@@ -40,9 +40,9 @@ class glm:
         if(self.distr=='poisson'):
             logL = np.sum(y*np.log(l) - l)
         elif(self.distr=='normal'):
-            logL = np.sum((y-l)**2)
+            logL = -0.5*np.sum((y-l)**2)
         elif(self.distr=='binomial'):
-            logL = np.sum(y*np.log(l) - (n-y)*np.log(1-l))
+            logL = np.sum(y*np.log(l) + (1-y)*np.log(1-l))
         return logL
 
     #--------------------
@@ -82,16 +82,24 @@ class glm:
     #---------------------
     def grad_L2loss(self, beta0, beta, alpha, reg_lambda, x, y):
         z = beta0 + np.dot(x, beta)
-        q = self.qu(z)
-        s = expit(z)
 
         if(self.distr=='poisson'):
+            q = self.qu(z)
+            s = expit(z)
             grad_beta0 = np.sum(s) - np.sum(y*s/q)
-
-            # This is a matrix implementation
             grad_beta = np.transpose(np.dot(np.transpose(s), x) - np.dot(np.transpose(y*s/q), x)) \
-                + reg_lambda*(1-alpha)*beta# + reg_lambda*alpha*np.sign(beta)
+                        + reg_lambda*(1-alpha)*beta# + reg_lambda*alpha*np.sign(beta)
 
+        elif(self.distr='normal'):
+            grad_beta0 = -np.sum(y-z)
+            grad_beta = -np.transpose(np.dot(y-z, x)) \
+                        + reg_lambda*(1-alpha)*beta# + reg_lambda*alpha*np.sign(beta)
+
+        elif(self.distr=='binomial'):
+            s = expit(z)
+            grad_beta0 =  np.sum(y-s)
+            grad_beta = np.transpose(np.dot(y-s, x)) \
+                        + reg_lambda*(1-alpha)*beta# + reg_lambda*alpha*np.sign(beta)
         return grad_beta0, grad_beta
 
     #-------------------------
