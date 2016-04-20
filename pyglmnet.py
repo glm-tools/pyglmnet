@@ -1,6 +1,6 @@
 import numpy as np
 from scipy.special import expit
-
+from scipy.stats import zscore
 # Define a class for a glm solver
 class glm:
 
@@ -42,7 +42,14 @@ class glm:
         elif(self.distr=='normal'):
             logL = -0.5*np.sum((y-l)**2)
         elif(self.distr=='binomial'):
-            logL = np.sum(y*np.log(l) + (1-y)*np.log(1-l))
+            #analytical formula
+            #logL = np.sum(y*np.log(l) + (1-y)*np.log(1-l))
+
+            #this prevents underflow
+            z = beta0 + np.dot(x,beta)
+            logL = np.sum(y*z - np.log(1+np.exp(z)))
+
+
         return logL
 
     #--------------------
@@ -90,15 +97,15 @@ class glm:
             grad_beta = np.transpose(np.dot(np.transpose(s), x) - np.dot(np.transpose(y*s/q), x)) \
                         + reg_lambda*(1-alpha)*beta# + reg_lambda*alpha*np.sign(beta)
 
-        elif(self.distr='normal'):
+        elif(self.distr=='normal'):
             grad_beta0 = -np.sum(y-z)
-            grad_beta = -np.transpose(np.dot(y-z, x)) \
+            grad_beta = -np.transpose(np.dot(np.transpose(y-z), x)) \
                         + reg_lambda*(1-alpha)*beta# + reg_lambda*alpha*np.sign(beta)
 
         elif(self.distr=='binomial'):
             s = expit(z)
-            grad_beta0 =  np.sum(y-s)
-            grad_beta = np.transpose(np.dot(y-s, x)) \
+            grad_beta0 =  np.sum(s-y)
+            grad_beta = np.transpose(np.dot(np.transpose(s-y), x)) \
                         + reg_lambda*(1-alpha)*beta# + reg_lambda*alpha*np.sign(beta)
         return grad_beta0, grad_beta
 
@@ -228,3 +235,15 @@ class glm:
             R2 = 1 - np.sum((y - yhat)**2)/np.sum((y - ynull)**2)
 
         return R2
+
+    #------------------------------------
+    # Define a function to simulate data
+    #------------------------------------
+    def simulate(self, beta0, beta, x):
+        if(self.distr=='poisson'):
+            y = np.random.poisson(self.lmb(beta0, beta, zscore(x)))
+        if(self.distr=='normal'):
+            y = np.random.normal(self.lmb(beta0, beta, zscore(x)))
+        if(self.distr=='binomial'):
+            y = np.random.binomial(1, self.lmb(beta0, beta, zscore(x)))
+        return y
