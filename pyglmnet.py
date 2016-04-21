@@ -81,8 +81,9 @@ class glm:
     # Define the proximal operator
     #------------------------------
     def prox(self,x,l):
-        sx = [0. if np.abs(y) <= l else np.sign(y)*np.abs(abs(y)-l) for y in x]
-        return np.array(sx).reshape(x.shape)
+        #sx = [0. if np.abs(y) <= l else np.sign(y)*np.abs(abs(y)-l) for y in x]
+        #return np.array(sx).reshape(x.shape)
+        return np.sign(x) * (np.abs(x) - l) * (np.abs(x) > l)
 
     #---------------------
     # Define the gradient
