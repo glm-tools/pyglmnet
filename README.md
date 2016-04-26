@@ -2,7 +2,10 @@
 Python implementation of elastic-net regularized generalized linear models.
 
 I follow the same approach and notations as in:
-Friedman, J., Hastie, T., & Tibshirani, R. (2010). Regularization paths for generalized linear models via coordinate descent. Journal of statistical software, 33(1), 1. [[link](ftp://www.r-project.org/pub/R/web/packages/glmnet/glmnet.pdf)].
+
+Friedman, J., Hastie, T., & Tibshirani, R. (2010). Regularization paths for generalized linear models via coordinate descent. Journal of statistical software, 33(1), 1.
+
+and the accompanying widely popular [R package](https://web.stanford.edu/~hastie/glmnet/glmnet_alpha.html).
 
 I use ordinary batch gradient descent instead of co-ordinate descent, which is very fast for $N x p$ of $10000 x 1000$.
 
