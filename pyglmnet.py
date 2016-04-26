@@ -113,7 +113,7 @@ class glm:
     #-------------------------
     # Define the fit function
     #-------------------------
-    def fit(self, x, y, reg_params, opt_params):
+    def fit(self, x, y, reg_params, opt_params, verbose):
     # Implements batch gradient descent (i.e. vanilla gradient descent by computing gradient over entire training set)
 
         # Dataset shape
@@ -134,9 +134,14 @@ class glm:
         fit = []
 
         # Outer loop with descending lambda
+        if(verbose==True):
+            print('---------------------------------------')
+            print('Looping throug the regularization path')
+            print('---------------------------------------')
         for l,rl in enumerate(reg_lambda):
             fit.append({'beta0': 0., 'beta': np.zeros([p,1])})
-            print('Lambda: {}\n').format(rl)
+            if(verbose==True):
+                print('Lambda: %6.4f')% rl
 
             # Warm initialize parameters
             if(l == 0):
@@ -189,9 +194,9 @@ class glm:
                     DL.append(L[-1] - L[-2])
                     if(np.abs(DL[-1]/L[-1]) < convergence_threshold):
                         no_convergence = 0
-                        print('Converged')
-                        print('    Loss function: {}').format(L[-1])
-                        print('    dL/L: {}\n').format(DL[-1]/L[-1])
+                        if(verbose==True):
+                            print('    Converged. Loss function: {0:.2f}').format(L[-1])
+                            print('    dL/L: {0:.6f}\n').format(DL[-1]/L[-1])
 
             #Store the parameters after convergence
             fit[-1]['beta0'] = beta[0]
@@ -236,6 +241,29 @@ class glm:
             R2 = 1 - np.sum((y - yhat)**2)/np.sum((y - ynull)**2)
 
         return R2
+
+    #------------------------------
+    # Define the deviance function
+    #------------------------------
+    def deviance(self, y, yhat):
+        eps = 0.1
+        # L1 = Log likelihood of model under consideration
+        # LS = Log likelihood of saturated model
+        if(self.distr=='poisson'):
+            L1 = np.sum(y*np.log(eps+yhat) - yhat)
+            LS = np.sum(y*np.log(eps+y) - y)
+
+        elif(self.distr=='binomial'):
+            L1 = 2*len(y)*np.sum(y*np.log((yhat==0)+yhat)/np.mean(yhat) + \
+                                (1-y)*np.log((yhat==1)+1-yhat)/(1-np.mean(yhat)))
+            LS = 0
+
+        elif(self.distr=='normal'):
+            L1 = -np.sum((y - yhat)**2)
+            LS = 0
+
+        D = -2*(L1-LS)
+        return D
 
     #------------------------------------
     # Define a function to simulate data
