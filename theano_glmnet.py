@@ -1,6 +1,7 @@
 import numpy as np
 from scipy.special import expit
-from scipy.stats import zscore
+import theano.tensor as T
+
 # Define a class for a glm solver
 class glm:
 
@@ -40,16 +41,9 @@ class glm:
         if(self.distr=='poisson'):
             logL = np.sum(y*np.log(l) - l)
         elif(self.distr=='normal'):
-            logL = -0.5*np.sum((y-l)**2)
+            logL = np.sum((y-l)**2)
         elif(self.distr=='binomial'):
-            #analytical formula
-            #logL = np.sum(y*np.log(l) + (1-y)*np.log(1-l))
-
-            #this prevents underflow
-            z = beta0 + np.dot(x,beta)
-            logL = np.sum(y*z - np.log(1+np.exp(z)))
-
-
+            logL = np.sum(y*np.log(l) - (n-y)*np.log(1-l))
         return logL
 
     #--------------------
@@ -81,33 +75,24 @@ class glm:
     # Define the proximal operator
     #------------------------------
     def prox(self,x,l):
-        #sx = [0. if np.abs(y) <= l else np.sign(y)*np.abs(abs(y)-l) for y in x]
-        #return np.array(sx).reshape(x.shape)
-        return np.sign(x) * (np.abs(x) - l) * (np.abs(x) > l)
+        sx = [0. if np.abs(y) <= l else np.sign(y)*np.abs(abs(y)-l) for y in x]
+        return np.array(sx).reshape(x.shape)
 
     #---------------------
     # Define the gradient
     #---------------------
     def grad_L2loss(self, beta0, beta, alpha, reg_lambda, x, y):
         z = beta0 + np.dot(x, beta)
+        q = self.qu(z)
+        s = expit(z)
 
         if(self.distr=='poisson'):
-            q = self.qu(z)
-            s = expit(z)
             grad_beta0 = np.sum(s) - np.sum(y*s/q)
+
+            # This is a matrix implementation
             grad_beta = np.transpose(np.dot(np.transpose(s), x) - np.dot(np.transpose(y*s/q), x)) \
-                        + reg_lambda*(1-alpha)*beta# + reg_lambda*alpha*np.sign(beta)
+                + reg_lambda*(1-alpha)*beta# + reg_lambda*alpha*np.sign(beta)
 
-        elif(self.distr=='normal'):
-            grad_beta0 = -np.sum(y-z)
-            grad_beta = -np.transpose(np.dot(np.transpose(y-z), x)) \
-                        + reg_lambda*(1-alpha)*beta# + reg_lambda*alpha*np.sign(beta)
-
-        elif(self.distr=='binomial'):
-            s = expit(z)
-            grad_beta0 =  np.sum(s-y)
-            grad_beta = np.transpose(np.dot(np.transpose(s-y), x)) \
-                        + reg_lambda*(1-alpha)*beta# + reg_lambda*alpha*np.sign(beta)
         return grad_beta0, grad_beta
 
     #-------------------------
@@ -155,8 +140,8 @@ class glm:
 
             # Initialize parameters
             beta = np.zeros([p+1,1])
-            beta[0] = fit[-1]['beta0']
-            beta[1:] = fit[-1]['beta']
+            beta[0] = beta0_hat[:]
+            beta[1:] = beta_hat[:]
 
             # Initialize moment parameters
             g = np.zeros([p+1,1])
@@ -236,15 +221,3 @@ class glm:
             R2 = 1 - np.sum((y - yhat)**2)/np.sum((y - ynull)**2)
 
         return R2
-
-    #------------------------------------
-    # Define a function to simulate data
-    #------------------------------------
-    def simulate(self, beta0, beta, x):
-        if(self.distr=='poisson'):
-            y = np.random.poisson(self.lmb(beta0, beta, zscore(x)))
-        if(self.distr=='normal'):
-            y = np.random.normal(self.lmb(beta0, beta, zscore(x)))
-        if(self.distr=='binomial'):
-            y = np.random.binomial(1, self.lmb(beta0, beta, zscore(x)))
-        return y
