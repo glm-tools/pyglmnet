@@ -139,3 +139,5 @@ ENV/
 # Temporary data
 .ipynb_checkpoints/
 
+# Other misc files
+todo.md
