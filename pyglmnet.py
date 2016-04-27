@@ -1,6 +1,17 @@
 import numpy as np
 from scipy.special import expit
 from scipy.stats import zscore
+from sklearn.metrics import classification
+
+def softmax(w):
+    w = np.array(w)
+
+    maxes = np.amax(w, axis=1)
+    maxes = maxes.reshape(maxes.shape[0], 1)
+    e = np.exp(w - maxes)
+    dist = e / np.sum(e, axis=1, keepdims=True)
+    return dist
+
 # Define a class for a glm solver
 class glm:
 
@@ -22,6 +33,8 @@ class glm:
             q = z
         elif(self.distr=='binomial'):
             q = expit(z)
+        elif(self.distr=='multinomial'):
+            q = softmax(z)
         return q
 
     #-------------------------------------------
@@ -48,8 +61,8 @@ class glm:
             #this prevents underflow
             z = beta0 + np.dot(x,beta)
             logL = np.sum(y*z - np.log(1+np.exp(z)))
-
-
+        elif(self.distr=='multinomial'):
+            logL = classification.log_loss(y, l, normalize=False)
         return logL
 
     #--------------------
@@ -108,6 +121,14 @@ class glm:
             grad_beta0 =  np.sum(s-y)
             grad_beta = np.transpose(np.dot(np.transpose(s-y), x)) \
                         + reg_lambda*(1-alpha)*beta# + reg_lambda*alpha*np.sign(beta)
+        elif(self.distr=='multinomial'):
+            # this assumes that y is already as a one-hot encoding
+            pred = self.qu(z)
+            grad_beta0 = -np.sum(y - pred)
+            grad_beta = -np.transpose(np.dot(np.transpose(y - pred), x)) \
+                        + reg_lambda*(1-alpha)*beta
+
+
         return grad_beta0, grad_beta
 
     #-------------------------
@@ -129,8 +150,12 @@ class glm:
         e = opt_params['learning_rate']
 
         # Initialize parameters
-        beta0_hat = np.random.normal(0.0,1.0,1)
-        beta_hat = np.random.normal(0.0,1.0,[p,1])
+        if self.distr=='multinomial':
+            beta0_hat = np.random.normal(0.0,1.0, y.shape[1])
+            beta_hat = np.random.normal(0.0, 1.0, [p, y.shape[1]])
+        else:
+            beta0_hat = np.random.normal(0.0,1.0,1)
+            beta_hat = np.random.normal(0.0,1.0,[p,1])
         fit = []
 
         # Outer loop with descending lambda
@@ -139,7 +164,7 @@ class glm:
             print('Looping throug the regularization path')
             print('---------------------------------------')
         for l,rl in enumerate(reg_lambda):
-            fit.append({'beta0': 0., 'beta': np.zeros([p,1])})
+            fit.append({'beta0': beta0_hat, 'beta':beta_hat})
             if(verbose==True):
                 print('Lambda: %6.4f')% rl
 
@@ -159,12 +184,18 @@ class glm:
             t = 0
 
             # Initialize parameters
-            beta = np.zeros([p+1,1])
+            if self.distr=='multinomial':
+                beta = np.zeros([p + 1, y.shape[1]])
+            else:
+                beta = np.zeros([p+1,1])
             beta[0] = fit[-1]['beta0']
             beta[1:] = fit[-1]['beta']
 
             # Initialize moment parameters
-            g = np.zeros([p+1,1])
+            if self.distr=='multinomial':
+                g = np.zeros([p + 1, y.shape[1]])
+            else:
+                g = np.zeros([p+1,1])
 
             # Initialize cost
             L = []
