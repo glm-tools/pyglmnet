@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.special import expit
 from scipy.stats import zscore
-from sklearn.metrics import classification
+
 
 def softmax(w):
     w = np.array(w)
@@ -62,7 +62,7 @@ class glm:
             z = beta0 + np.dot(x,beta)
             logL = np.sum(y*z - np.log(1+np.exp(z)))
         elif(self.distr=='multinomial'):
-            logL = classification.log_loss(y, l, normalize=False)
+            logL = -np.sum(y*np.log(l))
         return logL
 
     #--------------------
@@ -141,6 +141,19 @@ class glm:
         n = x.shape[0]
         p = x.shape[1]
 
+        if len(y.shape) == 1:
+            # convert to 1-hot encoding
+            y_bk = y
+            y = np.zeros([x.shape[0], y.max()+1])
+            for i in range(x.shape[0]):
+                y[i, y_bk[i]] = 1.
+
+        # number of predictions
+        if self.distr=='multinomial':
+            k = y.shape[1]
+        else:
+            k = 1
+
         # Regularization parameters
         reg_lambda = reg_params['reg_lambda']
         alpha = reg_params['alpha']
@@ -150,12 +163,8 @@ class glm:
         e = opt_params['learning_rate']
 
         # Initialize parameters
-        if self.distr=='multinomial':
-            beta0_hat = np.random.normal(0.0,1.0, y.shape[1])
-            beta_hat = np.random.normal(0.0, 1.0, [p, y.shape[1]])
-        else:
-            beta0_hat = np.random.normal(0.0,1.0,1)
-            beta_hat = np.random.normal(0.0,1.0,[p,1])
+        beta0_hat = np.random.normal(0.0,1.0,k)
+        beta_hat = np.random.normal(0.0,1.0,[p,k])
         fit = []
 
         # Outer loop with descending lambda
@@ -184,19 +193,11 @@ class glm:
             t = 0
 
             # Initialize parameters
-            if self.distr=='multinomial':
-                beta = np.zeros([p + 1, y.shape[1]])
-            else:
-                beta = np.zeros([p+1,1])
+            beta = np.zeros([p+1,k])
             beta[0] = fit[-1]['beta0']
             beta[1:] = fit[-1]['beta']
 
-            # Initialize moment parameters
-            if self.distr=='multinomial':
-                g = np.zeros([p + 1, y.shape[1]])
-            else:
-                g = np.zeros([p+1,1])
-
+            g = np.zeros([p+1,k])
             # Initialize cost
             L = []
             DL = []
