@@ -31,6 +31,9 @@ A more extensive tutorial on posing and fitting the GLM is here:
 glmnet_tutorial.ipynb
 ```
 
+### Documentation
+Coming soon
+
 ### Author
 * [Pavan Ramkumar](http:/github.com/pavanramkumar)
 

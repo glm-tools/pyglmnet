@@ -27,7 +27,7 @@ class glm:
     #--------------------------
     def qu(self, z):
         if(self.distr=='poisson'):
-            eps = 0.1
+            eps = np.spacing(1)
             q = np.log(1+eps+np.exp(z))
         elif(self.distr=='normal'):
             q = z
@@ -169,9 +169,9 @@ class glm:
 
         # Outer loop with descending lambda
         if(verbose==True):
-            print('---------------------------------------')
-            print('Looping throug the regularization path')
-            print('---------------------------------------')
+            print('----------------------------------------')
+            print('Looping through the regularization path')
+            print('----------------------------------------')
         for l,rl in enumerate(reg_lambda):
             fit.append({'beta0': beta0_hat, 'beta':beta_hat})
             if(verbose==True):
@@ -247,7 +247,7 @@ class glm:
     # Define the pseudo-R2 function
     #-------------------------------
     def pseudo_R2(self, y, yhat, ynull):
-        eps = 0.1
+        eps = np.spacing(1)
         if(self.distr=='poisson'):
             # Log likelihood of model under consideration
             L1 = np.sum(y*np.log(eps+yhat) - yhat)
@@ -278,7 +278,7 @@ class glm:
     # Define the deviance function
     #------------------------------
     def deviance(self, y, yhat):
-        eps = 0.1
+        eps = np.spacing(1)
         # L1 = Log likelihood of model under consideration
         # LS = Log likelihood of saturated model
         if(self.distr=='poisson'):
