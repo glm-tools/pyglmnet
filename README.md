@@ -30,3 +30,13 @@ A more extensive tutorial on posing and fitting the GLM is here:
 ```
 glmnet_tutorial.ipynb
 ```
+
+### Author
+* [Pavan Ramkumar](http:/github.com/pavanramkumar)
+
+### Contributors
+* [Daniel Acuna](http:/github.com/daniel-acuna)
+* [Titipat Achakulvisut](http:/github.com/titipata)
+
+### License
+MIT License Copyright (c) 2016 Pavan Ramkumar
