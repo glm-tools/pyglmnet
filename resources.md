@@ -24,3 +24,9 @@
 
 - [0] http://multithreaded.stitchfix.com/blog/2015/07/30/gam/
 - [1] http://austinrochford.com/posts/2015-08-29-additive.html
+
+#### Group Lasso
+- [0] http://jmlr.org/papers/volume17/15-021/15-021.pdf
+
+#### Misc
+- [0] https://web.stanford.edu/~boyd/papers/pdf/rwl1.pdf
