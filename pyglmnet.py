@@ -25,18 +25,43 @@ class GLM:
     ----------
     family: str, 'poisson' or 'normal' or 'binomial' or 'multinomial'
         default: 'poisson'
-    alpha: float, the weighting between L1 and L2 norm, default: 0.5
-    reg_lambda: array, array of regularized parameters,
+    alpha: float, the weighting between L1 and L2 norm in penalty term
+        loss function i.e.
+            P(beta) = 0.5*(1-alpha)*|beta|_2^2 + alpha*|beta|_1
+        default: 0.5
+    reg_lambda: array or list, array of regularized parameters of penalty term i.e.
+            (1/2*N) sum(y - beta*X) + lambda*P
+        where lambda is number in reg_lambda list
         default: np.logspace(np.log(0.5), np.log(0.01), 10, base=np.exp(1))
     learning_rate: float, learning rate for gradient descent,
         default: 1e-4
     max_iter: int, maximum iteration for the model, default: 100
+    threshold: float, threshold for convergence. Optimization loop will stop
+        below setting threshold, default: 1e-3
+    verbose: boolean, if True it will print output while iterating
 
     Reference
     ---------
     Friedman, Hastie, Tibshirani (2010). Regularization Paths for Generalized Linear
         Models via Coordinate Descent, J Statistical Software.
         https://core.ac.uk/download/files/153/6287975.pdf
+
+    Examples
+    --------
+    >>> import matplotlib.pyplot as plt
+    >>> from pyglmnet import GLM
+    >>>
+    >>> n_samples, n_features = 1000, 20
+    >>> beta0 = np.random.normal(0.0, 1.0, 1)
+    >>> beta = np.array(sps.rand(n_features,1,0.1).todense())
+    >>> X = np.random.normal(0.0, 1.0, [n_samples, n_features])
+    >>> y = model.simulate(beta0, beta, X)
+    >>> model = GLM(family='poisson', alpha=0.05, reg_lambda=[0.1])
+    >>> model.fit(X, y)
+    >>> fit_param = model.fit_params[-1]
+    >>> yhat = model.predict(X, fit_param)
+    >>> plt.plot(beta, '.b')
+    >>> plt.plot(model.fit_params[-1]['beta'], '.r')
     """
 
     def __init__(self, family='poisson', alpha=0.5,
@@ -227,7 +252,6 @@ class GLM:
             # Iterate until convergence
             #---------------------------
             no_convergence = 1
-            threshold = self.threshold
             t = 0
 
             # Initialize parameters
@@ -260,7 +284,7 @@ class GLM:
                 # Delta loss and convergence criterion
                 if t > 1:
                     DL.append(L[-1] - L[-2])
-                    if(np.abs(DL[-1]/L[-1]) < threshold):
+                    if(np.abs(DL[-1]/L[-1]) < self.threshold):
                         no_convergence = 0
                         if(self.verbose==True):
                             print('    Converged. Loss function: {0:.2f}').format(L[-1])
@@ -283,7 +307,12 @@ class GLM:
         X: array, numpy array of shape (N, p) where
             N is data length and
             p is dimension or number of features
-        fit_param: dict, dictionary including 2 main keys ['beta0', 'beta']
+        fit_param: dict, dictionary of parameter including 2 main keys
+            ['beta0', 'beta'] where fit_param['beta0'] is intercept and
+            fit_param['beta'] is other parameters
+        Return
+        ------
+        yhat: array, numpy array of predicted output of size (N, 1)
         """
         yhat = self.lmb(fit_param['beta0'], fit_param['beta'], zscore(X))
         return yhat
@@ -293,6 +322,7 @@ class GLM:
         """
         pseudo-R2 function
         """
+
         eps = np.spacing(1)
         if(self.family=='poisson'):
             # Log likelihood of model under consideration
@@ -324,7 +354,13 @@ class GLM:
     def deviance(self, y, yhat):
         """
         deviance function of y and predicted y (yhat)
+
+        Parameters
+        ----------
+        y: array of output value
+        yhat: array of predicted output value
         """
+
         eps = np.spacing(1)
         # L1 = Log likelihood of model under consideration
         # LS = Log likelihood of saturated model
