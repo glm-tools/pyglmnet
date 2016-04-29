@@ -40,6 +40,7 @@ Coming soon
 ### Contributors
 * [Daniel Acuna](http:/github.com/daniel-acuna)
 * [Titipat Achakulvisut](http:/github.com/titipata)
+* [Hugo Fernandes](http:/github.com/hugoguh)
 
 ### License
 MIT License Copyright (c) 2016 Pavan Ramkumar
