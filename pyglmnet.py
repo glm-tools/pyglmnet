@@ -24,10 +24,13 @@ class GLM:
     Parameters
     ----------
     family: str, 'poisson' or 'normal' or 'binomial' or 'multinomial'
-    alpha: float, the weighting default 0.5
-    reg_lambda: array, array of regularized parameters
-    learning_rate: float, learning rate for
-    max_iter: int, maximum iteration for the model
+        default: 'poisson'
+    alpha: float, the weighting between L1 and L2 norm, default: 0.5
+    reg_lambda: array, array of regularized parameters,
+        default: np.logspace(np.log(0.5), np.log(0.01), 10, base=np.exp(1))
+    learning_rate: float, learning rate for gradient descent,
+        default: 1e-4
+    max_iter: int, maximum iteration for the model, default: 100
 
     Reference
     ---------
@@ -282,7 +285,7 @@ class GLM:
             p is dimension or number of features
         fit_param: dict, dictionary including 2 main keys ['beta0', 'beta']
         """
-        yhat = self.lmb(fitparam['beta0'], fit_param['beta'], zscore(X))
+        yhat = self.lmb(fit_param['beta0'], fit_param['beta'], zscore(X))
         return yhat
 
 
