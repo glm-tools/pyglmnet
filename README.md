@@ -10,6 +10,7 @@ The key difference is that I use ordinary batch gradient descent instead of co-o
 
 You can find some resources [here](resources.md).
 
+
 ### Simulating data and fitting a GLM in 5 minutes
 
 Clone the repository.
@@ -18,29 +19,58 @@ Clone the repository.
 $ git clone http://github.com/pavanramkumar/pyglmnet
 ```
 
-Work through the demo.
-
-```
-pyglmnet_example.ipynb
-```
 
 ### Tutorial
+
 A more extensive tutorial on posing and fitting the GLM is here:
 
 ```
 glmnet_tutorial.ipynb
 ```
 
+
 ### Documentation
-Coming soon
+
+```python
+import numpy as np
+import scipy.sparse as sps
+from pyglmnet import GLM
+model = GLM(family='poisson', verbose=True, alpha=0.05)
+
+N, p = 10000, 100
+
+
+beta0 = np.random.normal(0.0, 1.0, 1)
+beta = sps.rand(p,1,0.1)
+beta = np.array(beta.todense())
+
+# training data
+Xr = np.random.normal(0.0, 1.0, [N,p])
+yr = model.simulate(beta0, beta, Xr)
+
+# Test data
+Xt = np.random.normal(0.0, 1.0, [N,p])
+yt = model.simulate(beta0, beta, Xt)
+
+model.fit(zscore(Xr),yr)
+```
+
+You can also work through given Jupyter notebook demo
+[`pyglmnet_example.ipynb`](pyglmnet_example.ipynb)
+
 
 ### Author
+
 * [Pavan Ramkumar](http:/github.com/pavanramkumar)
 
+
 ### Contributors
+
 * [Daniel Acuna](http:/github.com/daniel-acuna)
 * [Titipat Achakulvisut](http:/github.com/titipata)
 * [Hugo Fernandes](http:/github.com/hugoguh)
 
+
 ### License
+
 MIT License Copyright (c) 2016 Pavan Ramkumar
