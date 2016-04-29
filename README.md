@@ -20,26 +20,21 @@ $ git clone http://github.com/pavanramkumar/pyglmnet
 ```
 
 
-### Tutorial
-
-A more extensive tutorial on posing and fitting the GLM is here:
-
-```
-glmnet_tutorial.ipynb
-```
-
-
 ### Documentation
+
+Here is an example on how to use `GLM` class.
 
 ```python
 import numpy as np
 import scipy.sparse as sps
 from pyglmnet import GLM
+
+# create Generalized Linear model
 model = GLM(family='poisson', verbose=True, alpha=0.05)
 
 N, p = 10000, 100
 
-
+# coefficients
 beta0 = np.random.normal(0.0, 1.0, 1)
 beta = sps.rand(p,1,0.1)
 beta = np.array(beta.todense())
@@ -52,11 +47,24 @@ yr = model.simulate(beta0, beta, Xr)
 Xt = np.random.normal(0.0, 1.0, [N,p])
 yt = model.simulate(beta0, beta, Xt)
 
+# fit Generalized Linear Model
 model.fit(zscore(Xr),yr)
+
+# get one set of fit parameters
+fit_param = model.fit_params[-2]
 ```
 
 You can also work through given Jupyter notebook demo
 [`pyglmnet_example.ipynb`](pyglmnet_example.ipynb)
+
+
+### Tutorial
+
+A more extensive tutorial on posing and fitting the GLM is here:
+
+```
+glmnet_tutorial.ipynb
+```
 
 
 ### Author
