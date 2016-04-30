@@ -156,10 +156,22 @@ class GLM:
         return grad_beta0, grad_beta
 
     def fit(self, X, y):
-        """The fit function."""
+        """The fit function.
+
+        Parameters
+        ----------
+        X : array
+            The input data
+        y : array
+            Labels to the data
+
+        Returns
+        -------
+        self : instance of GLM
+            The fitted model.
+        """
         # Implements batch gradient descent (i.e. vanilla gradient descent by
         # computing gradient over entire training set)
-
 
         # Dataset shape
         p = X.shape[1]
@@ -198,11 +210,8 @@ class GLM:
                 fit_params[-1]['beta'] = fit_params[-2]['beta']
 
             # Iterate until convergence
-            no_convergence = 1
             threshold = self.threshold
             alpha = self.alpha
-
-            t = 0
 
             # Initialize parameters
             beta = np.zeros([p + 1, k])
@@ -210,20 +219,16 @@ class GLM:
             beta[1:] = fit_params[-1]['beta']
 
             g = np.zeros([p + 1, k])
-            # Initialize cost
-            L = []
-            DL = []
 
-            while(no_convergence and t < self.max_iter):
+            # Initialize cost
+            L, DL = list(), list()
+            for t in range(0, self.max_iter):
 
                 # Calculate gradient
                 grad_beta0, grad_beta = self.grad_L2loss(
                     beta[0], beta[1:], rl, X, y)
                 g[0] = grad_beta0
                 g[1:] = grad_beta
-
-                # Update time step
-                t = t + 1
 
                 # Update parameters
                 beta = beta - self.learning_rate * g
@@ -238,11 +243,11 @@ class GLM:
                 if t > 1:
                     DL.append(L[-1] - L[-2])
                     if np.abs(DL[-1] / L[-1]) < threshold:
-                        no_convergence = 0
                         if self.verbose is True:
                             print('    Converged. Loss function: {0:.2f}').format(
                                 L[-1])
                             print('    dL/L: {0:.6f}\n').format(DL[-1] / L[-1])
+                        break
 
             # Store the parameters after convergence
             fit_params[-1]['beta0'] = beta[0]
