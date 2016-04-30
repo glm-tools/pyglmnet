@@ -103,7 +103,7 @@ class GLM:
         """Define the objective function for elastic net."""
         alpha = self.alpha
         L = self.logL(beta0, beta, X, y)
-        P = self.penalty(alpha, beta)
+        P = self.penalty(beta)
         J = -L + reg_lambda * P
         return J
 
