@@ -4,25 +4,60 @@ from scipy.stats import zscore
 
 
 def softmax(w):
+    """
+    Softmax function of given array of number w
+    """
     w = np.array(w)
-
     maxes = np.amax(w, axis=1)
     maxes = maxes.reshape(maxes.shape[0], 1)
     e = np.exp(w - maxes)
     dist = e / np.sum(e, axis=1, keepdims=True)
     return dist
 
-# Define a class for a glm solver
 
+class GLM:
+    """Generalized Linear Model (GLM)
 
-class glm:
+    This is class implements  elastic-net regularized generalized linear models.
+    The core algorithm is defined in the ariticle
 
-    # Instance object
-    distr = 'poisson'
+    Parameters
+    ----------
+    distr: str, 'poisson' or 'normal' or 'binomial' or 'multinomial'
+        default: 'poisson'
+    alpha: float, the weighting between L1 and L2 norm in penalty term
+        loss function i.e.
+            P(beta) = 0.5*(1-alpha)*|beta|_2^2 + alpha*|beta|_1
+        default: 0.5
+    reg_lambda: array or list, array of regularized parameters of penalty term i.e.
+            (1/2*N) sum(y - beta*X) + lambda*P
+        where lambda is number in reg_lambda list
+        default: np.logspace(np.log(0.5), np.log(0.01), 10, base=np.exp(1))
+    learning_rate: float, learning rate for gradient descent,
+        default: 1e-4
+    max_iter: int, maximum iteration for the model, default: 100
+    threshold: float, threshold for convergence. Optimization loop will stop
+        below setting threshold, default: 1e-3
+    verbose: boolean, if True it will print output while iterating
 
-    # Initialize with distr as poisson by default
-    def __init__(self, distr='poisson'):
+    Reference
+    ---------
+    Friedman, Hastie, Tibshirani (2010). Regularization Paths for Generalized Linear
+        Models via Coordinate Descent, J Statistical Software.
+        https://core.ac.uk/download/files/153/6287975.pdf
+    """
+
+    def __init__(self, distr='poisson', alpha=0.05,
+                 reg_lambda=np.logspace(np.log(0.5), np.log(0.01), 10, base=np.exp(1)),
+                 learning_rate=1e-4, max_iter=100, verbose=False):
         self.distr = distr
+        self.alpha = alpha
+        self.reg_lambda = reg_lambda
+        self.learning_rate = learning_rate
+        self.max_iter = max_iter
+        self.fit_params = None
+        self.verbose = False
+        self.threshold = 1e-3
 
     def qu(self, z):
         """The non-linearity."""
@@ -32,15 +67,15 @@ class glm:
                   multinomial=softmax(z))
         return qu[self.distr]
 
-    def lmb(self, beta0, beta, x):
+    def lmb(self, beta0, beta, X):
         """Conditional intensity function."""
-        z = beta0 + np.dot(x, beta)
+        z = beta0 + np.dot(X, beta)
         l = self.qu(z)
         return l
 
-    def logL(self, beta0, beta, x, y):
+    def logL(self, beta0, beta, X, y):
         """The log likelihood."""
-        l = self.lmb(beta0, beta, x)
+        l = self.lmb(beta0, beta, X)
         if(self.distr == 'poisson'):
             logL = np.sum(y * np.log(l) - l)
         elif(self.distr == 'normal'):
@@ -50,7 +85,7 @@ class glm:
             #logL = np.sum(y*np.log(l) + (1-y)*np.log(1-l))
 
             # this prevents underflow
-            z = beta0 + np.dot(x, beta)
+            z = beta0 + np.dot(X, beta)
             logL = np.sum(y * z - np.log(1 + np.exp(z)))
         elif(self.distr == 'multinomial'):
             logL = -np.sum(y * np.log(l))
@@ -62,77 +97,73 @@ class glm:
             alpha * np.linalg.norm(beta, 1)
         return P
 
-    def loss(self, beta0, beta, alpha, reg_lambda, x, y):
+    def loss(self, beta0, beta, alpha, reg_lambda, X, y):
         """Define the objective function for elastic net."""
-        L = self.logL(beta0, beta, x, y)
+        L = self.logL(beta0, beta, X, y)
         P = self.penalty(alpha, beta)
         J = -L + reg_lambda * P
         return J
 
-    def L2loss(self, beta0, beta, alpha, reg_lambda, x, y):
+    def L2loss(self, beta0, beta, alpha, reg_lambda, X, y):
         """Quadratic loss."""
-        L = self.logL(beta0, beta, x, y)
+        L = self.logL(beta0, beta, X, y)
         P = 0.5 * (1 - alpha) * np.linalg.norm(beta, 2)
         J = -L + reg_lambda * P
         return J
 
-    def prox(self, x, l):
+    def prox(self, X, l):
         """Proximal operator."""
         # sx = [0. if np.abs(y) <= l else np.sign(y)*np.abs(abs(y)-l) for y in x]
         # return np.array(sx).reshape(x.shape)
-        return np.sign(x) * (np.abs(x) - l) * (np.abs(x) > l)
+        return np.sign(X) * (np.abs(X) - l) * (np.abs(X) > l)
 
     # Define the gradient
-    def grad_L2loss(self, beta0, beta, alpha, reg_lambda, x, y):
-        z = beta0 + np.dot(x, beta)
+    def grad_L2loss(self, beta0, beta, alpha, reg_lambda, X, y):
+        z = beta0 + np.dot(X, beta)
         s = expit(z)
 
         if self.distr == 'poisson':
             q = self.qu(z)
             grad_beta0 = np.sum(s) - np.sum(y * s / q)
-            grad_beta = np.transpose(np.dot(np.transpose(s), x) -
-                                     np.dot(np.transpose(y * s / q), x)) + \
+            grad_beta = np.transpose(np.dot(np.transpose(s), X) -
+                                     np.dot(np.transpose(y * s / q), X)) + \
                 reg_lambda * (1 - alpha) * beta
             # + reg_lambda*alpha*np.sign(beta)
 
         elif self.distr == 'normal':
             grad_beta0 = -np.sum(y - z)
-            grad_beta = -np.transpose(np.dot(np.transpose(y - z), x)) \
+            grad_beta = -np.transpose(np.dot(np.transpose(y - z), X)) \
                 + reg_lambda * (1 - alpha) * beta
             # + reg_lambda*alpha*np.sign(beta)
 
         elif self.distr == 'binomial':
             grad_beta0 = np.sum(s - y)
-            grad_beta = np.transpose(np.dot(np.transpose(s - y), x)) \
+            grad_beta = np.transpose(np.dot(np.transpose(s - y), X)) \
                 + reg_lambda * (1 - alpha) * beta
             # + reg_lambda*alpha*np.sign(beta)
         elif self.distr == 'multinomial':
             # this assumes that y is already as a one-hot encoding
             pred = self.qu(z)
             grad_beta0 = -np.sum(y - pred)
-            grad_beta = -np.transpose(np.dot(np.transpose(y - pred), x)) \
+            grad_beta = -np.transpose(np.dot(np.transpose(y - pred), X)) \
                 + reg_lambda * (1 - alpha) * beta
 
         return grad_beta0, grad_beta
 
-    def fit(self, x, y, max_iter=1000, learning_rate=1e-4, reg_lambda=None,
-            alpha=0.05, verbose=True):
+    def fit(self, X, y):
         """The fit function."""
         # Implements batch gradient descent (i.e. vanilla gradient descent by
         # computing gradient over entire training set)
 
-        if reg_lambda is None:
-            reg_lambda = np.logspace(np.log(0.5), np.log(0.01), 10,
-                                     base=np.exp(1))
 
         # Dataset shape
-        p = x.shape[1]
+        p = X.shape[1]
 
         if len(y.shape) == 1:
             # convert to 1-hot encoding
             y_bk = y
-            y = np.zeros([x.shape[0], y.max() + 1])
-            for i in range(x.shape[0]):
+            y = np.zeros([X.shape[0], y.max() + 1])
+            for i in range(X.shape[0]):
                 y[i, y_bk[i]] = 1.
 
         # number of predictions
@@ -141,46 +172,48 @@ class glm:
         # Initialize parameters
         beta0_hat = np.random.normal(0.0, 1.0, k)
         beta_hat = np.random.normal(0.0, 1.0, [p, k])
-        fit = []
+        fit_params = []
 
         # Outer loop with descending lambda
-        if verbose is True:
+        if self.verbose is True:
             print('----------------------------------------')
             print('Looping through the regularization path')
             print('----------------------------------------')
-        for l, rl in enumerate(reg_lambda):
-            fit.append({'beta0': beta0_hat, 'beta': beta_hat})
-            if verbose is True:
+        for l, rl in enumerate(self.reg_lambda):
+            fit_params.append({'beta0': beta0_hat, 'beta': beta_hat})
+            if self.verbose is True:
                 print('Lambda: %6.4f') % rl
 
             # Warm initialize parameters
             if l == 0:
-                fit[-1]['beta0'] = beta0_hat
-                fit[-1]['beta'] = beta_hat
+                fit_params[-1]['beta0'] = beta0_hat
+                fit_params[-1]['beta'] = beta_hat
             else:
-                fit[-1]['beta0'] = fit[-2]['beta0']
-                fit[-1]['beta'] = fit[-2]['beta']
+                fit_params[-1]['beta0'] = fit_params[-2]['beta0']
+                fit_params[-1]['beta'] = fit_params[-2]['beta']
 
             # Iterate until convergence
             no_convergence = 1
-            convergence_threshold = 1e-3
+            threshold = self.threshold
+            alpha = self.alpha
+
             t = 0
 
             # Initialize parameters
             beta = np.zeros([p + 1, k])
-            beta[0] = fit[-1]['beta0']
-            beta[1:] = fit[-1]['beta']
+            beta[0] = fit_params[-1]['beta0']
+            beta[1:] = fit_params[-1]['beta']
 
             g = np.zeros([p + 1, k])
             # Initialize cost
             L = []
             DL = []
 
-            while(no_convergence and t < max_iter):
+            while(no_convergence and t < self.max_iter):
 
                 # Calculate gradient
                 grad_beta0, grad_beta = self.grad_L2loss(
-                    beta[0], beta[1:], alpha, rl, x, y)
+                    beta[0], beta[1:], alpha, rl, X, y)
                 g[0] = grad_beta0
                 g[1:] = grad_beta
 
@@ -188,33 +221,34 @@ class glm:
                 t = t + 1
 
                 # Update parameters
-                beta = beta - learning_rate * g
+                beta = beta - self.learning_rate * g
 
                 # Apply proximal operator for L1-regularization
                 beta[1:] = self.prox(beta[1:], rl * alpha)
 
                 # Calculate loss and convergence criteria
-                L.append(self.loss(beta[0], beta[1:], alpha, rl, x, y))
+                L.append(self.loss(beta[0], beta[1:], alpha, rl, X, y))
 
                 # Delta loss and convergence criterion
                 if t > 1:
                     DL.append(L[-1] - L[-2])
-                    if np.abs(DL[-1] / L[-1]) < convergence_threshold:
+                    if np.abs(DL[-1] / L[-1]) < threshold:
                         no_convergence = 0
-                        if verbose is True:
+                        if self.verbose is True:
                             print('    Converged. Loss function: {0:.2f}').format(
                                 L[-1])
                             print('    dL/L: {0:.6f}\n').format(DL[-1] / L[-1])
 
             # Store the parameters after convergence
-            fit[-1]['beta0'] = beta[0]
-            fit[-1]['beta'] = beta[1:]
+            fit_params[-1]['beta0'] = beta[0]
+            fit_params[-1]['beta'] = beta[1:]
 
-        return fit
+        self.fit_params = fit_params
+        return self
 
-    def predict(self, x, fitparams):
+    def predict(self, X, fit_param):
         """Define the predict function."""
-        yhat = self.lmb(fitparams['beta0'], fitparams['beta'], zscore(x))
+        yhat = self.lmb(fit_param['beta0'], fit_param['beta'], zscore(X))
         return yhat
 
     def pseudo_R2(self, y, yhat, ynull):
@@ -267,12 +301,12 @@ class glm:
         D = -2 * (L1 - LS)
         return D
 
-    def simulate(self, beta0, beta, x):
+    def simulate(self, beta0, beta, X):
         """Simulate data."""
         if self.distr == 'poisson':
-            y = np.random.poisson(self.lmb(beta0, beta, zscore(x)))
+            y = np.random.poisson(self.lmb(beta0, beta, zscore(X)))
         if self.distr == 'normal':
-            y = np.random.normal(self.lmb(beta0, beta, zscore(x)))
+            y = np.random.normal(self.lmb(beta0, beta, zscore(X)))
         if self.distr == 'binomial':
-            y = np.random.binomial(1, self.lmb(beta0, beta, zscore(x)))
+            y = np.random.binomial(1, self.lmb(beta0, beta, zscore(X)))
         return y
