@@ -8,7 +8,7 @@ and the accompanying widely popular [R package](https://web.stanford.edu/~hastie
 
 The key difference is that I use ordinary batch gradient descent instead of co-ordinate descent, which is very fast for `N x p` of up to `10000 x 1000`.
 
-You can find some resources [here](resources.md).
+You can find some resources [here](doc/resources.md).
 
 
 ### Simulating data and fitting a GLM in 5 minutes
@@ -17,6 +17,12 @@ Clone the repository.
 
 ```bash
 $ git clone http://github.com/pavanramkumar/pyglmnet
+```
+
+Install `pyglmnet` using `setup.py` as following
+
+```bash
+$ python setup.py develop install
 ```
 
 
@@ -36,15 +42,15 @@ N, p = 10000, 100
 
 # coefficients
 beta0 = np.random.normal(0.0, 1.0, 1)
-beta = sps.rand(p,1,0.1)
+beta = sps.rand(p, 1, 0.1)
 beta = np.array(beta.todense())
 
 # training data
-Xr = np.random.normal(0.0, 1.0, [N,p])
+Xr = np.random.normal(0.0, 1.0, [N, p])
 yr = model.simulate(beta0, beta, Xr)
 
 # Test data
-Xt = np.random.normal(0.0, 1.0, [N,p])
+Xt = np.random.normal(0.0, 1.0, [N, p])
 yt = model.simulate(beta0, beta, Xt)
 
 # fit Generalized Linear Model
@@ -55,13 +61,13 @@ fit_param = model.fit_params[-2]
 ```
 
 You can also work through given Jupyter notebook demo
-[`pyglmnet_example.ipynb`](pyglmnet_example.ipynb)
+[`pyglmnet_example.ipynb`](scripts/pyglmnet_example.ipynb)
 
 
 ### Tutorial
 
 A more extensive tutorial on posing and fitting the GLM is in
-[`glmnet_tutorial.ipynb`](glmnet_tutorial.ipynb)
+[`glmnet_tutorial.ipynb`](scripts/glmnet_tutorial.ipynb)
 
 
 ### Author
