@@ -5,6 +5,7 @@ from scipy.stats import zscore
 
 logger = logging.getLogger('pyglmnet')
 
+
 def set_log_level(verbose):
     """Convenience function for setting the log level.
 
@@ -129,9 +130,8 @@ class GLM:
 
     def loss(self, beta0, beta, reg_lambda, X, y):
         """Define the objective function for elastic net."""
-        alpha = self.alpha
         L = self.logL(beta0, beta, X, y)
-        P = self.penalty(alpha, beta)
+        P = self.penalty(beta)
         J = -L + reg_lambda * P
         return J
 
