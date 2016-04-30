@@ -67,7 +67,7 @@ You can also work through given Jupyter notebook demo
 ### Tutorial
 
 A more extensive tutorial on posing and fitting the GLM is in
-[`glmnet_tutorial.ipynb`](notebooks/glmnet_tutorial.ipynb)
+[`glmnet_tutorial.ipynb`](notebooks/pyglmnet_tutorial.ipynb)
 
 
 ### Author
