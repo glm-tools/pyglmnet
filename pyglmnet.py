@@ -23,7 +23,8 @@ class GLM:
 
     Parameters
     ----------
-    distr: str, 'poisson' or 'normal' or 'binomial' or 'multinomial'
+    distr: str, distribution family in this following
+        'poisson' or 'normal' or 'binomial' or 'multinomial'
         default: 'poisson'
     alpha: float, the weighting between L1 and L2 norm in penalty term
         loss function i.e.
@@ -91,21 +92,24 @@ class GLM:
             logL = -np.sum(y * np.log(l))
         return logL
 
-    def penalty(self, alpha, beta):
+    def penalty(self, beta):
         """The penalty."""
+        alpha = self.alpha
         P = 0.5 * (1 - alpha) * np.linalg.norm(beta, 2) + \
             alpha * np.linalg.norm(beta, 1)
         return P
 
-    def loss(self, beta0, beta, alpha, reg_lambda, X, y):
+    def loss(self, beta0, beta, reg_lambda, X, y):
         """Define the objective function for elastic net."""
+        alpha = self.alpha
         L = self.logL(beta0, beta, X, y)
         P = self.penalty(alpha, beta)
         J = -L + reg_lambda * P
         return J
 
-    def L2loss(self, beta0, beta, alpha, reg_lambda, X, y):
+    def L2loss(self, beta0, beta, reg_lambda, X, y):
         """Quadratic loss."""
+        alpha = self.alpha
         L = self.logL(beta0, beta, X, y)
         P = 0.5 * (1 - alpha) * np.linalg.norm(beta, 2)
         J = -L + reg_lambda * P
@@ -117,8 +121,9 @@ class GLM:
         # return np.array(sx).reshape(x.shape)
         return np.sign(X) * (np.abs(X) - l) * (np.abs(X) > l)
 
-    # Define the gradient
-    def grad_L2loss(self, beta0, beta, alpha, reg_lambda, X, y):
+    def grad_L2loss(self, beta0, beta, reg_lambda, X, y):
+        """The gradient."""
+        alpha = self.alpha
         z = beta0 + np.dot(X, beta)
         s = expit(z)
 
@@ -213,7 +218,7 @@ class GLM:
 
                 # Calculate gradient
                 grad_beta0, grad_beta = self.grad_L2loss(
-                    beta[0], beta[1:], alpha, rl, X, y)
+                    beta[0], beta[1:], rl, X, y)
                 g[0] = grad_beta0
                 g[1:] = grad_beta
 
@@ -227,7 +232,7 @@ class GLM:
                 beta[1:] = self.prox(beta[1:], rl * alpha)
 
                 # Calculate loss and convergence criteria
-                L.append(self.loss(beta[0], beta[1:], alpha, rl, X, y))
+                L.append(self.loss(beta[0], beta[1:], rl, X, y))
 
                 # Delta loss and convergence criterion
                 if t > 1:
