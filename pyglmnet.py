@@ -24,16 +24,16 @@ class glm:
     def __init__(self, distr='poisson'):
         self.distr = distr
 
-    # Define the nonlinearity
     def qu(self, z):
+        """The non-linearity."""
         eps = np.spacing(1)
         qu = dict(poisson=np.log(1 + eps + np.exp(z)),
                   normal=z, binomial=expit(z),
                   multinomial=softmax(z))
         return qu[self.distr]
 
-    # Define the conditional intensity function
     def lmb(self, beta0, beta, x):
+        """Conditional intensity function."""
         z = beta0 + np.dot(x, beta)
         l = self.qu(z)
         return l
@@ -85,29 +85,28 @@ class glm:
     # Define the gradient
     def grad_L2loss(self, beta0, beta, alpha, reg_lambda, x, y):
         z = beta0 + np.dot(x, beta)
+        s = expit(z)
 
-        if(self.distr == 'poisson'):
+        if self.distr == 'poisson':
             q = self.qu(z)
-            s = expit(z)
             grad_beta0 = np.sum(s) - np.sum(y * s / q)
             grad_beta = np.transpose(np.dot(np.transpose(s), x) -
                                      np.dot(np.transpose(y * s / q), x)) + \
                 reg_lambda * (1 - alpha) * beta
             # + reg_lambda*alpha*np.sign(beta)
 
-        elif(self.distr == 'normal'):
+        elif self.distr == 'normal':
             grad_beta0 = -np.sum(y - z)
             grad_beta = -np.transpose(np.dot(np.transpose(y - z), x)) \
                 + reg_lambda * (1 - alpha) * beta
             # + reg_lambda*alpha*np.sign(beta)
 
-        elif(self.distr == 'binomial'):
-            s = expit(z)
+        elif self.distr == 'binomial':
             grad_beta0 = np.sum(s - y)
             grad_beta = np.transpose(np.dot(np.transpose(s - y), x)) \
                 + reg_lambda * (1 - alpha) * beta
             # + reg_lambda*alpha*np.sign(beta)
-        elif(self.distr == 'multinomial'):
+        elif self.distr == 'multinomial':
             # this assumes that y is already as a one-hot encoding
             pred = self.qu(z)
             grad_beta0 = -np.sum(y - pred)
@@ -132,10 +131,7 @@ class glm:
                 y[i, y_bk[i]] = 1.
 
         # number of predictions
-        if self.distr == 'multinomial':
-            k = y.shape[1]
-        else:
-            k = 1
+        k = y.shape[1] if self.distr == 'multinomial' else 1
 
         # Regularization parameters
         reg_lambda = reg_params['reg_lambda']
