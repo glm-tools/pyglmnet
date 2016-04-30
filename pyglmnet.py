@@ -115,10 +115,15 @@ class glm:
 
         return grad_beta0, grad_beta
 
-    def fit(self, x, y, reg_params, opt_params, verbose):
+    def fit(self, x, y, max_iter=1000, learning_rate=1e-4, reg_lambda=None,
+            alpha=0.05, verbose=True):
         """The fit function."""
         # Implements batch gradient descent (i.e. vanilla gradient descent by
         # computing gradient over entire training set)
+
+        if reg_lambda is None:
+            reg_lambda = np.logspace(np.log(0.5), np.log(0.01), 10,
+                                     base=np.exp(1))
 
         # Dataset shape
         p = x.shape[1]
@@ -132,14 +137,6 @@ class glm:
 
         # number of predictions
         k = y.shape[1] if self.distr == 'multinomial' else 1
-
-        # Regularization parameters
-        reg_lambda = reg_params['reg_lambda']
-        alpha = reg_params['alpha']
-
-        # Optimization parameters
-        max_iter = opt_params['max_iter']
-        e = opt_params['learning_rate']
 
         # Initialize parameters
         beta0_hat = np.random.normal(0.0, 1.0, k)
@@ -191,7 +188,7 @@ class glm:
                 t = t + 1
 
                 # Update parameters
-                beta = beta - e * g
+                beta = beta - learning_rate * g
 
                 # Apply proximal operator for L1-regularization
                 beta[1:] = self.prox(beta[1:], rl * alpha)
