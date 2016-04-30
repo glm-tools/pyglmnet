@@ -26,16 +26,11 @@ class glm:
 
     # Define the nonlinearity
     def qu(self, z):
-        if self.distr == 'poisson':
-            eps = np.spacing(1)
-            q = np.log(1 + eps + np.exp(z))
-        elif self.distr == 'normal':
-            q = z
-        elif self.distr == 'binomial':
-            q = expit(z)
-        elif self.distr == 'multinomial':
-            q = softmax(z)
-        return q
+        eps = np.spacing(1)
+        qu = dict(poisson=np.log(1 + eps + np.exp(z)),
+                  normal=z, binomial=expit(z),
+                  multinomial=softmax(z))
+        return qu[self.distr]
 
     # Define the conditional intensity function
     def lmb(self, beta0, beta, x):
