@@ -1,6 +1,35 @@
+import logging
 import numpy as np
 from scipy.special import expit
 from scipy.stats import zscore
+
+logger = logging.getLogger('pyglmnet')
+
+def set_log_level(verbose):
+    """Convenience function for setting the log level.
+
+    Parameters
+    ----------
+    verbose : bool, str, int, or None
+        The verbosity of messages to print. If a str, it can be either DEBUG,
+        INFO, WARNING, ERROR, or CRITICAL. Note that these are for
+        convenience and are equivalent to passing in logging.DEBUG, etc.
+        For bool, True is the same as 'INFO', False is the same as 'WARNING'.
+    """
+    if isinstance(verbose, bool):
+        if verbose is True:
+            verbose = 'INFO'
+        else:
+            verbose = 'WARNING'
+    if isinstance(verbose, str):
+        verbose = verbose.upper()
+        logging_types = dict(DEBUG=logging.DEBUG, INFO=logging.INFO,
+                             WARNING=logging.WARNING, ERROR=logging.ERROR,
+                             CRITICAL=logging.CRITICAL)
+        if verbose not in logging_types:
+            raise ValueError('verbose must be of a valid type')
+        verbose = logging_types[verbose]
+    logger.setLevel(verbose)
 
 
 def softmax(w):
@@ -13,7 +42,6 @@ def softmax(w):
     e = np.exp(w - maxes)
     dist = e / np.sum(e, axis=1, keepdims=True)
     return dist
-
 
 class GLM:
     """Generalized Linear Model (GLM)
@@ -57,8 +85,8 @@ class GLM:
         self.learning_rate = learning_rate
         self.max_iter = max_iter
         self.fit_params = None
-        self.verbose = False
         self.threshold = 1e-3
+        set_log_level(verbose)
 
     def qu(self, z):
         """The non-linearity."""
@@ -192,14 +220,10 @@ class GLM:
         fit_params = []
 
         # Outer loop with descending lambda
-        if self.verbose is True:
-            print('----------------------------------------')
-            print('Looping through the regularization path')
-            print('----------------------------------------')
+        logger.info('Looping through the regularization path')
         for l, rl in enumerate(self.reg_lambda):
             fit_params.append({'beta0': beta0_hat, 'beta': beta_hat})
-            if self.verbose is True:
-                print('Lambda: %6.4f') % rl
+            logger.info('Lambda: %6.4f' % rl)
 
             # Warm initialize parameters
             if l == 0:
@@ -243,10 +267,9 @@ class GLM:
                 if t > 1:
                     DL.append(L[-1] - L[-2])
                     if np.abs(DL[-1] / L[-1]) < threshold:
-                        if self.verbose is True:
-                            print('    Converged. Loss function: {0:.2f}').format(
-                                L[-1])
-                            print('    dL/L: {0:.6f}\n').format(DL[-1] / L[-1])
+                        msg = '\tConverged. Loss function: {0:.2f}'.format(L[-1])
+                        logger.info(msg)
+                        logger.info('\tdL/L: {0:.6f}\n'.format(DL[-1] / L[-1]))
                         break
 
             # Store the parameters after convergence
