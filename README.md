@@ -74,12 +74,12 @@ A more extensive tutorial on posing and fitting the GLM is in
 
 * [Pavan Ramkumar](http:/github.com/pavanramkumar)
 
-
 ### Contributors
 
 * [Daniel Acuna](http:/github.com/daniel-acuna)
 * [Titipat Achakulvisut](http:/github.com/titipata)
 * [Hugo Fernandes](http:/github.com/hugoguh)
+* [Mainak Jas](http:/github.com/jasmainak)
 
 ### License
 
