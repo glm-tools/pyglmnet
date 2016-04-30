@@ -61,13 +61,13 @@ fit_param = model.fit_params[-2]
 ```
 
 You can also work through given Jupyter notebook demo
-[`pyglmnet_example.ipynb`](scripts/pyglmnet_example.ipynb)
+[`pyglmnet_example.ipynb`](notebooks/pyglmnet_example.ipynb)
 
 
 ### Tutorial
 
 A more extensive tutorial on posing and fitting the GLM is in
-[`glmnet_tutorial.ipynb`](scripts/glmnet_tutorial.ipynb)
+[`glmnet_tutorial.ipynb`](notebooks/glmnet_tutorial.ipynb)
 
 
 ### Author
