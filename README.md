@@ -33,6 +33,7 @@ Here is an example on how to use `GLM` class.
 ```python
 import numpy as np
 import scipy.sparse as sps
+from scipy.stats import zscore
 from pyglmnet import GLM
 
 # create class of Generalized Linear model
@@ -49,7 +50,7 @@ beta = np.array(beta.todense())
 Xr = np.random.normal(0.0, 1.0, [n_samples, n_features])
 yr = model.simulate(beta0, beta, Xr)
 
-# Test data
+# testing data
 Xt = np.random.normal(0.0, 1.0, [n_samples, n_features])
 yt = model.simulate(beta0, beta, Xt)
 
