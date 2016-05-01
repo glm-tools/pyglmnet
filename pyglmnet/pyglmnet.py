@@ -1,6 +1,36 @@
+import logging
 import numpy as np
 from scipy.special import expit
 from scipy.stats import zscore
+
+logger = logging.getLogger('pyglmnet')
+
+
+def set_log_level(verbose):
+    """Convenience function for setting the log level.
+
+    Parameters
+    ----------
+    verbose : bool, str, int, or None
+        The verbosity of messages to print. If a str, it can be either DEBUG,
+        INFO, WARNING, ERROR, or CRITICAL. Note that these are for
+        convenience and are equivalent to passing in logging.DEBUG, etc.
+        For bool, True is the same as 'INFO', False is the same as 'WARNING'.
+    """
+    if isinstance(verbose, bool):
+        if verbose is True:
+            verbose = 'INFO'
+        else:
+            verbose = 'WARNING'
+    if isinstance(verbose, str):
+        verbose = verbose.upper()
+        logging_types = dict(DEBUG=logging.DEBUG, INFO=logging.INFO,
+                             WARNING=logging.WARNING, ERROR=logging.ERROR,
+                             CRITICAL=logging.CRITICAL)
+        if verbose not in logging_types:
+            raise ValueError('verbose must be of a valid type')
+        verbose = logging_types[verbose]
+    logger.setLevel(verbose)
 
 
 def softmax(w):
@@ -13,7 +43,6 @@ def softmax(w):
     e = np.exp(w - maxes)
     dist = e / np.sum(e, axis=1, keepdims=True)
     return dist
-
 
 class GLM:
     """Generalized Linear Model (GLM)
@@ -57,8 +86,8 @@ class GLM:
         self.learning_rate = learning_rate
         self.max_iter = max_iter
         self.fit_params = None
-        self.verbose = False
         self.threshold = 1e-3
+        set_log_level(verbose)
 
     def qu(self, z):
         """The non-linearity."""
@@ -101,9 +130,8 @@ class GLM:
 
     def loss(self, beta0, beta, reg_lambda, X, y):
         """Define the objective function for elastic net."""
-        alpha = self.alpha
         L = self.logL(beta0, beta, X, y)
-        P = self.penalty(alpha, beta)
+        P = self.penalty(beta)
         J = -L + reg_lambda * P
         return J
 
@@ -156,10 +184,22 @@ class GLM:
         return grad_beta0, grad_beta
 
     def fit(self, X, y):
-        """The fit function."""
+        """The fit function.
+
+        Parameters
+        ----------
+        X : array
+            The input data
+        y : array
+            Labels to the data
+
+        Returns
+        -------
+        self : instance of GLM
+            The fitted model.
+        """
         # Implements batch gradient descent (i.e. vanilla gradient descent by
         # computing gradient over entire training set)
-
 
         # Dataset shape
         p = X.shape[1]
@@ -180,14 +220,10 @@ class GLM:
         fit_params = []
 
         # Outer loop with descending lambda
-        if self.verbose is True:
-            print('----------------------------------------')
-            print('Looping through the regularization path')
-            print('----------------------------------------')
+        logger.info('Looping through the regularization path')
         for l, rl in enumerate(self.reg_lambda):
             fit_params.append({'beta0': beta0_hat, 'beta': beta_hat})
-            if self.verbose is True:
-                print('Lambda: %6.4f') % rl
+            logger.info('Lambda: %6.4f' % rl)
 
             # Warm initialize parameters
             if l == 0:
@@ -198,11 +234,8 @@ class GLM:
                 fit_params[-1]['beta'] = fit_params[-2]['beta']
 
             # Iterate until convergence
-            no_convergence = 1
             threshold = self.threshold
             alpha = self.alpha
-
-            t = 0
 
             # Initialize parameters
             beta = np.zeros([p + 1, k])
@@ -210,20 +243,16 @@ class GLM:
             beta[1:] = fit_params[-1]['beta']
 
             g = np.zeros([p + 1, k])
-            # Initialize cost
-            L = []
-            DL = []
 
-            while(no_convergence and t < self.max_iter):
+            # Initialize cost
+            L, DL = list(), list()
+            for t in range(0, self.max_iter):
 
                 # Calculate gradient
                 grad_beta0, grad_beta = self.grad_L2loss(
                     beta[0], beta[1:], rl, X, y)
                 g[0] = grad_beta0
                 g[1:] = grad_beta
-
-                # Update time step
-                t = t + 1
 
                 # Update parameters
                 beta = beta - self.learning_rate * g
@@ -238,11 +267,10 @@ class GLM:
                 if t > 1:
                     DL.append(L[-1] - L[-2])
                     if np.abs(DL[-1] / L[-1]) < threshold:
-                        no_convergence = 0
-                        if self.verbose is True:
-                            print('    Converged. Loss function: {0:.2f}').format(
-                                L[-1])
-                            print('    dL/L: {0:.6f}\n').format(DL[-1] / L[-1])
+                        msg = '\tConverged. Loss function: {0:.2f}'.format(L[-1])
+                        logger.info(msg)
+                        logger.info('\tdL/L: {0:.6f}\n'.format(DL[-1] / L[-1]))
+                        break
 
             # Store the parameters after convergence
             fit_params[-1]['beta0'] = beta[0]
