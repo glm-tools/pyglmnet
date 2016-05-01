@@ -59,6 +59,9 @@ model.fit(zscore(Xr), yr)
 
 # we'll get .fit_params after .fit(), here we get one set of fit parameters
 fit_param = model.fit_params[-2]
+
+# we can use fitted parameters to predict
+yhat = model.predict(zscore(Xt), fit_param)
 ```
 
 You can also work through given Jupyter notebook demo

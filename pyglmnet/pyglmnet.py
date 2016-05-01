@@ -53,7 +53,11 @@ class GLM:
     """Generalized Linear Model (GLM)
 
     This is class implements  elastic-net regularized generalized linear models.
-    The core algorithm is defined in the ariticle
+    The core algorithm is defined in the ariticle.
+        min_(beta0, beta) [-L + lamda * P]
+    where
+        L is log-likelihood term
+        P is elastic-net penalty term
 
     Parameters
     ----------
@@ -62,10 +66,10 @@ class GLM:
         default: 'poisson'
     alpha: float, the weighting between L1 and L2 norm in penalty term
         loss function i.e.
-            P(beta) = 0.5*(1-alpha)*|beta|_2^2 + alpha*|beta|_1
+            P(beta) = 0.5 * (1-alpha) * |beta|_2^2 + alpha * |beta|_1
         default: 0.5
-    reg_lambda: array or list, array of regularized parameters of penalty term i.e.
-            (1/2*N) sum(y - beta*X) + lambda*P
+    reg_lambda: ndarray or list, array of regularized parameters of penalty term i.e.
+            min_(beta0, beta) -L + lambda * P
         where lambda is number in reg_lambda list
         default: np.logspace(np.log(0.5), np.log(0.01), 10, base=np.exp(1))
     learning_rate: float, learning rate for gradient descent,
@@ -206,15 +210,18 @@ class GLM:
         # Implements batch gradient descent (i.e. vanilla gradient descent by
         # computing gradient over entire training set)
 
-        # Dataset shape
+        # dataset shape
         p = X.shape[1]
 
-        if len(y.shape) == 1:
-            # convert to 1-hot encoding
-            y_bk = y
+        if self.distr == 'multinomial':
+            # convert to 1-hot encoding in multinomial case
+            y_bk = y.ravel()
             y = np.zeros([X.shape[0], y.max() + 1])
-            for i in range(X.shape[0]):
-                y[i, y_bk[i]] = 1.
+            y[np.arange(X.shape[0]), y_bk] = 1
+        else:
+            # else convert to column vector
+            if y.ndim == 1:
+                y = y[:, np.newaxis]
 
         # number of predictions
         k = y.shape[1] if self.distr == 'multinomial' else 1
