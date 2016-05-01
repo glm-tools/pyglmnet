@@ -31,7 +31,12 @@ def set_log_level(verbose):
             raise ValueError('verbose must be of a valid type')
         verbose = logging_types[verbose]
     logger.setLevel(verbose)
-
+    # output log to console
+    handler = logging.StreamHandler()
+    handler.setLevel(logging.INFO)
+    formatter = logging.Formatter("    %(message)s")
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
 
 def softmax(w):
     """
