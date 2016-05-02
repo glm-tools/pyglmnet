@@ -6,7 +6,7 @@ I follow the same approach and notations as in
 [Friedman, J., Hastie, T., & Tibshirani, R. (2010)](https://core.ac.uk/download/files/153/6287975.pdf)
 and the accompanying widely popular [R package](https://web.stanford.edu/~hastie/glmnet/glmnet_alpha.html).
 
-The key difference is that I use ordinary batch gradient descent instead of
+The key difference is that we use ordinary batch gradient descent instead of
 co-ordinate descent, which is very fast for `N x p` of up to `10000 x 1000`.
 
 You can find some resources [here](doc/resources.md).
@@ -27,7 +27,7 @@ $ python setup.py develop install
 ```
 
 
-### Getting Start
+### Getting Started
 
 Here is an example on how to use `GLM` class.
 
@@ -74,13 +74,19 @@ You can also work through given Jupyter notebook demo
 A more extensive tutorial on posing and fitting the GLM is in
 [`glmnet_tutorial.ipynb`](http://nbviewer.jupyter.org/github/pavanramkumar/pyglmnet/blob/master/notebooks/glmnet_tutorial.ipynb)
 
+### Note
 
-### Contribution
+We don't use the canonical link function ```exp()``` for ```'poisson'``` targets.
+Instead, we use the softplus function: ```log(1+exp())``` for numerical stability.
 
-We are welcome for any pull request. You can run
 `nosetests tests/test_glmnet.py` before for making pull request
 to ensure that the changes work.
 
+### To contribute
+
+We welcome any pull requests. You can run
+`nosetests tests/test_glmnet.py` before for making pull request
+to ensure that the changes work.
 
 ### Author
 
