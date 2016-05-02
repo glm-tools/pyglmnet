@@ -12,7 +12,7 @@ MAINTAINER = 'Pavan Ramkumar'
 MAINTAINER_EMAIL = 'pavan.ramkumar@gmail.com'
 LICENSE = 'MIT'
 DOWNLOAD_URL = 'https://github.com/pavanramkumar/pyglmnet.git'
-VERSION = 'unstable'
+VERSION = '0.1.dev0'
 
 if __name__ == "__main__":
     setup(name=DISTNAME,
