@@ -52,8 +52,8 @@ def softmax(w):
 class GLM:
     """Generalized Linear Model (GLM)
 
-    This is class implements  elastic-net regularized generalized linear models.
-    The core algorithm is defined in the ariticle.
+    This class implements elastic-net regularized generalized linear models.
+    The core algorithm is defined in the article.
         min_(beta0, beta) [-L + lamda * P]
     where
         L is log-likelihood term
@@ -61,11 +61,11 @@ class GLM:
 
     Parameters
     ----------
-    distr: str, distribution family in this following
+    distr: str, distribution family can be one of the following
         'poisson' or 'normal' or 'binomial' or 'multinomial'
         default: 'poisson'
-    alpha: float, the weighting between L1 and L2 norm in penalty term
-        loss function i.e.
+    alpha: float, the weighting between L1 and L2 norm in the penalty term
+        of the loss function i.e.
             P(beta) = 0.5 * (1-alpha) * |beta|_2^2 + alpha * |beta|_1
         default: 0.5
     reg_lambda: ndarray or list, array of regularized parameters of penalty term i.e.
@@ -74,10 +74,10 @@ class GLM:
         default: np.logspace(np.log(0.5), np.log(0.01), 10, base=np.exp(1))
     learning_rate: float, learning rate for gradient descent,
         default: 1e-4
-    max_iter: int, maximum iteration for the model, default: 100
+    max_iter: int, maximum iterations for the model, default: 100
     threshold: float, threshold for convergence. Optimization loop will stop
         below setting threshold, default: 1e-3
-    verbose: boolean, if True it will print output while iterating
+    verbose: boolean, if True it will print the output while iterating
 
     Reference
     ---------
@@ -87,7 +87,8 @@ class GLM:
     """
 
     def __init__(self, distr='poisson', alpha=0.05,
-                 reg_lambda=np.logspace(np.log(0.5), np.log(0.01), 10, base=np.exp(1)),
+                 reg_lambda=np.logspace(np.log(0.5),
+                 np.log(0.01), 10, base=np.exp(1)),
                  learning_rate=1e-4, max_iter=100, verbose=False):
         self.distr = distr
         self.alpha = alpha
@@ -123,7 +124,7 @@ class GLM:
             # analytical formula
             #logL = np.sum(y*np.log(l) + (1-y)*np.log(1-l))
 
-            # this prevents underflow
+            # but this prevents underflow
             z = beta0 + np.dot(X, beta)
             logL = np.sum(y * z - np.log(1 + np.exp(z)))
         elif(self.distr == 'multinomial'):
