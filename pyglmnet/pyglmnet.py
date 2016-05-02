@@ -1,7 +1,6 @@
 import logging
 import numpy as np
 from scipy.special import expit
-from scipy.stats import zscore
 
 logger = logging.getLogger('pyglmnet')
 
@@ -293,7 +292,7 @@ class GLM:
 
     def predict(self, X, fit_param):
         """Define the predict function."""
-        yhat = self.lmb(fit_param['beta0'], fit_param['beta'], zscore(X))
+        yhat = self.lmb(fit_param['beta0'], fit_param['beta'], X)
         return yhat
 
     def pseudo_R2(self, y, yhat, ynull):
@@ -349,9 +348,9 @@ class GLM:
     def simulate(self, beta0, beta, X):
         """Simulate data."""
         if self.distr == 'poisson':
-            y = np.random.poisson(self.lmb(beta0, beta, zscore(X)))
+            y = np.random.poisson(self.lmb(beta0, beta, X))
         if self.distr == 'normal':
-            y = np.random.normal(self.lmb(beta0, beta, zscore(X)))
+            y = np.random.normal(self.lmb(beta0, beta, X))
         if self.distr == 'binomial':
-            y = np.random.binomial(1, self.lmb(beta0, beta, zscore(X)))
+            y = np.random.binomial(1, self.lmb(beta0, beta, X))
         return y
