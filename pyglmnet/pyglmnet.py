@@ -104,7 +104,7 @@ class GLM:
         qu = dict(poisson=np.log(1 + eps + np.exp(z)),
                   normal=z, binomial=expit(z),
                   multinomial=softmax(z))
-        return qu[self.distr]
+        return qu[self.distr](z)
 
     def lmb(self, beta0, beta, X):
         """Conditional intensity function."""
