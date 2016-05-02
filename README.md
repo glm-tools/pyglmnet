@@ -6,7 +6,8 @@ I follow the same approach and notations as in
 [Friedman, J., Hastie, T., & Tibshirani, R. (2010)](https://core.ac.uk/download/files/153/6287975.pdf)
 and the accompanying widely popular [R package](https://web.stanford.edu/~hastie/glmnet/glmnet_alpha.html).
 
-The key difference is that I use ordinary batch gradient descent instead of co-ordinate descent, which is very fast for `N x p` of up to `10000 x 1000`.
+The key difference is that I use ordinary batch gradient descent instead of
+co-ordinate descent, which is very fast for `N x p` of up to `10000 x 1000`.
 
 You can find some resources [here](doc/resources.md).
 
@@ -26,7 +27,7 @@ $ python setup.py develop install
 ```
 
 
-### Documentation
+### Getting Start
 
 Here is an example on how to use `GLM` class.
 
@@ -72,6 +73,13 @@ You can also work through given Jupyter notebook demo
 
 A more extensive tutorial on posing and fitting the GLM is in
 [`glmnet_tutorial.ipynb`](notebooks/glmnet_tutorial.ipynb)
+
+
+### Contribution
+
+We are welcome for any pull request. You can run
+`nosetests tests/test_glmnet.py` before for making pull request
+to ensure that the changes work.
 
 
 ### Author
