@@ -34,7 +34,7 @@ Here is an example on how to use `GLM` class.
 ```python
 import numpy as np
 import scipy.sparse as sps
-from scipy.stats import zscore
+from sklearn.preprocessing import StandardScaler
 from pyglmnet import GLM
 
 # create class of Generalized Linear model
@@ -56,13 +56,14 @@ Xt = np.random.normal(0.0, 1.0, [n_samples, n_features])
 yt = model.simulate(beta0, beta, Xt)
 
 # fit Generalized Linear Model
-model.fit(zscore(Xr), yr)
+scaler = StandardScaler().fit(Xr)
+model.fit(scaler.transform(Xr), yr)
 
 # we'll get .fit_params after .fit(), here we get one set of fit parameters
 fit_param = model.fit_params[-2]
 
 # we can use fitted parameters to predict
-yhat = model.predict(zscore(Xt), fit_param)
+yhat = model.predict(scaler.transform(Xt), fit_param)
 ```
 
 You can also work through given Jupyter notebook demo
