@@ -79,13 +79,13 @@ A more extensive tutorial on posing and fitting the GLM is in
 We don't use the canonical link function ```exp()``` for ```'poisson'``` targets.
 Instead, we use the softplus function: ```log(1+exp())``` for numerical stability.
 
-`nosetests tests/test_glmnet.py` before for making pull request
-to ensure that the changes work.
-
 ### To contribute
 
 We welcome any pull requests. You can run
 `nosetests tests/test_glmnet.py` before for making pull request
+to ensure that the changes work.
+
+Run `nosetests tests/test_glmnet.py` before for making pull request
 to ensure that the changes work.
 
 ### Author
