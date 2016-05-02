@@ -3,9 +3,9 @@ import numpy as np
 from scipy.special import expit
 from scipy.stats import zscore
 
+np.random.seed(0)
+
 logger = logging.getLogger('pyglmnet')
-
-
 def set_log_level(verbose):
     """Convenience function for setting the log level.
 
