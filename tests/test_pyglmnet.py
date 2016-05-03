@@ -27,4 +27,4 @@ def test_glmnet():
     beta_ = glm.fit_params[-2]['beta'][:]
     assert_allclose(beta[:], beta_, atol=0.1)  # check fit
     density_ = np.sum(beta_ > 0.1) / float(n_features)
-    assert_allclose(density_, density, atol=0.02)  # check density
+    assert_allclose(density_, density, atol=0.05)  # check density
