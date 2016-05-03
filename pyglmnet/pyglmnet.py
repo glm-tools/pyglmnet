@@ -94,7 +94,7 @@ class GLM:
         self.reg_lambda = reg_lambda
         self.learning_rate = learning_rate
         self.max_iter = max_iter
-        self.fit_params = None
+        self.fit_ = None
         self.threshold = 1e-3
         set_log_level(verbose)
 
@@ -211,7 +211,7 @@ class GLM:
         # computing gradient over entire training set)
 
         # dataset shape
-        p = X.shape[1]
+        n_features = X.shape[1]
 
         if self.distr == 'multinomial':
             # convert to 1-hot encoding in multinomial case
@@ -224,12 +224,12 @@ class GLM:
                 y = y[:, np.newaxis]
 
         # number of predictions
-        k = y.shape[1] if self.distr == 'multinomial' else 1
+        n_classes = y.shape[1] if self.distr == 'multinomial' else 1
 
         # Initialize parameters
-        beta0_hat = np.random.normal(0.0, 1.0, k)
-        beta_hat = np.random.normal(0.0, 1.0, [p, k])
-        fit_params = []
+        beta0_hat = np.random.normal(0.0, 1.0, n_classes)
+        beta_hat = np.random.normal(0.0, 1.0, [n_features, n_classes])
+        fit_params = list()
 
         # Outer loop with descending lambda
         logger.info('Looping through the regularization path')
@@ -250,11 +250,11 @@ class GLM:
             alpha = self.alpha
 
             # Initialize parameters
-            beta = np.zeros([p + 1, k])
+            beta = np.zeros([n_features + 1, n_classes])
             beta[0] = fit_params[-1]['beta0']
             beta[1:] = fit_params[-1]['beta']
 
-            g = np.zeros([p + 1, k])
+            g = np.zeros([n_features + 1, n_classes])
 
             # Initialize cost
             L, DL = list(), list()
@@ -288,7 +288,7 @@ class GLM:
             fit_params[-1]['beta0'] = beta[0]
             fit_params[-1]['beta'] = beta[1:]
 
-        self.fit_params = fit_params
+        self.fit_ = fit_params
         return self
 
     def predict(self, X, fit_param):
