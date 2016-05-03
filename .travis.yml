@@ -1,0 +1,13 @@
+language: python
+before_install:
+  - wget -q http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh
+  - chmod +x miniconda.sh
+  - ./miniconda.sh -b -p /home/travis/miniconda
+  - export PATH=/home/travis/miniconda/bin:$PATH
+  - conda update --yes --quiet conda
+install:
+    - conda create -n testenv --yes pip python=2.7
+    - source activate testenv
+    - conda install --yes --quiet numpy=1.10.4 scipy=0.17 scikit-learn=0.17 nose coverage
+    - python setup.py install
+script: nosetests .
