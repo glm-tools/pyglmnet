@@ -1,1 +1,1 @@
-from .pyglmnet import *
+from .pyglmnet import GLM
