@@ -83,10 +83,7 @@ Instead, we use the softplus function: ```log(1+exp())``` for numerical stabilit
 ### To contribute
 
 We welcome any pull requests. You can run
-`nosetests tests/test_glmnet.py` before for making pull request
-to ensure that the changes work.
-
-Run `nosetests tests/test_glmnet.py` before for making pull request
+`nosetests tests` before for making pull request
 to ensure that the changes work.
 
 ### Author
