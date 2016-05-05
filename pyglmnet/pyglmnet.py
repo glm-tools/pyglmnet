@@ -74,8 +74,9 @@ class GLM:
     learning_rate: float, learning rate for gradient descent,
         default: 1e-4
     max_iter: int, maximum iterations for the model, default: 100
-    threshold: float, threshold for convergence. Optimization loop will stop
-        below setting threshold, default: 1e-3
+    tol: float, convergence threshold or stopping criteria.
+        Optimization loop will stop below setting threshold,
+        default: 1e-3
     verbose: boolean, if True it will print the output while iterating
 
     Reference
@@ -88,14 +89,21 @@ class GLM:
     def __init__(self, distr='poisson', alpha=0.05,
                  reg_lambda=np.logspace(np.log(0.5),
                  np.log(0.01), 10, base=np.exp(1)),
-                 learning_rate=1e-4, max_iter=100, verbose=False):
+                 learning_rate=1e-4, max_iter=100,
+                 tol=1e-3, verbose=False):
+
+        if not isinstance(reg_lambda, (list, np.ndarray)):
+            reg_lambda = [reg_lambda]
+        if not isinstance(max_iter, int):
+            max_iter = int(max_iter)
+
         self.distr = distr
         self.alpha = alpha
         self.reg_lambda = reg_lambda
         self.learning_rate = learning_rate
         self.max_iter = max_iter
         self.fit_ = None
-        self.threshold = 1e-3
+        self.tol = tol
         set_log_level(verbose)
 
     def qu(self, z):
@@ -246,7 +254,7 @@ class GLM:
                 fit_params[-1]['beta'] = fit_params[-2]['beta']
 
             # Iterate until convergence
-            threshold = self.threshold
+            tol = self.tol
             alpha = self.alpha
 
             # Initialize parameters
@@ -278,7 +286,7 @@ class GLM:
                 # Delta loss and convergence criterion
                 if t > 1:
                     DL.append(L[-1] - L[-2])
-                    if np.abs(DL[-1] / L[-1]) < threshold:
+                    if np.abs(DL[-1] / L[-1]) < tol:
                         msg = '\tConverged. Loss function: {0:.2f}'.format(L[-1])
                         logger.info(msg)
                         logger.info('\tdL/L: {0:.6f}\n'.format(DL[-1] / L[-1]))
