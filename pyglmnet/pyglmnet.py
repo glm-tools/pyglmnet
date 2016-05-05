@@ -127,7 +127,7 @@ class GLM:
             z = beta0 + np.dot(X, beta)
             logL = np.sum(y * z - np.log(1 + np.exp(z)))
         elif(self.distr == 'multinomial'):
-            logL = -np.sum(y * np.log(l))
+            logL = np.sum(y * np.log(l))
         return logL
 
     def penalty(self, beta):
@@ -186,7 +186,7 @@ class GLM:
         elif self.distr == 'multinomial':
             # this assumes that y is already as a one-hot encoding
             pred = self.qu(z)
-            grad_beta0 = -np.sum(y - pred)
+            grad_beta0 = -np.sum(y - pred, axis=0)
             grad_beta = -np.transpose(np.dot(np.transpose(y - pred), X)) \
                 + reg_lambda * (1 - alpha) * beta
 

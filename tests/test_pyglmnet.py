@@ -24,7 +24,16 @@ def test_glmnet():
     X_train = scaler.fit_transform(X_train)
     glm.fit(X_train, y_train)
 
-    beta_ = glm.fit_params[-2]['beta'][:]
+    beta_ = glm.fit_[-2]['beta'][:]
     assert_allclose(beta[:], beta_, atol=0.1)  # check fit
     density_ = np.sum(beta_ > 0.1) / float(n_features)
     assert_allclose(density_, density, atol=0.05)  # check density
+
+def test_multinomial_gradient():
+    """Gradient of intercept params is different"""
+    glm = GLM(distr='multinomial')
+    X = np.array([[1,2,3], [4,5,6]])
+    y = np.array([1,2])
+    beta = np.zeros([4, 2])
+    grad_beta0, grad_beta = glm.grad_L2loss(beta[0], beta[1:], 0, X, y)
+    assert grad_beta0[0] != grad_beta0[1]
