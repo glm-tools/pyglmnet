@@ -5,6 +5,8 @@ from scipy.special import expit
 np.random.seed(0)
 
 logger = logging.getLogger('pyglmnet')
+
+
 def set_log_level(verbose):
     """Convenience function for setting the log level.
 
@@ -37,6 +39,7 @@ def set_log_level(verbose):
     handler.setFormatter(formatter)
     logger.addHandler(handler)
 
+
 def softmax(w):
     """
     Softmax function of given array of number w
@@ -47,6 +50,7 @@ def softmax(w):
     e = np.exp(w - maxes)
     dist = e / np.sum(e, axis=1, keepdims=True)
     return dist
+
 
 class GLM:
     """Generalized Linear Model (GLM)
@@ -67,10 +71,12 @@ class GLM:
         of the loss function i.e.
             P(beta) = 0.5 * (1-alpha) * |beta|_2^2 + alpha * |beta|_1
         default: 0.5
-    reg_lambda: ndarray or list, array of regularized parameters of penalty term i.e.
+    reg_lambda: ndarray or list | None
+        array of regularized parameters of penalty term i.e.
             min_(beta0, beta) -L + lambda * P
         where lambda is number in reg_lambda list
-        default: np.logspace(np.log(0.5), np.log(0.01), 10, base=np.exp(1))
+        If None (default), a list of 10 floats spaced logarithmically (base e)
+        between 0.5 and 0.01 is generated.
     learning_rate: float, learning rate for gradient descent,
         default: 1e-4
     max_iter: int, maximum iterations for the model, default: 100
@@ -81,17 +87,19 @@ class GLM:
 
     Reference
     ---------
-    Friedman, Hastie, Tibshirani (2010). Regularization Paths for Generalized Linear
-        Models via Coordinate Descent, J Statistical Software.
+    Friedman, Hastie, Tibshirani (2010). Regularization Paths for Generalized
+        Linear Models via Coordinate Descent, J Statistical Software.
         https://core.ac.uk/download/files/153/6287975.pdf
     """
 
     def __init__(self, distr='poisson', alpha=0.05,
-                 reg_lambda=np.logspace(np.log(0.5),
-                 np.log(0.01), 10, base=np.exp(1)),
+                 reg_lambda=None,
                  learning_rate=1e-4, max_iter=100,
                  tol=1e-3, verbose=False):
 
+        if reg_lambda is None:
+            reg_lambda = np.logspace(np.log(0.5), np.log(0.01), 10,
+                                     base=np.exp(1))
         if not isinstance(reg_lambda, (list, np.ndarray)):
             reg_lambda = [reg_lambda]
         if not isinstance(max_iter, int):
@@ -129,7 +137,7 @@ class GLM:
             logL = -0.5 * np.sum((y - l)**2)
         elif(self.distr == 'binomial'):
             # analytical formula
-            #logL = np.sum(y*np.log(l) + (1-y)*np.log(1-l))
+            # logL = np.sum(y*np.log(l) + (1-y)*np.log(1-l))
 
             # but this prevents underflow
             z = beta0 + np.dot(X, beta)
@@ -162,7 +170,8 @@ class GLM:
 
     def prox(self, X, l):
         """Proximal operator."""
-        # sx = [0. if np.abs(y) <= l else np.sign(y)*np.abs(abs(y)-l) for y in x]
+        # sx = [0. if np.abs(y) <= l else np.sign(y)*np.abs(abs(y)-l)
+        # for y in x]
         # return np.array(sx).reshape(x.shape)
         return np.sign(X) * (np.abs(X) - l) * (np.abs(X) > l)
 
@@ -287,7 +296,8 @@ class GLM:
                 if t > 1:
                     DL.append(L[-1] - L[-2])
                     if np.abs(DL[-1] / L[-1]) < tol:
-                        msg = '\tConverged. Loss function: {0:.2f}'.format(L[-1])
+                        msg = ('\tConverged. Loss function:'
+                               ' {0:.2f}').format(L[-1])
                         logger.info(msg)
                         logger.info('\tdL/L: {0:.6f}\n'.format(DL[-1] / L[-1]))
                         break
@@ -320,12 +330,16 @@ class GLM:
 
         elif self.distr == 'binomial':
             # Log likelihood of model under consideration
-            L1 = 2 * len(y) * np.sum(y * np.log((yhat == 0) + yhat) / np.mean(yhat) +
-                                     (1 - y) * np.log((yhat == 1) + 1 - yhat) / (1 - np.mean(yhat)))
+            L1 = 2 * len(y) * \
+                np.sum(y * np.log((yhat == 0) + yhat) / np.mean(yhat) +
+                       (1 - y) * np.log((yhat == 1) +
+                                        1 - yhat) / (1 - np.mean(yhat)))
 
             # Log likelihood of homogeneous model
-            L0 = 2 * len(y) * np.sum(y * np.log((ynull == 0) + ynull) / np.mean(yhat) +
-                                     (1 - y) * np.log((ynull == 1) + 1 - ynull) / (1 - np.mean(yhat)))
+            L0 = 2 * len(y) * \
+                np.sum(y * np.log((ynull == 0) + ynull) / np.mean(yhat) +
+                       (1 - y) * np.log((ynull == 1) +
+                                        1 - ynull) / (1 - np.mean(yhat)))
             R2 = 1 - L1 / L0
 
         elif self.distr == 'normal':
@@ -343,8 +357,10 @@ class GLM:
             LS = np.sum(y * np.log(eps + y) - y)
 
         elif self.distr == 'binomial':
-            L1 = 2 * len(y) * np.sum(y * np.log((yhat == 0) + yhat) / np.mean(yhat) +
-                                     (1 - y) * np.log((yhat == 1) + 1 - yhat) / (1 - np.mean(yhat)))
+            L1 = 2 * len(y) * \
+                np.sum(y * np.log((yhat == 0) + yhat) / np.mean(yhat) +
+                       (1 - y) * np.log((yhat == 1) +
+                                        1 - yhat) / (1 - np.mean(yhat)))
             LS = 0
 
         elif self.distr == 'normal':
