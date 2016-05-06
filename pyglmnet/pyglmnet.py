@@ -1,4 +1,8 @@
+"""Python implementation of elastic-net regularized GLMs."""
+
 import logging
+from copy import deepcopy
+
 import numpy as np
 from scipy.special import expit
 
@@ -90,6 +94,13 @@ class GLM:
     Friedman, Hastie, Tibshirani (2010). Regularization Paths for Generalized
         Linear Models via Coordinate Descent, J Statistical Software.
         https://core.ac.uk/download/files/153/6287975.pdf
+
+    Notes
+    -----
+    To select subset of fitted glm models, you can simply do:
+
+    >>> glm = glm[1:3]
+    >>> glm[2].predict(X_test, y_test)
     """
 
     def __init__(self, distr='poisson', alpha=0.05,
@@ -113,6 +124,31 @@ class GLM:
         self.fit_ = None
         self.tol = tol
         set_log_level(verbose)
+
+    def __repr__(self):
+        """Description of the object."""
+        reg_lambda = self.reg_lambda
+
+        s = '<\nDistribution | %s' % self.distr
+        s += 'alpha | %0.2f' % self.alpha
+        s += 'max_iter | %0.2f' % self.max_iter
+        if len(reg_lambda) > 1:
+            s += 'lambda: %0.2f to %0.2f>' % (reg_lambda[0], reg_lambda[-1])
+        else:
+            s += 'lambda: %0.2f\n>' % reg_lambda[0]
+        return '\n'.join(s)
+
+    def __getitem__(self, key):
+        """Return a GLM object with a subset of fitted lambdas."""
+        glm = deepcopy(self)
+        if self.fit_ is None:
+            raise ValueError('Cannot slice object if the lambdas have'
+                             ' not been fit.')
+        if not isinstance(key, (slice, int)):
+            raise IndexError('Invalid slice for GLM object')
+        glm.fit_ = glm.fit_[key]
+        glm.reg_lambda = glm.reg_lambda[key]
+        return glm
 
     def qu(self, z):
         """The non-linearity."""
@@ -214,7 +250,7 @@ class GLM:
 
         Parameters
         ----------
-        X : array
+        X : array, shape (n_samples, n_features)
             The input data
         y : array
             Labels to the data
@@ -226,6 +262,10 @@ class GLM:
         """
         # Implements batch gradient descent (i.e. vanilla gradient descent by
         # computing gradient over entire training set)
+
+        if not isinstance(X, np.ndarray):
+            raise ValueError('Input data should be of type ndarray (got %s).'
+                             % type(X))
 
         # dataset shape
         n_features = X.shape[1]
@@ -309,10 +349,49 @@ class GLM:
         self.fit_ = fit_params
         return self
 
-    def predict(self, X, fit_param):
-        """Define the predict function."""
-        yhat = self.lmb(fit_param['beta0'], fit_param['beta'], X)
-        return yhat
+    def predict(self, X):
+        """Predict labels.
+
+        Parameters
+        ----------
+        X : array, shape (n_samples, n_features)
+            The data for prediction.
+
+        Returns
+        -------
+        yhat : array, shape ([n_lambda], n_samples)
+            The predicted labels. A 1D array if predicting on only
+            one lambda (compatible with scikit-learn API). Otherwise,
+            returns a 2D array.
+        """
+        if not isinstance(X, np.ndarray):
+            raise ValueError('Input data should be of type ndarray (got %s).'
+                             % type(X))
+
+        if isinstance(self.fit_, list):
+            yhat = list()
+            for fit in self.fit_:
+                yhat.append(self.lmb(fit['beta0'], fit['beta'], X).ravel())
+        else:
+            yhat = self.lmb(self.fit_['beta0'], self.fit_['beta'], X).ravel()
+        return np.asarray(yhat)
+
+    def fit_predict(self, X, y):
+        """Fit the model and predict on the same data.
+
+        Parameters
+        ----------
+        X : array, shape (n_samples, n_features)
+            The data for fit and prediction.
+
+        Returns
+        -------
+        yhat : array, shape ([n_lambda], n_samples)
+            The predicted labels. A 1D array if predicting on only
+            one lambda (compatible with scikit-learn API). Otherwise,
+            returns a 2D array.
+        """
+        return self.fit(X, y).predict(X)
 
     def pseudo_R2(self, y, yhat, ynull):
         """Define the pseudo-R2 function."""
