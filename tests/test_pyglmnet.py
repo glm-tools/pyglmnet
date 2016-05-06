@@ -46,6 +46,10 @@ def test_glmnet():
     glm = GLM(distr='poisson')
     assert_raises(ValueError, glm.__getitem__, 2)
 
+    # test fit_predict
+    glm.fit_predict(X_train, y_train)
+    assert_raises(ValueError, glm.fit_predict, X_train[None, ...], y_train)
+
 
 def test_multinomial_gradient():
     """Gradient of intercept params is different"""

@@ -250,7 +250,7 @@ class GLM:
 
         Parameters
         ----------
-        X : array
+        X : array, shape (n_samples, n_features)
             The input data
         y : array
             Labels to the data
@@ -262,6 +262,10 @@ class GLM:
         """
         # Implements batch gradient descent (i.e. vanilla gradient descent by
         # computing gradient over entire training set)
+
+        if not isinstance(X, np.ndarray):
+            raise ValueError('Input data should be of type ndarray (got %s).'
+                             % type(X))
 
         # dataset shape
         n_features = X.shape[1]
@@ -360,6 +364,10 @@ class GLM:
             one lambda (compatible with scikit-learn API). Otherwise,
             returns a 2D array.
         """
+        if not isinstance(X, np.ndarray):
+            raise ValueError('Input data should be of type ndarray (got %s).'
+                             % type(X))
+
         if isinstance(self.fit_, list):
             yhat = list()
             for fit in self.fit_:
@@ -367,6 +375,23 @@ class GLM:
         else:
             yhat = self.lmb(self.fit_['beta0'], self.fit_['beta'], X).ravel()
         return np.asarray(yhat)
+
+    def fit_predict(self, X, y):
+        """Fit the model and predict on the same data.
+
+        Parameters
+        ----------
+        X : array, shape (n_samples, n_features)
+            The data for fit and prediction.
+
+        Returns
+        -------
+        yhat : array, shape ([n_lambda], n_samples)
+            The predicted labels. A 1D array if predicting on only
+            one lambda (compatible with scikit-learn API). Otherwise,
+            returns a 2D array.
+        """
+        return self.fit(X, y).predict(X)
 
     def pseudo_R2(self, y, yhat, ynull):
         """Define the pseudo-R2 function."""
