@@ -396,6 +396,9 @@ class GLM:
     def pseudo_R2(self, y, yhat, ynull):
         """Define the pseudo-R2 function."""
         eps = np.spacing(1)
+        y = y.ravel()
+        yhat = y.ravel()
+
         if self.distr == 'poisson':
             # Log likelihood of model under consideration
             L1 = np.sum(y * np.log(eps + yhat) - yhat)
@@ -429,6 +432,8 @@ class GLM:
     def deviance(self, y, yhat):
         """The deviance function."""
         eps = np.spacing(1)
+        y = y.ravel()
+        yhat = yhat.ravel()
         # L1 = Log likelihood of model under consideration
         # LS = Log likelihood of saturated model
         if self.distr == 'poisson':
