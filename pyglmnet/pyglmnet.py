@@ -100,7 +100,7 @@ class GLM:
     To select subset of fitted glm models, you can simply do:
 
     >>> glm = glm[1:3]
-    >>> glm[2].predict(X_test, y_test)
+    >>> glm[2].predict(X_test)
     """
 
     def __init__(self, distr='poisson', alpha=0.05,
