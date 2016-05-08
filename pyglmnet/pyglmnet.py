@@ -130,13 +130,14 @@ class GLM:
         reg_lambda = self.reg_lambda
 
         s = '<\nDistribution | %s' % self.distr
-        s += 'alpha | %0.2f' % self.alpha
-        s += 'max_iter | %0.2f' % self.max_iter
+        s += '\nalpha | %0.2f' % self.alpha
+        s += '\nmax_iter | %0.2f' % self.max_iter
         if len(reg_lambda) > 1:
-            s += 'lambda: %0.2f to %0.2f>' % (reg_lambda[0], reg_lambda[-1])
+            s += ('\nlambda: %0.2f to %0.2f\n>'
+                  % (reg_lambda[0], reg_lambda[-1]))
         else:
-            s += 'lambda: %0.2f\n>' % reg_lambda[0]
-        return '\n'.join(s)
+            s += '\nlambda: %0.2f\n>' % reg_lambda[0]
+        return s
 
     def __getitem__(self, key):
         """Return a GLM object with a subset of fitted lambdas."""
