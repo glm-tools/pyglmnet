@@ -371,9 +371,9 @@ class GLM:
         if isinstance(self.fit_, list):
             yhat = list()
             for fit in self.fit_:
-                yhat.append(self.lmb(fit['beta0'], fit['beta'], X).ravel())
+                yhat.append(self.lmb(fit['beta0'], fit['beta'], X))
         else:
-            yhat = self.lmb(self.fit_['beta0'], self.fit_['beta'], X).ravel()
+            yhat = self.lmb(self.fit_['beta0'], self.fit_['beta'], X)
         return np.asarray(yhat)
 
     def fit_predict(self, X, y):
