@@ -397,7 +397,7 @@ class GLM:
         """Define the pseudo-R2 function."""
         eps = np.spacing(1)
         y = y.ravel()
-        yhat = y.ravel()
+        yhat = yhat.ravel()
 
         if self.distr == 'poisson':
             # Log likelihood of model under consideration
