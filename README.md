@@ -37,7 +37,7 @@ import scipy.sparse as sps
 from sklearn.preprocessing import StandardScaler
 from pyglmnet import GLM
 
-# create class of Generalized Linear model
+# create an instance of the GLM class
 model = GLM(distr='poisson', verbose=True, alpha=0.05)
 
 n_samples, n_features = 10000, 100
@@ -60,7 +60,7 @@ scaler = StandardScaler().fit(Xr)
 model.fit(scaler.transform(Xr), yr)
 
 # we'll get .fit_params after .fit(), here we get one set of fit parameters
-fit_param = model.fit_params[-2]
+fit_param = model[-1].fit_
 
 # we can use fitted parameters to predict
 yhat = model.predict(scaler.transform(Xt), fit_param)
@@ -83,7 +83,7 @@ Instead, we use the softplus function: ```log(1+exp())``` for numerical stabilit
 ### To contribute
 
 We welcome any pull requests. You can run
-`nosetests tests` before for making pull request
+`nosetests tests` before for making pull requests
 to ensure that the changes work.
 
 ### Author
