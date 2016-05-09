@@ -57,10 +57,10 @@ def test_multinomial_gradient():
     """Gradient of intercept params is different"""
     glm = GLM(distr='multinomial')
     X = np.array([[1, 2, 3], [4, 5, 6]])
-    y = np.array([1, 2])
+    y = np.array([0, 1])
     beta = np.zeros([4, 2])
     grad_beta0, grad_beta = glm.grad_L2loss(beta[0], beta[1:], 0, X, y)
     glm.fit(X, y)
     y_pred = glm.predict(X)
-    assert_equal(y_pred.shape, (10, 2, 3))  # n_classes x n_samples x n_classes
+    assert_equal(y_pred.shape, (10, 2, 2))  # n_classes x n_samples x n_classes
     assert grad_beta0[0] != grad_beta0[1]
