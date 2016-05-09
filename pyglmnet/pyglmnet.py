@@ -263,6 +263,7 @@ class GLM:
         """
         # Implements batch gradient descent (i.e. vanilla gradient descent by
         # computing gradient over entire training set)
+        np.random.seed(0)
 
         if not isinstance(X, np.ndarray):
             raise ValueError('Input data should be of type ndarray (got %s).'
