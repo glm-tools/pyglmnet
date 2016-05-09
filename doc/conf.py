@@ -31,6 +31,7 @@ import os
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.doctest',
+    'sphinx.ext.mathjax',
     'sphinx_gallery.gen_gallery'
 ]
 
