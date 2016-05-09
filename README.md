@@ -63,7 +63,7 @@ model.fit(scaler.transform(Xr), yr)
 fit_param = model[-1].fit_
 
 # we can use fitted parameters to predict
-yhat = model.predict(scaler.transform(Xt), fit_param)
+yhat = model.predict(scaler.transform(Xt))
 ```
 
 You can also work through given Jupyter notebook demo
