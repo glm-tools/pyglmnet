@@ -34,6 +34,8 @@ def test_glmnet():
 
     # checks for slicing.
     glm = glm[:3]
+    glm_copy = glm.copy()
+    assert_true(glm_copy is not glm)
     assert_equal(len(glm.reg_lambda), 3)
     y_pred = glm[:2].predict(scaler.transform(X_train))
     assert_equal(y_pred.shape, (2, X_train.shape[0]))

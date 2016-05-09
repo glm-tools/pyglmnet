@@ -151,6 +151,10 @@ class GLM:
         glm.reg_lambda = glm.reg_lambda[key]
         return glm
 
+    def copy(self):
+        """Return a copy of the object."""
+        return deepcopy(self)
+
     def qu(self, z):
         """The non-linearity."""
         eps = np.spacing(1)
