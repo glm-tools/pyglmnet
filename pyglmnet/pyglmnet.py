@@ -380,7 +380,9 @@ class GLM:
                 yhat.append(self.lmb(fit['beta0'], fit['beta'], X))
         else:
             yhat = self.lmb(self.fit_['beta0'], self.fit_['beta'], X)
-        return np.asarray(yhat)
+        yhat = np.asarray(yhat)
+        yhat = yhat[..., 0] if self.distr != 'multinomial' else yhat
+        return yhat
 
     def fit_predict(self, X, y):
         """Fit the model and predict on the same data.
