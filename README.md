@@ -81,12 +81,17 @@ A more extensive tutorial on posing and fitting the GLM is in
 
 We don't use the canonical link function ```exp()``` for ```'poisson'``` targets.
 Instead, we use the softplus function: ```log(1+exp())``` for numerical stability.
+For the canonical poisson link function, use ```'poissonexp'```
 
 ### To contribute
 
-We welcome any pull requests. You can run
-`nosetests tests` before for making pull requests
-to ensure that the changes work.
+We welcome any pull requests.
+- Fork this repository
+- Develop and push to your branch
+- Create new pull requests
+
+You can run `nosetests tests` before for making pull requests
+to ensure that the changes work. We are continuously adding tests with more coverage.
 
 ### Author
 
