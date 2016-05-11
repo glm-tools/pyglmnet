@@ -1,3 +1,8 @@
+|Travis|_
+
+.. |Travis| image:: https://api.travis-ci.org/pavanramkumar/pyglmnet.png?branch=master
+.. _Travis: https://travis-ci.org/pavanramkumar/pyglmnet
+
 # pyglmnet
 
 Python implementation of elastic-net regularized generalized linear models.
