@@ -252,16 +252,16 @@ class GLM:
             q = self.qu(z)
 
             grad_beta0 = np.sum(q[z <= self.eta] - y[z <= self.eta]) + \
-                         np.sum(1 - y[z > self.eta]/q[z > self.eta]) * self.eta
+                np.sum(1 - y[z > self.eta] / q[z > self.eta]) * self.eta
 
             grad_beta = np.zeros([X.shape[1], 1])
             selector = np.where(z.ravel() <= self.eta)[0]
-            grad_beta += np.transpose(np.dot((q[selector] - y[selector]).T, \
+            grad_beta += np.transpose(np.dot((q[selector] - y[selector]).T,
                                              X[selector, :]))
             selector = np.where(z.ravel() > self.eta)[0]
             grad_beta += self.eta * \
-                         np.transpose(np.dot((1 - y[selector] / q[selector]).T, \
-                                             X[selector, :]))
+                np.transpose(np.dot((1 - y[selector] / q[selector]).T,
+                                    X[selector, :]))
             grad_beta += reg_lambda * (1 - alpha) * beta
 
         elif self.distr == 'normal':
@@ -420,8 +420,8 @@ class GLM:
         else:
             yhat = self.lmb(self.fit_['beta0'], self.fit_['beta'], X)
         yhat = np.asarray(yhat) if self.distr != 'poissonexp' else yhat
-        yhat = yhat[..., 0] if (self.distr != 'multinomial'
-                                and self.distr != 'poissonexp') else yhat
+        yhat = yhat[..., 0] if (self.distr != 'multinomial' and
+                                self.distr != 'poissonexp') else yhat
         return yhat
 
     def fit_predict(self, X, y):
@@ -496,7 +496,7 @@ class GLM:
             LS = 0
 
         elif self.distr == 'normal':
-            L1 = -np.sum((y - yhat)**2)
+            L1 = -np.sum((y - yhat) ** 2)
             LS = 0
 
         D = -2 * (L1 - LS)
