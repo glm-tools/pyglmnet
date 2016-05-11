@@ -56,7 +56,7 @@ def test_poissonexp_glmnet():
         """Test glmnet."""
         glm = GLM(distr='poissonexp', learning_rate=1e-5, reg_lambda=[0.05, 0.01])
         scaler = StandardScaler()
-        n_samples, n_features = 1000, 100
+        n_samples, n_features = 10000, 100
         density = 0.1
 
         assert_true(repr(glm))
@@ -72,9 +72,9 @@ def test_poissonexp_glmnet():
         glm.fit(X_train, y_train)
 
         beta_ = glm.fit_[-1]['beta'][:]
-        assert_allclose(beta[:], beta_, atol=0.1)  # check fit
+        assert_allclose(beta[:], beta_, atol=0.05)  # check fit
         density_ = np.sum(beta_ > 0.1) / float(n_features)
-        assert_allclose(density_, density, atol=0.05)  # check density
+        assert_allclose(density_, density, atol=0.1)  # check density
 
 def test_multinomial_gradient():
     """Gradient of intercept params is different"""
