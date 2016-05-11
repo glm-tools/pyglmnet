@@ -155,7 +155,6 @@ class GLM:
 
     def qu(self, z):
         """The non-linearity."""
-        eps = np.spacing(1)
         if self.distr == 'poisson':
             qu = np.log1p(np.exp(z))
         elif self.distr == 'poissonexp':
@@ -188,20 +187,20 @@ class GLM:
     def logL(self, beta0, beta, X, y):
         """The log likelihood."""
         l = self.lmb(beta0, beta, X)
-        if(self.distr == 'poisson'):
+        if self.distr == 'poisson':
             logL = np.sum(y * np.log(l) - l)
-        elif(self.distr == 'poissonexp'):
+        elif self.distr == 'poissonexp':
             logL = np.sum(y * l - l)
-        elif(self.distr == 'normal'):
+        elif self.distr == 'normal':
             logL = -0.5 * np.sum((y - l)**2)
-        elif(self.distr == 'binomial'):
+        elif self.distr == 'binomial':
             # analytical formula
             # logL = np.sum(y*np.log(l) + (1-y)*np.log(1-l))
 
             # but this prevents underflow
             z = beta0 + np.dot(X, beta)
             logL = np.sum(y * z - np.log(1 + np.exp(z)))
-        elif(self.distr == 'multinomial'):
+        elif self.distr == 'multinomial':
             logL = np.sum(y * np.log(l))
         return logL
 
@@ -257,10 +256,10 @@ class GLM:
             grad_beta = np.zeros([X.shape[1], 1])
             selector = np.where(z.ravel() <= self.eta)[0]
             grad_beta += np.transpose(np.dot((q[selector] - y[selector]).T, \
-                                             X[selector,:]))
+                                             X[selector, :]))
             selector = np.where(z.ravel() > self.eta)[0]
             grad_beta += self.eta * np.transpose(np.dot((1 - y[selector]/q[selector]).T, \
-                                             X[selector,:]))
+                                             X[selector, :]))
             grad_beta += reg_lambda * (1 - alpha) * beta
 
         elif self.distr == 'normal':
@@ -382,7 +381,8 @@ class GLM:
                         msg = ('\tConverged. Loss function:'
                                ' {0:.2f}').format(L[-1])
                         logger.info(msg)
-                        logger.info('\tdL/L: {0:.6f}\n'.format(DL[-1] / L[-1]))
+                        msg = ('\tdL/L: {0:.6f}\n'.format(DL[-1] / L[-1]))
+                        logger.info(msg)
                         break
 
             # Store the parameters after convergence
@@ -418,7 +418,8 @@ class GLM:
         else:
             yhat = self.lmb(self.fit_['beta0'], self.fit_['beta'], X)
         yhat = np.asarray(yhat) if self.distr != 'poissonexp' else yhat
-        yhat = yhat[..., 0] if (self.distr != 'multinomial' and self.distr != 'poissonexp') else yhat
+        yhat = yhat[..., 0] if (self.distr != 'multinomial' \
+                            and self.distr != 'poissonexp') else yhat
         return yhat
 
     def fit_predict(self, X, y):
