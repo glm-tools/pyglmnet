@@ -64,7 +64,7 @@ class GLM:
     Parameters
     ----------
     distr: str, distribution family can be one of the following
-        'poisson' or 'normal' or 'binomial' or 'multinomial'
+        'poisson' or 'poissonexp' or 'normal' or 'binomial' or 'multinomial'
         default: 'poisson'
     alpha: float, the weighting between L1 and L2 norm in the penalty term
         of the loss function i.e.
@@ -82,6 +82,8 @@ class GLM:
     tol: float, convergence threshold or stopping criteria.
         Optimization loop will stop below setting threshold,
         default: 1e-3
+    eta: a threshold parameter that linearizes the exp() function above eta
+    default: 4.0
     verbose: boolean, if True it will print the output while iterating
 
     Reference
@@ -101,7 +103,7 @@ class GLM:
     def __init__(self, distr='poisson', alpha=0.05,
                  reg_lambda=None,
                  learning_rate=1e-4, max_iter=100,
-                 tol=1e-3, verbose=False):
+                 tol=1e-3, eta=4.0, verbose=False):
 
         if reg_lambda is None:
             reg_lambda = np.logspace(np.log(0.5), np.log(0.01), 10,
@@ -118,6 +120,7 @@ class GLM:
         self.max_iter = max_iter
         self.fit_ = None
         self.tol = tol
+        self.eta = eta
         set_log_level(verbose)
 
     def __repr__(self):
@@ -153,10 +156,28 @@ class GLM:
     def qu(self, z):
         """The non-linearity."""
         eps = np.spacing(1)
-        qu = dict(poisson=np.log(1 + eps + np.exp(z)),
-                  normal=z, binomial=expit(z),
-                  multinomial=softmax(z))
-        return qu[self.distr]
+        if self.distr == 'poisson':
+            qu = np.log1p(np.exp(z))
+        elif self.distr == 'poissonexp':
+            qu = deepcopy(z)
+            slope = np.exp(self.eta)
+            intercept = (1-self.eta) * slope
+            qu[z > self.eta] = z[z > self.eta]*slope + intercept
+            qu[z <= self.eta] = np.exp(z[z <= self.eta])
+            #qu = np.exp([zi if zi < 5.0 else 5.0 for zi in z.ravel()])
+        elif self.distr == 'normal':
+            qu = z
+        elif self.distr == 'binomial':
+            qu = expit(z)
+        elif self.distr == 'multinomial':
+            qu = softmax(z)
+
+        return qu
+        #qu = dict(poisson=np.log1p(np.exp(z)),
+        #           poissonexp=np.exp([zi if zi < 3.0 else 3.0 for zi in z.ravel()]),
+        #          normal=z, binomial=expit(z),
+        #          multinomial=softmax(z))
+        #return qu[self.distr]
 
     def lmb(self, beta0, beta, X):
         """Conditional intensity function."""
@@ -169,6 +190,8 @@ class GLM:
         l = self.lmb(beta0, beta, X)
         if(self.distr == 'poisson'):
             logL = np.sum(y * np.log(l) - l)
+        elif(self.distr == 'poissonexp'):
+            logL = np.sum(y * l - l)
         elif(self.distr == 'normal'):
             logL = -0.5 * np.sum((y - l)**2)
         elif(self.distr == 'binomial'):
@@ -225,6 +248,21 @@ class GLM:
                 reg_lambda * (1 - alpha) * beta
             # + reg_lambda*alpha*np.sign(beta)
 
+        elif self.distr == 'poissonexp':
+            q = self.qu(z)
+
+            grad_beta0 = np.sum(q[z <= self.eta] - y[z <= self.eta]) + \
+                         np.sum(1 - y[z > self.eta]/q[z > self.eta]) * self.eta
+
+            grad_beta = np.zeros([X.shape[1], 1])
+            selector = np.where(z.ravel() <= self.eta)[0]
+            grad_beta += np.transpose(np.dot((q[selector] - y[selector]).T, \
+                                             X[selector,:]))
+            selector = np.where(z.ravel() > self.eta)[0]
+            grad_beta += self.eta * np.transpose(np.dot((1 - y[selector]/q[selector]).T, \
+                                             X[selector,:]))
+            grad_beta += reg_lambda * (1 - alpha) * beta
+
         elif self.distr == 'normal':
             grad_beta0 = -np.sum(y - z)
             grad_beta = -np.transpose(np.dot(np.transpose(y - z), X)) \
@@ -236,6 +274,7 @@ class GLM:
             grad_beta = np.transpose(np.dot(np.transpose(s - y), X)) \
                 + reg_lambda * (1 - alpha) * beta
             # + reg_lambda*alpha*np.sign(beta)
+
         elif self.distr == 'multinomial':
             # this assumes that y is already as a one-hot encoding
             pred = self.qu(z)
@@ -287,6 +326,9 @@ class GLM:
         # Initialize parameters
         beta0_hat = np.random.normal(0.0, 1.0, n_classes)
         beta_hat = np.random.normal(0.0, 1.0, [n_features, n_classes])
+        #beta0_hat = np.zeros(n_classes)
+        #beta_hat = np.zeros([n_features, n_classes])
+
         fit_params = list()
 
         # Outer loop with descending lambda
@@ -375,8 +417,8 @@ class GLM:
                 yhat.append(self.lmb(fit['beta0'], fit['beta'], X))
         else:
             yhat = self.lmb(self.fit_['beta0'], self.fit_['beta'], X)
-        yhat = np.asarray(yhat)
-        yhat = yhat[..., 0] if self.distr != 'multinomial' else yhat
+        yhat = np.asarray(yhat) if self.distr != 'poissonexp' else yhat
+        yhat = yhat[..., 0] if (self.distr != 'multinomial' and self.distr != 'poissonexp') else yhat
         return yhat
 
     def fit_predict(self, X, y):
@@ -402,7 +444,7 @@ class GLM:
         y = y.ravel()
         yhat = yhat.ravel()
 
-        if self.distr == 'poisson':
+        if self.distr == 'poisson' or self.distr == 'poissonexp':
             # Log likelihood of model under consideration
             L1 = np.sum(y * np.log(eps + yhat) - yhat)
 
@@ -439,7 +481,7 @@ class GLM:
         yhat = yhat.ravel()
         # L1 = Log likelihood of model under consideration
         # LS = Log likelihood of saturated model
-        if self.distr == 'poisson':
+        if self.distr == 'poisson' or self.distr == 'poissonexp':
             L1 = np.sum(y * np.log(eps + yhat) - yhat)
             LS = np.sum(y * np.log(eps + y) - y)
 
@@ -459,7 +501,7 @@ class GLM:
 
     def simulate(self, beta0, beta, X):
         """Simulate data."""
-        if self.distr == 'poisson':
+        if self.distr == 'poisson' or self.distr == 'poissonexp':
             y = np.random.poisson(self.lmb(beta0, beta, X))
         if self.distr == 'normal':
             y = np.random.normal(self.lmb(beta0, beta, X))
