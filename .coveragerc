@@ -1,0 +1,6 @@
+[run]
+branch = True
+source = pyglmnet
+include = */pyglmnet/*
+omit =
+    */setup.py
