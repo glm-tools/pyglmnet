@@ -1,4 +1,4 @@
-[![Travis](https://api.travis-ci.org/pavanramkumar/pyglmnet.png?branch=master "Travis")](https://travis-ci.org/pavanramkumar/pyglmnet)
+[![Travis](https://api.travis-ci.org/pavanramkumar/pyglmnet.png?branch=master "Travis")](https://travis-ci.org/pavanramkumar/pyglmnet) [![Coverage Status](https://coveralls.io/repos/github/pavanramkumar/pyglmnet/badge.svg?branch=master)](https://coveralls.io/github/pavanramkumar/pyglmnet?branch=master)
 
 # pyglmnet
 
