@@ -160,10 +160,11 @@ class GLM:
         elif self.distr == 'poissonexp':
             qu = deepcopy(z)
             slope = np.exp(self.eta)
-            intercept = (1-self.eta) * slope
-            qu[z > self.eta] = z[z > self.eta]*slope + intercept
+            intercept = (1 - self.eta) * slope
+            qu[z > self.eta] = z[z > self.eta] * slope + intercept
             qu[z <= self.eta] = np.exp(z[z <= self.eta])
-            #qu = np.exp([zi if zi < 5.0 else 5.0 for zi in z.ravel()])
+
+            # qu = np.exp([zi if zi < 5.0 else 5.0 for zi in z.ravel()])
         elif self.distr == 'normal':
             qu = z
         elif self.distr == 'binomial':
@@ -172,11 +173,11 @@ class GLM:
             qu = softmax(z)
 
         return qu
-        #qu = dict(poisson=np.log1p(np.exp(z)),
-        #           poissonexp=np.exp([zi if zi < 3.0 else 3.0 for zi in z.ravel()]),
-        #          normal=z, binomial=expit(z),
-        #          multinomial=softmax(z))
-        #return qu[self.distr]
+        # qu = dict(poisson=np.log1p(np.exp(z)),
+        #     poissonexp=np.exp([zi if zi < 3.0 else 3.0 for zi in z.ravel()]),
+        #     normal=z, binomial=expit(z),
+        #     multinomial=softmax(z))
+        # return qu[self.distr]
 
     def lmb(self, beta0, beta, X):
         """Conditional intensity function."""
@@ -258,7 +259,8 @@ class GLM:
             grad_beta += np.transpose(np.dot((q[selector] - y[selector]).T, \
                                              X[selector, :]))
             selector = np.where(z.ravel() > self.eta)[0]
-            grad_beta += self.eta * np.transpose(np.dot((1 - y[selector]/q[selector]).T, \
+            grad_beta += self.eta * \
+                         np.transpose(np.dot((1 - y[selector] / q[selector]).T, \
                                              X[selector, :]))
             grad_beta += reg_lambda * (1 - alpha) * beta
 
@@ -325,8 +327,8 @@ class GLM:
         # Initialize parameters
         beta0_hat = np.random.normal(0.0, 1.0, n_classes)
         beta_hat = np.random.normal(0.0, 1.0, [n_features, n_classes])
-        #beta0_hat = np.zeros(n_classes)
-        #beta_hat = np.zeros([n_features, n_classes])
+        # beta0_hat = np.zeros(n_classes)
+        # beta_hat = np.zeros([n_features, n_classes])
 
         fit_params = list()
 
@@ -418,8 +420,8 @@ class GLM:
         else:
             yhat = self.lmb(self.fit_['beta0'], self.fit_['beta'], X)
         yhat = np.asarray(yhat) if self.distr != 'poissonexp' else yhat
-        yhat = yhat[..., 0] if (self.distr != 'multinomial' \
-                            and self.distr != 'poissonexp') else yhat
+        yhat = yhat[..., 0] if (self.distr != 'multinomial'
+                                and self.distr != 'poissonexp') else yhat
         return yhat
 
     def fit_predict(self, X, y):
