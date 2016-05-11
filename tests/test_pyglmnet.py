@@ -52,6 +52,29 @@ def test_glmnet():
     glm.fit_predict(X_train, y_train)
     assert_raises(ValueError, glm.fit_predict, X_train[None, ...], y_train)
 
+def test_poissonexp_glmnet():
+        """Test glmnet."""
+        glm = GLM(distr='poissonexp', learning_rate=1e-5, reg_lambda=[0.05, 0.01])
+        scaler = StandardScaler()
+        n_samples, n_features = 1000, 100
+        density = 0.1
+
+        assert_true(repr(glm))
+
+        # coefficients
+        beta0 = np.random.rand()
+        beta = sps.rand(n_features, 1, density=density).toarray()
+
+        X_train = np.random.normal(0.0, 1.0, [n_samples, n_features])
+        y_train = glm.simulate(beta0, beta, X_train)
+
+        X_train = scaler.fit_transform(X_train)
+        glm.fit(X_train, y_train)
+
+        beta_ = glm.fit_[-1]['beta'][:]
+        assert_allclose(beta[:], beta_, atol=0.1)  # check fit
+        density_ = np.sum(beta_ > 0.1) / float(n_features)
+        assert_allclose(density_, density, atol=0.05)  # check density
 
 def test_multinomial_gradient():
     """Gradient of intercept params is different"""
