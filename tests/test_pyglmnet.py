@@ -1,11 +1,11 @@
 import numpy as np
 import scipy.sparse as sps
 from sklearn.preprocessing import StandardScaler
-from sklearn.base import BaseEstimator, RegressorMixin
-
 
 from nose.tools import assert_true, assert_equal, assert_raises
 from numpy.testing import assert_allclose
+from sklearn.cross_validation import KFold, cross_val_score
+from sklearn.datasets import make_regression
 
 from pyglmnet import GLM
 
@@ -43,8 +43,6 @@ def test_glmnet():
 
         y_pred = glm.predict(scaler.transform(X_train))
         assert_equal(y_pred.shape, (n_lambda, X_train.shape[0]))
-        scores = glm.score(X_train, y_train)
-        assert_equal(len(scores), n_lambda)
 
     # checks for slicing.
     glm = glm[:3]
@@ -78,7 +76,20 @@ def test_multinomial_gradient():
     assert_equal(y_pred.shape, (10, 2, 2))  # n_classes x n_samples x n_classes
     assert grad_beta0[0] != grad_beta0[1]
 
-def test_inheritance():
-    """GLM should inherent from sklearn's BaseEstimator and RegressorMixin"""
-    glm = GLM()
-    assert isinstance(glm, BaseEstimator) and isinstance(glm, RegressorMixin)
+def test_cv():
+    """Simple CV check"""
+    X, y = make_regression()
+    model_mn = GLM(distr='normal', alpha=0.01, reg_lambda=np.array([0.0, 0.1, 0.2]))
+    model_mn.fit(X, y)
+
+
+    def simple_scorer(obj, X, y):
+        """Dumb scorer that results average pseudo-R2 as score"""
+        yhats = obj.predict(X)
+        ynull = np.zeros(y.shape) * y.mean()
+        return np.mean([obj.pseudo_R2(y, yhat, ynull) for yhat in yhats])
+
+    cv = KFold(X.shape[0], 5)
+
+    # check that it returns 5 scores
+    assert_equal(len(cross_val_score(model_mn, X, y, cv=cv, scoring=simple_scorer)), 5)

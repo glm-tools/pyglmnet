@@ -1,11 +1,10 @@
 """Python implementation of elastic-net regularized GLMs."""
-
 import logging
 from copy import deepcopy
 
 import numpy as np
 from scipy.special import expit
-from sklearn.base import BaseEstimator, RegressorMixin
+from mini_sklearn import BaseEstimatorish
 
 np.random.seed(0)
 
@@ -24,6 +23,11 @@ def set_log_level(verbose):
         convenience and are equivalent to passing in logging.DEBUG, etc.
         For bool, True is the same as 'INFO', False is the same as 'WARNING'.
     """
+    if isinstance(verbose, int):
+        if verbose > 0:
+            verbose = 'INFO'
+        else:
+            verbose = 'WARNING'
     if isinstance(verbose, bool):
         if verbose is True:
             verbose = 'INFO'
@@ -37,6 +41,8 @@ def set_log_level(verbose):
         if verbose not in logging_types:
             raise ValueError('verbose must be of a valid type')
         verbose = logging_types[verbose]
+    if verbose is None:
+        verbose = 'WARNING'
     logger.setLevel(verbose)
 
 
@@ -52,7 +58,7 @@ def softmax(w):
     return dist
 
 
-class GLM(BaseEstimator, RegressorMixin):
+class GLM(BaseEstimatorish):
     """Generalized Linear Model (GLM)
 
     This class implements elastic-net regularized generalized linear models.
@@ -123,6 +129,21 @@ class GLM(BaseEstimator, RegressorMixin):
         self.tol = tol
         self.eta = eta
         set_log_level(verbose)
+
+    def __repr__(self):
+        """Description of the object."""
+        reg_lambda = self.reg_lambda
+
+        s = '<\nDistribution | %s' % self.distr
+        s += '\nalpha | %0.2f' % self.alpha
+        s += '\nmax_iter | %0.2f' % self.max_iter
+
+        if len(reg_lambda) > 1:
+            s += ('\nlambda: %0.2f to %0.2f\n>'
+                  % (reg_lambda[0], reg_lambda[-1]))
+        else:
+            s += '\nlambda: %0.2f\n>' % reg_lambda[0]
+        return s
 
     def __getitem__(self, key):
         """Return a GLM object with a subset of fitted lambdas."""
@@ -462,11 +483,6 @@ class GLM(BaseEstimator, RegressorMixin):
             R2 = 1 - np.sum((y - yhat)**2) / np.sum((y - ynull)**2)
 
         return R2
-
-    def score(self, X, y, sample_weight=None):
-        yhats = self.predict(X)
-        ynull = np.zeros(y.shape) * y.mean()
-        return [self.pseudo_R2(y, yhat, ynull) for yhat in yhats]
 
     def deviance(self, y, yhat):
         """The deviance function."""
