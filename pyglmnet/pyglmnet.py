@@ -51,7 +51,7 @@ def softmax(w):
     return dist
 
 
-class GLM:
+class GLM(object):
     """Generalized Linear Model (GLM)
 
     This class implements elastic-net regularized generalized linear models.
@@ -419,9 +419,8 @@ class GLM:
                 yhat.append(self.lmb(fit['beta0'], fit['beta'], X))
         else:
             yhat = self.lmb(self.fit_['beta0'], self.fit_['beta'], X)
-        yhat = np.asarray(yhat) if self.distr != 'poissonexp' else yhat
-        yhat = yhat[..., 0] if (self.distr != 'multinomial' and
-                                self.distr != 'poissonexp') else yhat
+        yhat = np.asarray(yhat)
+        yhat = yhat[..., 0] if self.distr != 'multinomial' else yhat
         return yhat
 
     def fit_predict(self, X, y):
