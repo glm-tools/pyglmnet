@@ -1,6 +1,8 @@
 import numpy as np
 import scipy.sparse as sps
 from sklearn.preprocessing import StandardScaler
+from sklearn.base import BaseEstimator, RegressorMixin
+
 
 from nose.tools import assert_true, assert_equal, assert_raises
 from numpy.testing import assert_allclose
@@ -41,6 +43,8 @@ def test_glmnet():
 
         y_pred = glm.predict(scaler.transform(X_train))
         assert_equal(y_pred.shape, (n_lambda, X_train.shape[0]))
+        scores = glm.score(X_train, y_train)
+        assert_equal(len(scores), n_lambda)
 
     # checks for slicing.
     glm = glm[:3]
@@ -73,3 +77,8 @@ def test_multinomial_gradient():
     y_pred = glm.predict(X)
     assert_equal(y_pred.shape, (10, 2, 2))  # n_classes x n_samples x n_classes
     assert grad_beta0[0] != grad_beta0[1]
+
+def test_inheritance():
+    """GLM should inherent from sklearn's BaseEstimator and RegressorMixin"""
+    glm = GLM()
+    assert isinstance(glm, BaseEstimator) and isinstance(glm, RegressorMixin)

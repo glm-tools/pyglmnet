@@ -5,6 +5,7 @@ from copy import deepcopy
 
 import numpy as np
 from scipy.special import expit
+from sklearn.base import BaseEstimator, RegressorMixin
 
 np.random.seed(0)
 
@@ -51,7 +52,7 @@ def softmax(w):
     return dist
 
 
-class GLM(object):
+class GLM(BaseEstimator, RegressorMixin):
     """Generalized Linear Model (GLM)
 
     This class implements elastic-net regularized generalized linear models.
@@ -122,20 +123,6 @@ class GLM(object):
         self.tol = tol
         self.eta = eta
         set_log_level(verbose)
-
-    def __repr__(self):
-        """Description of the object."""
-        reg_lambda = self.reg_lambda
-
-        s = '<\nDistribution | %s' % self.distr
-        s += '\nalpha | %0.2f' % self.alpha
-        s += '\nmax_iter | %0.2f' % self.max_iter
-        if len(reg_lambda) > 1:
-            s += ('\nlambda: %0.2f to %0.2f\n>'
-                  % (reg_lambda[0], reg_lambda[-1]))
-        else:
-            s += '\nlambda: %0.2f\n>' % reg_lambda[0]
-        return s
 
     def __getitem__(self, key):
         """Return a GLM object with a subset of fitted lambdas."""
@@ -475,6 +462,11 @@ class GLM(object):
             R2 = 1 - np.sum((y - yhat)**2) / np.sum((y - ynull)**2)
 
         return R2
+
+    def score(self, X, y, sample_weight=None):
+        yhats = self.predict(X)
+        ynull = np.zeros(y.shape)*y.mean()
+        return [self.pseudo_R2(y, yhat, ynull) for yhat in yhats]
 
     def deviance(self, y, yhat):
         """The deviance function."""
