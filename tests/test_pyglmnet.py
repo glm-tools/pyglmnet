@@ -13,7 +13,6 @@ def test_glmnet():
     scaler = StandardScaler()
     n_samples, n_features = 10000, 100
     density = 0.1
-    n_lambda = 10
 
     # coefficients
     beta0 = np.random.rand()
@@ -23,9 +22,11 @@ def test_glmnet():
     for distr in distrs:
 
         glm = GLM(distr)
+        n_lambda = 10
         # FIXME: why do we need such lambda & learning rate?
         if distr == 'poissonexp':
             learning_rate, reg_lambda = 1e-5, [0.05, 0.01]
+            n_lambda = 2
             glm = GLM(distr=distr, learning_rate=learning_rate,
                       reg_lambda=reg_lambda)
 
