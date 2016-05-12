@@ -1,1 +1,259 @@
-First commit
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pyglmnet 0.1.dev0 &mdash; pyglmnet 0.1.dev0 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="stylesheet" href="_static/gallery.css" type="text/css" />
+  
+
+  
+    <link rel="top" title="pyglmnet 0.1.dev0 documentation" href="#"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="#" class="icon icon-home"> pyglmnet
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1.dev0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <!-- Local TOC -->
+                <div class="local-toc"><ul>
+<li><a class="reference internal" href="#">pyglmnet 0.1.dev0</a><ul>
+<li><a class="reference internal" href="#links-examples-and-resources">Links / Examples and Resources</a></li>
+<li><a class="reference internal" href="#introduction">Introduction</a></li>
+<li><a class="reference internal" href="#installation">Installation</a></li>
+<li><a class="reference internal" href="#contributing">Contributing</a></li>
+<li><a class="reference internal" href="#questions-errors-bugs">Questions / Errors / Bugs</a></li>
+</ul>
+</li>
+</ul>
+</div>
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="#">pyglmnet</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="#">Docs</a> &raquo;</li>
+      
+    <li>pyglmnet 0.1.dev0</li>
+    <li class="wy-breadcrumbs-aside">
+      
+        
+          <a href="_sources/index.txt" rel="nofollow"> View page source</a>
+        
+      
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="pyglmnet-release">
+<h1>pyglmnet 0.1.dev0<a class="headerlink" href="#pyglmnet-release" title="Permalink to this headline">¶</a></h1>
+<p><code class="docutils literal"><span class="pre">pyglmnet</span></code> is a Python library implementing elastic-net
+regularized generalized linear models (GLM). Notations and approach
+are followed as in <a class="reference external" href="https://core.ac.uk/download/files/153/6287975.pdf">Friedman, J., Hastie, T., &amp; Tibshirani, R. (2010)</a>.
+The implementation is aim to suite users the same way along side with popular GLM
+<a class="reference external" href="https://web.stanford.edu/~hastie/glmnet/glmnet_alpha.html">R package</a>.
+The only different is that we still use batch gradient descent rather than
+coordinate gradient descent which os very fast for <code class="docutils literal"><span class="pre">n_samples</span> <span class="pre">x</span> <span class="pre">n_features</span></code>
+size up to 10000 by 1000.</p>
+<div class="section" id="links-examples-and-resources">
+<h2>Links / Examples and Resources<a class="headerlink" href="#links-examples-and-resources" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Repository: <a class="reference external" href="https://github.com/pavanramkumar/pyglmnet">https://github.com/pavanramkumar/pyglmnet</a></li>
+<li>Documentation: <a class="reference external" href="http://pavanramkumar.github.io/pyglmnet">http://pavanramkumar.github.io/pyglmnet</a></li>
+<li><a class="reference internal" href="auto_examples/index.html#general-examples"><span class="std std-ref">Examples Gallery</span></a></li>
+<li><a class="reference internal" href="resources.html#resources"><span class="std std-ref">Resources</span></a></li>
+</ul>
+</div>
+<div class="section" id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
+<p>In Generalized Linear Model (GLM), we mainly want to solve the following problem.</p>
+<div class="math">
+\[\min_{\beta_0, \beta} \frac{1}{N} \sum_{i = 1}^N w_i \ell (y_i, \beta_0 + \beta^T x_i)
++ \lambda [0.5(1 - \alpha)\| \beta \|_2^2 + \alpha \| \beta \|_1]\]</div>
+<p>where <span class="math">\(\ell (y_i, \beta_0 + \beta^T x_i)\)</span> is negative log-likelihood of
+an observation <span class="math">\(i\)</span></p>
+</div>
+<div class="section" id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div>You only need <code class="docutils literal"><span class="pre">numpy</span></code>, <code class="docutils literal"><span class="pre">scipy</span></code> and (optional) <code class="docutils literal"><span class="pre">scikit-learn</span></code> as
+requiments. You can use <code class="docutils literal"><span class="pre">pip</span></code> to install all dependencies,</div></blockquote>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>pip install numpy
+pip install scipy
+pip install scikit-learn
+</pre></div>
+</div>
+<p>To install <code class="docutils literal"><span class="pre">pyglmnet</span></code>, first clone the repository</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>git clone http://github.com/pavanramkumar/pyglmnet
+</pre></div>
+</div>
+<p>Then run <code class="docutils literal"><span class="pre">setup.py</span></code> to install the library</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>python setup.py develop install
+</pre></div>
+</div>
+</div>
+<div class="section" id="contributing">
+<h2>Contributing<a class="headerlink" href="#contributing" title="Permalink to this headline">¶</a></h2>
+<p>We welcome any pull requests. You can run <code class="docutils literal"><span class="pre">nosetests</span> <span class="pre">tests</span></code>
+before for making pull requests to ensure that the changes work.</p>
+</div>
+<div class="section" id="questions-errors-bugs">
+<h2>Questions / Errors / Bugs<a class="headerlink" href="#questions-errors-bugs" title="Permalink to this headline">¶</a></h2>
+<p>If you have a question about the code or find errors or bugs,
+please <a class="reference external" href="https://github.com/pavanramkumar/pyglmnet/issues">report it here</a>.
+For more specific question, feel free to email directly to us.</p>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, Pavan Ramkumar.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.1.dev0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

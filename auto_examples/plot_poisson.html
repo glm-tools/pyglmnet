@@ -1,0 +1,260 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>GLM for Poisson distribution &mdash; pyglmnet 0.1.dev0 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="stylesheet" href="../_static/gallery.css" type="text/css" />
+  
+
+  
+    <link rel="top" title="pyglmnet 0.1.dev0 documentation" href="../index.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> pyglmnet
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1.dev0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <!-- Local TOC -->
+                <div class="local-toc"><ul>
+<li><a class="reference internal" href="#">GLM for Poisson distribution</a><ul>
+<li><a class="reference internal" href="#simulate-a-dataset">Simulate a dataset</a></li>
+</ul>
+</li>
+</ul>
+</div>
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../index.html">pyglmnet</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../index.html">Docs</a> &raquo;</li>
+      
+    <li>GLM for Poisson distribution</li>
+    <li class="wy-breadcrumbs-aside">
+      
+        
+          <a href="../_sources/auto_examples/plot_poisson.txt" rel="nofollow"> View page source</a>
+        
+      
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="glm-for-poisson-distribution">
+<span id="sphx-glr-auto-examples-plot-poisson-py"></span><h1>GLM for Poisson distribution<a class="headerlink" href="#glm-for-poisson-distribution" title="Permalink to this headline">¶</a></h1>
+<p>This is an example demonstrating how Pyglmnet works.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="c1"># Author: Pavan Ramkumar</span>
+<span class="c1"># License: MIT</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">StandardScaler</span>
+<span class="kn">import</span> <span class="nn">scipy.sparse</span> <span class="kn">as</span> <span class="nn">sps</span>
+<span class="kn">from</span> <span class="nn">scipy.special</span> <span class="kn">import</span> <span class="n">expit</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+</pre></div>
+</div>
+<p>Here are inputs that you can provide when you instantiate the <cite>GLM</cite> class.
+If not provided, it will be set to the respective defaults</p>
+<ul>
+<li><dl class="first docutils">
+<dt><cite>distr</cite>: str, <cite>&#8216;poisson&#8217;</cite> or <cite>&#8216;normal&#8217;</cite> or <cite>&#8216;binomial&#8217;</cite> or <cite>&#8216;multinomial&#8217;</cite></dt>
+<dd><p class="first last">default: <cite>&#8216;poisson&#8217;</cite></p>
+</dd>
+</dl>
+</li>
+<li><p class="first"><cite>alpha</cite>: float, the weighting between L1 and L2 norm, default: 0.5</p>
+</li>
+<li><dl class="first docutils">
+<dt><cite>reg_lambda</cite>: array, array of regularized parameters,</dt>
+<dd><p class="first last">default: <cite>np.logspace(np.log(0.5), np.log(0.01), 10, base=np.exp(1))</cite></p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt><cite>learning_rate</cite>: float, learning rate for gradient descent,</dt>
+<dd><p class="first last">default: 1e-4</p>
+</dd>
+</dl>
+</li>
+<li><p class="first"><cite>max_iter</cite>: int, maximum iteration for the model, default: 100</p>
+</li>
+</ul>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="c1"># import GLM model</span>
+<span class="kn">from</span> <span class="nn">pyglmnet</span> <span class="kn">import</span> <span class="n">GLM</span>
+
+<span class="c1"># create regularize parameters for model</span>
+<span class="n">reg_lambda</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logspace</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mf">0.5</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mf">0.01</span><span class="p">),</span> <span class="mi">10</span><span class="p">,</span> <span class="n">base</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">GLM</span><span class="p">(</span><span class="n">distr</span><span class="o">=</span><span class="s1">&#39;poisson&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span>
+            <span class="n">max_iter</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">learning_rate</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">,</span>
+            <span class="n">reg_lambda</span><span class="o">=</span><span class="n">reg_lambda</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="section" id="simulate-a-dataset">
+<h2>Simulate a dataset<a class="headerlink" href="#simulate-a-dataset" title="Permalink to this headline">¶</a></h2>
+<p>The <code class="docutils literal"><span class="pre">GLM</span></code> class has a very useful method called <code class="docutils literal"><span class="pre">simulate()</span></code>.</p>
+<p>Since a canonical link function is already specified by the distribution
+parameters, or provided by the user, <code class="docutils literal"><span class="pre">simulate()</span></code> requires
+only the independent variables <code class="docutils literal"><span class="pre">X</span></code> and the coefficients <code class="docutils literal"><span class="pre">beta0</span></code>
+and <code class="docutils literal"><span class="pre">beta</span></code></p>
+<p><strong>Total running time of the script:</strong>
+(0 minutes 0.336 seconds)</p>
+<div class="sphx-glr-download container">
+<strong>Download Python source code:</strong> <a class="reference download internal" href="../_downloads/plot_poisson.py" download=""><code class="xref download docutils literal"><span class="pre">plot_poisson.py</span></code></a></div>
+<div class="sphx-glr-download container">
+<strong>Download IPython notebook:</strong> <a class="reference download internal" href="../_downloads/plot_poisson.ipynb" download=""><code class="xref download docutils literal"><span class="pre">plot_poisson.ipynb</span></code></a></div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, Pavan Ramkumar.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'0.1.dev0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

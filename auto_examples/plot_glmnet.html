@@ -1,0 +1,307 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Elastic net regularized GLMs &mdash; pyglmnet 0.1.dev0 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="stylesheet" href="../_static/gallery.css" type="text/css" />
+  
+
+  
+    <link rel="top" title="pyglmnet 0.1.dev0 documentation" href="../index.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> pyglmnet
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1.dev0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <!-- Local TOC -->
+                <div class="local-toc"><ul>
+<li><a class="reference internal" href="#">Elastic net regularized GLMs</a><ul>
+<li><a class="reference internal" href="#glm-with-elastic-net-penalty">GLM with elastic net penalty</a><ul>
+<li><a class="reference internal" href="#poisson-like-glm">Poisson-like GLM</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#log-likelihood">Log-likelihood</a></li>
+<li><a class="reference internal" href="#elastic-net-penalty">Elastic net penalty</a></li>
+</ul>
+</li>
+</ul>
+</div>
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../index.html">pyglmnet</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../index.html">Docs</a> &raquo;</li>
+      
+    <li>Elastic net regularized GLMs</li>
+    <li class="wy-breadcrumbs-aside">
+      
+        
+          <a href="../_sources/auto_examples/plot_glmnet.txt" rel="nofollow"> View page source</a>
+        
+      
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="elastic-net-regularized-glms">
+<span id="sphx-glr-auto-examples-plot-glmnet-py"></span><h1>Elastic net regularized GLMs<a class="headerlink" href="#elastic-net-regularized-glms" title="Permalink to this headline">¶</a></h1>
+<p>This is an example demonstrating the internals of glmnet.</p>
+<p>Jerome Friedman, Trevor Hastie and Rob Tibshirani. (2010).
+Regularization Paths for Generalized Linear Models via Coordinate Descent.
+Journal of Statistical Software, Vol. 33(1), 1-22 <a class="reference external" href="https://core.ac.uk/download/files/153/6287975.pdf">[pdf]</a>.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="c1"># Author: Pavan Ramkumar</span>
+<span class="c1"># License: MIT</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">scipy.special</span> <span class="kn">import</span> <span class="n">expit</span>
+<span class="kn">import</span> <span class="nn">scipy.sparse</span> <span class="kn">as</span> <span class="nn">sps</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+</pre></div>
+</div>
+<div class="section" id="glm-with-elastic-net-penalty">
+<h2>GLM with elastic net penalty<a class="headerlink" href="#glm-with-elastic-net-penalty" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="poisson-like-glm">
+<h3>Poisson-like GLM<a class="headerlink" href="#poisson-like-glm" title="Permalink to this headline">¶</a></h3>
+<p>The <cite>pyglmnet</cite> implementation comes with <cite>poisson</cite>, <cite>binomial</cite>
+and <cite>normal</cite> distributions, but for illustration, we will walk you
+through a particular adaptation of the canonical Poisson generalized
+linear model (GLM).</p>
+<p>For the Poisson GLM, <span class="math">\(\lambda_i\)</span> is the rate parameter of an
+inhomogeneous linear-nonlinear Poisson (LNP) process with instantaneous
+mean given by:</p>
+<div class="math">
+\[\lambda_i = \exp(\beta_0 + \beta^T x_i)\]</div>
+<p>where <span class="math">\(x_i \in \mathcal{R}^{p \times 1}, i = \{1, 2, \dots, n\}\)</span> are
+the observed independent variables (predictors),
+<span class="math">\(\beta_0 \in \mathcal{R}^{1 \times 1}\)</span>,
+<span class="math">\(\beta \in \mathcal{R}^{p \times 1}\)</span>
+are linear coefficients. <span class="math">\(\lambda_i\)</span> is also known as the conditional
+intensity function, conditioned on <span class="math">\((\beta_0, \beta)\)</span> and
+<span class="math">\(q(z) = \exp(z)\)</span> is the nonlinearity.</p>
+<p>For numerical reasons, let&#8217;s adopt a stabilizing non-linearity, known as the
+softplus or the smooth rectifier <a class="reference external" href="http://papers.nips.cc/paper/1920-incorporating-second-order-functional-knowledge-for-better-option-pricing.pdf">Dugas et al., 2001</a>,
+and adopted by Jonathan Pillow&#8217;s and Liam Paninski&#8217;s groups for neural data
+analysis.
+See for instance: <a class="reference external" href="http://www.nature.com/neuro/journal/v17/n10/abs/nn.3800.html">Park et al., 2014</a>.</p>
+<div class="math">
+\[q(z) = \log(1+\exp(z))\]</div>
+<p>The softplus prevents <span class="math">\(\lambda\)</span> in the canonical inverse link function
+from exploding when the argument to the exponent is large. In this
+modification, the formulation is no longer an exact LNP, nor an exact GLM,
+but :math:pmmathcal{L}(beta_0, beta)` is still concave (convex) and we
+can use gradient ascent (descent) to optimize it.</p>
+<div class="math">
+\[\lambda_i = q(\beta_0 + \beta^T x_i) = \log(1 + \exp(\beta_0 +
+\beta^T x_i))\]</div>
+<p>[There is more to be said about this issue; ref. Sara Solla&#8217;s GLM lectures
+concerning moment generating functions and strict definitions of GLMs]</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="c1"># Let&#39;s define the conditional intensity function</span>
+<span class="k">def</span> <span class="nf">qu</span><span class="p">(</span><span class="n">z</span><span class="p">):</span>
+    <span class="n">eps</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">spacing</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">eps</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">z</span><span class="p">))</span>
+
+<span class="k">def</span> <span class="nf">lmb</span><span class="p">(</span><span class="n">beta0</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+    <span class="n">eps</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">spacing</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">z</span> <span class="o">=</span> <span class="n">beta0</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">beta</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">eps</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">z</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="log-likelihood">
+<h2>Log-likelihood<a class="headerlink" href="#log-likelihood" title="Permalink to this headline">¶</a></h2>
+<p>The likelihood of observing the spike count <span class="math">\(y_i\)</span> under the Poisson
+likelihood function with inhomogeneous rate <span class="math">\(\lambda_i\)</span> is given by:</p>
+<div class="math">
+\[\prod_i P(y = y_i) = \prod_i \frac{e^{-\lambda_i} \lambda_i^{y_i}}{y_i!}\]</div>
+<p>The log-likelihood is given by:</p>
+<div class="math">
+\[\mathcal{L} = \sum_i \bigg\{y_i \log(\lambda_i) - \lambda_i
+- log(y_i!)\bigg\}\]</div>
+<p>However, we are interested in maximizing the log-likelihood as a function of
+<span class="math">\(\beta_0\)</span> and <span class="math">\(\beta\)</span>. Thus, we can drop the factorial term:</p>
+<div class="math">
+\[\mathcal{L}(\beta_0, \beta) = \sum_i \bigg\{y_i \log(\lambda_i)
+- \lambda_i\bigg\}\]</div>
+</div>
+<div class="section" id="elastic-net-penalty">
+<h2>Elastic net penalty<a class="headerlink" href="#elastic-net-penalty" title="Permalink to this headline">¶</a></h2>
+<p>For large models we need to penalize the log likelihood term in order to
+prevent overfitting. The elastic net penalty is given by:</p>
+<div class="math">
+\[\mathcal{P}_\alpha(\beta) = (1-\alpha)\frac{1}{2} \|\beta\|^2_{\mathcal{l}_2} + \alpha\|\beta\|_{\mathcal{l}_1}\]</div>
+<p>The elastic net interpolates between two extremes.
+<span class="math">\(\alpha = 0\)</span> is known as ridge regression and <span class="math">\(\alpha = 1\)</span>
+is known as LASSO. Note that we do not penalize the baseline term
+<span class="math">\(\beta_0\)</span>.</p>
+<p>Let&#8217;s define the penalty term</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">penalty</span><span class="p">(</span><span class="n">alpha</span><span class="p">,</span> <span class="n">beta</span><span class="p">):</span>
+    <span class="n">P</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">alpha</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">beta</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="o">+</span> \
+        <span class="n">alpha</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">beta</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">P</span>
+</pre></div>
+</div>
+<p><strong>Total running time of the script:</strong>
+(0 minutes 0.452 seconds)</p>
+<div class="sphx-glr-download container">
+<strong>Download Python source code:</strong> <a class="reference download internal" href="../_downloads/plot_glmnet.py" download=""><code class="xref download docutils literal"><span class="pre">plot_glmnet.py</span></code></a></div>
+<div class="sphx-glr-download container">
+<strong>Download IPython notebook:</strong> <a class="reference download internal" href="../_downloads/plot_glmnet.ipynb" download=""><code class="xref download docutils literal"><span class="pre">plot_glmnet.ipynb</span></code></a></div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, Pavan Ramkumar.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'0.1.dev0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
