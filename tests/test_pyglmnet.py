@@ -10,27 +10,40 @@ from pyglmnet import GLM
 
 def test_glmnet():
     """Test glmnet."""
-    glm = GLM(distr='poisson')
     scaler = StandardScaler()
     n_samples, n_features = 10000, 100
     density = 0.1
-
-    assert_true(repr(glm))
+    n_lambda = 10
 
     # coefficients
     beta0 = np.random.rand()
     beta = sps.rand(n_features, 1, density=density).toarray()
 
-    X_train = np.random.normal(0.0, 1.0, [n_samples, n_features])
-    y_train = glm.simulate(beta0, beta, X_train)
+    distrs = ['poisson', 'poissonexp', 'normal', 'binomial']
+    for distr in distrs:
 
-    X_train = scaler.fit_transform(X_train)
-    glm.fit(X_train, y_train)
+        glm = GLM(distr)
+        # FIXME: why do we need such lambda & learning rate?
+        if distr == 'poissonexp':
+            learning_rate, reg_lambda = 1e-5, [0.05, 0.01]
+            glm = GLM(distr=distr, learning_rate=learning_rate,
+                      reg_lambda=reg_lambda)
 
-    beta_ = glm.fit_[-2]['beta'][:]
-    assert_allclose(beta[:], beta_, atol=0.1)  # check fit
-    density_ = np.sum(beta_ > 0.1) / float(n_features)
-    assert_allclose(density_, density, atol=0.05)  # check density
+        assert_true(repr(glm))
+
+        X_train = np.random.normal(0.0, 1.0, [n_samples, n_features])
+        y_train = glm.simulate(beta0, beta, X_train)
+
+        X_train = scaler.fit_transform(X_train)
+        glm.fit(X_train, y_train)
+
+        beta_ = glm.fit_[-2]['beta'][:]
+        assert_allclose(beta[:], beta_, atol=0.1)  # check fit
+        density_ = np.sum(beta_ > 0.1) / float(n_features)
+        assert_allclose(density_, density, atol=0.05)  # check density
+
+        y_pred = glm.predict(scaler.transform(X_train))
+        assert_equal(y_pred.shape, (n_lambda, X_train.shape[0]))
 
     # checks for slicing.
     glm = glm[:3]
@@ -51,30 +64,6 @@ def test_glmnet():
     # test fit_predict
     glm.fit_predict(X_train, y_train)
     assert_raises(ValueError, glm.fit_predict, X_train[None, ...], y_train)
-
-def test_poissonexp_glmnet():
-        """Test glmnet."""
-        glm = GLM(distr='poissonexp', learning_rate=1e-5, reg_lambda=[0.05, 0.01])
-        scaler = StandardScaler()
-        n_samples, n_features = 10000, 100
-        density = 0.1
-
-        assert_true(repr(glm))
-
-        # coefficients
-        beta0 = np.random.rand()
-        beta = sps.rand(n_features, 1, density=density).toarray()
-
-        X_train = np.random.normal(0.0, 1.0, [n_samples, n_features])
-        y_train = glm.simulate(beta0, beta, X_train)
-
-        X_train = scaler.fit_transform(X_train)
-        glm.fit(X_train, y_train)
-
-        beta_ = glm.fit_[-1]['beta'][:]
-        assert_allclose(beta[:], beta_, atol=0.05)  # check fit
-        density_ = np.sum(beta_ > 0.1) / float(n_features)
-        assert_allclose(density_, density, atol=0.1)  # check density
 
 def test_multinomial_gradient():
     """Gradient of intercept params is different"""
