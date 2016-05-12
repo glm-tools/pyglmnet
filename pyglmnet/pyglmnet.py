@@ -465,7 +465,7 @@ class GLM(BaseEstimator, RegressorMixin):
 
     def score(self, X, y, sample_weight=None):
         yhats = self.predict(X)
-        ynull = np.zeros(y.shape)*y.mean()
+        ynull = np.zeros(y.shape) * y.mean()
         return [self.pseudo_R2(y, yhat, ynull) for yhat in yhats]
 
     def deviance(self, y, yhat):
