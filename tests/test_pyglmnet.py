@@ -1,11 +1,11 @@
 import numpy as np
 import scipy.sparse as sps
 from sklearn.preprocessing import StandardScaler
+from sklearn.cross_validation import KFold, cross_val_score
+from sklearn.datasets import make_regression
 
 from nose.tools import assert_true, assert_equal, assert_raises
 from numpy.testing import assert_allclose
-from sklearn.cross_validation import KFold, cross_val_score
-from sklearn.datasets import make_regression
 
 from pyglmnet import GLM
 

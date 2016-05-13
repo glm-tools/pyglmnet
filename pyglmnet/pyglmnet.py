@@ -1,4 +1,5 @@
 """Python implementation of elastic-net regularized GLMs."""
+
 import logging
 from copy import deepcopy
 
@@ -22,11 +23,6 @@ def set_log_level(verbose):
         convenience and are equivalent to passing in logging.DEBUG, etc.
         For bool, True is the same as 'INFO', False is the same as 'WARNING'.
     """
-    if isinstance(verbose, int):
-        if verbose > 0:
-            verbose = 'INFO'
-        else:
-            verbose = 'WARNING'
     if isinstance(verbose, bool):
         if verbose is True:
             verbose = 'INFO'
@@ -40,8 +36,6 @@ def set_log_level(verbose):
         if verbose not in logging_types:
             raise ValueError('verbose must be of a valid type')
         verbose = logging_types[verbose]
-    if verbose is None:
-        verbose = 'WARNING'
     logger.setLevel(verbose)
 
 
@@ -151,7 +145,6 @@ class GLM(object):
         s = '<\nDistribution | %s' % self.distr
         s += '\nalpha | %0.2f' % self.alpha
         s += '\nmax_iter | %0.2f' % self.max_iter
-
         if len(reg_lambda) > 1:
             s += ('\nlambda: %0.2f to %0.2f\n>'
                   % (reg_lambda[0], reg_lambda[-1]))
