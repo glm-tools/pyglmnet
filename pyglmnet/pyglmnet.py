@@ -50,11 +50,22 @@ def softmax(w):
 
 
 def label_binarizer(y):
-    """Mimics scikit learn's LabelBinarizer"""
-    y_bk = y.ravel()
-    yn = np.zeros([len(y), y.max() + 1])
-    yn[np.arange(len(y)), y_bk] = 1
-    return yn
+    """Mimics scikit learn's LabelBinarizer
+    Parameters
+    ---------
+    y: ndarray (n_samples)
+        one dimensional array of class labels
+    Returns
+    -------
+    yb: array, shape (n_samples, n_classes)
+        one-hot encoding of labels in y
+    """
+    if y.ndim != 1:
+        raise ValueError('y has to be one-dimensional')
+    y_flat = y.ravel()
+    yb = np.zeros([len(y), y.max() + 1])
+    yb[np.arange(len(y)), y_flat] = 1
+    return yb
 
 
 class GLM(object):
@@ -518,11 +529,8 @@ class GLM(object):
             y = label_binarizer(y)
             # yhat is the probability of each output
             if yhat.ndim != y.ndim or ynull.ndim != y.ndim:
-                raise Exception(('yhat and ynull must '
-                                 'be a (n_samples, n_class) '
-                                 'matrix with the prediction for '
-                                 'each class'
-                                 ))
+                msg = 'yhat and ynull must be a (n_samples, n_class) ndarray'
+                raise Exception(msg)
             L1 = np.sum(y * np.log(yhat))
             L0 = np.sum(y * np.log(ynull))
             R2 = 1 - L1 / L0
@@ -554,6 +562,9 @@ class GLM(object):
             LS = 0
         elif self.distr == 'multinomial':
             y = label_binarizer(y)
+            if yhat.ndim != y.ndim:
+                msg = 'yhat and ynull must be a (n_samples, n_class) ndarray'
+                raise Exception(msg)
             L1 = np.sum(y * np.log(yhat))
             LS = 0
 
