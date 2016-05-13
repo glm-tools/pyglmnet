@@ -529,7 +529,7 @@ class GLM(object):
             y = label_binarizer(y)
             # yhat is the probability of each output
             if yhat.ndim != y.ndim or ynull.ndim != y.ndim:
-                msg = 'yhat and ynull must be a (n_samples, n_class) ndarray'
+                msg = 'yhat and ynull must be (n_samples, n_class) ndarrays'
                 raise Exception(msg)
             L1 = np.sum(y * np.log(yhat))
             L0 = np.sum(y * np.log(ynull))
@@ -563,7 +563,7 @@ class GLM(object):
         elif self.distr == 'multinomial':
             y = label_binarizer(y)
             if yhat.ndim != y.ndim:
-                msg = 'yhat and ynull must be a (n_samples, n_class) ndarray'
+                msg = 'yhat must be a (n_samples, n_class) ndarray'
                 raise Exception(msg)
             L1 = np.sum(y * np.log(yhat))
             LS = 0
