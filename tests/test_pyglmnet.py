@@ -76,20 +76,19 @@ def test_multinomial_gradient():
     assert_equal(y_pred.shape, (10, 2, 2))  # n_classes x n_samples x n_classes
     assert grad_beta0[0] != grad_beta0[1]
 
+def simple_cv_scorer(obj, X, y):
+    """Simple scorer takes average pseudo-R2 from regularization path"""
+    yhats = obj.predict(X)
+    ynull = np.zeros(y.shape) * y.mean()
+    return np.mean([obj.pseudo_R2(y, yhat, ynull) for yhat in yhats])
+
 def test_cv():
     """Simple CV check"""
     X, y = make_regression()
     model_mn = GLM(distr='normal', alpha=0.01, reg_lambda=np.array([0.0, 0.1, 0.2]))
     model_mn.fit(X, y)
 
-
-    def simple_scorer(obj, X, y):
-        """Dumb scorer that results average pseudo-R2 as score"""
-        yhats = obj.predict(X)
-        ynull = np.zeros(y.shape) * y.mean()
-        return np.mean([obj.pseudo_R2(y, yhat, ynull) for yhat in yhats])
-
     cv = KFold(X.shape[0], 5)
 
     # check that it returns 5 scores
-    assert_equal(len(cross_val_score(model_mn, X, y, cv=cv, scoring=simple_scorer)), 5)
+    assert_equal(len(cross_val_score(model_mn, X, y, cv=cv, scoring=simple_cv_scorer)), 5)
