@@ -518,6 +518,7 @@ class GLM(object):
 
     def simulate(self, beta0, beta, X):
         """Simulate data."""
+        np.random.seed(self.random_state)
         if self.distr == 'poisson' or self.distr == 'poissonexp':
             y = np.random.poisson(self.lmb(beta0, beta, X))
         if self.distr == 'normal':
