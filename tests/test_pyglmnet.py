@@ -28,6 +28,7 @@ def test_glmnet():
 
         assert_true(repr(glm))
 
+        np.random.seed(glm.random_state)
         X_train = np.random.normal(0.0, 1.0, [n_samples, n_features])
         y_train = glm.simulate(beta0, beta, X_train)
 
