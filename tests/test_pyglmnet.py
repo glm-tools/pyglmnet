@@ -1,8 +1,8 @@
 import numpy as np
 import scipy.sparse as sps
-from sklearn.preprocessing import StandardScaler
 from sklearn.cross_validation import KFold, cross_val_score
 from sklearn.datasets import make_regression
+from sklearn.preprocessing import StandardScaler
 
 from nose.tools import assert_true, assert_equal, assert_raises
 from numpy.testing import assert_allclose
@@ -93,3 +93,22 @@ def test_cv():
 
     # check that it returns 5 scores
     assert_equal(len(cross_val_score(model_mn, X, y, cv=cv, scoring=simple_cv_scorer)), 5)
+
+
+def test_multinomial_functionality():
+    """Test pseudo-R2, deviance, and simulate functionality for multinomial model"""
+    glm = GLM(distr='multinomial', reg_lambda=np.array([0.0]), tol=1e-10)
+    X = np.array([[-1, -2, -3], [4, 5, 6]])
+    y = np.array([1, 0])
+    glm.fit(X, y)
+    # pick one yhat
+    yhat = glm.predict(X)[0]
+    # uniform prediction
+    ynull = np.ones(yhat.shape) / yhat.shape[1]
+    # pseudo_R2 should be greater than 0
+    assert_true(glm.pseudo_R2(y, yhat, ynull) > 0.)
+    glm.deviance(y, yhat)
+    assert_equal(len(glm.simulate(glm.fit_[0]['beta0'],
+                                  glm.fit_[0]['beta'],
+                                  X)),
+                 X.shape[0])
