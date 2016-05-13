@@ -49,6 +49,25 @@ def softmax(w):
     return dist
 
 
+def label_binarizer(y):
+    """Mimics scikit learn's LabelBinarizer
+    Parameters
+    ---------
+    y: ndarray (n_samples)
+        one dimensional array of class labels
+    Returns
+    -------
+    yb: array, shape (n_samples, n_classes)
+        one-hot encoding of labels in y
+    """
+    if y.ndim != 1:
+        raise ValueError('y has to be one-dimensional')
+    y_flat = y.ravel()
+    yb = np.zeros([len(y), y.max() + 1])
+    yb[np.arange(len(y)), y_flat] = 1
+    return yb
+
+
 class GLM(object):
     """Generalized Linear Model (GLM)
 
@@ -476,7 +495,8 @@ class GLM(object):
         """Define the pseudo-R2 function."""
         eps = np.spacing(1)
         y = y.ravel()
-        yhat = yhat.ravel()
+        if self.distr != 'multinomial':
+            yhat = yhat.ravel()
 
         if self.distr == 'poisson' or self.distr == 'poissonexp':
             # Log likelihood of model under consideration
@@ -505,6 +525,15 @@ class GLM(object):
 
         elif self.distr == 'normal':
             R2 = 1 - np.sum((y - yhat)**2) / np.sum((y - ynull)**2)
+        elif self.distr == 'multinomial':
+            y = label_binarizer(y)
+            # yhat is the probability of each output
+            if yhat.ndim != y.ndim or ynull.ndim != y.ndim:
+                msg = 'yhat and ynull must be (n_samples, n_class) ndarrays'
+                raise Exception(msg)
+            L1 = np.sum(y * np.log(yhat))
+            L0 = np.sum(y * np.log(ynull))
+            R2 = 1 - L1 / L0
 
         return R2
 
@@ -512,7 +541,9 @@ class GLM(object):
         """The deviance function."""
         eps = np.spacing(1)
         y = y.ravel()
-        yhat = yhat.ravel()
+        if self.distr != 'multinomial':
+            yhat = yhat.ravel()
+
         # L1 = Log likelihood of model under consideration
         # LS = Log likelihood of saturated model
         if self.distr == 'poisson' or self.distr == 'poissonexp':
@@ -529,6 +560,13 @@ class GLM(object):
         elif self.distr == 'normal':
             L1 = -np.sum((y - yhat) ** 2)
             LS = 0
+        elif self.distr == 'multinomial':
+            y = label_binarizer(y)
+            if yhat.ndim != y.ndim:
+                msg = 'yhat must be a (n_samples, n_class) ndarray'
+                raise Exception(msg)
+            L1 = np.sum(y * np.log(yhat))
+            LS = 0
 
         D = -2 * (L1 - LS)
         return D
@@ -542,4 +580,8 @@ class GLM(object):
             y = np.random.normal(self.lmb(beta0, beta, X))
         if self.distr == 'binomial':
             y = np.random.binomial(1, self.lmb(beta0, beta, X))
+        if self.distr == 'multinomial':
+            y = np.array([np.random.multinomial(1, pvals)
+                          for pvals in
+                          self.lmb(beta0, beta, X)]).argmax(0)
         return y

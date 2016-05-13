@@ -1,8 +1,8 @@
 import numpy as np
 import scipy.sparse as sps
-from sklearn.preprocessing import StandardScaler
 from sklearn.cross_validation import KFold, cross_val_score
 from sklearn.datasets import make_regression
+from sklearn.preprocessing import StandardScaler
 
 from nose.tools import assert_true, assert_equal, assert_raises
 from numpy.testing import assert_allclose
@@ -65,23 +65,13 @@ def test_glmnet():
     glm.fit_predict(X_train, y_train)
     assert_raises(ValueError, glm.fit_predict, X_train[None, ...], y_train)
 
-def test_multinomial_gradient():
-    """Gradient of intercept params is different"""
-    glm = GLM(distr='multinomial')
-    X = np.array([[1, 2, 3], [4, 5, 6]])
-    y = np.array([0, 1])
-    beta = np.zeros([4, 2])
-    grad_beta0, grad_beta = glm.grad_L2loss(beta[0], beta[1:], 0, X, y)
-    glm.fit(X, y)
-    y_pred = glm.predict(X)
-    assert_equal(y_pred.shape, (10, 2, 2))  # n_classes x n_samples x n_classes
-    assert grad_beta0[0] != grad_beta0[1]
 
 def simple_cv_scorer(obj, X, y):
     """Simple scorer takes average pseudo-R2 from regularization path"""
     yhats = obj.predict(X)
     ynull = np.zeros(y.shape) * y.mean()
     return np.mean([obj.pseudo_R2(y, yhat, ynull) for yhat in yhats])
+
 
 def test_cv():
     """Simple CV check"""
@@ -93,3 +83,40 @@ def test_cv():
 
     # check that it returns 5 scores
     assert_equal(len(cross_val_score(model_mn, X, y, cv=cv, scoring=simple_cv_scorer)), 5)
+
+
+def test_multinomial():
+    """Test all multinomial functionality"""
+    glm = GLM(distr='multinomial', reg_lambda=np.array([0.0, 0.1, 0.2]), tol=1e-10)
+    X = np.array([[-1, -2, -3], [4, 5, 6]])
+    y = np.array([1, 0])
+    # test gradient
+    beta = np.zeros([4, 2])
+    grad_beta0, grad_beta = glm.grad_L2loss(beta[0], beta[1:], 0, X, y)
+    assert grad_beta0[0] != grad_beta0[1]
+    glm.fit(X, y)
+    y_pred = glm.predict(X)
+    assert_equal(y_pred.shape, (3, X.shape[0], 2))  # n_lambdas x n_samples x n_classes
+    # pick one as yhat
+    yhat = y_pred[0]
+    # uniform prediction
+    ynull = np.ones(yhat.shape) / yhat.shape[1]
+    # pseudo_R2 should be greater than 0
+    assert_true(glm.pseudo_R2(y, yhat, ynull) > 0.)
+    glm.deviance(y, yhat)
+    assert_equal(len(glm.simulate(glm.fit_[0]['beta0'],
+                                  glm.fit_[0]['beta'],
+                                  X)),
+                 X.shape[0])
+    # these should raise an exception
+    try:
+        glm.pseudo_R2(y, y, y)
+        assert False
+    except Exception:
+        assert True
+    try:
+        glm.deviance(y, y)
+        assert False
+    except Exception:
+        assert True
+
