@@ -6,8 +6,6 @@ from copy import deepcopy
 import numpy as np
 from scipy.special import expit
 
-np.random.seed(0)
-
 logger = logging.getLogger('pyglmnet')
 logger.addHandler(logging.StreamHandler())
 
@@ -63,28 +61,39 @@ class GLM(object):
 
     Parameters
     ----------
-    distr: str, distribution family can be one of the following
+    distr: str
+        distribution family can be one of the following
         'poisson' or 'poissonexp' or 'normal' or 'binomial' or 'multinomial'
         default: 'poisson'
-    alpha: float, the weighting between L1 and L2 norm in the penalty term
+    alpha: float
+        the weighting between L1 and L2 norm in the penalty term
         of the loss function i.e.
-            P(beta) = 0.5 * (1-alpha) * |beta|_2^2 + alpha * |beta|_1
+        P(beta) = 0.5 * (1-alpha) * |beta|_2^2 + alpha * |beta|_1
         default: 0.5
-    reg_lambda: ndarray or list | None
+    reg_lambda: ndarray or list
         array of regularized parameters of penalty term i.e.
-            min_(beta0, beta) -L + lambda * P
+        min_(beta0, beta) -L + lambda * P
         where lambda is number in reg_lambda list
-        If None (default), a list of 10 floats spaced logarithmically (base e)
+        default: None, a list of 10 floats spaced logarithmically (base e)
         between 0.5 and 0.01 is generated.
-    learning_rate: float, learning rate for gradient descent,
+    learning_rate: float
+        learning rate for gradient descent
         default: 1e-4
-    max_iter: int, maximum iterations for the model, default: 100
-    tol: float, convergence threshold or stopping criteria.
-        Optimization loop will stop below setting threshold,
+    max_iter: int
+        maximum iterations for the model,
+        default: 100
+    tol: float
+        convergence threshold or stopping criteria.
+        Optimization loop will stop below setting threshold
         default: 1e-3
-    eta: a threshold parameter that linearizes the exp() function above eta
-    default: 4.0
-    verbose: boolean, if True it will print the output while iterating
+    eta: float
+        a threshold parameter that linearizes the exp() function above eta
+        default: 4.0
+    random_state: int
+        seed of the random number generator used to initialize the solution
+    verbose: boolean or int
+        if True it will print the output while iterating
+        default: False
 
     Reference
     ---------
@@ -103,7 +112,7 @@ class GLM(object):
     def __init__(self, distr='poisson', alpha=0.05,
                  reg_lambda=None,
                  learning_rate=1e-4, max_iter=100,
-                 tol=1e-3, eta=4.0, verbose=False):
+                 tol=1e-3, eta=4.0, random_state=0, verbose=False):
 
         if reg_lambda is None:
             reg_lambda = np.logspace(np.log(0.5), np.log(0.01), 10,
@@ -121,6 +130,7 @@ class GLM(object):
         self.fit_ = None
         self.tol = tol
         self.eta = eta
+        self.random_state = random_state
         set_log_level(verbose)
 
     def __repr__(self):
@@ -290,7 +300,8 @@ class GLM(object):
 
         Parameters
         ----------
-        X : array, shape (n_samples, n_features)
+        X : array
+            shape (n_samples, n_features)
             The input data
         y : array
             Labels to the data
@@ -302,7 +313,7 @@ class GLM(object):
         """
         # Implements batch gradient descent (i.e. vanilla gradient descent by
         # computing gradient over entire training set)
-        np.random.seed(0)
+        np.random.seed(self.random_state)
 
         if not isinstance(X, np.ndarray):
             raise ValueError('Input data should be of type ndarray (got %s).'
@@ -399,12 +410,14 @@ class GLM(object):
 
         Parameters
         ----------
-        X : array, shape (n_samples, n_features)
+        X : array
+            shape (n_samples, n_features)
             The data for prediction.
 
         Returns
         -------
-        yhat : array, shape ([n_lambda], n_samples)
+        yhat : array
+            shape ([n_lambda], n_samples)
             The predicted labels. A 1D array if predicting on only
             one lambda (compatible with scikit-learn API). Otherwise,
             returns a 2D array.
@@ -428,12 +441,14 @@ class GLM(object):
 
         Parameters
         ----------
-        X : array, shape (n_samples, n_features)
+        X : array
+            shape (n_samples, n_features)
             The data for fit and prediction.
 
         Returns
         -------
-        yhat : array, shape ([n_lambda], n_samples)
+        yhat : array
+            shape ([n_lambda], n_samples)
             The predicted labels. A 1D array if predicting on only
             one lambda (compatible with scikit-learn API). Otherwise,
             returns a 2D array.
