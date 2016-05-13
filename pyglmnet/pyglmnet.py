@@ -131,7 +131,24 @@ class GLM(object):
         self.tol = tol
         self.eta = eta
         self.random_state = random_state
+        self.verbose = verbose
+
         set_log_level(verbose)
+
+    def get_params(self, deep=False):
+        return dict(
+            (
+                ('distr', self.distr),
+                ('alpha', self.alpha),
+                ('reg_lambda', self.reg_lambda),
+                ('learning_rate', self.learning_rate),
+                ('max_iter', self.max_iter),
+                ('tol', self.tol),
+                ('eta', self.eta),
+                ('random_state', self.random_state),
+                ('verbose', self.verbose)
+            )
+        )
 
     def __repr__(self):
         """Description of the object."""
