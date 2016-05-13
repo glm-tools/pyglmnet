@@ -4,7 +4,6 @@ from copy import deepcopy
 
 import numpy as np
 from scipy.special import expit
-from mini_sklearn import BaseEstimatorish
 
 np.random.seed(0)
 
@@ -58,7 +57,7 @@ def softmax(w):
     return dist
 
 
-class GLM(BaseEstimatorish):
+class GLM(object):
     """Generalized Linear Model (GLM)
 
     This class implements elastic-net regularized generalized linear models.
@@ -128,7 +127,22 @@ class GLM(BaseEstimatorish):
         self.fit_ = None
         self.tol = tol
         self.eta = eta
+        self.verbose = verbose
         set_log_level(verbose)
+
+    def get_params(self, deep=False):
+        return dict(
+            (
+                ('distr', self.distr),
+                ('alpha', self.alpha),
+                ('reg_lambda', self.reg_lambda),
+                ('learning_rate', self.learning_rate),
+                ('max_iter', self.max_iter),
+                ('tol', self.tol),
+                ('eta', self.eta),
+                ('verbose', self.verbose)
+            )
+        )
 
     def __repr__(self):
         """Description of the object."""
