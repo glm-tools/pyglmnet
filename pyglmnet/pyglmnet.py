@@ -5,6 +5,7 @@ from copy import deepcopy
 
 import numpy as np
 from scipy.special import expit
+from scipy.optimize import minimize
 
 logger = logging.getLogger('pyglmnet')
 logger.addHandler(logging.StreamHandler())
@@ -95,6 +96,11 @@ class GLM(object):
         where lambda is number in reg_lambda list
         default: None, a list of 10 floats spaced logarithmically (base e)
         between 0.5 and 0.01 is generated.
+    solver: str
+        two types of solvers:
+        'batch-gradient' which performs vanilla batch gradient descent
+        'newton-cg' which performs newton coordinate gradient descent with scipy.optimize.minimize
+        default: 'batch-gradient'
     learning_rate: float
         learning rate for gradient descent
         default: 1e-4
@@ -129,7 +135,7 @@ class GLM(object):
     """
 
     def __init__(self, distr='poisson', alpha=0.05,
-                 reg_lambda=None,
+                 reg_lambda=None, solver = 'batch-gradient',
                  learning_rate=1e-4, max_iter=100,
                  tol=1e-3, eta=4.0, random_state=0, verbose=False):
 
@@ -144,6 +150,7 @@ class GLM(object):
         self.distr = distr
         self.alpha = alpha
         self.reg_lambda = reg_lambda
+        self.solver = solver
         self.learning_rate = learning_rate
         self.max_iter = max_iter
         self.fit_ = None
@@ -408,14 +415,25 @@ class GLM(object):
             L, DL = list(), list()
             for t in range(0, self.max_iter):
 
-                # Calculate gradient
-                grad_beta0, grad_beta = self.grad_L2loss(
-                    beta[0], beta[1:], rl, X, y)
-                g[0] = grad_beta0
-                g[1:] = grad_beta
+                if self.solver == 'batch-gradient':
+                    # Calculate gradient
+                    grad_beta0, grad_beta = self.grad_L2loss(
+                        beta[0], beta[1:], rl, X, y)
+                    g[0] = grad_beta0
+                    g[1:] = grad_beta
 
-                # Update parameters
-                beta = beta - self.learning_rate * g
+                    # Update parameters
+                    beta = beta - self.learning_rate * g
+
+                elif self.solver == 'newton-cg':
+                    # Run one iteration of newton-cg solver
+                    res = minimize(self.L2loss, beta,
+                                   (beta[0], beta[1:], rl, X, y),
+                                   method='Newton-CG',
+                                   jac=self.grad_L2loss,
+                                   hess=self.hess_L2loss,
+                                   options=dict({'maxiter', 1}))
+                    beta = res.x
 
                 # Apply proximal operator for L1-regularization
                 beta[1:] = self.prox(beta[1:], rl * alpha)
