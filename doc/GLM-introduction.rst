@@ -109,9 +109,8 @@ penalize the baseline term :math:`\beta_0`.
 
 .. code:: python
 
-    def penalty(beta):
+    def penalty(alpha, beta):
         """The penalty."""
-        alpha = self.alpha
         P = 0.5 * (1 - alpha) * np.linalg.norm(beta, 2) + \
             alpha * np.linalg.norm(beta, 1)
         return P
@@ -134,8 +133,8 @@ where :math:`\mathcal{L}(\beta_0, \beta)` is the Poisson log-likelihood and
 
     def loss(beta0, beta, reg_lambda, X, y):
         """Define the objective function for elastic net."""
-        L = self.logL(beta0, beta, X, y)
-        P = self.penalty(beta)
+        L = logL(beta0, beta, X, y)
+        P = penalty(beta)
         J = -L + reg_lambda * P
         return J
 
@@ -277,9 +276,10 @@ Plugging all these in, we get
         grad_s_by_q = grad_s/q - s/(q * q)
         hess_beta0 = np.sum(grad_s) - np.sum(y * grad_s_by_q)
         hess_beta = np.transpose(np.dot(np.transpose(grad_s), X * X)
-                    - np.dot(np.transpose(y*grad_s_by_q), X * X))\
-                    + reg_lambda*(1-alpha)
+                    - np.dot(np.transpose(y * grad_s_by_q), X * X))\
+                    + reg_lambda * (1-alpha)
         return hess_beta0, hess_beta
+
 
 Cyclical co-ordinate descent
 ----------------------------
@@ -325,7 +325,7 @@ If :math:`\beta_k^{t}` has been zero-ed out, we remove :math:`k` from the active
 
 .. code:: python
 
-    def prox(self, X, l):
+    def prox(X, l):
         """Proximal operator."""
         return np.sign(X) * (np.abs(X) - l) * (np.abs(X) > l)
 

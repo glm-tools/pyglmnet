@@ -5,7 +5,7 @@ API Documentation
 :class:`GLM` Objects
 --------------------
 
-.. py:class:: GLM
+.. py:class:: GLM(distr='poisson', alpha=0.05, reg_lambda=None, learning_rate=1e-4, max_iter=100, tol=1e-3, eta=4.0, random_state=0, verbose=False)
 
    Initialize a Generalized Linear Model (GLM) object
 
@@ -77,6 +77,28 @@ API Documentation
 
    .. py:method:: pseudo_R2(y, yhat, ynull)
 
+      Define the pseudo-R2 function
+
+      :param ndarray y:
+
+      :param ndarray yhat:
+
+      :param ndarray ynull:
+
    .. py:method:: deviance(y, yhat)
 
+      The deviance function
+
+      :param ndarray y:
+
+      :param ndarray yhat:
+
    .. py:method:: simulate(beta0, beta, X)
+
+      Simulate data with parameters and data `X`
+
+      :param ndarray beta0:
+
+      :param ndarray beta:
+
+      :param ndarray X:

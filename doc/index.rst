@@ -40,8 +40,8 @@ Contents
 Installation
 ============
 
- You only need ``numpy``, ``scipy`` and (optional) ``scikit-learn`` as
- requiments. You can use ``pip`` to install all dependencies,
+You only need ``numpy``, ``scipy`` and (optional) ``scikit-learn`` as
+requiments. You can use ``pip`` to install all dependencies,
 
 .. code-block:: bash
 
