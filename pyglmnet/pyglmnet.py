@@ -5,7 +5,7 @@ from copy import deepcopy
 
 import numpy as np
 from scipy.special import expit
-from scipy.optimize import minimize
+from sklearn.utils import optimize
 
 logger = logging.getLogger('pyglmnet')
 logger.addHandler(logging.StreamHandler())
@@ -338,6 +338,28 @@ class GLM(object):
 
         return grad_beta0, grad_beta
 
+    def grad_(self, beta0, beta, reg_lambda, X, y):
+        """Concatenates the intercept gradient with the feature gradient"""
+        grad_beta0, grad_beta = self.grad_L2loss(beta0, beta, reg_lambda, X, y)
+        return np.concatenate(grad_beta0, grad_beta)
+
+    def grad_hess_(self, beta0, beta, reg_lambda, X, y):
+        """
+        A callable function passed to optimize.newton_cg
+        Returns gradient and a callable for hessian vector product
+        """
+        g = self.grad_(beta0, beta, reg_lambda, X, y)
+
+        def hess_product(v):
+            """The hessian matrix vector product"""
+            r = 0.1
+            gplus = self.grad_(beta0 + r * v[0], beta + r * v[1:], reg_lambda, X, y)
+            gminus = self.grad_(beta0 - r * v[0], beta - r * v[1:], reg_lambda, X, y)
+            Hv = (gplus - gminus)/(2.0 * r)
+            return Hv
+
+        return g, hess_product
+
     def fit(self, X, y):
         """The fit function.
 
@@ -426,14 +448,17 @@ class GLM(object):
                     beta = beta - self.learning_rate * g
 
                 elif self.solver == 'newton-cg':
+                    grad_hess_ = self.grad_hess_
+                    L2loss = self.L2loss
+                    grad_ = self.grad_
+
                     # Run one iteration of newton-cg solver
-                    res = minimize(self.L2loss, beta,
-                                   (beta[0], beta[1:], rl, X, y),
-                                   method='Newton-CG',
-                                   jac=self.grad_L2loss,
-                                   hess=self.hess_L2loss,
-                                   options=dict({'maxiter', 1}))
-                    beta = res.x
+                    beta = \
+                    optimize.newton_cg(grad_hess_, L2loss,
+                                       grad_, beta,
+                                       args=(beta[0], beta[1:], rl, X, y),
+                                       maxiter=1, maxinner=1,
+                                       line_search=True, warn=False)
 
                 # Apply proximal operator for L1-regularization
                 beta[1:] = self.prox(beta[1:], rl * alpha)
