@@ -5,7 +5,7 @@ See full documentation page [here](http://pavanramkumar.github.io/pyglmnet/).
 We use `sphinx` to generate documentation page.
 You can install dependencies for documentation page by running
 
-```python
+```bash
 $ pip install -r requirements.txt
 ```
 
@@ -17,3 +17,5 @@ Here is example on how to run at port 8000 (`http://localhost:8000`).
 $ python -m SimpleHTTPServer 8000 # for Python 2
 $ python -m http.server 8000 # for Python 3
 ```
+
+To push built documentation page to `gh-pages`, simply run `bash gh-pages.sh`
