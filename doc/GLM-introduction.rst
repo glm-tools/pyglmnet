@@ -43,7 +43,7 @@ See for instance: `Park et al., 2014 <http://www.nature.com/neuro/journal/v17/n1
 
     q(z) = \log(1 + \exp(z))
 
-The softplus prevents $\lambda$ in the canonical inverse link function from
+The softplus prevents :math:`\lambda` in the canonical inverse link function from
 exploding when the argument to the exponent is large. In this modification,
 the formulation is no longer an exact LNP, nor an exact GLM, but
 :math:`\pm\mathcal{L}(\beta_0, \beta)` is still concave (convex) and we can use
@@ -105,7 +105,7 @@ The elastic net penalty is given by:
 
 The elastic net interpolates between two extremes. :math:`\alpha = 0` is known as
 ridge regression and :math:`\alpha = 1` is known as Lasso. Note that we do not
-penalize the baseline term :math:`\beta_0$`.
+penalize the baseline term :math:`\beta_0`.
 
 .. code:: python
 
@@ -124,7 +124,7 @@ We minimize the objective function:
 
 .. math::
 
-    J(\beta_0, \beta) = -\mathcal{L}(\beta_0, \beta) + \lambda \mathcal{P}_\alpha(\beta)$$
+    J(\beta_0, \beta) = -\mathcal{L}(\beta_0, \beta) + \lambda \mathcal{P}_\alpha(\beta)
 
 where :math:`\mathcal{L}(\beta_0, \beta)` is the Poisson log-likelihood and
 :math:`\mathcal{P}_\alpha(\beta)` is the elastic net penalty term and
@@ -156,7 +156,8 @@ To calculate the gradients of the cost function with respect to :math:`\beta_0` 
     \end{eqnarray}
 
 
-Since we will apply co-ordinate descent, let's rewrite this cost in terms of each scalar parameter $\beta_j$
+Since we will apply co-ordinate descent, let's rewrite this cost in terms of each
+scalar parameter :math:`\beta_j`
 
 .. math::
 
@@ -176,7 +177,7 @@ For the nonlinearity in the first term :math:`y = q(z) = \log(1+e^{z(\theta)})`,
     \begin{eqnarray}
     \frac{\partial y}{\partial \theta} &= \frac{\partial q}{\partial z}\frac{\partial z}{\partial \theta}\\
     & = \frac{e^z}{1+e^z}\frac{\partial z}{\partial \theta}\\
-    & = \sigma(z)\frac{\partial z}{\partial \theta}$$
+    & = \sigma(z)\frac{\partial z}{\partial \theta}
     \end{eqnarray}
 
 For the nonlinearity in the second term :math:`y = \log(q(z)) = \log(\log(1+e^{z(\theta)}))`,
@@ -282,3 +283,153 @@ Plugging all these in, we get
 
 Cyclical co-ordinate descent
 ----------------------------
+
+
+**Parameter update step**
+
+In cylical coordinate descent with elastic net, we store an active set,
+:math:`\mathcal{K}`, of parameter indices that we update. Since the :math:`\mathcal{l}_1`
+terms :math:`|\beta_j|` are not differentiable at zero, we use the gradient without
+the :math:`\lambda\alpha \text{sgn}(\beta_j)` term to update :math:`\beta_j`.
+Let's call these gradient terms :math:`\tilde{g}_k`.
+
+We start by initializing :math:`\mathcal{K}` to contain all parameter indices
+Let's say only the :math:`k^{th}` parameter is updated at time step :math:`t`.
+
+.. math::
+
+    \begin{eqnarray}
+        \beta_k^{t} & = \beta_k^{t-1} - (h_k^{t-1})^{-1} \tilde{g}_k^{t-1} \\
+        \beta_j^{t} & = \beta_j^{t-1}, \forall j \neq k
+    \end{eqnarray}
+
+
+Next, we apply a soft thresholding step for :math:`k \neq 0` after every update iteration, as follows.
+:math:`\beta_k^{t} = \mathcal{S}_{\lambda\alpha}(\beta_k^{t})`
+
+where
+
+.. math::
+
+    S_\lambda(x) =
+    \begin{cases}
+    0 & \text{if} & |x| \leq \lambda\\
+    \text{sgn}(x)||x|-\lambda| & \text{if} & |x| > \lambda
+    \end{cases}
+
+If :math:`\beta_k^{t}` has been zero-ed out, we remove :math:`k` from the active set.
+
+.. math::
+
+    \mathcal{K} = \mathcal{K} \setminus \left\{k\right\}
+
+.. code:: python
+
+    def prox(self, X, l):
+        """Proximal operator."""
+        return np.sign(X) * (np.abs(X) - l) * (np.abs(X) > l)
+
+**Efficient z update**
+
+Next, we want to update :math:`\beta_{k+1}` at the next time step :math:`t+1`.
+For this we need the gradient and Hessian terms, :math:`\tilde{g}_{k+1}` and
+:math`h_{k+1}`. If we update them instead of recalculating them, we can save on
+a lot of multiplications and additions. This is possible because we only update
+one parameter at a time. Let's calculate how to make these updates.
+
+.. math::
+
+    z_i^{t} = z_i^{t-1} - \beta_k^{t-1}x_{ik} + \beta_k^{t}x_{ik}
+
+.. math::
+
+    z_i^{t} = z_i^{t-1} - (h_k^{t-1})^{-1} \tilde{g}_k^{t-1}x_{ik}
+
+
+**Gradient update**
+
+If :math:`k = 0`,
+
+.. math::
+
+    \tilde{g}_{k+1}^t = \sum_i \sigma(z_i^t) - \sum_i y_i \frac{\sigma(z_i^t)}{q(z_i^t)}
+
+If :math:`k > 0`,
+
+.. math::
+
+    \begin{eqnarray}
+        \tilde{g}_{k+1}^t & = \sum_i \sigma(z_i^t) x_{i,k+1} - \sum_i y_i \frac{\sigma(z_i^t)}{q(z_i^t)} x_{i,k+1}
+          & + \lambda(1-\alpha)\beta_{k+1}^t
+    \end{eqnarray}
+
+.. code: python
+
+    def grad_loss_k(z, beta_k, alpha, rl, xk, y, k):
+        """Gradient update for a single coordinate
+        """
+        q = qu(z)
+        s = expit(z)
+        if(k == 0):
+            gk = np.sum(s) - np.sum(y*s/q)
+        else:
+            gk = np.sum(s*xk) - np.sum(y*s/q*xk) + rl*(1-alpha)*beta_k
+        return gk
+
+**Hessian update**
+
+If :math:`k = 0`,
+
+.. math::
+
+    h_{k+1}^t & = \sum_i \sigma(z_i^t)(1 - \sigma(z_i^t)) \\
+    & - \sum_i y_i \bigg\{ \frac{\sigma(z_i^t) (1 - \sigma(z_i^t))}{q(z_i^t)} - \frac{\sigma(z_i^t)}{q(z_i^t)^2} \bigg\}
+
+
+If :math:`k > 0`,
+
+.. math::
+
+    \begin{eqnarray}
+    h_{k+1}^t & = \sum_i \sigma(z_i^t)(1 - \sigma(z_i^t)) x_{i,k+1}^2 \\
+    & - \sum_i y_i \bigg\{ \frac{\sigma(z_i^t) (1 - \sigma(z_i^t))}{q(z_i^t)}
+    & - \frac{\sigma(z_i^t)}{q(z_i^t)^2} \bigg\}x_{i,k+1}^2 + \lambda(1-\alpha)
+    \end{eqnarray}
+
+.. code:: python
+
+    def hess_loss_k(z, alpha, rl, xk, y, k):
+        """Hessian update for a single coordinate
+        """
+        q = qu(z)
+        s = expit(z)
+        grad_s = s*(1-s)
+        grad_s_by_q = grad_s/q - s/(q*q)
+        if(k == 0):
+            hk = np.sum(grad_s) - np.sum(y*grad_s_by_q)
+        else:
+            hk = np.sum(grad_s*xk*xk) - np.sum(y*grad_s_by_q*xk*xk) + rl*(1-alpha)
+        return hk
+
+
+Regularization paths and warm restarts
+--------------------------------------
+
+We often find the optimal regularization parameter :math:`\lambda` through cross-validation.
+Thus, in practice, we fit the model several times over a range of :math:`\lambda`'s
+:math:`\{ \lambda_{max} \geq \dots \geq \lambda_0\}`.
+
+Instead of re-fitting the model each time, we can solve the problem for the
+most-regularized model (:math:`\lambda_{max}`) and then initialize the subsequent
+model with this solution. The path that each parameter takes through the range of
+regularization parameters is known as the regularization path, and the trick of
+initializing each model with the previous model's solution is known as a warm restart.
+
+In practice, this significantly speeds up convergence.
+
+
+Implementation
+--------------
+
+The optimization step is implemented in ``fit`` method in ``GLM``. We will add
+pseudo code on how algorithm works soon.
