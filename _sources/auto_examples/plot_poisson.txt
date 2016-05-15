@@ -69,7 +69,7 @@ only the independent variables ``X`` and the coefficients ``beta0``
 and ``beta``
 
 **Total running time of the script:**
-(0 minutes 0.336 seconds)
+(0 minutes 0.104 seconds)
 
 
 

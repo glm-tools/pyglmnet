@@ -145,7 +145,7 @@ Let's define the penalty term
 
 
 **Total running time of the script:**
-(0 minutes 0.452 seconds)
+(0 minutes 0.028 seconds)
 
 
 
