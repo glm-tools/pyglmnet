@@ -5,7 +5,8 @@ from copy import deepcopy
 
 import numpy as np
 from scipy.special import expit
-
+from sklearn.utils import optimize
+import pyglmnet_utils as utils
 logger = logging.getLogger('pyglmnet')
 logger.addHandler(logging.StreamHandler())
 
@@ -36,38 +37,6 @@ def set_log_level(verbose):
         verbose = logging_types[verbose]
     logger.setLevel(verbose)
 
-
-def softmax(w):
-    """
-    Softmax function of given array of number w
-    """
-    w = np.array(w)
-    maxes = np.amax(w, axis=1)
-    maxes = maxes.reshape(maxes.shape[0], 1)
-    e = np.exp(w - maxes)
-    dist = e / np.sum(e, axis=1, keepdims=True)
-    return dist
-
-
-def label_binarizer(y):
-    """Mimics scikit learn's LabelBinarizer
-    Parameters
-    ---------
-    y: ndarray (n_samples)
-        one dimensional array of class labels
-    Returns
-    -------
-    yb: array, shape (n_samples, n_classes)
-        one-hot encoding of labels in y
-    """
-    if y.ndim != 1:
-        raise ValueError('y has to be one-dimensional')
-    y_flat = y.ravel()
-    yb = np.zeros([len(y), y.max() + 1])
-    yb[np.arange(len(y)), y_flat] = 1
-    return yb
-
-
 class GLM(object):
     """Generalized Linear Model (GLM)
 
@@ -95,6 +64,11 @@ class GLM(object):
         where lambda is number in reg_lambda list
         default: None, a list of 10 floats spaced logarithmically (base e)
         between 0.5 and 0.01 is generated.
+    solver: str
+        two types of solvers:
+        'batch-gradient' which performs vanilla batch gradient descent
+        'newton-cg' which performs newton coordinate gradient descent with scipy.optimize.minimize
+        default: 'batch-gradient'
     learning_rate: float
         learning rate for gradient descent
         default: 1e-4
@@ -129,7 +103,7 @@ class GLM(object):
     """
 
     def __init__(self, distr='poisson', alpha=0.05,
-                 reg_lambda=None,
+                 reg_lambda=None, solver = 'batch-gradient',
                  learning_rate=1e-4, max_iter=100,
                  tol=1e-3, eta=4.0, random_state=0, verbose=False):
 
@@ -144,6 +118,7 @@ class GLM(object):
         self.distr = distr
         self.alpha = alpha
         self.reg_lambda = reg_lambda
+        self.solver = solver
         self.learning_rate = learning_rate
         self.max_iter = max_iter
         self.fit_ = None
@@ -216,13 +191,13 @@ class GLM(object):
         elif self.distr == 'binomial':
             qu = expit(z)
         elif self.distr == 'multinomial':
-            qu = softmax(z)
+            qu = utils.softmax_(z)
 
         return qu
         # qu = dict(poisson=np.log1p(np.exp(z)),
         #     poissonexp=np.exp([zi if zi < 3.0 else 3.0 for zi in z.ravel()]),
         #     normal=z, binomial=expit(z),
-        #     multinomial=softmax(z))
+        #     multinomial=utils.softmax_(z))
         # return qu[self.distr]
 
     def lmb(self, beta0, beta, X):
@@ -408,15 +383,31 @@ class GLM(object):
             L, DL = list(), list()
             for t in range(0, self.max_iter):
 
-                # Calculate gradient
-                grad_beta0, grad_beta = self.grad_L2loss(
-                    beta[0], beta[1:], rl, X, y)
-                g[0] = grad_beta0
-                g[1:] = grad_beta
+                if self.solver == 'batch-gradient':
+                    # Calculate gradient
+                    grad_beta0, grad_beta = self.grad_L2loss(
+                        beta[0], beta[1:], rl, X, y)
+                    g[0] = grad_beta0
+                    g[1:] = grad_beta
 
-                # Update parameters
-                beta = beta - self.learning_rate * g
+                    # Update parameters
+                    beta = beta - self.learning_rate * g
 
+                elif self.solver == 'newton-cg':
+                    distr = deepcopy(self.distr)
+                    alpha = deepcopy(self.alpha)
+                    eta = deepcopy(self.eta)
+                    args = (distr, alpha, rl, X, y, eta)
+
+                    # Run one iteration of newton-cg solver
+                    beta, num_iter = \
+                    optimize.newton_cg(utils.grad_hess_, utils.L2loss_,
+                                       utils.grad_L2loss_, beta,
+                                       args,
+                                       maxiter=1, maxinner=1,
+                                       line_search=True, warn=False)
+                    beta = np.expand_dims(beta, axis=1)
+                    beta[:5]
                 # Apply proximal operator for L1-regularization
                 beta[1:] = self.prox(beta[1:], rl * alpha)
 
@@ -526,7 +517,7 @@ class GLM(object):
         elif self.distr == 'normal':
             R2 = 1 - np.sum((y - yhat)**2) / np.sum((y - ynull)**2)
         elif self.distr == 'multinomial':
-            y = label_binarizer(y)
+            y = utils.label_binarizer_(y)
             # yhat is the probability of each output
             if yhat.ndim != y.ndim or ynull.ndim != y.ndim:
                 msg = 'yhat and ynull must be (n_samples, n_class) ndarrays'
@@ -561,7 +552,7 @@ class GLM(object):
             L1 = -np.sum((y - yhat) ** 2)
             LS = 0
         elif self.distr == 'multinomial':
-            y = label_binarizer(y)
+            y = utils.label_binarizer_(y)
             if yhat.ndim != y.ndim:
                 msg = 'yhat must be a (n_samples, n_class) ndarray'
                 raise Exception(msg)
