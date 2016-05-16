@@ -6,6 +6,5 @@ API Documentation
 
 .. autosummary::
    :toctree: generated/
-   :template: class.rst
 
    GLM

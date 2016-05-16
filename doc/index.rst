@@ -32,9 +32,9 @@ Contents
 .. toctree::
    :maxdepth: 1
 
-   GLM-introduction
-   API-documentation
+   api
    resources
+   developers
 
 
 Installation
@@ -60,13 +60,6 @@ Then run ``setup.py`` to install the library
 .. code-block:: bash
 
     python setup.py develop install
-
-
-Contributing
-============
-
-We welcome any pull requests. You can run ``nosetests tests``
-before for making pull requests to ensure that the changes work.
 
 
 Questions / Errors / Bugs
