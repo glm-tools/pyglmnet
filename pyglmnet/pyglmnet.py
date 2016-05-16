@@ -532,7 +532,7 @@ class GLM(object):
             # yhat is the probability of each output
             if yhat.ndim != y.ndim or ynull.ndim != y.ndim:
                 msg = 'yhat and ynull must be (n_samples, n_class) ndarrays'
-                raise Exception(msg)
+                raise ValueError(msg)
             L1 = np.sum(y * np.log(yhat))
             L0 = np.sum(y * np.log(ynull))
             R2 = 1 - L1 / L0
@@ -566,7 +566,7 @@ class GLM(object):
             y = label_binarizer(y)
             if yhat.ndim != y.ndim:
                 msg = 'yhat must be a (n_samples, n_class) ndarray'
-                raise Exception(msg)
+                raise ValueError(msg)
             L1 = np.sum(y * np.log(yhat))
             LS = 0
 

@@ -93,7 +93,7 @@ def test_multinomial():
     # test gradient
     beta = np.zeros([4, 2])
     grad_beta0, grad_beta = glm.grad_L2loss(beta[0], beta[1:], 0, X, y)
-    assert grad_beta0[0] != grad_beta0[1]
+    assert_true(grad_beta0[0] != grad_beta0[1])
     glm.fit(X, y)
     y_pred = glm.predict(X)
     assert_equal(y_pred.shape, (3, X.shape[0], 2))  # n_lambdas x n_samples x n_classes
@@ -109,14 +109,5 @@ def test_multinomial():
                                   X)),
                  X.shape[0])
     # these should raise an exception
-    try:
-        glm.pseudo_R2(y, y, y)
-        assert False
-    except Exception:
-        assert True
-    try:
-        glm.deviance(y, y)
-        assert False
-    except Exception:
-        assert True
-
+    assert_raises(ValueError, glm.pseudo_R2, y, y, y)
+    assert_raises(ValueError, glm.deviance, y, y)
