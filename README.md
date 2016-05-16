@@ -69,20 +69,21 @@ fit_param = model[-1].fit_
 yhat = model.predict(scaler.transform(Xt))
 ```
 
-You can also work through given Jupyter notebook demo
-[`pyglmnet_example.ipynb`](http://nbviewer.jupyter.org/github/pavanramkumar/pyglmnet/blob/master/notebooks/pyglmnet_example.ipynb)
+See full example on how to use `pyglmnet`
+[here](http://pavanramkumar.github.io/pyglmnet/auto_examples/plot_poisson.html)
 
 
 ### Tutorial
 
-A more extensive tutorial on posing and fitting the GLM is in
-[`glmnet_tutorial.ipynb`](http://nbviewer.jupyter.org/github/pavanramkumar/pyglmnet/blob/master/notebooks/glmnet_tutorial.ipynb)
+Find more extensive tutorial on posing and fitting the GLM
+[here](http://pavanramkumar.github.io/pyglmnet/auto_examples/plot_glmnet.html)
+
 
 ### Note
 
-We don't use the canonical link function ```exp()``` for ```'poisson'``` targets.
-Instead, we use the softplus function: ```log(1+exp())``` for numerical stability.
-For the canonical poisson link function, use ```'poissonexp'```
+We don't use the canonical link function `exp()` for `'poisson'` targets.
+Instead, we use the softplus function: `log(1+exp())` for numerical stability.
+For the canonical poisson link function, use `'poissonexp'`
 
 ### To contribute
 

@@ -3,12 +3,17 @@
 ============================
 Elastic net regularized GLMs
 ============================
-This is an example demonstrating the internals of glmnet.
 
+Tutorial on Elastic net Regularized Generalized Linear Model.
+We will go through the math and gradient descent algorithm to
+in order to optimize GLM cost function.
+
+**Reference**
 Jerome Friedman, Trevor Hastie and Rob Tibshirani. (2010).
 Regularization Paths for Generalized Linear Models via Coordinate Descent.
 Journal of Statistical Software, Vol. 33(1), 1-22 `[pdf]
 <https://core.ac.uk/download/files/153/6287975.pdf>`_.
+
 """
 
 # Author: Pavan Ramkumar
@@ -16,12 +21,21 @@ Journal of Statistical Software, Vol. 33(1), 1-22 `[pdf]
 
 import numpy as np
 from scipy.special import expit
-import scipy.sparse as sps
-import matplotlib.pyplot as plt
 
 ########################################################
 # GLM with elastic net penalty
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+#
+# In Generalized Linear Model (GLM), we mainly want to solve the following problem.
+#
+# .. math::
+#
+#     \min_{\beta_0, \beta} \frac{1}{N} \sum_{i = 1}^N w_i \ell (y_i, \beta_0 + \beta^T x_i)
+#     + \lambda [0.5(1 - \alpha)\| \beta \|_2^2 + \alpha \| \beta \|_1]
+#
+# where :math:`\ell (y_i, \beta_0 + \beta^T x_i)` is negative log-likelihood of
+# an observation :math:`i`. Here, we will go through Poisson link function case
+# and show how we can optimize this cost function
 #
 # Poisson-like GLM
 # ----------------
