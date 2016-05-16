@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Examples Gallery &mdash; pyglmnet 0.1.dev documentation</title>
+  <title>pyglmnet.set_log_level &mdash; pyglmnet 0.1.dev documentation</title>
   
 
   
@@ -32,7 +32,10 @@
   
 
   
-    <link rel="top" title="pyglmnet 0.1.dev documentation" href="../index.html"/> 
+    <link rel="top" title="pyglmnet 0.1.dev documentation" href="../index.html"/>
+        <link rel="up" title="API Documentation" href="../api.html"/>
+        <link rel="next" title="pyglmnet.label_binarizer" href="pyglmnet.label_binarizer.html"/>
+        <link rel="prev" title="pyglmnet.GLM" href="pyglmnet.GLM.html"/> 
 
   
   <script src="../_static/js/modernizr.min.js"></script>
@@ -82,8 +85,16 @@
           
             
             
-                <ul>
-<li class="toctree-l1"><a class="reference internal" href="../api.html">API Documentation</a></li>
+                <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">API Documentation</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../api.html#classes">Classes</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../api.html#functions">Functions</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">pyglmnet.set_log_level</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyglmnet.label_binarizer.html">pyglmnet.label_binarizer</a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="../resources.html">Resources</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../developers.html">Developer Documentation</a></li>
 </ul>
@@ -116,11 +127,13 @@
   <ul class="wy-breadcrumbs">
     <li><a href="../index.html">Docs</a> &raquo;</li>
       
-    <li>Examples Gallery</li>
+        <li><a href="../api.html">API Documentation</a> &raquo;</li>
+      
+    <li>pyglmnet.set_log_level</li>
     <li class="wy-breadcrumbs-aside">
       
         
-          <a href="../_sources/auto_examples/index.txt" rel="nofollow"> View page source</a>
+          <a href="../_sources/generated/pyglmnet.set_log_level.txt" rel="nofollow"> View page source</a>
         
       
     </li>
@@ -130,32 +143,36 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="examples-gallery">
-<span id="general-examples"></span><h1>Examples Gallery<a class="headerlink" href="#examples-gallery" title="Permalink to this headline">¶</a></h1>
-<div class="sphx-glr-thumbcontainer" tooltip="This is an example demonstrating how pyglmnet with poisson exponential distribution works."><div class="figure" id="id1">
-<img alt="../_images/sphx_glr_plot_poisson_2_thumb.png" src="../_images/sphx_glr_plot_poisson_2_thumb.png" />
-<p class="caption"><span class="caption-text"><a class="reference internal" href="plot_poisson_2.html#sphx-glr-auto-examples-plot-poisson-2-py"><span class="std std-ref">pyglmnet for Poisson exponential distribution</span></a></span></p>
+  <div class="section" id="pyglmnet-set-log-level">
+<h1>pyglmnet.set_log_level<a class="headerlink" href="#pyglmnet-set-log-level" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="pyglmnet.set_log_level">
+<code class="descclassname">pyglmnet.</code><code class="descname">set_log_level</code><span class="sig-paren">(</span><em>verbose</em><span class="sig-paren">)</span><a class="headerlink" href="#pyglmnet.set_log_level" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convenience function for setting the log level.</p>
+<dl class="docutils">
+<dt>verbose</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">bool, str, int, or None</span><dd>The verbosity of messages to print. If a str, it can be either DEBUG,
+INFO, WARNING, ERROR, or CRITICAL. Note that these are for
+convenience and are equivalent to passing in logging.DEBUG, etc.
+For bool, True is the same as &#8216;INFO&#8217;, False is the same as &#8216;WARNING&#8217;.</dd>
+</dl>
+</dd></dl>
+
 </div>
-</div><div class="toctree-wrapper compound">
-</div>
-<div class="sphx-glr-thumbcontainer" tooltip="This is an example demonstrating how pyglmnet works."><div class="figure" id="id2">
-<img alt="../_images/sphx_glr_plot_poisson_thumb.png" src="../_images/sphx_glr_plot_poisson_thumb.png" />
-<p class="caption"><span class="caption-text"><a class="reference internal" href="plot_poisson.html#sphx-glr-auto-examples-plot-poisson-py"><span class="std std-ref">pyglmnet for Poisson distribution</span></a></span></p>
-</div>
-</div><div class="toctree-wrapper compound">
-</div>
-<div class="sphx-glr-thumbcontainer" tooltip="Tutorial on Elastic net Regularized Generalized Linear Model. We will go through the math and g..."><div class="figure" id="id3">
-<img alt="../_images/sphx_glr_plot_glmnet_thumb.png" src="../_images/sphx_glr_plot_glmnet_thumb.png" />
-<p class="caption"><span class="caption-text"><a class="reference internal" href="plot_glmnet.html#sphx-glr-auto-examples-plot-glmnet-py"><span class="std std-ref">Elastic net regularized GLMs</span></a></span></p>
-</div>
-</div><div class="toctree-wrapper compound">
-</div>
-<div style='clear:both'></div></div>
 
 
            </div>
           </div>
           <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="pyglmnet.label_binarizer.html" class="btn btn-neutral float-right" title="pyglmnet.label_binarizer" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="pyglmnet.GLM.html" class="btn btn-neutral" title="pyglmnet.GLM" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
   
 
   <hr/>

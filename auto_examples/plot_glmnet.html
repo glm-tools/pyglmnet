@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Elastic net regularized GLMs &mdash; pyglmnet 0.1.dev0 documentation</title>
+  <title>Elastic net regularized GLMs &mdash; pyglmnet 0.1.dev documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="pyglmnet 0.1.dev0 documentation" href="../index.html"/> 
+    <link rel="top" title="pyglmnet 0.1.dev documentation" href="../index.html"/> 
 
   
   <script src="../_static/js/modernizr.min.js"></script>
@@ -61,7 +61,7 @@
             
             
               <div class="version">
-                0.1.dev0
+                0.1.dev
               </div>
             
           
@@ -82,19 +82,12 @@
           
             
             
-                <!-- Local TOC -->
-                <div class="local-toc"><ul>
-<li><a class="reference internal" href="#">Elastic net regularized GLMs</a><ul>
-<li><a class="reference internal" href="#glm-with-elastic-net-penalty">GLM with elastic net penalty</a><ul>
-<li><a class="reference internal" href="#poisson-like-glm">Poisson-like GLM</a></li>
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">API Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../resources.html">Resources</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../developers.html">Developer Documentation</a></li>
 </ul>
-</li>
-<li><a class="reference internal" href="#log-likelihood">Log-likelihood</a></li>
-<li><a class="reference internal" href="#elastic-net-penalty">Elastic net penalty</a></li>
-</ul>
-</li>
-</ul>
-</div>
+
             
           
         </div>
@@ -115,7 +108,7 @@
         <div class="rst-content">
           
 
-
+ 
 
 
 
@@ -139,8 +132,11 @@
             
   <div class="section" id="elastic-net-regularized-glms">
 <span id="sphx-glr-auto-examples-plot-glmnet-py"></span><h1>Elastic net regularized GLMs<a class="headerlink" href="#elastic-net-regularized-glms" title="Permalink to this headline">¶</a></h1>
-<p>This is an example demonstrating the internals of glmnet.</p>
-<p>Jerome Friedman, Trevor Hastie and Rob Tibshirani. (2010).
+<p>Tutorial on Elastic net Regularized Generalized Linear Model.
+We will go through the math and gradient descent algorithm to
+in order to optimize GLM cost function.</p>
+<p><strong>Reference</strong>
+Jerome Friedman, Trevor Hastie and Rob Tibshirani. (2010).
 Regularization Paths for Generalized Linear Models via Coordinate Descent.
 Journal of Statistical Software, Vol. 33(1), 1-22 <a class="reference external" href="https://core.ac.uk/download/files/153/6287975.pdf">[pdf]</a>.</p>
 <div class="highlight-python"><div class="highlight"><pre><span></span><span class="c1"># Author: Pavan Ramkumar</span>
@@ -148,12 +144,17 @@ Journal of Statistical Software, Vol. 33(1), 1-22 <a class="reference external" 
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">scipy.special</span> <span class="kn">import</span> <span class="n">expit</span>
-<span class="kn">import</span> <span class="nn">scipy.sparse</span> <span class="kn">as</span> <span class="nn">sps</span>
-<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
 </pre></div>
 </div>
 <div class="section" id="glm-with-elastic-net-penalty">
 <h2>GLM with elastic net penalty<a class="headerlink" href="#glm-with-elastic-net-penalty" title="Permalink to this headline">¶</a></h2>
+<p>In Generalized Linear Model (GLM), we mainly want to solve the following problem.</p>
+<div class="math">
+\[\min_{\beta_0, \beta} \frac{1}{N} \sum_{i = 1}^N w_i \ell (y_i, \beta_0 + \beta^T x_i)
++ \lambda [0.5(1 - \alpha)\| \beta \|_2^2 + \alpha \| \beta \|_1]\]</div>
+<p>where <span class="math">\(\ell (y_i, \beta_0 + \beta^T x_i)\)</span> is negative log-likelihood of
+an observation <span class="math">\(i\)</span>. Here, we will go through Poisson link function case
+and show how we can optimize this cost function</p>
 <div class="section" id="poisson-like-glm">
 <h3>Poisson-like GLM<a class="headerlink" href="#poisson-like-glm" title="Permalink to this headline">¶</a></h3>
 <p>The <cite>pyglmnet</cite> implementation comes with <cite>poisson</cite>, <cite>binomial</cite>
@@ -189,21 +190,21 @@ can use gradient ascent (descent) to optimize it.</p>
 \beta^T x_i))\]</div>
 <p>[There is more to be said about this issue; ref. Sara Solla&#8217;s GLM lectures
 concerning moment generating functions and strict definitions of GLMs]</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="c1"># Let&#39;s define the conditional intensity function</span>
-<span class="k">def</span> <span class="nf">qu</span><span class="p">(</span><span class="n">z</span><span class="p">):</span>
-    <span class="n">eps</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">spacing</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">eps</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">z</span><span class="p">))</span>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">qu</span><span class="p">(</span><span class="n">z</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;The non-linearity.&quot;&quot;&quot;</span>
+    <span class="n">qu</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log1p</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">z</span><span class="p">))</span>
 
-<span class="k">def</span> <span class="nf">lmb</span><span class="p">(</span><span class="n">beta0</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
-    <span class="n">eps</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">spacing</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-    <span class="n">z</span> <span class="o">=</span> <span class="n">beta0</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">beta</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">eps</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">z</span><span class="p">))</span>
+<span class="k">def</span> <span class="nf">lmb</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">beta0</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Conditional intensity function.&quot;&quot;&quot;</span>
+    <span class="n">z</span> <span class="o">=</span> <span class="n">beta0</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">beta</span><span class="p">)</span>
+    <span class="n">l</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">qu</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">l</span>
 </pre></div>
 </div>
 </div>
 </div>
-<div class="section" id="log-likelihood">
-<h2>Log-likelihood<a class="headerlink" href="#log-likelihood" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="poisson-log-likelihood">
+<h2>Poisson Log-likelihood<a class="headerlink" href="#poisson-log-likelihood" title="Permalink to this headline">¶</a></h2>
 <p>The likelihood of observing the spike count <span class="math">\(y_i\)</span> under the Poisson
 likelihood function with inhomogeneous rate <span class="math">\(\lambda_i\)</span> is given by:</p>
 <div class="math">
@@ -228,19 +229,244 @@ prevent overfitting. The elastic net penalty is given by:</p>
 <span class="math">\(\alpha = 0\)</span> is known as ridge regression and <span class="math">\(\alpha = 1\)</span>
 is known as LASSO. Note that we do not penalize the baseline term
 <span class="math">\(\beta_0\)</span>.</p>
-<p>Let&#8217;s define the penalty term</p>
 <div class="highlight-python"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">penalty</span><span class="p">(</span><span class="n">alpha</span><span class="p">,</span> <span class="n">beta</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;the penalty term&quot;&quot;&quot;</span>
     <span class="n">P</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">alpha</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">beta</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="o">+</span> \
         <span class="n">alpha</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">beta</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">P</span>
 </pre></div>
 </div>
+</div>
+<div class="section" id="objective-function">
+<h2>Objective function<a class="headerlink" href="#objective-function" title="Permalink to this headline">¶</a></h2>
+<p>We minimize the objective function:</p>
+<div class="math">
+\[J(\beta_0, \beta) = -\mathcal{L}(\beta_0, \beta) + \lambda \mathcal{P}_\alpha(\beta)\]</div>
+<p>where <span class="math">\(\mathcal{L}(\beta_0, \beta)\)</span> is the Poisson log-likelihood and
+<span class="math">\(\mathcal{P}_\alpha(\beta)\)</span> is the elastic net penalty term and
+<span class="math">\(\lambda\)</span> and <span class="math">\(\alpha\)</span> are regularization parameters.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">loss</span><span class="p">(</span><span class="n">beta0</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">reg_lambda</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Define the objective function for elastic net.&quot;&quot;&quot;</span>
+    <span class="n">L</span> <span class="o">=</span> <span class="n">logL</span><span class="p">(</span><span class="n">beta0</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+    <span class="n">P</span> <span class="o">=</span> <span class="n">penalty</span><span class="p">(</span><span class="n">beta</span><span class="p">)</span>
+    <span class="n">J</span> <span class="o">=</span> <span class="o">-</span><span class="n">L</span> <span class="o">+</span> <span class="n">reg_lambda</span> <span class="o">*</span> <span class="n">P</span>
+    <span class="k">return</span> <span class="n">J</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="gradients-descent">
+<h2>Gradients descent<a class="headerlink" href="#gradients-descent" title="Permalink to this headline">¶</a></h2>
+<p>To calculate the gradients of the cost function with respect to <span class="math">\(\beta_0\)</span> and
+<span class="math">\(\beta\)</span>, let&#8217;s plug in the definitions for the log likelihood and penalty terms from above.</p>
+<div class="math">
+\[\begin{split}\begin{eqnarray}
+    J(\beta_0, \beta) &amp;= \sum_i \bigg\{ \log(1 + \exp(\beta_0 + \beta^T x_i))\\
+      &amp; - y_i \log(\log(1 + \exp(\beta_0 + \beta^T x_i)))\bigg\}\\
+      &amp; + \lambda(1 - \alpha)\frac{1}{2} \|\beta\|^2_{\mathcal{l_2}}
+      + \lambda\alpha\|\beta\|_{\mathcal{l_1}}
+\end{eqnarray}\end{split}\]</div>
+<p>Since we will apply co-ordinate descent, let&#8217;s rewrite this cost in terms of each
+scalar parameter <span class="math">\(\beta_j\)</span></p>
+<div class="math">
+\[\begin{split}\begin{eqnarray}
+    J(\beta_0, \beta) &amp;= \sum_i \bigg\{ \log(1 + \exp(\beta_0 + \sum_j \beta_j x_{ij}))
+    &amp; - y_i \log(\log(1 + \exp(\beta_0 + \sum_j \beta_j x_{ij})))\bigg\}\\
+    &amp; + \lambda(1-\alpha)\frac{1}{2} \sum_j \beta_j^2 + \lambda\alpha\sum_j \mid\beta_j\mid
+\end{eqnarray}\end{split}\]</div>
+<p>Let&#8217;s take the derivatives of some big expressions using chain rule.
+Define <span class="math">\(z_i = \beta_0 + \sum_j \beta_j x_{ij}\)</span>.</p>
+<p>For the nonlinearity in the first term <span class="math">\(y = q(z) = \log(1+e^{z(\theta)})\)</span>,</p>
+<div class="math">
+\[\begin{split}\begin{eqnarray}
+\frac{\partial y}{\partial \theta} &amp;= \frac{\partial q}{\partial z}\frac{\partial z}{\partial \theta}\\
+&amp; = \frac{e^z}{1+e^z}\frac{\partial z}{\partial \theta}\\
+&amp; = \sigma(z)\frac{\partial z}{\partial \theta}
+\end{eqnarray}\end{split}\]</div>
+<p>For the nonlinearity in the second term <span class="math">\(y = \log(q(z)) = \log(\log(1+e^{z(\theta)}))\)</span>,</p>
+<div class="math">
+\[\begin{split}\begin{eqnarray}
+\frac{\partial y}{\partial \theta} &amp; = \frac{1}{q(z)}\frac{\partial q}{\partial z}\frac{\partial z}{\partial \theta}\\
+&amp; = \frac{\sigma(z)}{q(z)}\frac{\partial z}{\partial \theta}
+\end{eqnarray}\end{split}\]</div>
+<p>where <span class="math">\(\dot q(z)\)</span> happens to be be the sigmoid function,</p>
+<div class="math">
+\[\sigma(z) = \frac{e^z}{1+e^z}\]</div>
+<p>Putting it all together, we have,</p>
+<div class="math">
+\[\frac{\partial J}{\partial \beta_0} = \sum_i \sigma(z_i) - \sum_i y_i\frac{\sigma(z_i)}{q(z_i)}\]</div>
+<div class="math">
+\[\frac{\partial J}{\partial \beta_j} = \sum_i \sigma(z_i) x_{ij} - \sum_i y_i \frac{\sigma(z_i)}{q(z_i)}x_{ij}
++ \lambda(1-\alpha)\beta_j + \lambda\alpha \text{sgn}(\beta_j)\]</div>
+<p>Let&#8217;s define these gradients</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">grad_L2loss</span><span class="p">(</span><span class="n">beta0</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">reg_lambda</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+    <span class="n">z</span> <span class="o">=</span> <span class="n">beta0</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">beta</span><span class="p">)</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">expit</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
+    <span class="n">q</span> <span class="o">=</span> <span class="n">qu</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
+    <span class="n">grad_beta0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">y</span> <span class="o">*</span> <span class="n">s</span> <span class="o">/</span> <span class="n">q</span><span class="p">)</span>
+    <span class="n">grad_beta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">s</span><span class="p">),</span> <span class="n">X</span><span class="p">)</span> <span class="o">-</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">y</span> <span class="o">*</span> <span class="n">s</span> <span class="o">/</span> <span class="n">q</span><span class="p">),</span> <span class="n">X</span><span class="p">))</span> <span class="o">+</span> \
+    <span class="n">reg_lambda</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">alpha</span><span class="p">)</span> <span class="o">*</span> <span class="n">beta</span>
+    <span class="k">return</span> <span class="n">grad_beta0</span><span class="p">,</span> <span class="n">grad_beta</span>
+</pre></div>
+</div>
+<p>Note that this is all we need for a classic batch gradient descent implementation.
+However, let&#8217;s also derive the Hessian terms that will be useful for second-order
+optimization methods.</p>
+</div>
+<div class="section" id="hessian-terms">
+<h2>Hessian terms<a class="headerlink" href="#hessian-terms" title="Permalink to this headline">¶</a></h2>
+<p>Second-order derivatives can accelerate convergence to local minima by providing
+optimal step sizes. However, they are expensive to compute.</p>
+<p>This is where co-ordinate descent shines. Since we update only one parameter
+<span class="math">\(\beta_j\)</span> per step, we can simply use the <span class="math">\(j^{th}\)</span> diagonal term in
+the Hessian matrix to perform an approximate Newton update as:</p>
+<div class="math">
+\[\beta_j^{t+1} = \beta_j^{t} - \bigg\{\frac{\partial^2 J}{\partial \beta_j^2}\bigg\}^{-1} \frac{\partial J}{\partial \beta_j}\]</div>
+<p>Let&#8217;s use calculus again to compute these diagonal terms. Recall that:</p>
+<div class="math">
+\[\begin{split}\begin{eqnarray}
+\dot q(z) &amp; = \sigma(z)\\
+\dot\sigma(z) = \sigma(z)(1-\sigma(z))
+\end{eqnarray}\end{split}\]</div>
+<p>Using these, and applying the product rule</p>
+<div class="math">
+\[\frac{\partial}{\partial z}\bigg\{ \frac{\sigma(z)}{q(z)} \bigg\} = \frac{\sigma(z)(1-\sigma(z))}{q(z)} - \frac{\sigma(z)}{q(z)^2}\]</div>
+<p>Plugging all these in, we get</p>
+<div class="math">
+\[\frac{\partial^2 J}{\partial \beta_0^2} = \sum_i \sigma(z_i)(1 - \sigma(z_i)) - \sum_i y_i \bigg\{ \frac{\sigma(z_i) (1 - \sigma(z_i))}{q(z_i)} - \frac{\sigma(z_i)}{q(z_i)^2} \bigg\}\]</div>
+<div class="math">
+\[\begin{split}\begin{eqnarray}
+\frac{\partial^2 J}{\partial \beta_j^2} &amp; = \sum_i \sigma(z_i)(1 - \sigma(z_i)) x_{ij}^2 \\
+&amp; - \sum_i y_i \bigg\{ \frac{\sigma(z_i) (1 - \sigma(z_i))}{q(z_i)} \\
+&amp; - \frac{\sigma(z_i)}{q(z_i)^2} \bigg\}x_{ij}^2 + \lambda(1-\alpha)
+\end{eqnarray}\end{split}\]</div>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">hessian_loss</span><span class="p">(</span><span class="n">beta0</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">reg_lambda</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+    <span class="n">z</span> <span class="o">=</span> <span class="n">beta0</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">beta</span><span class="p">)</span>
+    <span class="n">q</span> <span class="o">=</span> <span class="n">qu</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">expit</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
+    <span class="n">grad_s</span> <span class="o">=</span> <span class="n">s</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">s</span><span class="p">)</span>
+    <span class="n">grad_s_by_q</span> <span class="o">=</span> <span class="n">grad_s</span><span class="o">/</span><span class="n">q</span> <span class="o">-</span> <span class="n">s</span><span class="o">/</span><span class="p">(</span><span class="n">q</span> <span class="o">*</span> <span class="n">q</span><span class="p">)</span>
+    <span class="n">hess_beta0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">grad_s</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">y</span> <span class="o">*</span> <span class="n">grad_s_by_q</span><span class="p">)</span>
+    <span class="n">hess_beta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">grad_s</span><span class="p">),</span> <span class="n">X</span> <span class="o">*</span> <span class="n">X</span><span class="p">)</span>
+                <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">y</span> <span class="o">*</span> <span class="n">grad_s_by_q</span><span class="p">),</span> <span class="n">X</span> <span class="o">*</span> <span class="n">X</span><span class="p">))</span>\
+                <span class="o">+</span> <span class="n">reg_lambda</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">alpha</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">hess_beta0</span><span class="p">,</span> <span class="n">hess_beta</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="cyclical-co-ordinate-descent">
+<h2>Cyclical co-ordinate descent<a class="headerlink" href="#cyclical-co-ordinate-descent" title="Permalink to this headline">¶</a></h2>
+<p><strong>Parameter update step</strong></p>
+<p>In cylical coordinate descent with elastic net, we store an active set,
+<span class="math">\(\mathcal{K}\)</span>, of parameter indices that we update. Since the <span class="math">\(\mathcal{l}_1\)</span>
+terms <span class="math">\(|\beta_j|\)</span> are not differentiable at zero, we use the gradient without
+the <span class="math">\(\lambda\alpha \text{sgn}(\beta_j)\)</span> term to update <span class="math">\(\beta_j\)</span>.
+Let&#8217;s call these gradient terms <span class="math">\(\tilde{g}_k\)</span>.</p>
+<p>We start by initializing <span class="math">\(\mathcal{K}\)</span> to contain all parameter indices
+Let&#8217;s say only the <span class="math">\(k^{th}\)</span> parameter is updated at time step <span class="math">\(t\)</span>.</p>
+<div class="math">
+\[\begin{split}\begin{eqnarray}
+    \beta_k^{t} &amp; = \beta_k^{t-1} - (h_k^{t-1})^{-1} \tilde{g}_k^{t-1} \\
+    \beta_j^{t} &amp; = \beta_j^{t-1}, \forall j \neq k
+\end{eqnarray}\end{split}\]</div>
+<p>Next, we apply a soft thresholding step for <span class="math">\(k \neq 0\)</span> after every update iteration, as follows.
+<span class="math">\(\beta_k^{t} = \mathcal{S}_{\lambda\alpha}(\beta_k^{t})\)</span></p>
+<p>where</p>
+<div class="math">
+\[\begin{split}S_\lambda(x) =
+\begin{cases}
+0 &amp; \text{if} &amp; |x| \leq \lambda\\
+\text{sgn}(x)||x|-\lambda| &amp; \text{if} &amp; |x| &gt; \lambda
+\end{cases}\end{split}\]</div>
+<p>If <span class="math">\(\beta_k^{t}\)</span> has been zero-ed out, we remove <span class="math">\(k\)</span> from the active set.</p>
+<div class="math">
+\[\mathcal{K} = \mathcal{K} \setminus \left\{k\right\}\]</div>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">prox</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">l</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Proximal operator.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">X</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">X</span><span class="p">)</span> <span class="o">-</span> <span class="n">l</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">X</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">l</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>Efficient z update</strong></p>
+<p>Next, we want to update <span class="math">\(\beta_{k+1}\)</span> at the next time step <span class="math">\(t+1\)</span>.
+For this we need the gradient and Hessian terms, <span class="math">\(\tilde{g}_{k+1}\)</span> and
+:math`h_{k+1}`. If we update them instead of recalculating them, we can save on
+a lot of multiplications and additions. This is possible because we only update
+one parameter at a time. Let&#8217;s calculate how to make these updates.</p>
+<div class="math">
+\[z_i^{t} = z_i^{t-1} - \beta_k^{t-1}x_{ik} + \beta_k^{t}x_{ik}\]</div>
+<div class="math">
+\[z_i^{t} = z_i^{t-1} - (h_k^{t-1})^{-1} \tilde{g}_k^{t-1}x_{ik}\]</div>
+<p><strong>Gradient update</strong></p>
+<p>If <span class="math">\(k = 0\)</span>,</p>
+<div class="math">
+\[\tilde{g}_{k+1}^t = \sum_i \sigma(z_i^t) - \sum_i y_i \frac{\sigma(z_i^t)}{q(z_i^t)}\]</div>
+<p>If <span class="math">\(k &gt; 0\)</span>,</p>
+<div class="math">
+\[\begin{eqnarray}
+    \tilde{g}_{k+1}^t &amp; = \sum_i \sigma(z_i^t) x_{i,k+1} - \sum_i y_i \frac{\sigma(z_i^t)}{q(z_i^t)} x_{i,k+1}
+      &amp; + \lambda(1-\alpha)\beta_{k+1}^t
+\end{eqnarray}\]</div>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">grad_loss_k</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">beta_k</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">rl</span><span class="p">,</span> <span class="n">xk</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">k</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Gradient update for a single coordinate</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">q</span> <span class="o">=</span> <span class="n">qu</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">expit</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">k</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+        <span class="n">gk</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">y</span><span class="o">*</span><span class="n">s</span><span class="o">/</span><span class="n">q</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">gk</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">s</span><span class="o">*</span><span class="n">xk</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">y</span><span class="o">*</span><span class="n">s</span><span class="o">/</span><span class="n">q</span><span class="o">*</span><span class="n">xk</span><span class="p">)</span> <span class="o">+</span> <span class="n">rl</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">alpha</span><span class="p">)</span><span class="o">*</span><span class="n">beta_k</span>
+    <span class="k">return</span> <span class="n">gk</span>
+</pre></div>
+</div>
+<p><strong>Hessian update</strong></p>
+<p>If <span class="math">\(k = 0\)</span>,</p>
+<div class="math">
+\[\begin{split}h_{k+1}^t &amp; = \sum_i \sigma(z_i^t)(1 - \sigma(z_i^t)) \\
+&amp; - \sum_i y_i \bigg\{ \frac{\sigma(z_i^t) (1 - \sigma(z_i^t))}{q(z_i^t)} - \frac{\sigma(z_i^t)}{q(z_i^t)^2} \bigg\}\end{split}\]</div>
+<p>If <span class="math">\(k &gt; 0\)</span>,</p>
+<div class="math">
+\[\begin{split}\begin{eqnarray}
+h_{k+1}^t &amp; = \sum_i \sigma(z_i^t)(1 - \sigma(z_i^t)) x_{i,k+1}^2 \\
+&amp; - \sum_i y_i \bigg\{ \frac{\sigma(z_i^t) (1 - \sigma(z_i^t))}{q(z_i^t)}
+&amp; - \frac{\sigma(z_i^t)}{q(z_i^t)^2} \bigg\}x_{i,k+1}^2 + \lambda(1-\alpha)
+\end{eqnarray}\end{split}\]</div>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">hess_loss_k</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">rl</span><span class="p">,</span> <span class="n">xk</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">k</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Hessian update for a single coordinate</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">q</span> <span class="o">=</span> <span class="n">qu</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">expit</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
+    <span class="n">grad_s</span> <span class="o">=</span> <span class="n">s</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">s</span><span class="p">)</span>
+    <span class="n">grad_s_by_q</span> <span class="o">=</span> <span class="n">grad_s</span><span class="o">/</span><span class="n">q</span> <span class="o">-</span> <span class="n">s</span><span class="o">/</span><span class="p">(</span><span class="n">q</span><span class="o">*</span><span class="n">q</span><span class="p">)</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">k</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+        <span class="n">hk</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">grad_s</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">y</span><span class="o">*</span><span class="n">grad_s_by_q</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">hk</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">grad_s</span><span class="o">*</span><span class="n">xk</span><span class="o">*</span><span class="n">xk</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">y</span><span class="o">*</span><span class="n">grad_s_by_q</span><span class="o">*</span><span class="n">xk</span><span class="o">*</span><span class="n">xk</span><span class="p">)</span> <span class="o">+</span> <span class="n">rl</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">alpha</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">hk</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="regularization-paths-and-warm-restarts">
+<h2>Regularization paths and warm restarts<a class="headerlink" href="#regularization-paths-and-warm-restarts" title="Permalink to this headline">¶</a></h2>
+<p>We often find the optimal regularization parameter <span class="math">\(\lambda\)</span> through cross-validation.
+Thus, in practice, we fit the model several times over a range of <span class="math">\(\lambda\)</span>&#8216;s
+<span class="math">\(\{ \lambda_{max} \geq \dots \geq \lambda_0\}\)</span>.</p>
+<p>Instead of re-fitting the model each time, we can solve the problem for the
+most-regularized model (<span class="math">\(\lambda_{max}\)</span>) and then initialize the subsequent
+model with this solution. The path that each parameter takes through the range of
+regularization parameters is known as the regularization path, and the trick of
+initializing each model with the previous model&#8217;s solution is known as a warm restart.</p>
+<p>In practice, this significantly speeds up convergence.</p>
+<div class="section" id="implementation">
+<h3>Implementation<a class="headerlink" href="#implementation" title="Permalink to this headline">¶</a></h3>
+<p>The optimization step is implemented in <code class="docutils literal"><span class="pre">fit</span></code> method in <code class="docutils literal"><span class="pre">GLM</span></code>. We will add
+pseudo code on how algorithm works soon.</p>
 <p><strong>Total running time of the script:</strong>
-(0 minutes 0.028 seconds)</p>
+(0 minutes 0.001 seconds)</p>
 <div class="sphx-glr-download container">
-<strong>Download Python source code:</strong> <a class="reference download internal" href="../_downloads/plot_glmnet.py"><code class="xref download docutils literal"><span class="pre">plot_glmnet.py</span></code></a></div>
+<strong>Download Python source code:</strong> <a class="reference download internal" href="../_downloads/plot_glmnet.py" download=""><code class="xref download docutils literal"><span class="pre">plot_glmnet.py</span></code></a></div>
 <div class="sphx-glr-download container">
-<strong>Download IPython notebook:</strong> <a class="reference download internal" href="../_downloads/plot_glmnet.ipynb"><code class="xref download docutils literal"><span class="pre">plot_glmnet.ipynb</span></code></a></div>
+<strong>Download IPython notebook:</strong> <a class="reference download internal" href="../_downloads/plot_glmnet.ipynb" download=""><code class="xref download docutils literal"><span class="pre">plot_glmnet.ipynb</span></code></a></div>
+</div>
 </div>
 </div>
 
@@ -276,7 +502,7 @@ is known as LASSO. Note that we do not penalize the baseline term
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'0.1.dev0',
+            VERSION:'0.1.dev',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

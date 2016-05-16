@@ -24,27 +24,24 @@ Links / Examples and Resources
 * Repository: https://github.com/pavanramkumar/pyglmnet
 * Documentation: http://pavanramkumar.github.io/pyglmnet
 * :ref:`general_examples`
-* :ref:`resources`
 
 
-Introduction
-============
+Contents
+========
 
-In Generalized Linear Model (GLM), we mainly want to solve the following problem.
+.. toctree::
+   :maxdepth: 1
 
-.. math::
+   api
+   resources
+   developers
 
-    \min_{\beta_0, \beta} \frac{1}{N} \sum_{i = 1}^N w_i \ell (y_i, \beta_0 + \beta^T x_i)
-    + \lambda [0.5(1 - \alpha)\| \beta \|_2^2 + \alpha \| \beta \|_1]
-
-where :math:`\ell (y_i, \beta_0 + \beta^T x_i)` is negative log-likelihood of
-an observation :math:`i`
 
 Installation
 ============
 
- You only need ``numpy``, ``scipy`` and (optional) ``scikit-learn`` as
- requiments. You can use ``pip`` to install all dependencies,
+You only need ``numpy``, ``scipy`` and (optional) ``scikit-learn`` as
+requiments. You can use ``pip`` to install all dependencies,
 
 .. code-block:: bash
 
@@ -63,13 +60,6 @@ Then run ``setup.py`` to install the library
 .. code-block:: bash
 
     python setup.py develop install
-
-
-Contributing
-============
-
-We welcome any pull requests. You can run ``nosetests tests``
-before for making pull requests to ensure that the changes work.
 
 
 Questions / Errors / Bugs

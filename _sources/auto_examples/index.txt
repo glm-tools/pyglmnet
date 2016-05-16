@@ -9,7 +9,27 @@ Examples Gallery
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="">
+    <div class="sphx-glr-thumbcontainer" tooltip="This is an example demonstrating how pyglmnet with poisson exponential distribution works.">
+
+.. only:: html
+
+    .. figure:: /auto_examples/images/thumb/sphx_glr_plot_poisson_2_thumb.png
+
+        :ref:`sphx_glr_auto_examples_plot_poisson_2.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_examples/plot_poisson_2
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This is an example demonstrating how pyglmnet works.">
 
 .. only:: html
 
@@ -29,7 +49,7 @@ Examples Gallery
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="Jerome Friedman, Trevor Hastie and Rob Tibshirani. (2010). Regularization Paths for Generalized...">
+    <div class="sphx-glr-thumbcontainer" tooltip="Tutorial on Elastic net Regularized Generalized Linear Model. We will go through the math and g...">
 
 .. only:: html
 

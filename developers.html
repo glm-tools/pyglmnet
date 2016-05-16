@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Search &mdash; pyglmnet 0.1.dev documentation</title>
+  <title>Developer Documentation &mdash; pyglmnet 0.1.dev documentation</title>
   
 
   
@@ -32,7 +32,8 @@
   
 
   
-    <link rel="top" title="pyglmnet 0.1.dev documentation" href="index.html"/> 
+    <link rel="top" title="pyglmnet 0.1.dev documentation" href="index.html"/>
+        <link rel="prev" title="Resources" href="resources.html"/> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -68,7 +69,7 @@
 
           
 <div role="search">
-  <form id="rtd-search-form" class="wy-form" action="#" method="get">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
@@ -82,10 +83,14 @@
           
             
             
-                <ul>
+                <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="api.html">API Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="resources.html">Resources</a></li>
-<li class="toctree-l1"><a class="reference internal" href="developers.html">Developer Documentation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Developer Documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#to-contribute">To contribute</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#building-documentation">Building Documentation</a></li>
+</ul>
+</li>
 </ul>
 
             
@@ -108,7 +113,7 @@
         <div class="rst-content">
           
 
-
+ 
 
 
 
@@ -116,8 +121,12 @@
   <ul class="wy-breadcrumbs">
     <li><a href="index.html">Docs</a> &raquo;</li>
       
-    <li></li>
+    <li>Developer Documentation</li>
     <li class="wy-breadcrumbs-aside">
+      
+        
+          <a href="_sources/developers.txt" rel="nofollow"> View page source</a>
+        
       
     </li>
   </ul>
@@ -126,23 +135,45 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <noscript>
-  <div id="fallback" class="admonition warning">
-    <p class="last">
-      Please activate JavaScript to enable the search
-      functionality.
-    </p>
-  </div>
-  </noscript>
+  <div class="section" id="developer-documentation">
+<h1>Developer Documentation<a class="headerlink" href="#developer-documentation" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="to-contribute">
+<h2>To contribute<a class="headerlink" href="#to-contribute" title="Permalink to this headline">¶</a></h2>
+<p>We welcome any pull requests.</p>
+<ul class="simple">
+<li>Fork the <a class="reference external" href="https://github.com/pavanramkumar/pyglmnet">repository</a></li>
+<li>Develop and push to your branch</li>
+<li>Create new pull requests</li>
+</ul>
+<p>You can run <code class="docutils literal"><span class="pre">nosetests</span> <span class="pre">tests</span></code> before for making pull requests
+to ensure that the changes work. We are continuously adding tests
+with more coverage.</p>
+</div>
+<div class="section" id="building-documentation">
+<h2>Building Documentation<a class="headerlink" href="#building-documentation" title="Permalink to this headline">¶</a></h2>
+<p>We use <code class="docutils literal"><span class="pre">sphinx</span></code> to generate documentation page. To build documentation page, run:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">make</span> <span class="n">html</span>
+</pre></div>
+</div>
+<p>All static files will be built in <code class="docutils literal"><span class="pre">_build/html/</span></code> where you can open them using the web browser.</p>
+<p>To push built documentation page to <code class="docutils literal"><span class="pre">gh-pages</span></code>, simply run:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">make</span> <span class="n">install</span>
+</pre></div>
+</div>
+</div>
+</div>
 
-  
-  <div id="search-results">
-  
-  </div>
 
            </div>
           </div>
           <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="resources.html" class="btn btn-neutral" title="Resources" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
   
 
   <hr/>
@@ -181,7 +212,6 @@
       <script type="text/javascript" src="_static/underscore.js"></script>
       <script type="text/javascript" src="_static/doctools.js"></script>
       <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-      <script type="text/javascript" src="_static/searchtools.js"></script>
 
   
 
@@ -197,14 +227,7 @@
           SphinxRtdTheme.StickyNav.enable();
       });
   </script>
-  
-  <script type="text/javascript">
-    jQuery(function() { Search.loadIndex("searchindex.js"); });
-  </script>
-  
-  <script type="text/javascript" id="searchindexloader"></script>
    
-
 
 </body>
 </html>

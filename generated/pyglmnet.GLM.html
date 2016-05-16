@@ -1,0 +1,343 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pyglmnet.GLM &mdash; pyglmnet 0.1.dev documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="stylesheet" href="../_static/gallery.css" type="text/css" />
+  
+
+  
+    <link rel="top" title="pyglmnet 0.1.dev documentation" href="../index.html"/>
+        <link rel="up" title="API Documentation" href="../api.html"/>
+        <link rel="next" title="pyglmnet.set_log_level" href="pyglmnet.set_log_level.html"/>
+        <link rel="prev" title="API Documentation" href="../api.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> pyglmnet
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1.dev
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">API Documentation</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../api.html#classes">Classes</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">pyglmnet.GLM</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#functions">Functions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../resources.html">Resources</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../developers.html">Developer Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../index.html">pyglmnet</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../index.html">Docs</a> &raquo;</li>
+      
+        <li><a href="../api.html">API Documentation</a> &raquo;</li>
+      
+    <li>pyglmnet.GLM</li>
+    <li class="wy-breadcrumbs-aside">
+      
+        
+          <a href="../_sources/generated/pyglmnet.GLM.txt" rel="nofollow"> View page source</a>
+        
+      
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="pyglmnet-glm">
+<h1>pyglmnet.GLM<a class="headerlink" href="#pyglmnet-glm" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="pyglmnet.GLM">
+<em class="property">class </em><code class="descclassname">pyglmnet.</code><code class="descname">GLM</code><span class="sig-paren">(</span><em>distr='poisson'</em>, <em>alpha=0.05</em>, <em>reg_lambda=None</em>, <em>learning_rate=0.0001</em>, <em>max_iter=100</em>, <em>tol=0.001</em>, <em>eta=4.0</em>, <em>random_state=0</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pyglmnet.GLM" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generalized Linear Model (GLM)</p>
+<p>This class implements elastic-net regularized generalized linear models.
+The core algorithm is defined in the article.</p>
+<blockquote>
+<div>min_(beta0, beta) [-L + lamda * P]</div></blockquote>
+<dl class="docutils">
+<dt>where</dt>
+<dd>L is log-likelihood term
+P is elastic-net penalty term</dd>
+</dl>
+<dl class="docutils">
+<dt>distr: str</dt>
+<dd>distribution family can be one of the following
+&#8216;poisson&#8217; or &#8216;poissonexp&#8217; or &#8216;normal&#8217; or &#8216;binomial&#8217; or &#8216;multinomial&#8217;
+default: &#8216;poisson&#8217;</dd>
+<dt>alpha: float</dt>
+<dd>the weighting between L1 and L2 norm in the penalty term
+of the loss function i.e.
+P(beta) = 0.5 * (1-alpha) * <a href="#id1"><span class="problematic" id="id2">|</span></a>beta|_2^2 + alpha * <a href="#id3"><span class="problematic" id="id4">|</span></a>beta|_1
+default: 0.5</dd>
+<dt>reg_lambda: ndarray or list</dt>
+<dd>array of regularized parameters of penalty term i.e.
+min_(beta0, beta) -L + lambda * P
+where lambda is number in reg_lambda list
+default: None, a list of 10 floats spaced logarithmically (base e)
+between 0.5 and 0.01 is generated.</dd>
+<dt>learning_rate: float</dt>
+<dd>learning rate for gradient descent
+default: 1e-4</dd>
+<dt>max_iter: int</dt>
+<dd>maximum iterations for the model,
+default: 100</dd>
+<dt>tol: float</dt>
+<dd>convergence threshold or stopping criteria.
+Optimization loop will stop below setting threshold
+default: 1e-3</dd>
+<dt>eta: float</dt>
+<dd>a threshold parameter that linearizes the exp() function above eta
+default: 4.0</dd>
+<dt>random_state: int</dt>
+<dd>seed of the random number generator used to initialize the solution</dd>
+<dt>verbose: boolean or int</dt>
+<dd>if True it will print the output while iterating
+default: False</dd>
+</dl>
+<dl class="docutils">
+<dt>Friedman, Hastie, Tibshirani (2010). Regularization Paths for Generalized</dt>
+<dd>Linear Models via Coordinate Descent, J Statistical Software.
+<a class="reference external" href="https://core.ac.uk/download/files/153/6287975.pdf">https://core.ac.uk/download/files/153/6287975.pdf</a></dd>
+</dl>
+<p>To select subset of fitted glm models, you can simply do:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">glm</span> <span class="o">=</span> <span class="n">glm</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">glm</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="method">
+<dt id="pyglmnet.GLM.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>distr='poisson'</em>, <em>alpha=0.05</em>, <em>reg_lambda=None</em>, <em>learning_rate=0.0001</em>, <em>max_iter=100</em>, <em>tol=0.001</em>, <em>eta=4.0</em>, <em>random_state=0</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pyglmnet.GLM.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p class="rubric">Methods</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">L2loss</span></code>(beta0,&nbsp;beta,&nbsp;reg_lambda,&nbsp;X,&nbsp;y)</td>
+<td>Quadratic loss.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pyglmnet.GLM.__init__" title="pyglmnet.GLM.__init__"><code class="xref py py-obj docutils literal"><span class="pre">__init__</span></code></a>([distr,&nbsp;alpha,&nbsp;reg_lambda,&nbsp;...])</td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">copy</span></code>()</td>
+<td>Return a copy of the object.</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">deviance</span></code>(y,&nbsp;yhat)</td>
+<td>The deviance function.</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">fit</span></code>(X,&nbsp;y)</td>
+<td>The fit function.</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">fit_predict</span></code>(X,&nbsp;y)</td>
+<td>Fit the model and predict on the same data.</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">get_params</span></code>([deep])</td>
+<td></td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">grad_L2loss</span></code>(beta0,&nbsp;beta,&nbsp;reg_lambda,&nbsp;X,&nbsp;y)</td>
+<td>The gradient.</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">lmb</span></code>(beta0,&nbsp;beta,&nbsp;X)</td>
+<td>Conditional intensity function.</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">logL</span></code>(beta0,&nbsp;beta,&nbsp;X,&nbsp;y)</td>
+<td>The log likelihood.</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">loss</span></code>(beta0,&nbsp;beta,&nbsp;reg_lambda,&nbsp;X,&nbsp;y)</td>
+<td>Define the objective function for elastic net.</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">penalty</span></code>(beta)</td>
+<td>The penalty.</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">predict</span></code>(X)</td>
+<td>Predict labels.</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">prox</span></code>(X,&nbsp;l)</td>
+<td>Proximal operator.</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">pseudo_R2</span></code>(y,&nbsp;yhat,&nbsp;ynull)</td>
+<td>Define the pseudo-R2 function.</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">qu</span></code>(z)</td>
+<td>The non-linearity.</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">simulate</span></code>(beta0,&nbsp;beta,&nbsp;X)</td>
+<td>Simulate data.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="pyglmnet.set_log_level.html" class="btn btn-neutral float-right" title="pyglmnet.set_log_level" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="../api.html" class="btn btn-neutral" title="API Documentation" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, Pavan Ramkumar.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'0.1.dev',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

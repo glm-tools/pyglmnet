@@ -1,0 +1,38 @@
+pyglmnet.GLM
+============
+
+.. currentmodule:: pyglmnet
+
+.. autoclass:: GLM
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~GLM.L2loss
+      ~GLM.__init__
+      ~GLM.copy
+      ~GLM.deviance
+      ~GLM.fit
+      ~GLM.fit_predict
+      ~GLM.get_params
+      ~GLM.grad_L2loss
+      ~GLM.lmb
+      ~GLM.logL
+      ~GLM.loss
+      ~GLM.penalty
+      ~GLM.predict
+      ~GLM.prox
+      ~GLM.pseudo_R2
+      ~GLM.qu
+      ~GLM.simulate
+   
+   
+
+   
+   
+   

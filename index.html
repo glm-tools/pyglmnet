@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pyglmnet 0.1.dev0 &mdash; pyglmnet 0.1.dev0 documentation</title>
+  <title>pyglmnet 0.1.dev &mdash; pyglmnet 0.1.dev documentation</title>
   
 
   
@@ -32,7 +32,8 @@
   
 
   
-    <link rel="top" title="pyglmnet 0.1.dev0 documentation" href="#"/> 
+    <link rel="top" title="pyglmnet 0.1.dev documentation" href="#"/>
+        <link rel="next" title="API Documentation" href="api.html"/> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -61,7 +62,7 @@
             
             
               <div class="version">
-                0.1.dev0
+                0.1.dev
               </div>
             
           
@@ -82,18 +83,12 @@
           
             
             
-                <!-- Local TOC -->
-                <div class="local-toc"><ul>
-<li><a class="reference internal" href="#">pyglmnet 0.1.dev0</a><ul>
-<li><a class="reference internal" href="#links-examples-and-resources">Links / Examples and Resources</a></li>
-<li><a class="reference internal" href="#introduction">Introduction</a></li>
-<li><a class="reference internal" href="#installation">Installation</a></li>
-<li><a class="reference internal" href="#contributing">Contributing</a></li>
-<li><a class="reference internal" href="#questions-errors-bugs">Questions / Errors / Bugs</a></li>
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="resources.html">Resources</a></li>
+<li class="toctree-l1"><a class="reference internal" href="developers.html">Developer Documentation</a></li>
 </ul>
-</li>
-</ul>
-</div>
+
             
           
         </div>
@@ -114,7 +109,7 @@
         <div class="rst-content">
           
 
-
+ 
 
 
 
@@ -122,7 +117,7 @@
   <ul class="wy-breadcrumbs">
     <li><a href="#">Docs</a> &raquo;</li>
       
-    <li>pyglmnet 0.1.dev0</li>
+    <li>pyglmnet 0.1.dev</li>
     <li class="wy-breadcrumbs-aside">
       
         
@@ -137,7 +132,7 @@
            <div itemprop="articleBody">
             
   <div class="section" id="pyglmnet-release">
-<h1>pyglmnet 0.1.dev0<a class="headerlink" href="#pyglmnet-release" title="Permalink to this headline">¶</a></h1>
+<h1>pyglmnet 0.1.dev<a class="headerlink" href="#pyglmnet-release" title="Permalink to this headline">¶</a></h1>
 <p><code class="docutils literal"><span class="pre">pyglmnet</span></code> is a Python library implementing elastic-net
 regularized generalized linear models (GLM). Notations and approach
 are followed as in <a class="reference external" href="https://core.ac.uk/download/files/153/6287975.pdf">Friedman, J., Hastie, T., &amp; Tibshirani, R. (2010)</a>.
@@ -151,24 +146,23 @@ size up to 10000 by 1000.</p>
 <ul class="simple">
 <li>Repository: <a class="reference external" href="https://github.com/pavanramkumar/pyglmnet">https://github.com/pavanramkumar/pyglmnet</a></li>
 <li>Documentation: <a class="reference external" href="http://pavanramkumar.github.io/pyglmnet">http://pavanramkumar.github.io/pyglmnet</a></li>
-<li><a class="reference internal" href="auto_examples/index.html#general-examples"><span>Examples Gallery</span></a></li>
-<li><a class="reference internal" href="resources.html#resources"><span>Resources</span></a></li>
+<li><a class="reference internal" href="auto_examples/index.html#general-examples"><span class="std std-ref">Examples Gallery</span></a></li>
 </ul>
 </div>
-<div class="section" id="introduction">
-<h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
-<p>In Generalized Linear Model (GLM), we mainly want to solve the following problem.</p>
-<div class="math">
-\[\min_{\beta_0, \beta} \frac{1}{N} \sum_{i = 1}^N w_i \ell (y_i, \beta_0 + \beta^T x_i)
-+ \lambda [0.5(1 - \alpha)\| \beta \|_2^2 + \alpha \| \beta \|_1]\]</div>
-<p>where <span class="math">\(\ell (y_i, \beta_0 + \beta^T x_i)\)</span> is negative log-likelihood of
-an observation <span class="math">\(i\)</span></p>
+<div class="section" id="contents">
+<h2>Contents<a class="headerlink" href="#contents" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="resources.html">Resources</a></li>
+<li class="toctree-l1"><a class="reference internal" href="developers.html">Developer Documentation</a></li>
+</ul>
+</div>
 </div>
 <div class="section" id="installation">
 <h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
-<blockquote>
-<div>You only need <code class="docutils literal"><span class="pre">numpy</span></code>, <code class="docutils literal"><span class="pre">scipy</span></code> and (optional) <code class="docutils literal"><span class="pre">scikit-learn</span></code> as
-requiments. You can use <code class="docutils literal"><span class="pre">pip</span></code> to install all dependencies,</div></blockquote>
+<p>You only need <code class="docutils literal"><span class="pre">numpy</span></code>, <code class="docutils literal"><span class="pre">scipy</span></code> and (optional) <code class="docutils literal"><span class="pre">scikit-learn</span></code> as
+requiments. You can use <code class="docutils literal"><span class="pre">pip</span></code> to install all dependencies,</p>
 <div class="highlight-bash"><div class="highlight"><pre><span></span>pip install numpy
 pip install scipy
 pip install scikit-learn
@@ -183,11 +177,6 @@ pip install scikit-learn
 </pre></div>
 </div>
 </div>
-<div class="section" id="contributing">
-<h2>Contributing<a class="headerlink" href="#contributing" title="Permalink to this headline">¶</a></h2>
-<p>We welcome any pull requests. You can run <code class="docutils literal"><span class="pre">nosetests</span> <span class="pre">tests</span></code>
-before for making pull requests to ensure that the changes work.</p>
-</div>
 <div class="section" id="questions-errors-bugs">
 <h2>Questions / Errors / Bugs<a class="headerlink" href="#questions-errors-bugs" title="Permalink to this headline">¶</a></h2>
 <p>If you have a question about the code or find errors or bugs,
@@ -200,6 +189,13 @@ For more specific question, feel free to email directly to us.</p>
            </div>
           </div>
           <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="api.html" class="btn btn-neutral float-right" title="API Documentation" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+    </div>
   
 
   <hr/>
@@ -228,7 +224,7 @@ For more specific question, feel free to email directly to us.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'0.1.dev0',
+            VERSION:'0.1.dev',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true
