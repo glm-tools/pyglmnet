@@ -51,10 +51,12 @@ def softmax(w):
 
 def label_binarizer(y):
     """Mimics scikit learn's LabelBinarizer
+
     Parameters
-    ---------
+    ----------
     y: ndarray (n_samples)
         one dimensional array of class labels
+
     Returns
     -------
     yb: array, shape (n_samples, n_classes)

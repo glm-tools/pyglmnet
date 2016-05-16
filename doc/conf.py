@@ -15,11 +15,8 @@
 import sys
 import os
 import sphinx
-
-
-# import pyglmnet
-sys.path.insert(0, os.path.abspath('..'))
 import pyglmnet
+import sphinx_gallery
 
 # -- General configuration ------------------------------------------------
 
@@ -36,6 +33,9 @@ extensions = [
     'sphinx.ext.mathjax',
     'sphinx_gallery.gen_gallery'
 ]
+
+# generate autosummary even if no references
+autosummary_generate = True
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
