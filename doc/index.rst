@@ -23,7 +23,6 @@ Links / Examples and Resources
 
 * Repository: https://github.com/pavanramkumar/pyglmnet
 * Documentation: http://pavanramkumar.github.io/pyglmnet
-* :ref:`general_examples`
 
 
 Contents
@@ -33,6 +32,7 @@ Contents
    :maxdepth: 1
 
    api
+   auto_examples/index
    resources
    developers
 
