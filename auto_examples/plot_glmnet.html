@@ -32,7 +32,10 @@
   
 
   
-    <link rel="top" title="pyglmnet 0.1.dev documentation" href="../index.html"/> 
+    <link rel="top" title="pyglmnet 0.1.dev documentation" href="../index.html"/>
+        <link rel="up" title="Examples Gallery" href="index.html"/>
+        <link rel="next" title="Resources" href="../resources.html"/>
+        <link rel="prev" title="pyglmnet for Poisson distribution" href="plot_poisson.html"/> 
 
   
   <script src="../_static/js/modernizr.min.js"></script>
@@ -82,8 +85,30 @@
           
             
             
-                <ul>
+                <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../api.html">API Documentation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Examples Gallery</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="plot_poisson_2.html">pyglmnet for Poisson exponential distribution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plot_poisson.html">pyglmnet for Poisson distribution</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Elastic net regularized GLMs</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#glm-with-elastic-net-penalty">GLM with elastic net penalty</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#poisson-like-glm">Poisson-like GLM</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#poisson-log-likelihood">Poisson Log-likelihood</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#elastic-net-penalty">Elastic net penalty</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#objective-function">Objective function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gradients-descent">Gradients descent</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#hessian-terms">Hessian terms</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#cyclical-co-ordinate-descent">Cyclical co-ordinate descent</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#regularization-paths-and-warm-restarts">Regularization paths and warm restarts</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#implementation">Implementation</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="../resources.html">Resources</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../developers.html">Developer Documentation</a></li>
 </ul>
@@ -115,6 +140,8 @@
 <div role="navigation" aria-label="breadcrumbs navigation">
   <ul class="wy-breadcrumbs">
     <li><a href="../index.html">Docs</a> &raquo;</li>
+      
+        <li><a href="index.html">Examples Gallery</a> &raquo;</li>
       
     <li>Elastic net regularized GLMs</li>
     <li class="wy-breadcrumbs-aside">
@@ -474,6 +501,15 @@ pseudo code on how algorithm works soon.</p>
            </div>
           </div>
           <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../resources.html" class="btn btn-neutral float-right" title="Resources" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="plot_poisson.html" class="btn btn-neutral" title="pyglmnet for Poisson distribution" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
   
 
   <hr/>
