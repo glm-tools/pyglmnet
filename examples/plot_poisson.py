@@ -144,19 +144,6 @@ R2t = model[0].pseudo_R2(yt, ythat, np.mean(yr))
 print(R2r, R2t)
 
 ##########################################################
-# perform bootstrap
-# here you need ``scikits.bootstrap`` to perform the following line
-# you can install using: ``pip install scikits.bootstrap``
-
-##########################################################
-
-import scikits.bootstrap as boot
-ci = boot.ci((yr, yrhat, np.mean(yr) * np.ones(np.shape(yr)[0])),
-              statfunction=model.pseudo_R2,
-              n_samples=100, alpha=0.05)
-print(ci)
-
-##########################################################
 # Multinomial example
 # ^^^^^^^^^^^^^^^^^^^
 # we can also use ``pyglmnet`` with multinomial case
@@ -165,7 +152,6 @@ print(ci)
 ##########################################################
 
 from sklearn.datasets import make_classification
-from pyglmnet import GLM
 X, y = make_classification(n_samples=10000, n_classes=5,
                            n_informative=100, n_features=100, n_redundant=0)
 
