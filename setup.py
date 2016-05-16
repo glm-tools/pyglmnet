@@ -1,8 +1,6 @@
 #! /usr/bin/env python
-try:
-    from setuptools import setup
-except ImportError:
-    from distutils.core import setup
+import setuptools  # noqa; we are using a setuptools namespace
+from numpy.distutils.core import setup
 
 descr = """Elastic-net regularized generalized linear models."""
 
