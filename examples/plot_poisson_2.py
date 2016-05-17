@@ -154,4 +154,4 @@ plt.show()
 
 ########################################################
 
-print(m.pseudo_R2(yt, ythat, np.mean(yr)))
+print(m.score(yt, ythat, np.mean(yr), method='pseudo_R2'))
