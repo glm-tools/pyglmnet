@@ -534,7 +534,10 @@ class GLM(object):
             yhat = yhat.ravel()
 
         L1 = _log_likelihood(y, yhat, self.distr)
-        LS = _log_likelihood(y, y, self.distr)
+        if self.distr in ['poisson', 'poissonexp']:
+            LS = _log_likelihood(y, y, self.distr)
+        else:
+            LS = 0
 
         if method == 'deviance':
             score = -2 * (L1 - LS)

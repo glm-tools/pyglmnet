@@ -66,17 +66,26 @@ def test_glmnet():
     assert_raises(ValueError, glm.fit_predict, X_train[None, ...], y_train)
 
 
+def simple_cv_scorer(obj, X, y):
+    """Simple scorer takes average pseudo-R2 from regularization path"""
+    yhats = obj.predict(X)
+    ynull = np.zeros(y.shape) * y.mean()
+    return np.mean([obj.score(y, yhat, ynull, method='pseudo_R2')
+                   for yhat in yhats])
+
+
 def test_cv():
     """Simple CV check"""
+    # XXX: don't use scikit-learn for tests.
     X, y = make_regression()
-    model_mn = GLM(distr='normal', alpha=0.01,
-                   reg_lambda=np.array([0.0, 0.1, 0.2]))
-    model_mn.fit(X, y)
+    glm = GLM(distr='normal', alpha=0.01,
+              reg_lambda=[0.0, 0.1, 0.2])
+    glm.fit(X, y)
 
     cv = KFold(X.shape[0], 5)
-
     # check that it returns 5 scores
-    # assert_equal(len(cross_val_score(model_mn, X, y, cv=cv)), 5)
+    assert_equal(len(cross_val_score(glm, X, y, cv=cv,
+                 scoring=simple_cv_scorer)), 5)
 
 
 def test_multinomial():
@@ -97,12 +106,12 @@ def test_multinomial():
     # uniform prediction
     ynull = np.ones(yhat.shape) / yhat.shape[1]
     # pseudo_R2 should be greater than 0
-    # assert_true(glm.score(y, yhat, ynull, method='pseudo_R2') > 0.)
-    # glm.score(y, yhat)
+    assert_true(glm.score(y, yhat, ynull, method='pseudo_R2') > 0.)
+    glm.score(y, yhat)
     assert_equal(len(glm.simulate(glm.fit_[0]['beta0'],
                                   glm.fit_[0]['beta'],
                                   X)),
                  X.shape[0])
     # these should raise an exception
-    # assert_raises(ValueError, glm.score, y, y, y, 'pseudo_R2')
-    # assert_raises(ValueError, glm.score, y, y, None, 'deviance')
+    assert_raises(ValueError, glm.score, y, y, y, 'pseudo_R2')
+    assert_raises(ValueError, glm.score, y, y, None, 'deviance')
