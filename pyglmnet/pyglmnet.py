@@ -70,6 +70,28 @@ def label_binarizer(y):
     return yb
 
 
+def _log_likelihood(y, yhat, distr):
+    """Helper to compute the log likelihood."""
+    eps = np.spacing(1)
+    if distr in ['poisson', 'poissonexp']:
+        return np.sum(y * np.log(eps + yhat) - yhat)
+    elif distr == 'binomial':
+        # Log likelihood of model under consideration
+        return 2 * len(y) * \
+            np.sum(y * np.log((yhat == 0) + yhat) / np.mean(yhat) +
+                   (1 - y) * np.log((yhat == 1) +
+                                    1 - yhat) / (1 - np.mean(yhat)))
+    elif distr == 'normal':
+        return np.sum((y - yhat)**2)
+    elif distr == 'multinomial':
+        y = label_binarizer(y)
+        # yhat is the probability of each output
+        if yhat.ndim != y.ndim:
+            msg = 'yhat and ynull must be (n_samples, n_class) ndarrays'
+            raise ValueError(msg)
+        return np.sum(y * np.log(yhat))
+
+
 class GLM(object):
     """Generalized Linear Model (GLM)
 
@@ -493,85 +515,40 @@ class GLM(object):
         """
         return self.fit(X, y).predict(X)
 
-    def pseudo_R2(self, y, yhat, ynull):
-        """Define the pseudo-R2 function."""
-        eps = np.spacing(1)
+    def score(self, y, yhat, ynull=None, method='deviance'):
+        """Score the model.
+
+        Parameters
+        ----------
+        y : array, shape (n_samples, [n_classes])
+            The true labels.
+        yhat : array, shape (n_samples, [n_classes])
+            The estimated labels.
+        ynull : None | array, shape (n_samples, [n_classes])
+            The labels for the null model. Must be None if method is 'deviance'
+        method : str
+            One of 'pseudo_R2' or 'deviance'
+        """
         y = y.ravel()
         if self.distr != 'multinomial':
             yhat = yhat.ravel()
 
-        if self.distr == 'poisson' or self.distr == 'poissonexp':
-            # Log likelihood of model under consideration
-            L1 = np.sum(y * np.log(eps + yhat) - yhat)
-
-            # Log likelihood of homogeneous model
-            L0 = np.sum(y * np.log(eps + ynull) - ynull)
-
-            # Log likelihood of saturated model
-            LS = np.sum(y * np.log(eps + y) - y)
-            R2 = 1 - (LS - L1) / (LS - L0)
-
-        elif self.distr == 'binomial':
-            # Log likelihood of model under consideration
-            L1 = 2 * len(y) * \
-                np.sum(y * np.log((yhat == 0) + yhat) / np.mean(yhat) +
-                       (1 - y) * np.log((yhat == 1) +
-                                        1 - yhat) / (1 - np.mean(yhat)))
-
-            # Log likelihood of homogeneous model
-            L0 = 2 * len(y) * \
-                np.sum(y * np.log((ynull == 0) + ynull) / np.mean(yhat) +
-                       (1 - y) * np.log((ynull == 1) +
-                                        1 - ynull) / (1 - np.mean(yhat)))
-            R2 = 1 - L1 / L0
-
-        elif self.distr == 'normal':
-            R2 = 1 - np.sum((y - yhat)**2) / np.sum((y - ynull)**2)
-        elif self.distr == 'multinomial':
-            y = label_binarizer(y)
-            # yhat is the probability of each output
-            if yhat.ndim != y.ndim or ynull.ndim != y.ndim:
-                msg = 'yhat and ynull must be (n_samples, n_class) ndarrays'
-                raise Exception(msg)
-            L1 = np.sum(y * np.log(yhat))
-            L0 = np.sum(y * np.log(ynull))
-            R2 = 1 - L1 / L0
-
-        return R2
-
-    def deviance(self, y, yhat):
-        """The deviance function."""
-        eps = np.spacing(1)
-        y = y.ravel()
-        if self.distr != 'multinomial':
-            yhat = yhat.ravel()
-
-        # L1 = Log likelihood of model under consideration
-        # LS = Log likelihood of saturated model
-        if self.distr == 'poisson' or self.distr == 'poissonexp':
-            L1 = np.sum(y * np.log(eps + yhat) - yhat)
-            LS = np.sum(y * np.log(eps + y) - y)
-
-        elif self.distr == 'binomial':
-            L1 = 2 * len(y) * \
-                np.sum(y * np.log((yhat == 0) + yhat) / np.mean(yhat) +
-                       (1 - y) * np.log((yhat == 1) +
-                                        1 - yhat) / (1 - np.mean(yhat)))
+        L1 = _log_likelihood(y, yhat, self.distr)
+        if self.distr in ['poisson', 'poissonexp']:
+            LS = _log_likelihood(y, y, self.distr)
+        else:
             LS = 0
 
-        elif self.distr == 'normal':
-            L1 = -np.sum((y - yhat) ** 2)
-            LS = 0
-        elif self.distr == 'multinomial':
-            y = label_binarizer(y)
-            if yhat.ndim != y.ndim:
-                msg = 'yhat must be a (n_samples, n_class) ndarray'
-                raise Exception(msg)
-            L1 = np.sum(y * np.log(yhat))
-            LS = 0
+        if method == 'deviance':
+            score = -2 * (L1 - LS)
+        elif method == 'pseudo_R2':
+            L0 = _log_likelihood(y, ynull, self.distr)
+            if self.distr in ['poisson', 'poissonexp']:
+                score = 1 - (LS - L1) / (LS - L0)
+            else:
+                score = 1 - L1 / L0
 
-        D = -2 * (L1 - LS)
-        return D
+        return score
 
     def simulate(self, beta0, beta, X):
         """Simulate data."""

@@ -55,7 +55,7 @@ def test_glmnet():
     y_pred = glm[2].predict(scaler.transform(X_train))
     assert_equal(y_pred.shape, (X_train.shape[0], ))
     assert_raises(IndexError, glm.__getitem__, [2])
-    glm.deviance(y_train, y_pred)
+    glm.score(y_train, y_pred)
 
     # don't allow slicing if model has not been fit yet.
     glm = GLM(distr='poisson')
@@ -70,30 +70,34 @@ def simple_cv_scorer(obj, X, y):
     """Simple scorer takes average pseudo-R2 from regularization path"""
     yhats = obj.predict(X)
     ynull = np.zeros(y.shape) * y.mean()
-    return np.mean([obj.pseudo_R2(y, yhat, ynull) for yhat in yhats])
+    return np.mean([obj.score(y, yhat, ynull, method='pseudo_R2')
+                   for yhat in yhats])
 
 
 def test_cv():
     """Simple CV check"""
+    # XXX: don't use scikit-learn for tests.
     X, y = make_regression()
-    model_mn = GLM(distr='normal', alpha=0.01, reg_lambda=np.array([0.0, 0.1, 0.2]))
-    model_mn.fit(X, y)
+    glm = GLM(distr='normal', alpha=0.01,
+              reg_lambda=[0.0, 0.1, 0.2])
+    glm.fit(X, y)
 
     cv = KFold(X.shape[0], 5)
-
     # check that it returns 5 scores
-    assert_equal(len(cross_val_score(model_mn, X, y, cv=cv, scoring=simple_cv_scorer)), 5)
+    assert_equal(len(cross_val_score(glm, X, y, cv=cv,
+                 scoring=simple_cv_scorer)), 5)
 
 
 def test_multinomial():
     """Test all multinomial functionality"""
-    glm = GLM(distr='multinomial', reg_lambda=np.array([0.0, 0.1, 0.2]), tol=1e-10)
+    glm = GLM(distr='multinomial', reg_lambda=np.array([0.0, 0.1, 0.2]),
+              tol=1e-10)
     X = np.array([[-1, -2, -3], [4, 5, 6]])
     y = np.array([1, 0])
     # test gradient
     beta = np.zeros([4, 2])
     grad_beta0, grad_beta = glm.grad_L2loss(beta[0], beta[1:], 0, X, y)
-    assert grad_beta0[0] != grad_beta0[1]
+    assert_true(grad_beta0[0] != grad_beta0[1])
     glm.fit(X, y)
     y_pred = glm.predict(X)
     assert_equal(y_pred.shape, (3, X.shape[0], 2))  # n_lambdas x n_samples x n_classes
@@ -102,21 +106,12 @@ def test_multinomial():
     # uniform prediction
     ynull = np.ones(yhat.shape) / yhat.shape[1]
     # pseudo_R2 should be greater than 0
-    assert_true(glm.pseudo_R2(y, yhat, ynull) > 0.)
-    glm.deviance(y, yhat)
+    assert_true(glm.score(y, yhat, ynull, method='pseudo_R2') > 0.)
+    glm.score(y, yhat)
     assert_equal(len(glm.simulate(glm.fit_[0]['beta0'],
                                   glm.fit_[0]['beta'],
                                   X)),
                  X.shape[0])
     # these should raise an exception
-    try:
-        glm.pseudo_R2(y, y, y)
-        assert False
-    except Exception:
-        assert True
-    try:
-        glm.deviance(y, y)
-        assert False
-    except Exception:
-        assert True
-
+    assert_raises(ValueError, glm.score, y, y, y, 'pseudo_R2')
+    assert_raises(ValueError, glm.score, y, y, None, 'deviance')

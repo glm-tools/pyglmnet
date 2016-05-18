@@ -8,7 +8,7 @@ This is an example demonstrating how pyglmnet works.
 
 """
 
-# Author: Pavan Ramkumar
+# Author: Pavan Ramkumar <pavan.ramkumar@gmail.com>
 # License: MIT
 
 import numpy as np
@@ -134,13 +134,13 @@ plt.show()
 ##########################################################
 
 # Compute model deviance
-Dr = model[0].deviance(yr, yrhat)
-Dt = model[0].deviance(yt, ythat)
+Dr = model[0].score(yr, yrhat)
+Dt = model[0].score(yt, ythat)
 print(Dr, Dt)
 
 # Compute pseudo-R2s
-R2r = model[0].pseudo_R2(yr, yrhat, np.mean(yr))
-R2t = model[0].pseudo_R2(yt, ythat, np.mean(yr))
+R2r = model[0].score(yr, yrhat, np.mean(yr), method='pseudo_R2')
+R2t = model[0].score(yt, ythat, np.mean(yr), method='pseudo_R2')
 print(R2r, R2t)
 
 ##########################################################
