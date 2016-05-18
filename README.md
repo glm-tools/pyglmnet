@@ -12,7 +12,7 @@ and the accompanying widely popular [R package](https://web.stanford.edu/~hastie
 The key difference is that we use ordinary batch gradient descent instead of
 co-ordinate descent, which is very fast for `N x p` of up to `10000 x 1000`.
 
-You can find some resources [here](doc/resources.md).
+You can find some resources [here](doc/resources.rst).
 
 
 ### Simulating data and fitting a GLM in 5 minutes
