@@ -42,13 +42,13 @@ def softmax(w):
 
     Parameters
     ----------
-    w: array
-        any object exposing the array interface
+    w: array | list
+        The array of numbers.
 
     Returns
     -------
-    dist: ndarray
-        the resulting array with values ranging from 0 to 1
+    dist: array
+        The resulting array with values ranging from 0 to 1.
     """
     w = np.array(w)
     maxes = np.amax(w, axis=1)
