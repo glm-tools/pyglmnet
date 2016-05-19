@@ -8,7 +8,7 @@ This is an example demonstrating how pyglmnet works.
 
 """
 
-# Author: Pavan Ramkumar
+# Author: Pavan Ramkumar <pavan.ramkumar@gmail.com>
 # License: MIT
 
 import numpy as np
@@ -36,7 +36,7 @@ from pyglmnet import GLM
 
 # create regularize parameters for model
 reg_lambda = np.logspace(np.log(0.5), np.log(0.01), 10, base=np.exp(1))
-model = GLM(distr='poisson', verbose=False, alpha=0.05,
+glm_poisson = GLM(distr='poisson', verbose=False, alpha=0.05,
             max_iter=1000, learning_rate=1e-4,
             reg_lambda=reg_lambda)
 
@@ -61,11 +61,11 @@ beta = np.array(beta.todense())
 
 # training data
 Xr = np.random.normal(0.0, 1.0, [n_samples, n_features])
-yr = model.simulate(beta0, beta, Xr)
+yr = glm_poisson.simulate(beta0, beta, Xr)
 
 # testing data
 Xt = np.random.normal(0.0, 1.0, [n_samples, n_features])
-yt = model.simulate(beta0, beta, Xt)
+yt = glm_poisson.simulate(beta0, beta, Xt)
 
 ##########################################################
 # Fit the model
@@ -76,7 +76,7 @@ yt = model.simulate(beta0, beta, Xt)
 ##########################################################
 
 scaler = StandardScaler().fit(Xr)
-model.fit(scaler.transform(Xr), yr)
+glm_poisson.fit(scaler.transform(Xr), yr)
 
 ##########################################################
 # Visualize the fit coefficients
@@ -87,7 +87,7 @@ model.fit(scaler.transform(Xr), yr)
 
 ##########################################################
 
-fit_param = model[0].fit_
+fit_param = glm_poisson[0].fit_
 plt.plot(beta[:], 'bo')
 plt.hold(True)
 plt.plot(fit_param['beta'][:], 'ro')
@@ -113,8 +113,8 @@ plt.show()
 ##########################################################
 
 # Predict targets from test set
-yrhat = model[0].predict(scaler.transform(Xr))
-ythat = model[0].predict(scaler.transform(Xt))
+yrhat = glm_poisson[0].predict(scaler.transform(Xr))
+ythat = glm_poisson[0].predict(scaler.transform(Xt))
 
 plt.plot(yt[:100])
 plt.hold(True)
@@ -134,13 +134,13 @@ plt.show()
 ##########################################################
 
 # Compute model deviance
-Dr = model[0].deviance(yr, yrhat)
-Dt = model[0].deviance(yt, ythat)
+Dr = glm_poisson[0].score(yr, yrhat)
+Dt = glm_poisson[0].score(yt, ythat)
 print(Dr, Dt)
 
 # Compute pseudo-R2s
-R2r = model[0].pseudo_R2(yr, yrhat, np.mean(yr))
-R2t = model[0].pseudo_R2(yt, ythat, np.mean(yr))
+R2r = glm_poisson[0].score(yr, yrhat, np.mean(yr), method='pseudo_R2')
+R2t = glm_poisson[0].score(yt, ythat, np.mean(yr), method='pseudo_R2')
 print(R2r, R2t)
 
 ##########################################################
@@ -155,9 +155,9 @@ from sklearn.datasets import make_classification
 X, y = make_classification(n_samples=10000, n_classes=5,
                            n_informative=100, n_features=100, n_redundant=0)
 
-model_mn = GLM(distr='multinomial', alpha=0.01,
+glm_mn = GLM(distr='multinomial', alpha=0.01,
                reg_lambda=np.array([0.02, 0.01]), verbose=False)
-model_mn.threshold = 1e-5
-model_mn.fit(X, y)
-y_pred = model_mn[-1].predict(X).argmax(axis=1)
+glm_mn.threshold = 1e-5
+glm_mn.fit(X, y)
+y_pred = glm_mn[-1].predict(X).argmax(axis=1)
 print('Output performance = %f percent' % (y_pred == y).mean())

@@ -30,7 +30,7 @@ from pyglmnet import GLM
 
 # create regularization parameters for model
 reg_lambda = np.logspace(np.log(0.5), np.log(0.01), 10, base=np.exp(1))
-model = GLM(distr='poissonexp', verbose=False, alpha=0.05,
+glm_poissonexp = GLM(distr='poissonexp', verbose=False, alpha=0.05,
             max_iter=1000, learning_rate=1e-5,
             reg_lambda=reg_lambda, eta=4.0)
 
@@ -84,7 +84,7 @@ model = GLM(distr='poissonexp', verbose=False, alpha=0.05,
 ########################################################
 
 z = np.linspace(0., 10., 100)
-qu = model.qu(z)
+qu = glm_poissonexp.qu(z)
 plt.plot(z, qu)
 plt.hold
 plt.plot(z, np.exp(z))
@@ -107,11 +107,11 @@ beta = np.array(beta.todense())
 
 # training data
 Xr = np.random.normal(0.0, 1.0, [n_samples, n_features])
-yr = model.simulate(beta0, beta, Xr)
+yr = glm_poissonexp.simulate(beta0, beta, Xr)
 
 # testing data
 Xt = np.random.normal(0.0, 1.0, [n_samples, n_features])
-yt = model.simulate(beta0, beta, Xt)
+yt = glm_poissonexp.simulate(beta0, beta, Xt)
 
 ########################################################
 # fit model to training data
@@ -119,14 +119,14 @@ yt = model.simulate(beta0, beta, Xt)
 ########################################################
 
 scaler = StandardScaler().fit(Xr)
-model.fit(scaler.transform(Xr),yr);
+glm_poissonexp.fit(scaler.transform(Xr),yr);
 
 ########################################################
 # gradient of loss fucntion
 
 ########################################################
 
-grad_beta0, grad_beta = model.grad_L2loss(model.fit_[-1]['beta0'], model.fit_[-1]['beta'], 0.01, Xr, yr)
+grad_beta0, grad_beta = glm_poissonexp.grad_L2loss(glm_poissonexp.fit_[-1]['beta0'], glm_poissonexp.fit_[-1]['beta'], 0.01, Xr, yr)
 print(grad_beta[:5])
 
 ########################################################
@@ -134,7 +134,7 @@ print(grad_beta[:5])
 
 ########################################################
 
-m = model[-1]
+m = glm_poissonexp[-1]
 this_model_param = m.fit_
 yrhat = m.predict(scaler.transform(Xr))
 ythat = m.predict(scaler.transform(Xt))
@@ -154,4 +154,4 @@ plt.show()
 
 ########################################################
 
-print(m.pseudo_R2(yt, ythat, np.mean(yr)))
+print(m.score(yt, ythat, np.mean(yr), method='pseudo_R2'))
