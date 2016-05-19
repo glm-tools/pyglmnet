@@ -2,6 +2,7 @@
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)](https://github.com/pavanramkumar/pyglmnet/blob/master/LICENSE) [![Travis](https://api.travis-ci.org/pavanramkumar/pyglmnet.png?branch=master "Travis")](https://travis-ci.org/pavanramkumar/pyglmnet)
 [![Coverage Status](https://coveralls.io/repos/github/pavanramkumar/pyglmnet/badge.svg?branch=master)](https://coveralls.io/github/pavanramkumar/pyglmnet?branch=master)
+[![Gitter](https://badges.gitter.im/pavanramkumar/pyglmnet.svg)](https://gitter.im/pavanramkumar/pyglmnet?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
 Python implementation of elastic-net regularized generalized linear models.
 
@@ -12,7 +13,7 @@ and the accompanying widely popular [R package](https://web.stanford.edu/~hastie
 The key difference is that we use ordinary batch gradient descent instead of
 co-ordinate descent, which is very fast for `N x p` of up to `10000 x 1000`.
 
-You can find some resources [here](doc/resources.md).
+You can find some resources [here](doc/resources.rst).
 
 
 ### Simulating data and fitting a GLM in 5 minutes
@@ -41,7 +42,7 @@ from sklearn.preprocessing import StandardScaler
 from pyglmnet import GLM
 
 # create an instance of the GLM class
-model = GLM(distr='poisson', verbose=True, alpha=0.05)
+glm = GLM(distr='poisson', verbose=True, alpha=0.05)
 
 n_samples, n_features = 10000, 100
 
@@ -52,25 +53,24 @@ beta = np.array(beta.todense())
 
 # training data
 Xr = np.random.normal(0.0, 1.0, [n_samples, n_features])
-yr = model.simulate(beta0, beta, Xr)
+yr = glm.simulate(beta0, beta, Xr)
 
 # testing data
 Xt = np.random.normal(0.0, 1.0, [n_samples, n_features])
-yt = model.simulate(beta0, beta, Xt)
+yt = glm.simulate(beta0, beta, Xt)
 
 # fit Generalized Linear Model
 scaler = StandardScaler().fit(Xr)
-model.fit(scaler.transform(Xr), yr)
+glm.fit(scaler.transform(Xr), yr)
 
 # we'll get .fit_params after .fit(), here we get one set of fit parameters
-fit_param = model[-1].fit_
+fit_param = glm[-1].fit_
 
 # we can use fitted parameters to predict
-yhat = model.predict(scaler.transform(Xt))
+yhat = glm.predict(scaler.transform(Xt))
 ```
 
-See full example on how to use `pyglmnet`
-[here](http://pavanramkumar.github.io/pyglmnet/auto_examples/plot_poisson.html)
+[See the full example on how to use `pyglmnet`](http://pavanramkumar.github.io/pyglmnet/auto_examples/plot_poisson.html)
 
 
 ### Tutorial
