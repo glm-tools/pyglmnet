@@ -38,8 +38,17 @@ def set_log_level(verbose):
 
 
 def softmax(w):
-    """
-    Softmax function of given array of number w
+    """Softmax function of given array of number w
+
+    Parameters
+    ----------
+    w: array | list
+        The array of numbers.
+
+    Returns
+    -------
+    dist: array
+        The resulting array with values ranging from 0 to 1.
     """
     w = np.array(w)
     maxes = np.amax(w, axis=1)
