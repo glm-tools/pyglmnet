@@ -144,9 +144,11 @@ ythat = m.predict(scaler.transform(Xt))
 
 ########################################################
 
-plt.plot(yt[:100])
+plt.plot(yt[:100], label='tr')
 plt.hold(True)
-plt.plot(ythat[:100], 'r')
+plt.plot(ythat[:100], 'r', label='pr')
+plt.xlabel('samples')
+plt.ylabel('true and predicted outputs')
 plt.show()
 
 ########################################################
