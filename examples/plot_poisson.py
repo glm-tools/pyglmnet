@@ -4,7 +4,7 @@
 pyglmnet for Poisson distribution
 =================================
 
-This is an example demonstrating how pyglmnet works.
+This is an example demonstrating how pyglmnet works with a Poisson distribution.
 
 """
 
@@ -20,14 +20,16 @@ import matplotlib.pyplot as plt
 # Here are inputs that you can provide when you instantiate the `GLM` class.
 # If not provided, it will be set to the respective defaults
 #
-# - `distr`: str, `'poisson'` or `'normal'` or `'binomial'` or `'multinomial'`
+# - `distr`: str (`'poisson'` or `'normal'` or `'binomial'` or `'multinomial'`)
 #     default: `'poisson'`
-# - `alpha`: float, the weighting between L1 and L2 norm, default: 0.5
-# - `reg_lambda`: array, array of regularized parameters,
+# - `alpha`: float (the weighting between L1 and L2 norm)
+#     default: 0.5
+# - `reg_lambda`: array (array of regularized parameters)
 #     default: `np.logspace(np.log(0.5), np.log(0.01), 10, base=np.exp(1))`
-# - `learning_rate`: float, learning rate for gradient descent,
+# - `learning_rate`: float (learning rate for gradient descent)
 #     default: 1e-4
-# - `max_iter`: int, maximum iteration for the model, default: 100
+# - `max_iter`: int (maximum iteration for the model)
+#     default: 100
 
 ########################################################
 
@@ -136,18 +138,18 @@ plt.show()
 # Compute model deviance
 Dr = glm_poisson[0].score(yr, yrhat)
 Dt = glm_poisson[0].score(yt, ythat)
-print(Dr, Dt)
+print('Dr = ' Dr, 'Dt = ' Dt)
 
 # Compute pseudo-R2s
 R2r = glm_poisson[0].score(yr, yrhat, np.mean(yr), method='pseudo_R2')
 R2t = glm_poisson[0].score(yt, ythat, np.mean(yr), method='pseudo_R2')
-print(R2r, R2t)
+print('R2r = ' R2r, 'R2r = ' R2t)
 
 ##########################################################
 # Multinomial example
 # ^^^^^^^^^^^^^^^^^^^
-# we can also use ``pyglmnet`` with multinomial case
-# where you can provide array of class
+# We can also use ``pyglmnet`` with multinomial case
+# where you can provide array of class.
 
 ##########################################################
 
@@ -160,4 +162,4 @@ glm_mn = GLM(distr='multinomial', alpha=0.01,
 glm_mn.threshold = 1e-5
 glm_mn.fit(X, y)
 y_pred = glm_mn[-1].predict(X).argmax(axis=1)
-print('Output performance = %f percent' % (y_pred == y).mean())
+print('Output performance = %f %' % (y_pred == y).mean())
