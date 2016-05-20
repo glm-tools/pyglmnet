@@ -1,12 +1,18 @@
 # -*- coding: utf-8 -*-
 """
 =================================
-pyglmnet for Poisson distribution
+Poisson (Basic) Distribution
 =================================
 
-This is an example demonstrating how pyglmnet works with a Poisson distribution.
+This is an example demonstrating how pyglmnet
+works with a basic Poisson distribution.
 
 """
+
+########################################################
+# First, we can import useful libraries that we will use it later on.
+
+########################################################
 
 # Author: Pavan Ramkumar <pavan.ramkumar@gmail.com>
 # License: MIT
@@ -30,6 +36,11 @@ import matplotlib.pyplot as plt
 #     default: 1e-4
 # - `max_iter`: int (maximum iteration for the model)
 #     default: 100
+
+########################################################
+
+########################################################
+# Import ``GLM`` class from ``pyglmnet``
 
 ########################################################
 
@@ -122,11 +133,11 @@ plt.show()
 yrhat = glm_poisson[0].predict(scaler.transform(Xr))
 ythat = glm_poisson[0].predict(scaler.transform(Xt))
 
-plt.plot(yt[:100], label='true')
+plt.plot(yt[:100], label='tr')
 plt.hold(True)
-plt.plot(ythat[:100], 'r', label='predicted')
+plt.plot(ythat[:100], 'r', label='pr')
 plt.xlabel('samples')
-plt.ylabel('outputs')
+plt.ylabel('true and predicted outputs')
 plt.legend(bbox_to_anchor=(0., 1.02, 1., .102), loc=1,
            ncol=2, borderaxespad=0.)
 plt.show()
