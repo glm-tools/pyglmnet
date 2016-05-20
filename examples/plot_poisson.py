@@ -90,9 +90,13 @@ glm_poisson.fit(scaler.transform(Xr), yr)
 ##########################################################
 
 fit_param = glm_poisson[0].fit_
-plt.plot(beta[:], 'bo')
+plt.plot(beta[:], 'bo', label ='bo')
 plt.hold(True)
-plt.plot(fit_param['beta'][:], 'ro')
+plt.plot(fit_param['beta'][:], 'ro', label='ro')
+plt.xlabel('samples')
+plt.ylabel('outputs')
+plt.legend(bbox_to_anchor=(0., 1.02, 1., .102), loc=1,
+           ncol=2, borderaxespad=0.)
 plt.show()
 
 ##########################################################
@@ -118,11 +122,13 @@ plt.show()
 yrhat = glm_poisson[0].predict(scaler.transform(Xr))
 ythat = glm_poisson[0].predict(scaler.transform(Xt))
 
-plt.plot(yt[:100], label='tr')
+plt.plot(yt[:100], label='true')
 plt.hold(True)
-plt.plot(ythat[:100], 'r', label='pr')
+plt.plot(ythat[:100], 'r', label='predicted')
 plt.xlabel('samples')
-plt.ylabel('true and predicted outputs')
+plt.ylabel('outputs')
+plt.legend(bbox_to_anchor=(0., 1.02, 1., .102), loc=1,
+           ncol=2, borderaxespad=0.)
 plt.show()
 
 ##########################################################
@@ -138,12 +144,12 @@ plt.show()
 # Compute model deviance
 Dr = glm_poisson[0].score(yr, yrhat)
 Dt = glm_poisson[0].score(yt, ythat)
-print('Dr = ' Dr, 'Dt = ' Dt)
+print('Dr = %f' % Dr, 'Dt = %f' % Dt)
 
 # Compute pseudo-R2s
 R2r = glm_poisson[0].score(yr, yrhat, np.mean(yr), method='pseudo_R2')
 R2t = glm_poisson[0].score(yt, ythat, np.mean(yr), method='pseudo_R2')
-print('R2r = ' R2r, 'R2r = ' R2t)
+print('  R2r =  %f' % R2r, ' R2r = %f' % R2t)
 
 ##########################################################
 # Multinomial example
@@ -162,4 +168,4 @@ glm_mn = GLM(distr='multinomial', alpha=0.01,
 glm_mn.threshold = 1e-5
 glm_mn.fit(X, y)
 y_pred = glm_mn[-1].predict(X).argmax(axis=1)
-print('Output performance = %f %' % (y_pred == y).mean())
+print('Output performance = %f percent.' % (y_pred == y).mean())
