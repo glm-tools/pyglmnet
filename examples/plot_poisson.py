@@ -102,7 +102,6 @@ glm_poisson.fit(scaler.transform(Xr), yr)
 
 fit_param = glm_poisson[0].fit_
 plt.plot(beta[:], 'bo', label ='bo')
-plt.hold(True)
 plt.plot(fit_param['beta'][:], 'ro', label='ro')
 plt.xlabel('samples')
 plt.ylabel('outputs')
@@ -134,7 +133,6 @@ yrhat = glm_poisson[0].predict(scaler.transform(Xr))
 ythat = glm_poisson[0].predict(scaler.transform(Xt))
 
 plt.plot(yt[:100], label='tr')
-plt.hold(True)
 plt.plot(ythat[:100], 'r', label='pr')
 plt.xlabel('samples')
 plt.ylabel('true and predicted outputs')

@@ -92,7 +92,6 @@ glm_poissonexp = GLM(distr='poissonexp', verbose=False, alpha=0.05,
 z = np.linspace(0., 10., 100)
 qu = glm_poissonexp.qu(z)
 plt.plot(z, qu, label='a')
-plt.hold
 plt.plot(z, np.exp(z), label='b')
 plt.ylim([0, 1000])
 plt.xlabel('x')
@@ -154,7 +153,6 @@ ythat = m.predict(scaler.transform(Xt))
 ########################################################
 
 plt.plot(yt[:100], label='tr')
-plt.hold(True)
 plt.plot(ythat[:100], 'r', label='pr')
 plt.xlabel('samples')
 plt.ylabel('true and predicted outputs')
