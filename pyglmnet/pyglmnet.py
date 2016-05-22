@@ -5,7 +5,7 @@ from copy import deepcopy
 
 import numpy as np
 from scipy.special import expit
-import utils as utils
+from . import utils
 
 logger = logging.getLogger('pyglmnet')
 logger.addHandler(logging.StreamHandler())
