@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-=============================================
+================================
 Poisson Exponential Distribution
-=============================================
+================================
 
 This is an example demonstrating how pyglmnet with
 poisson exponential distribution works.

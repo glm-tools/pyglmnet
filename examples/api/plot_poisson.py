@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-=================================
+============================
 Poisson (Basic) Distribution
-=================================
+============================
 
 This is an example demonstrating how pyglmnet
 works with a basic Poisson distribution.
