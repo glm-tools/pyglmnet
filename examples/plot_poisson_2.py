@@ -17,6 +17,7 @@ poisson exponential distribution works.
 import numpy as np
 import scipy.sparse as sps
 from scipy.special import expit
+from copy import deepcopy
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import StandardScaler
 
@@ -90,7 +91,14 @@ glm_poissonexp = GLM(distr='poissonexp', verbose=False, alpha=0.05,
 ########################################################
 
 z = np.linspace(0., 10., 100)
-qu = glm_poissonexp.qu(z)
+
+eta = 4.0
+qu = deepcopy(z)
+slope = np.exp(eta)
+intercept = (1 - eta) * slope
+qu[z > eta] = z[z > eta] * slope + intercept
+qu[z <= eta] = np.exp(z[z <= eta])
+
 plt.plot(z, qu, label='a')
 plt.plot(z, np.exp(z), label='b')
 plt.ylim([0, 1000])
