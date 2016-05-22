@@ -248,7 +248,7 @@ class GLM(object):
         # return np.array(sx).reshape(x.shape)
         return np.sign(X) * (np.abs(X) - l) * (np.abs(X) > l)
 
-    def __grad_L2loss(self, beta0, beta, reg_lambda, X, y):
+    def grad_L2loss(self, beta0, beta, reg_lambda, X, y):
         """The gradient."""
         alpha = self.alpha
         z = beta0 + np.dot(X, beta)
@@ -377,7 +377,7 @@ class GLM(object):
             for t in range(0, self.max_iter):
 
                 # Calculate gradient
-                grad_beta0, grad_beta = self.__grad_L2loss(
+                grad_beta0, grad_beta = self.grad_L2loss(
                     beta[0], beta[1:], rl, X, y)
                 g[0] = grad_beta0
                 g[1:] = grad_beta
