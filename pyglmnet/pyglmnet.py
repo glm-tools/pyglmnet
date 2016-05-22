@@ -169,7 +169,7 @@ class GLM(object):
         """Return a copy of the object."""
         return deepcopy(self)
 
-    def __qu(self, z):
+    def _qu(self, z):
         """The non-linearity."""
         if self.distr == 'poisson':
             qu = np.log1p(np.exp(z))
@@ -195,15 +195,15 @@ class GLM(object):
         #     multinomial=softmax(z))
         # return qu[self.distr]
 
-    def __lmb(self, beta0, beta, X):
+    def _lmb(self, beta0, beta, X):
         """Conditional intensity function."""
         z = beta0 + np.dot(X, beta)
-        l = self.__qu(z)
+        l = self._qu(z)
         return l
 
-    def __logL(self, beta0, beta, X, y):
+    def _logL(self, beta0, beta, X, y):
         """The log likelihood."""
-        l = self.__lmb(beta0, beta, X)
+        l = self._lmb(beta0, beta, X)
         if self.distr == 'poisson':
             logL = np.sum(y * np.log(l) - l)
         elif self.distr == 'poissonexp':
@@ -221,29 +221,29 @@ class GLM(object):
             logL = np.sum(y * np.log(l))
         return logL
 
-    def __penalty(self, beta):
+    def _penalty(self, beta):
         """The penalty."""
         alpha = self.alpha
         P = 0.5 * (1 - alpha) * np.linalg.norm(beta, 2) + \
             alpha * np.linalg.norm(beta, 1)
         return P
 
-    def __loss(self, beta0, beta, reg_lambda, X, y):
+    def _loss(self, beta0, beta, reg_lambda, X, y):
         """Define the objective function for elastic net."""
-        L = self.__logL(beta0, beta, X, y)
-        P = self.__penalty(beta)
+        L = self._logL(beta0, beta, X, y)
+        P = self._penalty(beta)
         J = -L + reg_lambda * P
         return J
 
-    def __L2loss(self, beta0, beta, reg_lambda, X, y):
+    def _L2loss(self, beta0, beta, reg_lambda, X, y):
         """Quadratic loss."""
         alpha = self.alpha
-        L = self.__logL(beta0, beta, X, y)
+        L = self._logL(beta0, beta, X, y)
         P = 0.5 * (1 - alpha) * np.linalg.norm(beta, 2)
         J = -L + reg_lambda * P
         return J
 
-    def __prox(self, X, l):
+    def _prox(self, X, l):
         """Proximal operator."""
         # sx = [0. if np.abs(y) <= l else np.sign(y)*np.abs(abs(y)-l)
         # for y in x]
@@ -257,7 +257,7 @@ class GLM(object):
         s = expit(z)
 
         if self.distr == 'poisson':
-            q = self.__qu(z)
+            q = self._qu(z)
             grad_beta0 = np.sum(s) - np.sum(y * s / q)
             grad_beta = np.transpose(np.dot(np.transpose(s), X) -
                                      np.dot(np.transpose(y * s / q), X)) + \
@@ -265,7 +265,7 @@ class GLM(object):
             # + reg_lambda*alpha*np.sign(beta)
 
         elif self.distr == 'poissonexp':
-            q = self.__qu(z)
+            q = self._qu(z)
 
             grad_beta0 = np.sum(q[z <= self.eta] - y[z <= self.eta]) + \
                 np.sum(1 - y[z > self.eta] / q[z > self.eta]) * self.eta
@@ -294,7 +294,7 @@ class GLM(object):
 
         elif self.distr == 'multinomial':
             # this assumes that y is already as a one-hot encoding
-            pred = self.__qu(z)
+            pred = self._qu(z)
             grad_beta0 = -np.sum(y - pred, axis=0)
             grad_beta = -np.transpose(np.dot(np.transpose(y - pred), X)) \
                 + reg_lambda * (1 - alpha) * beta
@@ -388,10 +388,10 @@ class GLM(object):
                 beta = beta - self.learning_rate * g
 
                 # Apply proximal operator for L1-regularization
-                beta[1:] = self.__prox(beta[1:], rl * alpha)
+                beta[1:] = self._prox(beta[1:], rl * alpha)
 
                 # Calculate loss and convergence criteria
-                L.append(self.__loss(beta[0], beta[1:], rl, X, y))
+                L.append(self._loss(beta[0], beta[1:], rl, X, y))
 
                 # Delta loss and convergence criterion
                 if t > 1:
@@ -435,9 +435,9 @@ class GLM(object):
         if isinstance(self.fit_, list):
             yhat = list()
             for fit in self.fit_:
-                yhat.append(self.__lmb(fit['beta0'], fit['beta'], X))
+                yhat.append(self._lmb(fit['beta0'], fit['beta'], X))
         else:
-            yhat = self.__lmb(self.fit_['beta0'], self.fit_['beta'], X)
+            yhat = self._lmb(self.fit_['beta0'], self.fit_['beta'], X)
         yhat = np.asarray(yhat)
         yhat = yhat[..., 0] if self.distr != 'multinomial' else yhat
         return yhat
@@ -500,13 +500,13 @@ class GLM(object):
         """Simulate data."""
         np.random.seed(self.random_state)
         if self.distr == 'poisson' or self.distr == 'poissonexp':
-            y = np.random.poisson(self.__lmb(beta0, beta, X))
+            y = np.random.poisson(self._lmb(beta0, beta, X))
         if self.distr == 'normal':
-            y = np.random.normal(self.__lmb(beta0, beta, X))
+            y = np.random.normal(self._lmb(beta0, beta, X))
         if self.distr == 'binomial':
-            y = np.random.binomial(1, self.__lmb(beta0, beta, X))
+            y = np.random.binomial(1, self._lmb(beta0, beta, X))
         if self.distr == 'multinomial':
             y = np.array([np.random.multinomial(1, pvals)
                           for pvals in
-                          self.__lmb(beta0, beta, X)]).argmax(0)
+                          self._lmb(beta0, beta, X)]).argmax(0)
         return y
