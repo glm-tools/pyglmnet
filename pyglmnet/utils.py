@@ -1,3 +1,7 @@
+"""
+A few miscellaneous helper functions for pyglmnet.py
+"""
+
 import numpy as np
 
 
@@ -28,7 +32,7 @@ def label_binarizer(y):
 
     Parameters
     ----------
-    y: ndarray (n_samples)
+    y: ndarray, shape (n_samples, )
         one dimensional array of class labels
 
     Returns
