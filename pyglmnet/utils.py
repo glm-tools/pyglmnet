@@ -1,6 +1,4 @@
-from copy import deepcopy
 import numpy as np
-from scipy.special import expit
 
 
 def softmax(w):
@@ -23,8 +21,10 @@ def softmax(w):
     dist = e / np.sum(e, axis=1, keepdims=True)
     return dist
 
+
 def label_binarizer(y):
     """Mimics scikit learn's LabelBinarizer
+
 
     Parameters
     ----------
@@ -42,6 +42,7 @@ def label_binarizer(y):
     yb = np.zeros([len(y), y.max() + 1])
     yb[np.arange(len(y)), y_flat] = 1
     return yb
+
 
 def log_likelihood(y, yhat, distr):
     """Helper to compute the log likelihood."""

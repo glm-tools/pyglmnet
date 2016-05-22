@@ -10,6 +10,7 @@ import utils as utils
 logger = logging.getLogger('pyglmnet')
 logger.addHandler(logging.StreamHandler())
 
+
 def set_log_level(verbose):
     """Convenience function for setting the log level.
 
@@ -35,6 +36,7 @@ def set_log_level(verbose):
             raise ValueError('verbose must be of a valid type')
         verbose = logging_types[verbose]
     logger.setLevel(verbose)
+
 
 class GLM(object):
     """Generalized Linear Model (GLM)
