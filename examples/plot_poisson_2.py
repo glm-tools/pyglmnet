@@ -142,7 +142,7 @@ glm_poissonexp.fit(scaler.transform(Xr),yr);
 
 ########################################################
 
-grad_beta0, grad_beta = glm_poissonexp.grad_L2loss(glm_poissonexp.fit_[-1]['beta0'], glm_poissonexp.fit_[-1]['beta'], 0.01, Xr, yr)
+grad_beta0, grad_beta = glm_poissonexp._grad_L2loss(glm_poissonexp.fit_[-1]['beta0'], glm_poissonexp.fit_[-1]['beta'], 0.01, Xr, yr)
 print(grad_beta[:5])
 
 ########################################################
