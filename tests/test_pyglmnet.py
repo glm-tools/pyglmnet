@@ -98,7 +98,7 @@ def test_multinomial():
 
     # test gradient
     beta = np.zeros([4, 2])
-    grad_beta0, grad_beta = glm_mn.grad_L2loss(beta[0], beta[1:], 0, X, y)
+    grad_beta0, grad_beta = glm_mn._grad_L2loss(beta[0], beta[1:], 0, X, y)
     assert_true(grad_beta0[0] != grad_beta0[1])
     glm_mn.fit(X, y)
     y_pred = glm_mn.predict(X)
