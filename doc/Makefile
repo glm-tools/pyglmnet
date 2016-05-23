@@ -35,7 +35,7 @@ help:
 	@echo "  linkcheck  to check all external links for integrity"
 	@echo "  doctest    to run all doctests embedded in the documentation (if enabled)"
 	@echo "  coverage   to run coverage check of the documentation (if enabled)"
-	@echo "  install    to make the html and push it online" 
+	@echo "  install    to make the html and push it online"
 
 .PHONY: clean
 
@@ -44,6 +44,7 @@ clean:
 	rm -rf auto_examples/
 	rm -rf generated/
 	rm -rf modules/
+	rm -rf tutorials/
 
 html-noplot:
 	$(SPHINXBUILD) -D plot_gallery=0 -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
