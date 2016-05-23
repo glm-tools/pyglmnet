@@ -16,7 +16,6 @@ pyglmnet.GLM
       ~GLM.L2loss
       ~GLM.__init__
       ~GLM.copy
-      ~GLM.deviance
       ~GLM.fit
       ~GLM.fit_predict
       ~GLM.get_params
@@ -27,8 +26,8 @@ pyglmnet.GLM
       ~GLM.penalty
       ~GLM.predict
       ~GLM.prox
-      ~GLM.pseudo_R2
       ~GLM.qu
+      ~GLM.score
       ~GLM.simulate
    
    

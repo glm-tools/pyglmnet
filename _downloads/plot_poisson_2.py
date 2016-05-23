@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-=============================================
-pyglmnet for Poisson exponential distribution
-=============================================
+================================
+Poisson Exponential Distribution
+================================
 
 This is an example demonstrating how pyglmnet with
 poisson exponential distribution works.
@@ -10,18 +10,19 @@ poisson exponential distribution works.
 """
 
 ########################################################
-# first, we can import useful libraries that we will use it later on
+# First, we can import useful libraries that we will use it later on
 
 ########################################################
 
 import numpy as np
 import scipy.sparse as sps
 from scipy.special import expit
+from copy import deepcopy
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import StandardScaler
 
 ########################################################
-# import ``GLM`` class from ``pyglmnet``
+# Import ``GLM`` class from ``pyglmnet``
 
 ########################################################
 
@@ -30,11 +31,12 @@ from pyglmnet import GLM
 
 # create regularization parameters for model
 reg_lambda = np.logspace(np.log(0.5), np.log(0.01), 10, base=np.exp(1))
-model = GLM(distr='poissonexp', verbose=False, alpha=0.05,
+glm_poissonexp = GLM(distr='poissonexp', verbose=False, alpha=0.05,
             max_iter=1000, learning_rate=1e-5,
             reg_lambda=reg_lambda, eta=4.0)
 
 ########################################################
+#
 #
 # .. math::
 #
@@ -80,19 +82,33 @@ model = GLM(distr='poissonexp', verbose=False, alpha=0.05,
 #         \\
 #         \exp(\eta) \sum_i \Big(1 - \frac{\lambda_i}{y_i}\Big)x_{ij}, & \text{if}\ z_i \gt \eta
 #     \end{cases}
+#
+#
+#
+
+########################################################
 
 ########################################################
 
 z = np.linspace(0., 10., 100)
-qu = model.qu(z)
-plt.plot(z, qu)
-plt.hold
-plt.plot(z, np.exp(z))
+
+eta = 4.0
+qu = deepcopy(z)
+slope = np.exp(eta)
+intercept = (1 - eta) * slope
+qu[z > eta] = z[z > eta] * slope + intercept
+qu[z <= eta] = np.exp(z[z <= eta])
+
+plt.plot(z, qu, label='a')
+plt.plot(z, np.exp(z), label='b')
 plt.ylim([0, 1000])
+plt.xlabel('x')
+plt.ylabel('y')
+plt.legend(bbox_to_anchor=(0., 1.02, 1., .102), loc=1,
+           ncol=2, borderaxespad=0.)
 plt.show()
 
 ########################################################
-#
 
 ########################################################
 
@@ -107,46 +123,49 @@ beta = np.array(beta.todense())
 
 # training data
 Xr = np.random.normal(0.0, 1.0, [n_samples, n_features])
-yr = model.simulate(beta0, beta, Xr)
+yr = glm_poissonexp.simulate(beta0, beta, Xr)
 
 # testing data
 Xt = np.random.normal(0.0, 1.0, [n_samples, n_features])
-yt = model.simulate(beta0, beta, Xt)
+yt = glm_poissonexp.simulate(beta0, beta, Xt)
 
 ########################################################
-# fit model to training data
+# Fit model to training data
 
 ########################################################
 
 scaler = StandardScaler().fit(Xr)
-model.fit(scaler.transform(Xr),yr);
+glm_poissonexp.fit(scaler.transform(Xr),yr);
 
 ########################################################
-# gradient of loss fucntion
+# Gradient of loss function
 
 ########################################################
 
-grad_beta0, grad_beta = model.grad_L2loss(model.fit_[-1]['beta0'], model.fit_[-1]['beta'], 0.01, Xr, yr)
+grad_beta0, grad_beta = glm_poissonexp._grad_L2loss(glm_poissonexp.fit_[-1]['beta0'], glm_poissonexp.fit_[-1]['beta'], 0.01, Xr, yr)
 print(grad_beta[:5])
 
 ########################################################
-# use one model to predict
+# Use one model to predict
 
 ########################################################
 
-m = model[-1]
+m = glm_poissonexp[-1]
 this_model_param = m.fit_
 yrhat = m.predict(scaler.transform(Xr))
 ythat = m.predict(scaler.transform(Xt))
 
 ########################################################
-# visualize predicted output
+# Visualize predicted output
 
 ########################################################
 
-plt.plot(yt[:100])
-plt.hold(True)
-plt.plot(ythat[:100], 'r')
+plt.plot(yt[:100], label='tr')
+plt.plot(ythat[:100], 'r', label='pr')
+plt.xlabel('samples')
+plt.ylabel('true and predicted outputs')
+plt.legend(bbox_to_anchor=(0., 1.02, 1., .102), loc=1,
+           ncol=2, borderaxespad=0.)
 plt.show()
 
 ########################################################
@@ -154,4 +173,4 @@ plt.show()
 
 ########################################################
 
-print(m.pseudo_R2(yt, ythat, np.mean(yr)))
+print(m.score(yt, ythat, np.mean(yr), method='pseudo_R2'))

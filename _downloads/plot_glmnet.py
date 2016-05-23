@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 ============================
-Elastic net regularized GLMs
+Elastic Net Regularized GLM
 ============================
 
 Tutorial on Elastic net Regularized Generalized Linear Model.

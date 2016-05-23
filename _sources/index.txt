@@ -29,10 +29,11 @@ Contents
 ========
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
 
-   api
+   tutorials/index
    auto_examples/index
+   api
    resources
    developers
 

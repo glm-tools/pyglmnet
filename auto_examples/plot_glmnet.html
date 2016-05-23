@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Elastic net regularized GLMs &mdash; pyglmnet 0.1.dev documentation</title>
+  <title>Elastic Net Regularized GLM &mdash; pyglmnet 0.1.dev documentation</title>
   
 
   
@@ -32,10 +32,7 @@
   
 
   
-    <link rel="top" title="pyglmnet 0.1.dev documentation" href="../index.html"/>
-        <link rel="up" title="Examples Gallery" href="index.html"/>
-        <link rel="next" title="Resources" href="../resources.html"/>
-        <link rel="prev" title="pyglmnet for Poisson distribution" href="plot_poisson.html"/> 
+    <link rel="top" title="pyglmnet 0.1.dev documentation" href="../index.html"/> 
 
   
   <script src="../_static/js/modernizr.min.js"></script>
@@ -85,30 +82,10 @@
           
             
             
-                <ul class="current">
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/index.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="index.html">Examples Gallery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api.html">API Documentation</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="index.html">Examples Gallery</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="plot_poisson_2.html">pyglmnet for Poisson exponential distribution</a></li>
-<li class="toctree-l2"><a class="reference internal" href="plot_poisson.html">pyglmnet for Poisson distribution</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Elastic net regularized GLMs</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#glm-with-elastic-net-penalty">GLM with elastic net penalty</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#poisson-like-glm">Poisson-like GLM</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="#poisson-log-likelihood">Poisson Log-likelihood</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#elastic-net-penalty">Elastic net penalty</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#objective-function">Objective function</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#gradients-descent">Gradients descent</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#hessian-terms">Hessian terms</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#cyclical-co-ordinate-descent">Cyclical co-ordinate descent</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#regularization-paths-and-warm-restarts">Regularization paths and warm restarts</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#implementation">Implementation</a></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
 <li class="toctree-l1"><a class="reference internal" href="../resources.html">Resources</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../developers.html">Developer Documentation</a></li>
 </ul>
@@ -133,7 +110,7 @@
         <div class="rst-content">
           
 
- 
+
 
 
 
@@ -141,9 +118,7 @@
   <ul class="wy-breadcrumbs">
     <li><a href="../index.html">Docs</a> &raquo;</li>
       
-        <li><a href="index.html">Examples Gallery</a> &raquo;</li>
-      
-    <li>Elastic net regularized GLMs</li>
+    <li>Elastic Net Regularized GLM</li>
     <li class="wy-breadcrumbs-aside">
       
         
@@ -157,8 +132,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="elastic-net-regularized-glms">
-<span id="sphx-glr-auto-examples-plot-glmnet-py"></span><h1>Elastic net regularized GLMs<a class="headerlink" href="#elastic-net-regularized-glms" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="elastic-net-regularized-glm">
+<span id="sphx-glr-auto-examples-plot-glmnet-py"></span><h1>Elastic Net Regularized GLM<a class="headerlink" href="#elastic-net-regularized-glm" title="Permalink to this headline">¶</a></h1>
 <p>Tutorial on Elastic net Regularized Generalized Linear Model.
 We will go through the math and gradient descent algorithm to
 in order to optimize GLM cost function.</p>
@@ -429,10 +404,10 @@ one parameter at a time. Let&#8217;s calculate how to make these updates.</p>
 \[\tilde{g}_{k+1}^t = \sum_i \sigma(z_i^t) - \sum_i y_i \frac{\sigma(z_i^t)}{q(z_i^t)}\]</div>
 <p>If <span class="math">\(k &gt; 0\)</span>,</p>
 <div class="math">
-\[\begin{eqnarray}
+\[\begin{split}\begin{eqnarray}
     \tilde{g}_{k+1}^t &amp; = \sum_i \sigma(z_i^t) x_{i,k+1} - \sum_i y_i \frac{\sigma(z_i^t)}{q(z_i^t)} x_{i,k+1}
       &amp; + \lambda(1-\alpha)\beta_{k+1}^t
-\end{eqnarray}\]</div>
+\end{eqnarray}\end{split}\]</div>
 <div class="highlight-python"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">grad_loss_k</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">beta_k</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">rl</span><span class="p">,</span> <span class="n">xk</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">k</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Gradient update for a single coordinate</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -485,14 +460,14 @@ initializing each model with the previous model&#8217;s solution is known as a w
 <p>In practice, this significantly speeds up convergence.</p>
 <div class="section" id="implementation">
 <h3>Implementation<a class="headerlink" href="#implementation" title="Permalink to this headline">¶</a></h3>
-<p>The optimization step is implemented in <code class="docutils literal"><span class="pre">fit</span></code> method in <code class="docutils literal"><span class="pre">GLM</span></code>. We will add
+<p>The optimization step is implemented in <tt class="docutils literal"><span class="pre">fit</span></tt> method in <tt class="docutils literal"><span class="pre">GLM</span></tt>. We will add
 pseudo code on how algorithm works soon.</p>
 <p><strong>Total running time of the script:</strong>
-(0 minutes 0.001 seconds)</p>
+(0 minutes 0.002 seconds)</p>
 <div class="sphx-glr-download container">
-<strong>Download Python source code:</strong> <a class="reference download internal" href="../_downloads/plot_glmnet.py" download=""><code class="xref download docutils literal"><span class="pre">plot_glmnet.py</span></code></a></div>
+<strong>Download Python source code:</strong> <a class="reference download internal" href="../_downloads/plot_glmnet.py"><tt class="xref download docutils literal"><span class="pre">plot_glmnet.py</span></tt></a></div>
 <div class="sphx-glr-download container">
-<strong>Download IPython notebook:</strong> <a class="reference download internal" href="../_downloads/plot_glmnet.ipynb" download=""><code class="xref download docutils literal"><span class="pre">plot_glmnet.ipynb</span></code></a></div>
+<strong>Download IPython notebook:</strong> <a class="reference download internal" href="../_downloads/plot_glmnet.ipynb"><tt class="xref download docutils literal"><span class="pre">plot_glmnet.ipynb</span></tt></a></div>
 </div>
 </div>
 </div>
@@ -501,15 +476,6 @@ pseudo code on how algorithm works soon.</p>
            </div>
           </div>
           <footer>
-  
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="../resources.html" class="btn btn-neutral float-right" title="Resources" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
-      
-      
-        <a href="plot_poisson.html" class="btn btn-neutral" title="pyglmnet for Poisson distribution" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
-    </div>
   
 
   <hr/>
@@ -547,7 +513,7 @@ pseudo code on how algorithm works soon.</p>
       <script type="text/javascript" src="../_static/jquery.js"></script>
       <script type="text/javascript" src="../_static/underscore.js"></script>
       <script type="text/javascript" src="../_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   
 

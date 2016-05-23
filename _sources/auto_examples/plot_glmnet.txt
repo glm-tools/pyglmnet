@@ -4,7 +4,7 @@
 
 
 ============================
-Elastic net regularized GLMs
+Elastic Net Regularized GLM
 ============================
 
 Tutorial on Elastic net Regularized Generalized Linear Model.
@@ -522,7 +522,7 @@ The optimization step is implemented in ``fit`` method in ``GLM``. We will add
 pseudo code on how algorithm works soon.
 
 **Total running time of the script:**
-(0 minutes 0.001 seconds)
+(0 minutes 0.002 seconds)
 
 
 

@@ -35,7 +35,7 @@
     <link rel="top" title="pyglmnet 0.1.dev documentation" href="../index.html"/>
         <link rel="up" title="API Documentation" href="../api.html"/>
         <link rel="next" title="pyglmnet.set_log_level" href="pyglmnet.set_log_level.html"/>
-        <link rel="prev" title="API Documentation" href="../api.html"/> 
+        <link rel="prev" title="pyglmnet.label_binarizer" href="pyglmnet.label_binarizer.html"/> 
 
   
   <script src="../_static/js/modernizr.min.js"></script>
@@ -86,15 +86,16 @@
             
             
                 <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/index.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../auto_examples/index.html">Examples Gallery</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../api.html">API Documentation</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="../api.html#classes">Classes</a><ul class="current">
-<li class="toctree-l3 current"><a class="current reference internal" href="#">pyglmnet.GLM</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="">pyglmnet.GLM</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../api.html#functions">Functions</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../auto_examples/index.html">Examples Gallery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../resources.html">Resources</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../developers.html">Developer Documentation</a></li>
 </ul>
@@ -119,7 +120,7 @@
         <div class="rst-content">
           
 
- 
+
 
 
 
@@ -147,7 +148,7 @@
 <h1>pyglmnet.GLM<a class="headerlink" href="#pyglmnet-glm" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="pyglmnet.GLM">
-<em class="property">class </em><code class="descclassname">pyglmnet.</code><code class="descname">GLM</code><span class="sig-paren">(</span><em>distr='poisson'</em>, <em>alpha=0.05</em>, <em>reg_lambda=None</em>, <em>learning_rate=0.0001</em>, <em>max_iter=100</em>, <em>tol=0.001</em>, <em>eta=4.0</em>, <em>random_state=0</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pyglmnet.GLM" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">pyglmnet.</tt><tt class="descname">GLM</tt><big>(</big><em>distr='poisson'</em>, <em>alpha=0.05</em>, <em>reg_lambda=None</em>, <em>learning_rate=0.0001</em>, <em>max_iter=100</em>, <em>tol=0.001</em>, <em>eta=4.0</em>, <em>random_state=0</em>, <em>verbose=False</em><big>)</big><a class="headerlink" href="#pyglmnet.GLM" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generalized Linear Model (GLM)</p>
 <p>This class implements elastic-net regularized generalized linear models.
 The core algorithm is defined in the article.</p>
@@ -199,13 +200,13 @@ default: False</dd>
 <a class="reference external" href="https://core.ac.uk/download/files/153/6287975.pdf">https://core.ac.uk/download/files/153/6287975.pdf</a></dd>
 </dl>
 <p>To select subset of fitted glm models, you can simply do:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">glm</span> <span class="o">=</span> <span class="n">glm</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">glm</span> <span class="o">=</span> <span class="n">glm</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">glm</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
 </pre></div>
 </div>
 <dl class="method">
 <dt id="pyglmnet.GLM.__init__">
-<code class="descname">__init__</code><span class="sig-paren">(</span><em>distr='poisson'</em>, <em>alpha=0.05</em>, <em>reg_lambda=None</em>, <em>learning_rate=0.0001</em>, <em>max_iter=100</em>, <em>tol=0.001</em>, <em>eta=4.0</em>, <em>random_state=0</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pyglmnet.GLM.__init__" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">__init__</tt><big>(</big><em>distr='poisson'</em>, <em>alpha=0.05</em>, <em>reg_lambda=None</em>, <em>learning_rate=0.0001</em>, <em>max_iter=100</em>, <em>tol=0.001</em>, <em>eta=4.0</em>, <em>random_state=0</em>, <em>verbose=False</em><big>)</big><a class="headerlink" href="#pyglmnet.GLM.__init__" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <p class="rubric">Methods</p>
@@ -215,55 +216,52 @@ default: False</dd>
 <col width="90%" />
 </colgroup>
 <tbody valign="top">
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">L2loss</span></code>(beta0,&nbsp;beta,&nbsp;reg_lambda,&nbsp;X,&nbsp;y)</td>
+<tr class="row-odd"><td><tt class="xref py py-obj docutils literal"><span class="pre">L2loss</span></tt>(beta0,&nbsp;beta,&nbsp;reg_lambda,&nbsp;X,&nbsp;y)</td>
 <td>Quadratic loss.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="#pyglmnet.GLM.__init__" title="pyglmnet.GLM.__init__"><code class="xref py py-obj docutils literal"><span class="pre">__init__</span></code></a>([distr,&nbsp;alpha,&nbsp;reg_lambda,&nbsp;...])</td>
+<tr class="row-even"><td><a class="reference internal" href="#pyglmnet.GLM.__init__" title="pyglmnet.GLM.__init__"><tt class="xref py py-obj docutils literal"><span class="pre">__init__</span></tt></a>([distr,&nbsp;alpha,&nbsp;reg_lambda,&nbsp;...])</td>
 <td></td>
 </tr>
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">copy</span></code>()</td>
+<tr class="row-odd"><td><tt class="xref py py-obj docutils literal"><span class="pre">copy</span></tt>()</td>
 <td>Return a copy of the object.</td>
 </tr>
-<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">deviance</span></code>(y,&nbsp;yhat)</td>
-<td>The deviance function.</td>
-</tr>
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">fit</span></code>(X,&nbsp;y)</td>
+<tr class="row-even"><td><tt class="xref py py-obj docutils literal"><span class="pre">fit</span></tt>(X,&nbsp;y)</td>
 <td>The fit function.</td>
 </tr>
-<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">fit_predict</span></code>(X,&nbsp;y)</td>
+<tr class="row-odd"><td><tt class="xref py py-obj docutils literal"><span class="pre">fit_predict</span></tt>(X,&nbsp;y)</td>
 <td>Fit the model and predict on the same data.</td>
 </tr>
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">get_params</span></code>([deep])</td>
+<tr class="row-even"><td><tt class="xref py py-obj docutils literal"><span class="pre">get_params</span></tt>([deep])</td>
 <td></td>
 </tr>
-<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">grad_L2loss</span></code>(beta0,&nbsp;beta,&nbsp;reg_lambda,&nbsp;X,&nbsp;y)</td>
+<tr class="row-odd"><td><tt class="xref py py-obj docutils literal"><span class="pre">grad_L2loss</span></tt>(beta0,&nbsp;beta,&nbsp;reg_lambda,&nbsp;X,&nbsp;y)</td>
 <td>The gradient.</td>
 </tr>
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">lmb</span></code>(beta0,&nbsp;beta,&nbsp;X)</td>
+<tr class="row-even"><td><tt class="xref py py-obj docutils literal"><span class="pre">lmb</span></tt>(beta0,&nbsp;beta,&nbsp;X)</td>
 <td>Conditional intensity function.</td>
 </tr>
-<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">logL</span></code>(beta0,&nbsp;beta,&nbsp;X,&nbsp;y)</td>
+<tr class="row-odd"><td><tt class="xref py py-obj docutils literal"><span class="pre">logL</span></tt>(beta0,&nbsp;beta,&nbsp;X,&nbsp;y)</td>
 <td>The log likelihood.</td>
 </tr>
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">loss</span></code>(beta0,&nbsp;beta,&nbsp;reg_lambda,&nbsp;X,&nbsp;y)</td>
+<tr class="row-even"><td><tt class="xref py py-obj docutils literal"><span class="pre">loss</span></tt>(beta0,&nbsp;beta,&nbsp;reg_lambda,&nbsp;X,&nbsp;y)</td>
 <td>Define the objective function for elastic net.</td>
 </tr>
-<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">penalty</span></code>(beta)</td>
+<tr class="row-odd"><td><tt class="xref py py-obj docutils literal"><span class="pre">penalty</span></tt>(beta)</td>
 <td>The penalty.</td>
 </tr>
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">predict</span></code>(X)</td>
+<tr class="row-even"><td><tt class="xref py py-obj docutils literal"><span class="pre">predict</span></tt>(X)</td>
 <td>Predict labels.</td>
 </tr>
-<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">prox</span></code>(X,&nbsp;l)</td>
+<tr class="row-odd"><td><tt class="xref py py-obj docutils literal"><span class="pre">prox</span></tt>(X,&nbsp;l)</td>
 <td>Proximal operator.</td>
 </tr>
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">pseudo_R2</span></code>(y,&nbsp;yhat,&nbsp;ynull)</td>
-<td>Define the pseudo-R2 function.</td>
-</tr>
-<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">qu</span></code>(z)</td>
+<tr class="row-even"><td><tt class="xref py py-obj docutils literal"><span class="pre">qu</span></tt>(z)</td>
 <td>The non-linearity.</td>
 </tr>
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">simulate</span></code>(beta0,&nbsp;beta,&nbsp;X)</td>
+<tr class="row-odd"><td><tt class="xref py py-obj docutils literal"><span class="pre">score</span></tt>(y,&nbsp;yhat[,&nbsp;ynull,&nbsp;method])</td>
+<td>Score the model.</td>
+</tr>
+<tr class="row-even"><td><tt class="xref py py-obj docutils literal"><span class="pre">simulate</span></tt>(beta0,&nbsp;beta,&nbsp;X)</td>
 <td>Simulate data.</td>
 </tr>
 </tbody>
@@ -282,7 +280,7 @@ default: False</dd>
         <a href="pyglmnet.set_log_level.html" class="btn btn-neutral float-right" title="pyglmnet.set_log_level" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="../api.html" class="btn btn-neutral" title="API Documentation" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="pyglmnet.label_binarizer.html" class="btn btn-neutral" title="pyglmnet.label_binarizer" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -322,7 +320,7 @@ default: False</dd>
       <script type="text/javascript" src="../_static/jquery.js"></script>
       <script type="text/javascript" src="../_static/underscore.js"></script>
       <script type="text/javascript" src="../_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   
 
