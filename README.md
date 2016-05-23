@@ -58,12 +58,12 @@ glm.fit(scaler.transform(Xr), yr)
 yhat = glm.predict(scaler.transform(Xt))
 ```
 
-[More `pyglmnet` examples and use cases](http://pavanramkumar.github.io/pyglmnet/auto_examples/plot_poisson.html)
+[More `pyglmnet` examples and use cases](http://pavanramkumar.github.io/pyglmnet/auto_examples/index.html)
 
 
 ### Tutorial
 
-Here is an [extensive tutorial](http://pavanramkumar.github.io/pyglmnet/auto_examples/index.html) on GLMs with optimization and pseudo-code.
+Here is an [extensive tutorial](http://pavanramkumar.github.io/pyglmnet/tutorials/plot_tutorial.html) on GLMs with optimization and pseudo-code.
 
 ### How to contribute?
 
