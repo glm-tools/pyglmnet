@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 """
-============================
-Elastic net regularized GLMs
-============================
+========
+Tutorial
+========
 
-Tutorial on Elastic net Regularized Generalized Linear Model.
+This is a tutorial on Elastic net Regularized Generalized Linear Models.
 We will go through the math and gradient descent algorithm to
 in order to optimize GLM cost function.
 

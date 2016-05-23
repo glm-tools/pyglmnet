@@ -290,7 +290,6 @@ texinfo_documents = [
 #texinfo_no_detailmenu = False
 
 sphinx_gallery_conf = {
-    # path to your examples scripts
-    'examples_dirs': '../examples',
-    # path where to save gallery generated examples
-    'gallery_dirs': 'auto_examples'}
+    'examples_dirs': ['../examples', '../tutorial'],
+    'gallery_dirs': ['auto_examples', 'tutorials'],
+}
