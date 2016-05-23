@@ -1,10 +1,8 @@
-# pyglmnet
+# Python implementation of elastic-net regularized generalized linear models
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)](https://github.com/pavanramkumar/pyglmnet/blob/master/LICENSE) [![Travis](https://api.travis-ci.org/pavanramkumar/pyglmnet.png?branch=master "Travis")](https://travis-ci.org/pavanramkumar/pyglmnet)
 [![Coverage Status](https://coveralls.io/repos/github/pavanramkumar/pyglmnet/badge.svg?branch=master)](https://coveralls.io/github/pavanramkumar/pyglmnet?branch=master)
 [![Gitter](https://badges.gitter.im/pavanramkumar/pyglmnet.svg)](https://gitter.im/pavanramkumar/pyglmnet?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
-
-Python implementation of elastic-net regularized generalized linear models.
 
 We follow the same approach and notations as in
 [Friedman, J., Hastie, T., & Tibshirani, R. (2010)](https://core.ac.uk/download/files/153/6287975.pdf)
