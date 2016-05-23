@@ -18,7 +18,7 @@ Clone the repository.
 $ git clone http://github.com/pavanramkumar/pyglmnet
 ```
 
-Install `pyglmnet` using `setup.py` as following
+Install `pyglmnet` using `setup.py` as follows
 
 ```bash
 $ python setup.py develop install
@@ -52,11 +52,11 @@ yr = glm.simulate(beta0, beta, Xr)
 Xt = np.random.normal(0.0, 1.0, [n_samples, n_features])
 yt = glm.simulate(beta0, beta, Xt)
 
-# fit the model
+# fit the model on the training data
 scaler = StandardScaler().fit(Xr)
 glm.fit(scaler.transform(Xr), yr)
 
-# we can use fitted parameters to predict
+# predict using fitted model on the test data
 yhat = glm.predict(scaler.transform(Xt))
 ```
 
@@ -67,7 +67,7 @@ yhat = glm.predict(scaler.transform(Xt))
 
 Here is an [extensive tutorial](http://pavanramkumar.github.io/pyglmnet/auto_examples/index.html) on GLMs with optimization and pseudo-code.
 
-### How to contribute
+### How to contribute?
 
 We welcome pull requests. Please see our [developer documentation page](http://pavanramkumar.github.io/pyglmnet/developers.html) for more details.
 
