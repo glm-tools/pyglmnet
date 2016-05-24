@@ -41,7 +41,7 @@ API Gallery
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="This is an example demonstrating how pyglmnet works with a basic Poisson distribution.">
+    <div class="sphx-glr-thumbcontainer" tooltip="This is an example demonstrating how pyglmnet works with a Poisson distribution using the softp...">
 
 .. only:: html
 

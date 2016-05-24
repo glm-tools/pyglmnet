@@ -3,9 +3,9 @@
 .. _sphx_glr_auto_examples_api_plot_poisson_2.py:
 
 
-================================
-Poisson Exponential Distribution
-================================
+==============================
+Canonical Poisson Distribution
+==============================
 
 This is an example demonstrating how pyglmnet with
 poisson exponential distribution works.
@@ -252,11 +252,11 @@ compute pseudo R-square
 
  Out::
 
-      0.919667363899
+      0.727906295161
 
 
 **Total running time of the script:**
-(0 minutes 1.204 seconds)
+(0 minutes 3.956 seconds)
 
 
 

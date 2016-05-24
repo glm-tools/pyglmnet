@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Poisson (Basic) Distribution &mdash; pyglmnet 0.1.dev documentation</title>
+  <title>Poisson (Softplus) Distribution &mdash; pyglmnet 0.1.dev documentation</title>
   
 
   
@@ -34,8 +34,8 @@
   
     <link rel="top" title="pyglmnet 0.1.dev documentation" href="../../index.html"/>
         <link rel="up" title="Examples Gallery" href="../index.html"/>
-        <link rel="next" title="API Documentation" href="../../api.html"/>
-        <link rel="prev" title="Poisson Exponential Distribution" href="plot_poisson_2.html"/> 
+        <link rel="next" title="Tutorials" href="../../tutorials/index.html"/>
+        <link rel="prev" title="Canonical Poisson Distribution" href="plot_poisson_2.html"/> 
 
   
   <script src="../../_static/js/modernizr.min.js"></script>
@@ -86,11 +86,12 @@
             
             
                 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="../../tutorials/index.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../start.html">Getting Started</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../index.html">Examples Gallery</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="../index.html#api-gallery">API Gallery</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="plot_poisson_2.html">Poisson Exponential Distribution</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="">Poisson (Basic) Distribution</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="plot_poisson_2.html">Canonical Poisson Distribution</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="">Poisson (Softplus) Distribution</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#simulate-a-dataset">Simulate a dataset</a></li>
 </ul>
 </li>
@@ -100,9 +101,10 @@
 <li class="toctree-l2"><a class="reference internal" href="../index.html#benchmark-gallery">Benchmark Gallery</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/index.html">Tutorials</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../api.html">API Documentation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../resources.html">Resources</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../developers.html">Developer Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../resources.html">Resources</a></li>
 </ul>
 
             
@@ -135,7 +137,7 @@
       
         <li><a href="../index.html">Examples Gallery</a> &raquo;</li>
       
-    <li>Poisson (Basic) Distribution</li>
+    <li>Poisson (Softplus) Distribution</li>
     <li class="wy-breadcrumbs-aside">
       
         
@@ -149,10 +151,16 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="poisson-basic-distribution">
-<span id="sphx-glr-auto-examples-api-plot-poisson-py"></span><h1>Poisson (Basic) Distribution<a class="headerlink" href="#poisson-basic-distribution" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="poisson-softplus-distribution">
+<span id="sphx-glr-auto-examples-api-plot-poisson-py"></span><h1>Poisson (Softplus) Distribution<a class="headerlink" href="#poisson-softplus-distribution" title="Permalink to this headline">¶</a></h1>
 <p>This is an example demonstrating how pyglmnet
-works with a basic Poisson distribution.</p>
+works with a Poisson distribution using the softplus nonlinearity.</p>
+<p>Note that we don&#8217;t use the canonical link function <tt class="docutils literal"><span class="pre">exp()</span></tt> for <tt class="docutils literal"><span class="pre">'poisson'</span></tt> targets.
+Instead, we use the softplus function: <tt class="docutils literal"><span class="pre">log(1+exp())</span></tt> for numerical stability.</p>
+<p>For the canonical poisson link function, use <cite>&#8216;poissonexp&#8217;</cite>.</p>
+<p>See [this example]
+(<a class="reference external" href="http://pavanramkumar.github.io/pyglmnet/auto_examples/api/plot_poisson_2.html">http://pavanramkumar.github.io/pyglmnet/auto_examples/api/plot_poisson_2.html</a>)
+for more.</p>
 <p>First, we can import useful libraries that we will use it later on.</p>
 <div class="highlight-python"><div class="highlight"><pre><span></span><span class="c1"># Author: Pavan Ramkumar &lt;pavan.ramkumar@gmail.com&gt;</span>
 <span class="c1"># License: MIT</span>
@@ -303,8 +311,8 @@ the mean of the target variables in the training set.</p>
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-python"><div class="highlight"><pre><span></span>Dr = 9310.775560 Dt = 9508.367315
-R2r =  0.502176  R2r = 0.496674
+<div class="sphx-glr-script-out highlight-python"><div class="highlight"><pre><span></span>Dr = 10169.364020 Dt = 10119.301517
+R2r =  0.500172  R2r = 0.506384
 </pre></div>
 </div>
 </div>
@@ -329,7 +337,7 @@ where you can provide array of class.</p>
 </pre></div>
 </div>
 <p><strong>Total running time of the script:</strong>
-(0 minutes 9.474 seconds)</p>
+(0 minutes 5.156 seconds)</p>
 <div class="sphx-glr-download container">
 <strong>Download Python source code:</strong> <a class="reference download internal" href="../../_downloads/plot_poisson.py"><tt class="xref download docutils literal"><span class="pre">plot_poisson.py</span></tt></a></div>
 <div class="sphx-glr-download container">
@@ -345,10 +353,10 @@ where you can provide array of class.</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="../../api.html" class="btn btn-neutral float-right" title="API Documentation" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="../../tutorials/index.html" class="btn btn-neutral float-right" title="Tutorials" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="plot_poisson_2.html" class="btn btn-neutral" title="Poisson Exponential Distribution" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="plot_poisson_2.html" class="btn btn-neutral" title="Canonical Poisson Distribution" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

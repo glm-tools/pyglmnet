@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>API Documentation &mdash; pyglmnet 0.1.dev documentation</title>
+  <title>Installation &mdash; pyglmnet 0.1.dev documentation</title>
   
 
   
@@ -33,8 +33,8 @@
 
   
     <link rel="top" title="pyglmnet 0.1.dev documentation" href="index.html"/>
-        <link rel="next" title="pyglmnet.GLM" href="generated/pyglmnet.GLM.html"/>
-        <link rel="prev" title="Tutorial" href="tutorials/plot_tutorial.html"/> 
+        <link rel="next" title="Getting Started" href="start.html"/>
+        <link rel="prev" title="Python implementation of elastic-net regularized generalized linear models" href="index.html"/> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -85,22 +85,15 @@
             
             
                 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#check-dependencies">Check dependencies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#get-pyglmnet">Get pyglmnet</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="start.html">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="auto_examples/index.html">Examples Gallery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorials/index.html">Tutorials</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="">API Documentation</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#classes">Classes</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="generated/pyglmnet.GLM.html">pyglmnet.GLM</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#functions">Functions</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="generated/pyglmnet.set_log_level.html">pyglmnet.set_log_level</a></li>
-<li class="toctree-l3"><a class="reference internal" href="generated/pyglmnet.label_binarizer.html">pyglmnet.label_binarizer</a></li>
-</ul>
-</li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="developers.html">Developer Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="resources.html">Resources</a></li>
 </ul>
@@ -133,11 +126,11 @@
   <ul class="wy-breadcrumbs">
     <li><a href="index.html">Docs</a> &raquo;</li>
       
-    <li>API Documentation</li>
+    <li>Installation</li>
     <li class="wy-breadcrumbs-aside">
       
         
-          <a href="_sources/api.txt" rel="nofollow"> View page source</a>
+          <a href="_sources/install.txt" rel="nofollow"> View page source</a>
         
       
     </li>
@@ -147,38 +140,36 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="api-documentation">
-<span id="id1"></span><h1>API Documentation<a class="headerlink" href="#api-documentation" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="classes">
-<h2>Classes<a class="headerlink" href="#classes" title="Permalink to this headline">¶</a></h2>
-<table border="1" class="longtable docutils">
-<colgroup>
-<col width="10%" />
-<col width="90%" />
-</colgroup>
-<tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="generated/pyglmnet.GLM.html#pyglmnet.GLM" title="pyglmnet.GLM"><tt class="xref py py-obj docutils literal"><span class="pre">GLM</span></tt></a>([distr,&nbsp;alpha,&nbsp;reg_lambda,&nbsp;...])</td>
-<td>Generalized Linear Model (GLM)</td>
-</tr>
-</tbody>
-</table>
+  <div class="section" id="installation">
+<h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="check-dependencies">
+<h2>Check dependencies<a class="headerlink" href="#check-dependencies" title="Permalink to this headline">¶</a></h2>
+<p>You only need <tt class="docutils literal"><span class="pre">NumPy</span></tt>, <tt class="docutils literal"><span class="pre">SciPy</span></tt> and (optional) <tt class="docutils literal"><span class="pre">scikit-learn</span></tt> as
+requirements. We recommend <tt class="docutils literal"><span class="pre">Python</span> <span class="pre">&gt;=</span> <span class="pre">2.6</span></tt>, <tt class="docutils literal"><span class="pre">scikit-learn</span> <span class="pre">&gt;=</span> <span class="pre">0.17</span></tt>, <tt class="docutils literal"><span class="pre">NumPy</span> <span class="pre">&gt;=</span> <span class="pre">1.6.1</span></tt> and
+<tt class="docutils literal"><span class="pre">SciPy</span> <span class="pre">&gt;=</span> <span class="pre">0.14</span></tt>.</p>
+<p>Both <a class="reference external" href="https://www.enthought.com/products/canopy/">Canopy</a>
+and <a class="reference external" href="https://www.continuum.io/downloads">Anaconda</a>
+ship with a recent version of <tt class="docutils literal"><span class="pre">scikit-learn</span></tt>.</p>
+<p>In case you have other distributions of Python, you can install <tt class="docutils literal"><span class="pre">NumPy</span></tt> and <tt class="docutils literal"><span class="pre">SciPy</span></tt>
+using <tt class="docutils literal"><span class="pre">pip</span></tt>.</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>pip install numpy
+pip install scipy
+</pre></div>
 </div>
-<div class="section" id="functions">
-<h2>Functions<a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h2>
-<table border="1" class="longtable docutils">
-<colgroup>
-<col width="10%" />
-<col width="90%" />
-</colgroup>
-<tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="generated/pyglmnet.set_log_level.html#pyglmnet.set_log_level" title="pyglmnet.set_log_level"><tt class="xref py py-obj docutils literal"><span class="pre">set_log_level</span></tt></a>(verbose)</td>
-<td>Convenience function for setting the log level.</td>
-</tr>
-<tr class="row-even"><td><a class="reference internal" href="generated/pyglmnet.label_binarizer.html#pyglmnet.label_binarizer" title="pyglmnet.label_binarizer"><tt class="xref py py-obj docutils literal"><span class="pre">label_binarizer</span></tt></a>(y)</td>
-<td>Mimics scikit learn&#8217;s LabelBinarizer</td>
-</tr>
-</tbody>
-</table>
+<p>To install <tt class="docutils literal"><span class="pre">scikit-learn</span></tt> follow these
+<a class="reference external" href="http://scikit-learn.org/stable/install.html">installation instructions</a>.</p>
+</div>
+<div class="section" id="get-pyglmnet">
+<h2>Get pyglmnet<a class="headerlink" href="#get-pyglmnet" title="Permalink to this headline">¶</a></h2>
+<p>To install <tt class="docutils literal"><span class="pre">pyglmnet</span></tt>, first clone the repository</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>git clone http://github.com/pavanramkumar/pyglmnet
+</pre></div>
+</div>
+<p>Then run <tt class="docutils literal"><span class="pre">setup.py</span></tt> to install the library</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="nb">cd</span> pyglmnet
+python setup.py develop install
+</pre></div>
+</div>
 </div>
 </div>
 
@@ -189,10 +180,10 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="generated/pyglmnet.GLM.html" class="btn btn-neutral float-right" title="pyglmnet.GLM" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="start.html" class="btn btn-neutral float-right" title="Getting Started" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="tutorials/plot_tutorial.html" class="btn btn-neutral" title="Tutorial" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="index.html" class="btn btn-neutral" title="Python implementation of elastic-net regularized generalized linear models" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

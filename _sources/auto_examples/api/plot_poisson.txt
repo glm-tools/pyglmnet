@@ -3,13 +3,21 @@
 .. _sphx_glr_auto_examples_api_plot_poisson.py:
 
 
-============================
-Poisson (Basic) Distribution
-============================
+===============================
+Poisson (Softplus) Distribution
+===============================
 
 This is an example demonstrating how pyglmnet
-works with a basic Poisson distribution.
+works with a Poisson distribution using the softplus nonlinearity.
 
+Note that we don't use the canonical link function ``exp()`` for ``'poisson'`` targets.
+Instead, we use the softplus function: ``log(1+exp())`` for numerical stability.
+
+For the canonical poisson link function, use `'poissonexp'`.
+
+See [this example]
+(http://pavanramkumar.github.io/pyglmnet/auto_examples/api/plot_poisson_2.html)
+for more.
 
 First, we can import useful libraries that we will use it later on.
 
@@ -215,8 +223,8 @@ the mean of the target variables in the training set.
 
  Out::
 
-      Dr = 9310.775560 Dt = 9508.367315
-      R2r =  0.502176  R2r = 0.496674
+      Dr = 10169.364020 Dt = 10119.301517
+      R2r =  0.500172  R2r = 0.506384
 
 
 Multinomial example
@@ -250,7 +258,7 @@ where you can provide array of class.
 
 
 **Total running time of the script:**
-(0 minutes 9.474 seconds)
+(0 minutes 5.156 seconds)
 
 
 
