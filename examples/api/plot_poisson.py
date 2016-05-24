@@ -1,12 +1,20 @@
 # -*- coding: utf-8 -*-
 """
-============================
-Poisson (Basic) Distribution
-============================
+===============================
+Poisson (Softplus) Distribution
+===============================
 
 This is an example demonstrating how pyglmnet
-works with a basic Poisson distribution.
+works with a Poisson distribution using the softplus nonlinearity.
 
+Note that we don't use the canonical link function ``exp()`` for ``'poisson'`` targets.
+Instead, we use the softplus function: ``log(1+exp())`` for numerical stability.
+
+For the canonical poisson link function, use `'poissonexp'`.
+
+See [this example]
+(http://pavanramkumar.github.io/pyglmnet/auto_examples/api/plot_poisson_2.html)
+for more.
 """
 
 ########################################################
