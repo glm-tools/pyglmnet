@@ -155,8 +155,8 @@
 <span id="sphx-glr-auto-examples-api-plot-poisson-py"></span><h1>Poisson (Softplus) Distribution<a class="headerlink" href="#poisson-softplus-distribution" title="Permalink to this headline">¶</a></h1>
 <p>This is an example demonstrating how pyglmnet
 works with a Poisson distribution using the softplus nonlinearity.</p>
-<p>Note that we don&#8217;t use the canonical link function <tt class="docutils literal"><span class="pre">exp()</span></tt> for <tt class="docutils literal"><span class="pre">'poisson'</span></tt> targets.
-Instead, we use the softplus function: <tt class="docutils literal"><span class="pre">log(1+exp())</span></tt> for numerical stability.</p>
+<p>Note that we don&#8217;t use the canonical link function <code class="docutils literal"><span class="pre">exp()</span></code> for <code class="docutils literal"><span class="pre">'poisson'</span></code> targets.
+Instead, we use the softplus function: <code class="docutils literal"><span class="pre">log(1+exp())</span></code> for numerical stability.</p>
 <p>For the canonical poisson link function, use <cite>&#8216;poissonexp&#8217;</cite>.</p>
 <p>See [this example]
 (<a class="reference external" href="http://pavanramkumar.github.io/pyglmnet/auto_examples/api/plot_poisson_2.html">http://pavanramkumar.github.io/pyglmnet/auto_examples/api/plot_poisson_2.html</a>)
@@ -205,7 +205,7 @@ If not provided, it will be set to the respective defaults</p>
 </dl>
 </li>
 </ul>
-<p>Import <tt class="docutils literal"><span class="pre">GLM</span></tt> class from <tt class="docutils literal"><span class="pre">pyglmnet</span></tt></p>
+<p>Import <code class="docutils literal"><span class="pre">GLM</span></code> class from <code class="docutils literal"><span class="pre">pyglmnet</span></code></p>
 <div class="highlight-python"><div class="highlight"><pre><span></span><span class="c1"># import GLM model</span>
 <span class="kn">from</span> <span class="nn">pyglmnet</span> <span class="kn">import</span> <span class="n">GLM</span>
 
@@ -218,11 +218,11 @@ If not provided, it will be set to the respective defaults</p>
 </div>
 <div class="section" id="simulate-a-dataset">
 <h2>Simulate a dataset<a class="headerlink" href="#simulate-a-dataset" title="Permalink to this headline">¶</a></h2>
-<p>The <tt class="docutils literal"><span class="pre">GLM</span></tt> class has a very useful method called <tt class="docutils literal"><span class="pre">simulate()</span></tt>.</p>
+<p>The <code class="docutils literal"><span class="pre">GLM</span></code> class has a very useful method called <code class="docutils literal"><span class="pre">simulate()</span></code>.</p>
 <p>Since a canonical link function is already specified by the distribution
-parameters, or provided by the user, <tt class="docutils literal"><span class="pre">simulate()</span></tt> requires
-only the independent variables <tt class="docutils literal"><span class="pre">X</span></tt> and the coefficients <tt class="docutils literal"><span class="pre">beta0</span></tt>
-and <tt class="docutils literal"><span class="pre">beta</span></tt></p>
+parameters, or provided by the user, <code class="docutils literal"><span class="pre">simulate()</span></code> requires
+only the independent variables <code class="docutils literal"><span class="pre">X</span></code> and the coefficients <code class="docutils literal"><span class="pre">beta0</span></code>
+and <code class="docutils literal"><span class="pre">beta</span></code></p>
 <div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">n_samples</span><span class="p">,</span> <span class="n">n_features</span> <span class="o">=</span> <span class="mi">10000</span><span class="p">,</span> <span class="mi">100</span>
 
 <span class="c1"># coefficients</span>
@@ -250,9 +250,9 @@ You can provide data and output pair <cite>(X, y)</cite> i.e.</p>
 </div>
 <div class="section" id="visualize-the-fit-coefficients">
 <h3>Visualize the fit coefficients<a class="headerlink" href="#visualize-the-fit-coefficients" title="Permalink to this headline">¶</a></h3>
-<p>The estimated coefficients are stored in an instance variable called <tt class="docutils literal"><span class="pre">.fit_</span></tt>
+<p>The estimated coefficients are stored in an instance variable called <code class="docutils literal"><span class="pre">.fit_</span></code>
 which is a list of dictionaries. Each dictionary corresponds to a
-particular <tt class="docutils literal"><span class="pre">reg_lambda</span></tt></p>
+particular <code class="docutils literal"><span class="pre">reg_lambda</span></code></p>
 <div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">fit_param</span> <span class="o">=</span> <span class="n">glm_poisson</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">fit_</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">beta</span><span class="p">[:],</span> <span class="s1">&#39;bo&#39;</span><span class="p">,</span> <span class="n">label</span> <span class="o">=</span><span class="s1">&#39;bo&#39;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">fit_param</span><span class="p">[</span><span class="s1">&#39;beta&#39;</span><span class="p">][:],</span> <span class="s1">&#39;ro&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;ro&#39;</span><span class="p">)</span>
@@ -269,13 +269,13 @@ particular <tt class="docutils literal"><span class="pre">reg_lambda</span></tt>
 <h3>Slicing the model object<a class="headerlink" href="#slicing-the-model-object" title="Permalink to this headline">¶</a></h3>
 <p>Although the model is fit to all values of reg_lambda specified by a regularization
 path, often we are only interested in further analysis for a particular value of
-<tt class="docutils literal"><span class="pre">reg_lambda</span></tt>. We can easily do this by slicing the object.</p>
-<p>For instance model[0] returns an object identical to model but with <tt class="docutils literal"><span class="pre">.fit_</span></tt>
-as a dictionary corresponding to the estimated coefficients for <tt class="docutils literal"><span class="pre">reg_lambda[0]</span></tt>.</p>
+<code class="docutils literal"><span class="pre">reg_lambda</span></code>. We can easily do this by slicing the object.</p>
+<p>For instance model[0] returns an object identical to model but with <code class="docutils literal"><span class="pre">.fit_</span></code>
+as a dictionary corresponding to the estimated coefficients for <code class="docutils literal"><span class="pre">reg_lambda[0]</span></code>.</p>
 </div>
 <div class="section" id="make-predictions-based-on-fit-model">
 <h3>Make predictions based on fit model<a class="headerlink" href="#make-predictions-based-on-fit-model" title="Permalink to this headline">¶</a></h3>
-<p>The <tt class="docutils literal"><span class="pre">predict()</span></tt> method takes two parameters: a numpy 2d array of independent
+<p>The <code class="docutils literal"><span class="pre">predict()</span></code> method takes two parameters: a numpy 2d array of independent
 variables and a dictionary of fit parameters. It returns a vector of
 predicted targets.</p>
 <div class="highlight-python"><div class="highlight"><pre><span></span><span class="c1"># Predict targets from test set</span>
@@ -295,9 +295,9 @@ predicted targets.</p>
 </div>
 <div class="section" id="goodness-of-fit">
 <h3>Goodness of fit<a class="headerlink" href="#goodness-of-fit" title="Permalink to this headline">¶</a></h3>
-<p>The GLM class provides two methods for evaluating goodness of fit: <tt class="docutils literal"><span class="pre">deviance()</span></tt>
-and <tt class="docutils literal"><span class="pre">pseudo_R2()</span></tt>. Both of them require the true targets and the predicted targets
-as inputs. <tt class="docutils literal"><span class="pre">pseudo_R2()</span></tt> additionally requires a null model, which is typically
+<p>The GLM class provides two methods for evaluating goodness of fit: <code class="docutils literal"><span class="pre">deviance()</span></code>
+and <code class="docutils literal"><span class="pre">pseudo_R2()</span></code>. Both of them require the true targets and the predicted targets
+as inputs. <code class="docutils literal"><span class="pre">pseudo_R2()</span></code> additionally requires a null model, which is typically
 the mean of the target variables in the training set.</p>
 <div class="highlight-python"><div class="highlight"><pre><span></span><span class="c1"># Compute model deviance</span>
 <span class="n">Dr</span> <span class="o">=</span> <span class="n">glm_poisson</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">yr</span><span class="p">,</span> <span class="n">yrhat</span><span class="p">)</span>
@@ -311,14 +311,14 @@ the mean of the target variables in the training set.</p>
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-python"><div class="highlight"><pre><span></span>Dr = 10169.364020 Dt = 10119.301517
-R2r =  0.500172  R2r = 0.506384
+<div class="sphx-glr-script-out highlight-python"><div class="highlight"><pre><span></span>Dr = 6559.371885 Dt = 6744.392409
+R2r =  0.527815  R2r = 0.498061
 </pre></div>
 </div>
 </div>
 <div class="section" id="multinomial-example">
 <h3>Multinomial example<a class="headerlink" href="#multinomial-example" title="Permalink to this headline">¶</a></h3>
-<p>We can also use <tt class="docutils literal"><span class="pre">pyglmnet</span></tt> with multinomial case
+<p>We can also use <code class="docutils literal"><span class="pre">pyglmnet</span></code> with multinomial case
 where you can provide array of class.</p>
 <div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="kn">import</span> <span class="n">make_classification</span>
 <span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">make_classification</span><span class="p">(</span><span class="n">n_samples</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span> <span class="n">n_classes</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
@@ -337,11 +337,11 @@ where you can provide array of class.</p>
 </pre></div>
 </div>
 <p><strong>Total running time of the script:</strong>
-(0 minutes 5.156 seconds)</p>
+(0 minutes 3.421 seconds)</p>
 <div class="sphx-glr-download container">
-<strong>Download Python source code:</strong> <a class="reference download internal" href="../../_downloads/plot_poisson.py"><tt class="xref download docutils literal"><span class="pre">plot_poisson.py</span></tt></a></div>
+<strong>Download Python source code:</strong> <a class="reference download internal" href="../../_downloads/plot_poisson.py"><code class="xref download docutils literal"><span class="pre">plot_poisson.py</span></code></a></div>
 <div class="sphx-glr-download container">
-<strong>Download IPython notebook:</strong> <a class="reference download internal" href="../../_downloads/plot_poisson.ipynb"><tt class="xref download docutils literal"><span class="pre">plot_poisson.ipynb</span></tt></a></div>
+<strong>Download IPython notebook:</strong> <a class="reference download internal" href="../../_downloads/plot_poisson.ipynb"><code class="xref download docutils literal"><span class="pre">plot_poisson.ipynb</span></code></a></div>
 </div>
 </div>
 </div>
@@ -396,7 +396,7 @@ where you can provide array of class.</p>
       <script type="text/javascript" src="../../_static/jquery.js"></script>
       <script type="text/javascript" src="../../_static/underscore.js"></script>
       <script type="text/javascript" src="../../_static/doctools.js"></script>
-      <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   
 

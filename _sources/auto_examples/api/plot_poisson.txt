@@ -223,8 +223,8 @@ the mean of the target variables in the training set.
 
  Out::
 
-      Dr = 10169.364020 Dt = 10119.301517
-      R2r =  0.500172  R2r = 0.506384
+      Dr = 6559.371885 Dt = 6744.392409
+      R2r =  0.527815  R2r = 0.498061
 
 
 Multinomial example
@@ -258,7 +258,7 @@ where you can provide array of class.
 
 
 **Total running time of the script:**
-(0 minutes 5.156 seconds)
+(0 minutes 3.421 seconds)
 
 
 

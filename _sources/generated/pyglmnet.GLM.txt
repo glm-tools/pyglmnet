@@ -13,20 +13,12 @@ pyglmnet.GLM
 
    .. autosummary::
    
-      ~GLM.L2loss
       ~GLM.__init__
       ~GLM.copy
       ~GLM.fit
       ~GLM.fit_predict
       ~GLM.get_params
-      ~GLM.grad_L2loss
-      ~GLM.lmb
-      ~GLM.logL
-      ~GLM.loss
-      ~GLM.penalty
       ~GLM.predict
-      ~GLM.prox
-      ~GLM.qu
       ~GLM.score
       ~GLM.simulate
    
