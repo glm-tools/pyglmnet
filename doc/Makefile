@@ -44,7 +44,6 @@ clean:
 	rm -rf auto_examples/
 	rm -rf generated/
 	rm -rf modules/
-	rm -rf tutorials/
 
 html-noplot:
 	$(SPHINXBUILD) -D plot_gallery=0 -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
