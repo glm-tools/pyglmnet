@@ -6,28 +6,7 @@ dep-install:
 	@echo "#### Installing dependencies ####"
 	pip install numpy
 	pip install scipy
-	pip install scikit-learn
-	# Used to run the examples
-	pip install matplotlib
-	# Package needed to run tests in an automate way
-	pip install nose
 	@echo "#### All dependencies were installed successfully ####"
-
-# Test related commands
-NOSETESTS ?= nosetests
-
-.PHONY: test-all
-test-all:
-	nosetests
-
-# Examples related commands
-.PHONY: run-poisson
-run-poisson:
-	python examples/api/plot_poisson.py
-
-.PHONY: run-poisson2
-run-poisson2:
-	python examples/api/plot_poisson2.py
 
 # Documentation related commands
 #   see doc/Makefile for more options
@@ -54,6 +33,7 @@ doc-run:
 doc-dependencies:
 	pip install sphinx
 	pip install sphinx-gallery
+	pip install matplotlib
 
 .PHONY: doc-clean
 doc-clean:
@@ -69,3 +49,12 @@ install: dep-install
 	python setup.py develop install
 	@echo "#### Pyglmnet installed successfully ####"
 	@echo "#### Access http://pavanramkumar.github.io/pyglmnet/index.html for more information and tutorials ####"
+
+.PHONY: all
+all: install doc-dependencies doc-build
+
+.PHONY: clean
+clean:
+
+.PHOMY: test
+test:
