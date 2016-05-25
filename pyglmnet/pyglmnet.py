@@ -10,7 +10,6 @@ from . import utils
 logger = logging.getLogger('pyglmnet')
 logger.addHandler(logging.StreamHandler())
 
-
 def set_log_level(verbose):
     """Convenience function for setting the log level.
 
@@ -36,7 +35,6 @@ def set_log_level(verbose):
             raise ValueError('verbose must be of a valid type')
         verbose = logging_types[verbose]
     logger.setLevel(verbose)
-
 
 class GLM(object):
     """Generalized Linear Model (GLM)
@@ -179,21 +177,13 @@ class GLM(object):
             intercept = (1 - self.eta) * slope
             qu[z > self.eta] = z[z > self.eta] * slope + intercept
             qu[z <= self.eta] = np.exp(z[z <= self.eta])
-
-            # qu = np.exp([zi if zi < 5.0 else 5.0 for zi in z.ravel()])
         elif self.distr == 'normal':
             qu = z
         elif self.distr == 'binomial':
             qu = expit(z)
         elif self.distr == 'multinomial':
             qu = utils.softmax(z)
-
         return qu
-        # qu = dict(poisson=np.log1p(np.exp(z)),
-        #     poissonexp=np.exp([zi if zi < 3.0 else 3.0 for zi in z.ravel()]),
-        #     normal=z, binomial=expit(z),
-        #     multinomial=softmax(z))
-        # return qu[self.distr]
 
     def _lmb(self, beta0, beta, X):
         """Conditional intensity function."""
@@ -211,10 +201,7 @@ class GLM(object):
         elif self.distr == 'normal':
             logL = -0.5 * np.sum((y - l)**2)
         elif self.distr == 'binomial':
-            # analytical formula
-            # logL = np.sum(y*np.log(l) + (1-y)*np.log(1-l))
-
-            # but this prevents underflow
+            # this prevents underflow
             z = beta0 + np.dot(X, beta)
             logL = np.sum(y * z - np.log(1 + np.exp(z)))
         elif self.distr == 'multinomial':
@@ -245,9 +232,6 @@ class GLM(object):
 
     def _prox(self, X, l):
         """Proximal operator."""
-        # sx = [0. if np.abs(y) <= l else np.sign(y)*np.abs(abs(y)-l)
-        # for y in x]
-        # return np.array(sx).reshape(x.shape)
         return np.sign(X) * (np.abs(X) - l) * (np.abs(X) > l)
 
     def _grad_L2loss(self, beta0, beta, reg_lambda, X, y):
@@ -262,7 +246,6 @@ class GLM(object):
             grad_beta = np.transpose(np.dot(np.transpose(s), X) -
                                      np.dot(np.transpose(y * s / q), X)) + \
                 reg_lambda * (1 - alpha) * beta
-            # + reg_lambda*alpha*np.sign(beta)
 
         elif self.distr == 'poissonexp':
             q = self._qu(z)
@@ -284,13 +267,11 @@ class GLM(object):
             grad_beta0 = -np.sum(y - z)
             grad_beta = -np.transpose(np.dot(np.transpose(y - z), X)) \
                 + reg_lambda * (1 - alpha) * beta
-            # + reg_lambda*alpha*np.sign(beta)
 
         elif self.distr == 'binomial':
             grad_beta0 = np.sum(s - y)
             grad_beta = np.transpose(np.dot(np.transpose(s - y), X)) \
                 + reg_lambda * (1 - alpha) * beta
-            # + reg_lambda*alpha*np.sign(beta)
 
         elif self.distr == 'multinomial':
             # this assumes that y is already as a one-hot encoding
@@ -298,7 +279,6 @@ class GLM(object):
             grad_beta0 = -np.sum(y - pred, axis=0)
             grad_beta = -np.transpose(np.dot(np.transpose(y - pred), X)) \
                 + reg_lambda * (1 - alpha) * beta
-
         return grad_beta0, grad_beta
 
     def fit(self, X, y):
@@ -325,7 +305,6 @@ class GLM(object):
             raise ValueError('Input data should be of type ndarray (got %s).'
                              % type(X))
 
-        # dataset shape
         n_features = X.shape[1]
 
         if self.distr == 'multinomial':
@@ -338,14 +317,11 @@ class GLM(object):
             if y.ndim == 1:
                 y = y[:, np.newaxis]
 
-        # number of predictions
         n_classes = y.shape[1] if self.distr == 'multinomial' else 1
 
         # Initialize parameters
         beta0_hat = np.random.normal(0.0, 1.0, n_classes)
         beta_hat = np.random.normal(0.0, 1.0, [n_features, n_classes])
-        # beta0_hat = np.zeros(n_classes)
-        # beta_hat = np.zeros([n_features, n_classes])
 
         fit_params = list()
 
@@ -354,7 +330,7 @@ class GLM(object):
         for l, rl in enumerate(self.reg_lambda):
             fit_params.append({'beta0': beta0_hat, 'beta': beta_hat})
             logger.info('Lambda: %6.4f' % rl)
-
+            
             # Warm initialize parameters
             if l == 0:
                 fit_params[-1]['beta0'] = beta0_hat
