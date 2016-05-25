@@ -290,6 +290,6 @@ texinfo_documents = [
 #texinfo_no_detailmenu = False
 
 sphinx_gallery_conf = {
-    'examples_dirs': ['../examples', '../tutorial'],
-    'gallery_dirs': ['auto_examples', 'tutorials'],
+    'examples_dirs': '../examples',
+    'gallery_dirs': 'auto_examples'
 }
