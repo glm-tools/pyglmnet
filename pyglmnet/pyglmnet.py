@@ -121,7 +121,6 @@ class GLM(object):
         self.eta = eta
         self.random_state = random_state
         self.verbose = verbose
-
         set_log_level(verbose)
 
     def get_params(self, deep=False):
@@ -142,7 +141,6 @@ class GLM(object):
     def __repr__(self):
         """Description of the object."""
         reg_lambda = self.reg_lambda
-
         s = '<\nDistribution | %s' % self.distr
         s += '\nalpha | %0.2f' % self.alpha
         s += '\nmax_iter | %0.2f' % self.max_iter
@@ -179,21 +177,13 @@ class GLM(object):
             intercept = (1 - self.eta) * slope
             qu[z > self.eta] = z[z > self.eta] * slope + intercept
             qu[z <= self.eta] = np.exp(z[z <= self.eta])
-
-            # qu = np.exp([zi if zi < 5.0 else 5.0 for zi in z.ravel()])
         elif self.distr == 'normal':
             qu = z
         elif self.distr == 'binomial':
             qu = expit(z)
         elif self.distr == 'multinomial':
             qu = utils.softmax(z)
-
         return qu
-        # qu = dict(poisson=np.log1p(np.exp(z)),
-        #     poissonexp=np.exp([zi if zi < 3.0 else 3.0 for zi in z.ravel()]),
-        #     normal=z, binomial=expit(z),
-        #     multinomial=softmax(z))
-        # return qu[self.distr]
 
     def _lmb(self, beta0, beta, X):
         """Conditional intensity function."""
@@ -245,9 +235,6 @@ class GLM(object):
 
     def _prox(self, X, l):
         """Proximal operator."""
-        # sx = [0. if np.abs(y) <= l else np.sign(y)*np.abs(abs(y)-l)
-        # for y in x]
-        # return np.array(sx).reshape(x.shape)
         return np.sign(X) * (np.abs(X) - l) * (np.abs(X) > l)
 
     def _grad_L2loss(self, beta0, beta, reg_lambda, X, y):
@@ -262,14 +249,11 @@ class GLM(object):
             grad_beta = np.transpose(np.dot(np.transpose(s), X) -
                                      np.dot(np.transpose(y * s / q), X)) + \
                 reg_lambda * (1 - alpha) * beta
-            # + reg_lambda*alpha*np.sign(beta)
 
         elif self.distr == 'poissonexp':
             q = self._qu(z)
-
             grad_beta0 = np.sum(q[z <= self.eta] - y[z <= self.eta]) + \
                 np.sum(1 - y[z > self.eta] / q[z > self.eta]) * self.eta
-
             grad_beta = np.zeros([X.shape[1], 1])
             selector = np.where(z.ravel() <= self.eta)[0]
             grad_beta += np.transpose(np.dot((q[selector] - y[selector]).T,
@@ -284,13 +268,11 @@ class GLM(object):
             grad_beta0 = -np.sum(y - z)
             grad_beta = -np.transpose(np.dot(np.transpose(y - z), X)) \
                 + reg_lambda * (1 - alpha) * beta
-            # + reg_lambda*alpha*np.sign(beta)
 
         elif self.distr == 'binomial':
             grad_beta0 = np.sum(s - y)
             grad_beta = np.transpose(np.dot(np.transpose(s - y), X)) \
                 + reg_lambda * (1 - alpha) * beta
-            # + reg_lambda*alpha*np.sign(beta)
 
         elif self.distr == 'multinomial':
             # this assumes that y is already as a one-hot encoding
@@ -325,31 +307,23 @@ class GLM(object):
             raise ValueError('Input data should be of type ndarray (got %s).'
                              % type(X))
 
-        # dataset shape
         n_features = X.shape[1]
 
         if self.distr == 'multinomial':
-            # convert to 1-hot encoding in multinomial case
             y_bk = y.ravel()
             y = np.zeros([X.shape[0], y.max() + 1])
             y[np.arange(X.shape[0]), y_bk] = 1
         else:
-            # else convert to column vector
             if y.ndim == 1:
                 y = y[:, np.newaxis]
 
-        # number of predictions
         n_classes = y.shape[1] if self.distr == 'multinomial' else 1
 
         # Initialize parameters
         beta0_hat = np.random.normal(0.0, 1.0, n_classes)
         beta_hat = np.random.normal(0.0, 1.0, [n_features, n_classes])
-        # beta0_hat = np.zeros(n_classes)
-        # beta_hat = np.zeros([n_features, n_classes])
-
         fit_params = list()
 
-        # Outer loop with descending lambda
         logger.info('Looping through the regularization path')
         for l, rl in enumerate(self.reg_lambda):
             fit_params.append({'beta0': beta0_hat, 'beta': beta_hat})
@@ -363,37 +337,25 @@ class GLM(object):
                 fit_params[-1]['beta0'] = fit_params[-2]['beta0']
                 fit_params[-1]['beta'] = fit_params[-2]['beta']
 
-            # Iterate until convergence
             tol = self.tol
             alpha = self.alpha
-
-            # Initialize parameters
             beta = np.zeros([n_features + 1, n_classes])
             beta[0] = fit_params[-1]['beta0']
             beta[1:] = fit_params[-1]['beta']
 
             g = np.zeros([n_features + 1, n_classes])
 
-            # Initialize cost
             L, DL = list(), list()
             for t in range(0, self.max_iter):
 
-                # Calculate gradient
                 grad_beta0, grad_beta = self._grad_L2loss(
                     beta[0], beta[1:], rl, X, y)
                 g[0] = grad_beta0
                 g[1:] = grad_beta
-
-                # Update parameters
                 beta = beta - self.learning_rate * g
-
-                # Apply proximal operator for L1-regularization
                 beta[1:] = self._prox(beta[1:], rl * alpha)
-
-                # Calculate loss and convergence criteria
                 L.append(self._loss(beta[0], beta[1:], rl, X, y))
 
-                # Delta loss and convergence criterion
                 if t > 1:
                     DL.append(L[-1] - L[-2])
                     if np.abs(DL[-1] / L[-1]) < tol:
@@ -404,7 +366,6 @@ class GLM(object):
                         logger.info(msg)
                         break
 
-            # Store the parameters after convergence
             fit_params[-1]['beta0'] = beta[0]
             fit_params[-1]['beta'] = beta[1:]
 
