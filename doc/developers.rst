@@ -18,12 +18,14 @@ with more coverage.
 
 Building Documentation
 ----------------------
-The following is needed in order to build the documentation.
+The following should be installed in order to build the documentation.
 
-*    ``pip install sphinx``
-*    ``pip install sphinx-gallery``
-*    ``pip install Image``
-*    ``pip install matplotlib``
+*    `sphinx <https://github.com/sphinx-doc/sphinx/>`_
+*    `sphinx-gallery <https://github.com/sphinx-gallery/sphinx-gallery/>`_
+*    `pillow <https://github.com/python-pillow/Pillow/>`_
+*    `matplotlib <https://github.com/matplotlib/matplotlib/>`_
+
+Shortcut: ``pip install sphinx sphinx-gallery pillow matplotlib``
 
 Some dependencies are necessary to build the documentation (i.e. `sphinx`, `sphinx-gallery` and `matplotlib`). At the root project folder, you can simply run::
 
