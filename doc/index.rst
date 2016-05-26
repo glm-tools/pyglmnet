@@ -3,9 +3,12 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-==========================================================================
-Python implementation of elastic-net regularized generalized linear models
-==========================================================================
+========
+pyglmnet
+========
+
+- a python implementation of elastic-net regularized generalized linear models
+##############################################################################
 
 ``pyglmnet 0.1.dev`` is a Python library implementing elastic-net
 regularized generalized linear models (GLM).
