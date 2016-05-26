@@ -201,6 +201,10 @@ class GLM(object):
         elif self.distr == 'normal':
             logL = -0.5 * np.sum((y - l)**2)
         elif self.distr == 'binomial':
+            # analytical formula
+            # logL = np.sum(y*np.log(l) + (1-y)*np.log(1-l))
+
+            # but this prevents underflow
             z = beta0 + np.dot(X, beta)
             logL = np.sum(y * z - np.log(1 + np.exp(z)))
         elif self.distr == 'multinomial':
@@ -271,6 +275,7 @@ class GLM(object):
                 + reg_lambda * (1 - alpha) * beta
 
         elif self.distr == 'multinomial':
+            # this assumes that y is already as a one-hot encoding
             pred = self._qu(z)
             grad_beta0 = -np.sum(y - pred, axis=0)
             grad_beta = -np.transpose(np.dot(np.transpose(y - pred), X)) \
@@ -294,6 +299,8 @@ class GLM(object):
         self : instance of GLM
             The fitted model.
         """
+        # Implements batch gradient descent (i.e. vanilla gradient descent by
+        # computing gradient over entire training set)
         np.random.seed(self.random_state)
 
         if not isinstance(X, np.ndarray):
@@ -311,6 +318,8 @@ class GLM(object):
                 y = y[:, np.newaxis]
 
         n_classes = y.shape[1] if self.distr == 'multinomial' else 1
+
+        # Initialize parameters
         beta0_hat = np.random.normal(0.0, 1.0, n_classes)
         beta_hat = np.random.normal(0.0, 1.0, [n_features, n_classes])
         fit_params = list()
@@ -320,6 +329,7 @@ class GLM(object):
             fit_params.append({'beta0': beta0_hat, 'beta': beta_hat})
             logger.info('Lambda: %6.4f' % rl)
 
+            # Warm initialize parameters
             if l == 0:
                 fit_params[-1]['beta0'] = beta0_hat
                 fit_params[-1]['beta'] = beta_hat
