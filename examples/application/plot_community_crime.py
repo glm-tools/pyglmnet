@@ -1,7 +1,8 @@
+# -*- coding: utf-8 -*-
 """
-==============================
+============================================
 Communities and Crime - sklearn and pyglmnet
-==============================
+============================================
 
 This is a real application example comparing pyglmnet against scikit using R_2 measure and mean squared error.
 The used dataset was preprocessed fom the original dataset (it can be found at: http://archive.ics.uci.edu/ml/datasets/Communities+and+Crime)
@@ -14,6 +15,8 @@ involve the community, such as the percent of the population considered urban, a
 involving law enforcement, such as per capita number of police officers, and percent of officers assigned to drug units."
 
 We've tried to use the same values as possible for similiar parameters used by the two Classes.
+
+by Vinicius
 
 """
 
