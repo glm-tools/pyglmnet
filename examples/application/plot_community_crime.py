@@ -28,15 +28,15 @@ import numpy as np
 # Split data in train set and test set
 from sklearn.cross_validation import train_test_split
 
-df = pd.read_csv('community_crime.csv',header=0)
+df = pd.read_csv('community_crime.csv', header=0)
 X = df.values # it returns a numpy array
 n_samples, n_features = X.shape
 
 # att128 is the labeled attribute and it's defined as:
 #   ViolentCrimesPerPop: total number of violent crimes per 100K popuation (numeric - decimal) GOAL attribute (to be predicted)
-X, y = np.array(df.drop(['att128'],axis=1)), np.array(df['att128'])
+X, y = np.array(df.drop(['att128'], axis=1)), np.array(df['att128'])
 
-X_train, X_test, y_train, y_test = train_test_split(X,y,test_size=0.25,random_state=0)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=0)
 
 ########################################################
 # pyglmnet
@@ -85,6 +85,5 @@ plt.plot(y_pred_enet, 'r', label='scikit prediction')
 plt.plot(y_pred_glm, 'g', label='pyglmnet prediction')
 plt.xlabel('sample')
 plt.ylabel('predicted value')
-plt.legend(bbox_to_anchor=(0., 1.02, 1., .102), loc=1,
-           ncol=2, borderaxespad=0.)
+plt.legend(bbox_to_anchor=(0., 1.02, 1., .102), loc=1, ncol=2, borderaxespad=0.)
 plt.show()

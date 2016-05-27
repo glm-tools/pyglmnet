@@ -8,6 +8,8 @@ dependencies:
     - pip install scipy
     - pip install scikit-learn
     - pip install -e .
+    - pip install pandas
+    - pip install sphinx_bootstrap_theme
     # we need to do this here so the datasets will be cached
     # pipefail is necessary to propagate exit codes
     - set -o pipefail && cd doc && make html 2>&1 | tee ~/log.txt
