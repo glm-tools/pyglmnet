@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # pyglmnet documentation build configuration file, created by
-# sphinx-quickstart on Mon May  9 19:01:11 2016.
+# sphinx-quickstart on Mon May 9 19:01:11 2016.
 #
 # This file is execfile()d with the current directory set to its
 # containing dir.
