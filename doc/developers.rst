@@ -19,12 +19,18 @@ with more coverage.
 Building Documentation
 ----------------------
 
+Some dependencies are necessary to build the documentation (i.e. `sphinx`, `sphinx-gallery` and `matplotlib`). At the root project folder, you can simply run::
+
+    make doc-dependencies
+
 We use ``sphinx`` to generate documentation page. To build documentation page, run::
 
-    make html
+    make doc
 
-All static files will be built in ``_build/html/`` where you can open them using the web browser.
+All static files will be built in ``_build/html/`` where you can open them using the web browser. To do so, run::
+
+    make doc-run
 
 To push built documentation page to ``gh-pages``, simply run::
 
-    make install
+    make doc-publish
