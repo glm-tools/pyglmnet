@@ -81,6 +81,11 @@ We welcome pull requests. Please see our [developer documentation page](http://p
 * [Hugo Fernandes](http:/github.com/hugoguh)
 * [Mainak Jas](http:/github.com/jasmainak)
 
+### Acknowledgments
+
+* [Konrad Kording](http://kordinglab.com) for funding and support
+* [Sara Solla](http://www.physics.northwestern.edu/people/joint-faculty/sara-solla.html) for masterful GLM lectures
+
 ### License
 
 MIT License Copyright (c) 2016 Pavan Ramkumar
