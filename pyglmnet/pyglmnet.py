@@ -67,10 +67,10 @@ class GLM(object):
         between 0.5 and 0.01 is generated.
     learning_rate: float
         learning rate for gradient descent
-        default: 1e-4
+        default: 1e-2
     max_iter: int
         maximum iterations for the model,
-        default: 100
+        default: 1000
     tol: float
         convergence threshold or stopping criteria.
         Optimization loop will stop below setting threshold
@@ -100,7 +100,7 @@ class GLM(object):
 
     def __init__(self, distr='poisson', alpha=0.05,
                  reg_lambda=None,
-                 learning_rate=1e-4, max_iter=100,
+                 learning_rate=2e-1, max_iter=1000,
                  tol=1e-3, eta=4.0, random_state=0, verbose=False):
 
         if reg_lambda is None:
@@ -193,22 +193,23 @@ class GLM(object):
 
     def _logL(self, beta0, beta, X, y):
         """The log likelihood."""
+        n_samples = np.float(X.shape[0])
         l = self._lmb(beta0, beta, X)
         if self.distr == 'poisson':
-            logL = np.sum(y * np.log(l) - l)
+            logL = 1. / n_samples * np.sum(y * np.log(l) - l)
         elif self.distr == 'poissonexp':
-            logL = np.sum(y * l - l)
+            logL = 1. / n_samples * np.sum(y * l - l)
         elif self.distr == 'normal':
-            logL = -0.5 * np.sum((y - l)**2)
+            logL = -0.5 * 1. / n_samples * np.sum((y - l)**2)
         elif self.distr == 'binomial':
             # analytical formula
             # logL = np.sum(y*np.log(l) + (1-y)*np.log(1-l))
 
             # but this prevents underflow
             z = beta0 + np.dot(X, beta)
-            logL = np.sum(y * z - np.log(1 + np.exp(z)))
+            logL = 1. / n_samples * np.sum(y * z - np.log(1 + np.exp(z)))
         elif self.distr == 'multinomial':
-            logL = np.sum(y * np.log(l))
+            logL = 1. / n_samples * np.sum(y * np.log(l))
         return logL
 
     def _penalty(self, beta):
@@ -239,21 +240,25 @@ class GLM(object):
 
     def _grad_L2loss(self, beta0, beta, reg_lambda, X, y):
         """The gradient."""
+        n_samples = np.float(X.shape[0])
         alpha = self.alpha
         z = beta0 + np.dot(X, beta)
         s = expit(z)
 
         if self.distr == 'poisson':
             q = self._qu(z)
-            grad_beta0 = np.sum(s) - np.sum(y * s / q)
-            grad_beta = np.transpose(np.dot(np.transpose(s), X) -
-                                     np.dot(np.transpose(y * s / q), X)) + \
+            grad_beta0 = 1. / n_samples * (np.sum(s) - np.sum(y * s / q))
+            grad_beta = 1. / n_samples * \
+                (np.transpose(np.dot(np.transpose(s), X) -
+                              np.dot(np.transpose(y * s / q), X))) + \
                 reg_lambda * (1 - alpha) * beta
 
         elif self.distr == 'poissonexp':
             q = self._qu(z)
             grad_beta0 = np.sum(q[z <= self.eta] - y[z <= self.eta]) + \
                 np.sum(1 - y[z > self.eta] / q[z > self.eta]) * self.eta
+            grad_beta0 *= 1. / n_samples
+
             grad_beta = np.zeros([X.shape[1], 1])
             selector = np.where(z.ravel() <= self.eta)[0]
             grad_beta += np.transpose(np.dot((q[selector] - y[selector]).T,
@@ -262,23 +267,27 @@ class GLM(object):
             grad_beta += self.eta * \
                 np.transpose(np.dot((1 - y[selector] / q[selector]).T,
                                     X[selector, :]))
+            grad_beta *= 1. / n_samples
             grad_beta += reg_lambda * (1 - alpha) * beta
 
         elif self.distr == 'normal':
-            grad_beta0 = -np.sum(y - z)
-            grad_beta = -np.transpose(np.dot(np.transpose(y - z), X)) \
+            grad_beta0 = 1. / n_samples * np.sum(z - y)
+            grad_beta = 1. / n_samples * \
+                np.transpose(np.dot(np.transpose(z - y), X)) \
                 + reg_lambda * (1 - alpha) * beta
 
         elif self.distr == 'binomial':
-            grad_beta0 = np.sum(s - y)
-            grad_beta = np.transpose(np.dot(np.transpose(s - y), X)) \
+            grad_beta0 = 1. / n_samples * np.sum(s - y)
+            grad_beta = 1. / n_samples * \
+                np.transpose(np.dot(np.transpose(s - y), X)) \
                 + reg_lambda * (1 - alpha) * beta
 
         elif self.distr == 'multinomial':
             # this assumes that y is already as a one-hot encoding
             pred = self._qu(z)
-            grad_beta0 = -np.sum(y - pred, axis=0)
-            grad_beta = -np.transpose(np.dot(np.transpose(y - pred), X)) \
+            grad_beta0 = -1. / n_samples * np.sum(y - pred, axis=0)
+            grad_beta = -1. / n_samples * \
+                np.transpose(np.dot(np.transpose(y - pred), X)) \
                 + reg_lambda * (1 - alpha) * beta
 
         return grad_beta0, grad_beta
@@ -307,7 +316,8 @@ class GLM(object):
             raise ValueError('Input data should be of type ndarray (got %s).'
                              % type(X))
 
-        n_features = X.shape[1]
+        n_samples = np.float(X.shape[0])
+        n_features = np.float(X.shape[1])
 
         if self.distr == 'multinomial':
             y_bk = y.ravel()
@@ -353,7 +363,7 @@ class GLM(object):
                 g[0] = grad_beta0
                 g[1:] = grad_beta
                 beta = beta - self.learning_rate * g
-                beta[1:] = self._prox(beta[1:], rl * alpha)
+                beta[1:] = self._prox(beta[1:], 1. / n_samples * rl * alpha)
                 L.append(self._loss(beta[0], beta[1:], rl, X, y))
 
                 if t > 1:
