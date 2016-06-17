@@ -100,7 +100,7 @@ class GLM(object):
 
     def __init__(self, distr='poisson', alpha=0.05,
                  reg_lambda=None,
-                 learning_rate=1e-2, max_iter=1000,
+                 learning_rate=2e-1, max_iter=1000,
                  tol=1e-3, eta=4.0, random_state=0, verbose=False):
 
         if reg_lambda is None:
@@ -365,6 +365,8 @@ class GLM(object):
                 beta = beta - self.learning_rate * g
                 beta[1:] = self._prox(beta[1:], 1. / n_samples * rl * alpha)
                 L.append(self._loss(beta[0], beta[1:], rl, X, y))
+                #print('\t\t Loss: {0:.6f}\n').format(L[-1])
+                #print beta[:5]
 
                 if t > 1:
                     DL.append(L[-1] - L[-2])
