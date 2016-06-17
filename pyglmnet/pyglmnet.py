@@ -100,7 +100,7 @@ class GLM(object):
 
     def __init__(self, distr='poisson', alpha=0.05,
                  reg_lambda=None,
-                 learning_rate=1e-2, max_iter=100,
+                 learning_rate=1e-2, max_iter=1000,
                  tol=1e-3, eta=4.0, random_state=0, verbose=False):
 
         if reg_lambda is None:
