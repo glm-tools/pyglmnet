@@ -107,15 +107,22 @@ def test_multinomial():
 
     # pick one as yhat
     yhat = y_pred[0]
-    # uniform prediction
+
+    # define null as uniform prediction
     ynull = np.ones(yhat.shape) / yhat.shape[1]
-    # pseudo_R2 should be greater than 0
+
+    # check that pseudo_R2 should be greater than 0
     assert_true(glm_mn.score(y, yhat, ynull, method='pseudo_R2') > 0.)
     glm_mn.score(y, yhat)
+
+    # simulate data with parameters and check shape
     assert_equal(len(glm_mn.simulate(glm_mn.fit_[0]['beta0'],
                                   glm_mn.fit_[0]['beta'],
                                   X)),
                  X.shape[0])
-    # these should raise an exception
-    assert_raises(ValueError, glm_mn.score, y, y, y, 'pseudo_R2')
-    assert_raises(ValueError, glm_mn.score, y, y, None, 'deviance')
+
+    # pick all as yhat and check that score is computed for all lambdas
+    assert_equal(len(glm_mn.score(y, y_pred, ynull, 'pseudo_R2')),
+                 y_pred.shape[0])
+    assert_equal(len(glm_mn.score(y, y_pred, None, 'deviance')),
+                 y_pred.shape[0])
