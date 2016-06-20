@@ -46,11 +46,13 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random
 from pyglmnet import GLM
 
 # use the default value for reg_lambda
-glm = GLM(distr='poissonexp', alpha=0.2, learning_rate=1e-3, verbose=False, max_iter=100)
+glm = GLM(distr='normal', alpha=0.2, learning_rate=1e-2, verbose=False, max_iter=1000, tol=1e-3)
 
-glm.fit(X_train, y_train)
+from sklearn import preprocessing
+scaler = preprocessing.StandardScaler().fit(X_train)
+glm.fit(scaler.transform(X_train), y_train)
 
-y_pred_glm = glm[-1].predict(X_test)
+y_pred_glm = glm[-1].predict(scaler.transform(X_test))
 
 r2_score_glm = glm[-1].score(y_test, y_pred_glm, np.mean(y_train), method='pseudo_R2')
 print("r^2 on test data using pyglmnet : %f" % r2_score_glm)
