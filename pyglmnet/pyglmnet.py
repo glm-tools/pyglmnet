@@ -434,7 +434,8 @@ class GLM(object):
 
     def score(self, X, y):
         """Scoring function compatible with sklearn.
-        If multiple regularization parameters are fit, an additional step is needed (e.g., take the mean)
+        If multiple regularization parameters are fit,
+        an additional step is needed (e.g., take the mean)
 
         Parameters
         ----------
