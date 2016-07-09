@@ -22,11 +22,9 @@ def test_glmnet():
     beta = sps.rand(n_features, 1, density=density).toarray()
 
     distrs = ['poisson', 'poissonexp', 'normal', 'binomial']
-    learning_rates = {'poisson': 2e-1, 'poissonexp': 1e-1, 'normal': 1e-2, 'binomial': 2e-1}
+    learning_rate = 2e-1
     for distr in distrs:
 
-        # FIXME: why do we need such different learning rates?
-        learning_rate = learning_rates[distr]
         glm = GLM(distr, learning_rate=learning_rate)
 
         assert_true(repr(glm))

@@ -330,8 +330,9 @@ class GLM(object):
         n_classes = y.shape[1] if self.distr == 'multinomial' else 1
 
         # Initialize parameters
-        beta0_hat = np.random.normal(0.0, 1.0, n_classes)
-        beta_hat = np.random.normal(0.0, 1.0, [n_features, n_classes])
+        beta0_hat = 1/ (n_features + 1) * np.random.normal(0.0, 1.0, n_classes)
+        beta_hat = 1/ (n_features + 1) * \
+                    np.random.normal(0.0, 1.0, [n_features, n_classes])
         fit_params = list()
 
         logger.info('Looping through the regularization path')
