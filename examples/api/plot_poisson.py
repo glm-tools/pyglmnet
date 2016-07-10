@@ -4,21 +4,20 @@
 Poisson (Softplus) Distribution
 ===============================
 
+For Poisson distributed target variables, the canonical link function is an
+exponential nonlinearity. However, the gradient of the loss function that uses
+this nonlinearity is typically unstable.
+
 This is an example demonstrating how pyglmnet
 works with a Poisson distribution using the softplus nonlinearity.
 
-Note that we don't use the canonical link function ``exp()`` for ``'poisson'`` targets.
-Instead, we use the softplus function: ``log(1+exp())`` for numerical stability.
+Here, for the default ``distr = 'poisson'`` option, we use the
+softplus function: ``log(1+exp())``.
 
-For the canonical poisson link function, use `'poissonexp'`.
-
-See [this example]
-(http://pavanramkumar.github.io/pyglmnet/auto_examples/api/plot_poisson_2.html)
-for more.
 """
 
 ########################################################
-# First, we can import useful libraries that we will use it later on.
+# First, let's import useful libraries that we will use it later on.
 
 ########################################################
 
@@ -34,16 +33,16 @@ import matplotlib.pyplot as plt
 # Here are inputs that you can provide when you instantiate the `GLM` class.
 # If not provided, it will be set to the respective defaults
 #
-# - `distr`: str (`'poisson'` or `'normal'` or `'binomial'` or `'multinomial'`)
+# - `distr`: str (`'poisson'` or `'poissonexp'` or `'normal'` or `'binomial'` or `'multinomial'`)
 #     default: `'poisson'`
 # - `alpha`: float (the weighting between L1 and L2 norm)
 #     default: 0.5
-# - `reg_lambda`: array (array of regularized parameters)
+# - `reg_lambda`: array (array of regularization parameters)
 #     default: `np.logspace(np.log(0.5), np.log(0.01), 10, base=np.exp(1))`
 # - `learning_rate`: float (learning rate for gradient descent)
-#     default: 1e-4
+#     default: 2e-1
 # - `max_iter`: int (maximum iteration for the model)
-#     default: 100
+#     default: 1000
 
 ########################################################
 
@@ -58,7 +57,7 @@ from pyglmnet import GLM
 # create regularize parameters for model
 reg_lambda = np.logspace(np.log(0.5), np.log(0.01), 10, base=np.exp(1))
 glm_poisson = GLM(distr='poisson', verbose=False, alpha=0.05,
-            max_iter=1000, learning_rate=1e-4,
+            max_iter=1000, learning_rate=2e-1,
             reg_lambda=reg_lambda)
 
 ##########################################################
@@ -92,12 +91,21 @@ yt = glm_poisson.simulate(beta0, beta, Xt)
 # Fit the model
 # ^^^^^^^^^^^^^
 # Fitting the model is accomplished by a single GLM method called `fit()`.
-# You can provide data and output pair `(X, y)` i.e.
 
 ##########################################################
 
 scaler = StandardScaler().fit(Xr)
 glm_poisson.fit(scaler.transform(Xr), yr)
+
+##########################################################
+# Slicing the model object
+# ^^^^^^^^^^^^^^^^^^^^^^^^
+# Although the model is fit to all values of reg_lambda specified by a regularization
+# path, often we are only interested in further analysis for a particular value of
+# ``reg_lambda``. We can easily do this by slicing the object.
+#
+# For instance model[0] returns an object identical to model but with ``.fit_``
+# as a dictionary corresponding to the estimated coefficients for ``reg_lambda[0]``.
 
 ##########################################################
 # Visualize the fit coefficients
@@ -116,16 +124,6 @@ plt.ylabel('outputs')
 plt.legend(bbox_to_anchor=(0., 1.02, 1., .102), loc=1,
            ncol=2, borderaxespad=0.)
 plt.show()
-
-##########################################################
-# Slicing the model object
-# ^^^^^^^^^^^^^^^^^^^^^^^^
-# Although the model is fit to all values of reg_lambda specified by a regularization
-# path, often we are only interested in further analysis for a particular value of
-# ``reg_lambda``. We can easily do this by slicing the object.
-#
-# For instance model[0] returns an object identical to model but with ``.fit_``
-# as a dictionary corresponding to the estimated coefficients for ``reg_lambda[0]``.
 
 ##########################################################
 # Make predictions based on fit model
@@ -151,10 +149,11 @@ plt.show()
 ##########################################################
 # Goodness of fit
 # ^^^^^^^^^^^^^^^
-# The GLM class provides two methods for evaluating goodness of fit: ``deviance()``
-# and ``pseudo_R2()``. Both of them require the true targets and the predicted targets
-# as inputs. ``pseudo_R2()`` additionally requires a null model, which is typically
-# the mean of the target variables in the training set.
+# The GLM class provides two metrics to evaluate the goodness of fit: ``deviance``
+# and ``pseudo_R2``. Both these metrics are implemented in the ``score()`` method.
+# ``deviance`` require the true targets and the predicted targets
+# as inputs. ``pseudo_R2()`` additionally requires a null model, for which the
+# best estimate is the mean of the target variables in the training set.
 
 ##########################################################
 
@@ -163,26 +162,7 @@ Dr = glm_poisson[0].score(yr, yrhat)
 Dt = glm_poisson[0].score(yt, ythat)
 print('Dr = %f' % Dr, 'Dt = %f' % Dt)
 
-# Compute pseudo-R2s
+# Compute pseudo_R2s
 R2r = glm_poisson[0].score(yr, yrhat, np.mean(yr), method='pseudo_R2')
 R2t = glm_poisson[0].score(yt, ythat, np.mean(yr), method='pseudo_R2')
 print('  R2r =  %f' % R2r, ' R2r = %f' % R2t)
-
-##########################################################
-# Multinomial example
-# ^^^^^^^^^^^^^^^^^^^
-# We can also use ``pyglmnet`` with multinomial case
-# where you can provide array of class.
-
-##########################################################
-
-from sklearn.datasets import make_classification
-X, y = make_classification(n_samples=10000, n_classes=5,
-                           n_informative=100, n_features=100, n_redundant=0)
-
-glm_mn = GLM(distr='multinomial', alpha=0.01,
-               reg_lambda=np.array([0.02, 0.01]), verbose=False)
-glm_mn.threshold = 1e-5
-glm_mn.fit(X, y)
-y_pred = glm_mn[-1].predict(X).argmax(axis=1)
-print('Output performance = %f percent.' % (y_pred == y).mean())
