@@ -67,7 +67,7 @@ class GLM(object):
         between 0.5 and 0.01 is generated.
     learning_rate: float
         learning rate for gradient descent
-        default: 1e-2
+        default: 2e-1
     max_iter: int
         maximum iterations for the model,
         default: 1000
