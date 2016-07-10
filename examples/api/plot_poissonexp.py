@@ -30,11 +30,12 @@ import matplotlib.pyplot as plt
 from sklearn.preprocessing import StandardScaler
 
 ########################################################
-
-########################################################
 #
 # Consider the negative log-likelihood loss function
 
+########################################################
+
+########################################################
 # .. math::
 #
 #     J = \sum_i \lambda_i - y_i \log \lambda_i
@@ -50,7 +51,7 @@ from sklearn.preprocessing import StandardScaler
 #          \exp(\eta)z_i + (1-\eta)\exp(\eta), & \text{if}\ z_i \gt \eta
 #     \end{cases}
 #
-# and
+# where
 #
 # .. math::
 #
@@ -83,7 +84,7 @@ from sklearn.preprocessing import StandardScaler
 
 ########################################################
 #
-# Let's write a piece of code th visualize the difference
+# Let's write a piece of code to visualize the difference
 # between exponential and linearized exponential.
 
 ########################################################

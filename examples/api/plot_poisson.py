@@ -36,7 +36,7 @@ import matplotlib.pyplot as plt
 # - `distr`: str (`'poisson'` or `'poissonexp'` or `'normal'` or `'binomial'` or `'multinomial'`)
 #     default: `'poisson'`
 # - `alpha`: float (the weighting between L1 and L2 norm)
-#     default: 0.5
+#     default: 0.05
 # - `reg_lambda`: array (array of regularization parameters)
 #     default: `np.logspace(np.log(0.5), np.log(0.01), 10, base=np.exp(1))`
 # - `learning_rate`: float (learning rate for gradient descent)
@@ -116,7 +116,7 @@ glm_poisson.fit(scaler.transform(Xr), yr)
 
 ##########################################################
 
-fit_param = glm_poisson[0].fit_
+fit_param = glm_poisson[-1].fit_
 plt.plot(beta[:], 'bo', label ='true')
 plt.plot(fit_param['beta'][:], 'ro', label='estimated')
 plt.xlabel('samples')
@@ -135,8 +135,8 @@ plt.show()
 ##########################################################
 
 # Predict targets from test set
-yrhat = glm_poisson[0].predict(scaler.transform(Xr))
-ythat = glm_poisson[0].predict(scaler.transform(Xt))
+yrhat = glm_poisson[-1].predict(scaler.transform(Xr))
+ythat = glm_poisson[-1].predict(scaler.transform(Xt))
 
 plt.plot(yt[:100], label='true')
 plt.plot(ythat[:100], 'r', label='predicted')
@@ -158,11 +158,11 @@ plt.show()
 ##########################################################
 
 # Compute model deviance
-Dr = glm_poisson[0].score(yr, yrhat)
-Dt = glm_poisson[0].score(yt, ythat)
+Dr = glm_poisson[-1].score(yr, yrhat)
+Dt = glm_poisson[-1].score(yt, ythat)
 print('Dr = %f' % Dr, 'Dt = %f' % Dt)
 
 # Compute pseudo_R2s
-R2r = glm_poisson[0].score(yr, yrhat, np.mean(yr), method='pseudo_R2')
-R2t = glm_poisson[0].score(yt, ythat, np.mean(yr), method='pseudo_R2')
+R2r = glm_poisson[-1].score(yr, yrhat, np.mean(yr), method='pseudo_R2')
+R2t = glm_poisson[-1].score(yt, ythat, np.mean(yr), method='pseudo_R2')
 print('  R2r =  %f' % R2r, ' R2r = %f' % R2t)
