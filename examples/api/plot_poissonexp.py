@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 """
 ==============================
-Canonical Poisson Distribution
+Poisson (Canonical) Distribution
 ==============================
 
-This is an example demonstrating `'Pyglmnet'` with
-the canonical link function for Poisson distributed targets.
+This is an example demonstrating ``Pyglmnet`` with
+the canonical (exponential) link function for Poisson distributed targets.
 
 Here, we deal with the numerical instability of the exponential
 link function by linearizing it above a certain threshold, ``eta``.
@@ -13,6 +13,23 @@ link function by linearizing it above a certain threshold, ``eta``.
 This canonical link can be used by specifying ``distr`` = ``'poissonexp'``.
 
 """
+
+########################################################
+# Let's import useful libraries that we will use it later on
+
+########################################################
+
+# Author: Pavan Ramkumar <pavan.ramkumar@gmail.com>
+# License: MIT
+
+import numpy as np
+import scipy.sparse as sps
+from scipy.special import expit
+from copy import deepcopy
+import matplotlib.pyplot as plt
+from sklearn.preprocessing import StandardScaler
+
+########################################################
 
 ########################################################
 #
@@ -65,24 +82,11 @@ This canonical link can be used by specifying ``distr`` = ``'poissonexp'``.
 #
 
 ########################################################
+#
+# Let's write a piece of code th visualize the difference
+# between exponential and linearized exponential.
 
 ########################################################
-# Let's import useful libraries that we will use it later on
-
-########################################################
-
-# Author: Pavan Ramkumar <pavan.ramkumar@gmail.com>
-# License: MIT
-
-import numpy as np
-import scipy.sparse as sps
-from scipy.special import expit
-from copy import deepcopy
-import matplotlib.pyplot as plt
-from sklearn.preprocessing import StandardScaler
-
-########################################################
-
 z = np.linspace(0., 10., 100)
 
 eta = 4.0
@@ -167,7 +171,7 @@ plt.legend(bbox_to_anchor=(0., 1.02, 1., .102), loc=1,
 plt.show()
 
 ########################################################
-# compute pseudo R2
+# Compute pseudo R2
 
 ########################################################
 
