@@ -104,7 +104,7 @@ glm_poisson.fit(scaler.transform(Xr), yr)
 # path, often we are only interested in further analysis for a particular value of
 # ``reg_lambda``. We can easily do this by slicing the object.
 #
-# For instance model[0] returns an object identical to model but with ``.fit_``
+# For instance ``model[0]`` returns an object identical to model but with ``.fit_``
 # as a dictionary corresponding to the estimated coefficients for ``reg_lambda[0]``.
 
 ##########################################################
@@ -117,8 +117,8 @@ glm_poisson.fit(scaler.transform(Xr), yr)
 ##########################################################
 
 fit_param = glm_poisson[0].fit_
-plt.plot(beta[:], 'bo', label ='bo')
-plt.plot(fit_param['beta'][:], 'ro', label='ro')
+plt.plot(beta[:], 'bo', label ='true')
+plt.plot(fit_param['beta'][:], 'ro', label='estimated')
 plt.xlabel('samples')
 plt.ylabel('outputs')
 plt.legend(bbox_to_anchor=(0., 1.02, 1., .102), loc=1,
@@ -138,8 +138,8 @@ plt.show()
 yrhat = glm_poisson[0].predict(scaler.transform(Xr))
 ythat = glm_poisson[0].predict(scaler.transform(Xt))
 
-plt.plot(yt[:100], label='tr')
-plt.plot(ythat[:100], 'r', label='pr')
+plt.plot(yt[:100], label='true')
+plt.plot(ythat[:100], 'r', label='predicted')
 plt.xlabel('samples')
 plt.ylabel('true and predicted outputs')
 plt.legend(bbox_to_anchor=(0., 1.02, 1., .102), loc=1,
@@ -151,8 +151,8 @@ plt.show()
 # ^^^^^^^^^^^^^^^
 # The GLM class provides two metrics to evaluate the goodness of fit: ``deviance``
 # and ``pseudo_R2``. Both these metrics are implemented in the ``score()`` method.
-# ``deviance`` require the true targets and the predicted targets
-# as inputs. ``pseudo_R2()`` additionally requires a null model, for which the
+# The default metric, ``deviance`` requires the true targets and the predicted targets
+# as inputs. ``pseudo_R2`` additionally requires a null model, for which the
 # best estimate is the mean of the target variables in the training set.
 
 ##########################################################
