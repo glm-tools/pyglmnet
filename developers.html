@@ -87,11 +87,11 @@
                 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="start.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a></li>
 <li class="toctree-l1"><a class="reference internal" href="auto_examples/index.html">Examples Gallery</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tutorials/index.html">Tutorials</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api.html">API Documentation</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="">Developer Documentation</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#to-contribute">To contribute</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#contributing">Contributing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#building-documentation">Building Documentation</a></li>
 </ul>
 </li>
@@ -142,26 +142,38 @@
             
   <div class="section" id="developer-documentation">
 <h1>Developer Documentation<a class="headerlink" href="#developer-documentation" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="to-contribute">
-<h2>To contribute<a class="headerlink" href="#to-contribute" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="contributing">
+<h2>Contributing<a class="headerlink" href="#contributing" title="Permalink to this headline">¶</a></h2>
 <p>We welcome any pull requests.</p>
 <ul class="simple">
 <li>Fork the <a class="reference external" href="https://github.com/pavanramkumar/pyglmnet">repository</a></li>
 <li>Develop and push to your branch</li>
 <li>Create new pull requests</li>
 </ul>
-<p>You can run <code class="docutils literal"><span class="pre">nosetests</span> <span class="pre">tests</span></code> before for making pull requests
+<p>You can run <tt class="docutils literal"><span class="pre">nosetests</span> <span class="pre">tests</span></tt> before for making pull requests
 to ensure that the changes work. We are continuously adding tests
 with more coverage.</p>
 </div>
 <div class="section" id="building-documentation">
 <h2>Building Documentation<a class="headerlink" href="#building-documentation" title="Permalink to this headline">¶</a></h2>
-<p>We use <code class="docutils literal"><span class="pre">sphinx</span></code> to generate documentation page. To build documentation page, run:</p>
+<p>The following should be installed in order to build the documentation.</p>
+<ul class="simple">
+<li><a class="reference external" href="https://github.com/sphinx-doc/sphinx/">sphinx</a></li>
+<li><a class="reference external" href="https://github.com/sphinx-gallery/sphinx-gallery/">sphinx-gallery</a></li>
+<li><a class="reference external" href="https://github.com/python-pillow/Pillow/">pillow</a></li>
+<li><a class="reference external" href="https://github.com/matplotlib/matplotlib/">matplotlib</a></li>
+</ul>
+<p>Shortcut: <tt class="docutils literal"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">sphinx</span> <span class="pre">sphinx-gallery</span> <span class="pre">pillow</span> <span class="pre">matplotlib</span></tt></p>
+<p>We use <tt class="docutils literal"><span class="pre">sphinx</span></tt> to generate documentation page. To build documentation page, run:</p>
 <div class="highlight-python"><div class="highlight"><pre><span></span>make html
 </pre></div>
 </div>
-<p>All static files will be built in <code class="docutils literal"><span class="pre">_build/html/</span></code> where you can open them using the web browser.</p>
-<p>To push built documentation page to <code class="docutils literal"><span class="pre">gh-pages</span></code>, simply run:</p>
+<p>All static files will be built in <tt class="docutils literal"><span class="pre">_build/html/</span></tt> where you can open them using the web browser.</p>
+<p>To remove the built files from your local repository, run:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span>make clean
+</pre></div>
+</div>
+<p>To push built documentation page to <tt class="docutils literal"><span class="pre">gh-pages</span></tt>, simply run:</p>
 <div class="highlight-python"><div class="highlight"><pre><span></span>make install
 </pre></div>
 </div>
@@ -218,7 +230,7 @@ with more coverage.</p>
       <script type="text/javascript" src="_static/jquery.js"></script>
       <script type="text/javascript" src="_static/underscore.js"></script>
       <script type="text/javascript" src="_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   
 

@@ -21,13 +21,13 @@ API Gallery
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="This is an example demonstrating how pyglmnet with poisson exponential distribution works.">
+    <div class="sphx-glr-thumbcontainer" tooltip="This is an example demonstrating Pyglmnet with multinomial distributed targets, typical in clas...">
 
 .. only:: html
 
-    .. figure:: /auto_examples/api/images/thumb/sphx_glr_plot_poisson_2_thumb.png
+    .. figure:: /auto_examples/api/images/thumb/sphx_glr_plot_multinomial_thumb.png
 
-        :ref:`sphx_glr_auto_examples_api_plot_poisson_2.py`
+        :ref:`sphx_glr_auto_examples_api_plot_multinomial.py`
 
 .. raw:: html
 
@@ -37,11 +37,31 @@ API Gallery
 .. toctree::
    :hidden:
 
-   /auto_examples/api/plot_poisson_2
+   /auto_examples/api/plot_multinomial
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="This is an example demonstrating how pyglmnet works with a Poisson distribution using the softp...">
+    <div class="sphx-glr-thumbcontainer" tooltip="This is an example demonstrating ``Pyglmnet`` with the canonical (exponential) link function fo...">
+
+.. only:: html
+
+    .. figure:: /auto_examples/api/images/thumb/sphx_glr_plot_poissonexp_thumb.png
+
+        :ref:`sphx_glr_auto_examples_api_plot_poissonexp.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_examples/api/plot_poissonexp
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="For Poisson distributed target variables, the canonical link function is an exponential nonline...">
 
 .. only:: html
 

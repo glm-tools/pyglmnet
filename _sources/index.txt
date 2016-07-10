@@ -61,8 +61,8 @@ Contents
 
    install
    start
+   tutorial
    auto_examples/index
-   tutorials/index
    api
    developers
    resources

@@ -1,0 +1,274 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Multinomial Distribution &mdash; pyglmnet 0.1.dev documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="stylesheet" href="../../_static/gallery.css" type="text/css" />
+  
+
+  
+    <link rel="top" title="pyglmnet 0.1.dev documentation" href="../../index.html"/>
+        <link rel="up" title="Examples Gallery" href="../index.html"/>
+        <link rel="next" title="Poisson (Canonical) Distribution" href="plot_poissonexp.html"/>
+        <link rel="prev" title="Examples Gallery" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> pyglmnet
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1.dev
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../start.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorial.html">Tutorial</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Examples Gallery</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#api-gallery">API Gallery</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="">Multinomial Distribution</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#multinomial-example">Multinomial example</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="plot_poissonexp.html">Poisson (Canonical) Distribution</a></li>
+<li class="toctree-l3"><a class="reference internal" href="plot_poisson.html">Poisson (Softplus) Distribution</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#application-gallery">Application Gallery</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#benchmark-gallery">Benchmark Gallery</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../api.html">API Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../developers.html">Developer Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../resources.html">Resources</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">pyglmnet</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+        <li><a href="../index.html">Examples Gallery</a> &raquo;</li>
+      
+    <li>Multinomial Distribution</li>
+    <li class="wy-breadcrumbs-aside">
+      
+        
+          <a href="../../_sources/auto_examples/api/plot_multinomial.txt" rel="nofollow"> View page source</a>
+        
+      
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="multinomial-distribution">
+<span id="sphx-glr-auto-examples-api-plot-multinomial-py"></span><h1>Multinomial Distribution<a class="headerlink" href="#multinomial-distribution" title="Permalink to this headline">¶</a></h1>
+<p>This is an example demonstrating Pyglmnet with
+multinomial distributed targets, typical in classification problems.</p>
+<p>This canonical link can be used by specifying <tt class="docutils literal"><span class="pre">distr</span></tt> = <tt class="docutils literal"><span class="pre">'multinomial'</span></tt>.</p>
+<div class="section" id="multinomial-example">
+<h2>Multinomial example<a class="headerlink" href="#multinomial-example" title="Permalink to this headline">¶</a></h2>
+<p>In the multinomial case
+you can provide an array of class labels as targets.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="c1"># Author: Pavan Ramkumar &lt;pavan.ramkumar@gmail.com&gt;</span>
+<span class="c1"># License: MIT</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">scipy.sparse</span> <span class="kn">as</span> <span class="nn">sps</span>
+<span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">StandardScaler</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+</pre></div>
+</div>
+<p>Setup the model using scikit learn convenience functions</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="kn">import</span> <span class="n">make_classification</span>
+<span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">make_classification</span><span class="p">(</span><span class="n">n_samples</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span> <span class="n">n_classes</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+                           <span class="n">n_informative</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">n_features</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">n_redundant</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Fit the model</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pyglmnet</span> <span class="kn">import</span> <span class="n">GLM</span>
+<span class="n">glm_mn</span> <span class="o">=</span> <span class="n">GLM</span><span class="p">(</span><span class="n">distr</span><span class="o">=</span><span class="s1">&#39;multinomial&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span>
+               <span class="n">reg_lambda</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.02</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">]),</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+<span class="n">glm_mn</span><span class="o">.</span><span class="n">threshold</span> <span class="o">=</span> <span class="mf">1e-5</span>
+<span class="n">glm_mn</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Predict and score the output</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">y_pred</span> <span class="o">=</span> <span class="n">glm_mn</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">)</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="s1">&#39;Percentage correct = </span><span class="si">%f</span><span class="s1"> percent.&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">y_pred</span> <span class="o">==</span> <span class="n">y</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span>
+</pre></div>
+</div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-python"><div class="highlight"><pre><span></span>Percentage correct = 0.582700 percent.
+</pre></div>
+</div>
+<p><strong>Total running time of the script:</strong>
+(0 minutes 0.469 seconds)</p>
+<div class="sphx-glr-download container">
+<strong>Download Python source code:</strong> <a class="reference download internal" href="../../_downloads/plot_multinomial.py"><tt class="xref download docutils literal"><span class="pre">plot_multinomial.py</span></tt></a></div>
+<div class="sphx-glr-download container">
+<strong>Download IPython notebook:</strong> <a class="reference download internal" href="../../_downloads/plot_multinomial.ipynb"><tt class="xref download docutils literal"><span class="pre">plot_multinomial.ipynb</span></tt></a></div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="plot_poissonexp.html" class="btn btn-neutral float-right" title="Poisson (Canonical) Distribution" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="../index.html" class="btn btn-neutral" title="Examples Gallery" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, Pavan Ramkumar.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.1.dev',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

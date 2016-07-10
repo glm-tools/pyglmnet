@@ -34,8 +34,8 @@
   
     <link rel="top" title="pyglmnet 0.1.dev documentation" href="../../index.html"/>
         <link rel="up" title="Examples Gallery" href="../index.html"/>
-        <link rel="next" title="Tutorials" href="../../tutorials/index.html"/>
-        <link rel="prev" title="Canonical Poisson Distribution" href="plot_poisson_2.html"/> 
+        <link rel="next" title="API Documentation" href="../../api.html"/>
+        <link rel="prev" title="Poisson (Canonical) Distribution" href="plot_poissonexp.html"/> 
 
   
   <script src="../../_static/js/modernizr.min.js"></script>
@@ -88,9 +88,11 @@
                 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../start.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorial.html">Tutorial</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../index.html">Examples Gallery</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="../index.html#api-gallery">API Gallery</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="plot_poisson_2.html">Canonical Poisson Distribution</a></li>
+<li class="toctree-l3"><a class="reference internal" href="plot_multinomial.html">Multinomial Distribution</a></li>
+<li class="toctree-l3"><a class="reference internal" href="plot_poissonexp.html">Poisson (Canonical) Distribution</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="">Poisson (Softplus) Distribution</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#simulate-a-dataset">Simulate a dataset</a></li>
 </ul>
@@ -101,7 +103,6 @@
 <li class="toctree-l2"><a class="reference internal" href="../index.html#benchmark-gallery">Benchmark Gallery</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../../tutorials/index.html">Tutorials</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../api.html">API Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../developers.html">Developer Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../resources.html">Resources</a></li>
@@ -153,15 +154,14 @@
             
   <div class="section" id="poisson-softplus-distribution">
 <span id="sphx-glr-auto-examples-api-plot-poisson-py"></span><h1>Poisson (Softplus) Distribution<a class="headerlink" href="#poisson-softplus-distribution" title="Permalink to this headline">¶</a></h1>
+<p>For Poisson distributed target variables, the canonical link function is an
+exponential nonlinearity. However, the gradient of the loss function that uses
+this nonlinearity is typically unstable.</p>
 <p>This is an example demonstrating how pyglmnet
 works with a Poisson distribution using the softplus nonlinearity.</p>
-<p>Note that we don&#8217;t use the canonical link function <code class="docutils literal"><span class="pre">exp()</span></code> for <code class="docutils literal"><span class="pre">'poisson'</span></code> targets.
-Instead, we use the softplus function: <code class="docutils literal"><span class="pre">log(1+exp())</span></code> for numerical stability.</p>
-<p>For the canonical poisson link function, use <cite>&#8216;poissonexp&#8217;</cite>.</p>
-<p>See [this example]
-(<a class="reference external" href="http://pavanramkumar.github.io/pyglmnet/auto_examples/api/plot_poisson_2.html">http://pavanramkumar.github.io/pyglmnet/auto_examples/api/plot_poisson_2.html</a>)
-for more.</p>
-<p>First, we can import useful libraries that we will use it later on.</p>
+<p>Here, for the default <tt class="docutils literal"><span class="pre">distr</span> <span class="pre">=</span> <span class="pre">'poisson'</span></tt> option, we use the
+softplus function: <tt class="docutils literal"><span class="pre">log(1+exp())</span></tt>.</p>
+<p>First, let&#8217;s import useful libraries that we will use it later on.</p>
 <div class="highlight-python"><div class="highlight"><pre><span></span><span class="c1"># Author: Pavan Ramkumar &lt;pavan.ramkumar@gmail.com&gt;</span>
 <span class="c1"># License: MIT</span>
 
@@ -175,54 +175,54 @@ for more.</p>
 If not provided, it will be set to the respective defaults</p>
 <ul>
 <li><dl class="first docutils">
-<dt><cite>distr</cite>: str (<cite>&#8216;poisson&#8217;</cite> or <cite>&#8216;normal&#8217;</cite> or <cite>&#8216;binomial&#8217;</cite> or <cite>&#8216;multinomial&#8217;</cite>)</dt>
+<dt><cite>distr</cite>: str (<cite>&#8216;poisson&#8217;</cite> or <cite>&#8216;poissonexp&#8217;</cite> or <cite>&#8216;normal&#8217;</cite> or <cite>&#8216;binomial&#8217;</cite> or <cite>&#8216;multinomial&#8217;</cite>)</dt>
 <dd><p class="first last">default: <cite>&#8216;poisson&#8217;</cite></p>
 </dd>
 </dl>
 </li>
 <li><dl class="first docutils">
 <dt><cite>alpha</cite>: float (the weighting between L1 and L2 norm)</dt>
-<dd><p class="first last">default: 0.5</p>
+<dd><p class="first last">default: 0.05</p>
 </dd>
 </dl>
 </li>
 <li><dl class="first docutils">
-<dt><cite>reg_lambda</cite>: array (array of regularized parameters)</dt>
+<dt><cite>reg_lambda</cite>: array (array of regularization parameters)</dt>
 <dd><p class="first last">default: <cite>np.logspace(np.log(0.5), np.log(0.01), 10, base=np.exp(1))</cite></p>
 </dd>
 </dl>
 </li>
 <li><dl class="first docutils">
 <dt><cite>learning_rate</cite>: float (learning rate for gradient descent)</dt>
-<dd><p class="first last">default: 1e-4</p>
+<dd><p class="first last">default: 2e-1</p>
 </dd>
 </dl>
 </li>
 <li><dl class="first docutils">
 <dt><cite>max_iter</cite>: int (maximum iteration for the model)</dt>
-<dd><p class="first last">default: 100</p>
+<dd><p class="first last">default: 1000</p>
 </dd>
 </dl>
 </li>
 </ul>
-<p>Import <code class="docutils literal"><span class="pre">GLM</span></code> class from <code class="docutils literal"><span class="pre">pyglmnet</span></code></p>
+<p>Import <tt class="docutils literal"><span class="pre">GLM</span></tt> class from <tt class="docutils literal"><span class="pre">pyglmnet</span></tt></p>
 <div class="highlight-python"><div class="highlight"><pre><span></span><span class="c1"># import GLM model</span>
 <span class="kn">from</span> <span class="nn">pyglmnet</span> <span class="kn">import</span> <span class="n">GLM</span>
 
 <span class="c1"># create regularize parameters for model</span>
 <span class="n">reg_lambda</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logspace</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mf">0.5</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mf">0.01</span><span class="p">),</span> <span class="mi">10</span><span class="p">,</span> <span class="n">base</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
 <span class="n">glm_poisson</span> <span class="o">=</span> <span class="n">GLM</span><span class="p">(</span><span class="n">distr</span><span class="o">=</span><span class="s1">&#39;poisson&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span>
-            <span class="n">max_iter</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">learning_rate</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">,</span>
+            <span class="n">max_iter</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">learning_rate</span><span class="o">=</span><span class="mf">2e-1</span><span class="p">,</span>
             <span class="n">reg_lambda</span><span class="o">=</span><span class="n">reg_lambda</span><span class="p">)</span>
 </pre></div>
 </div>
 <div class="section" id="simulate-a-dataset">
 <h2>Simulate a dataset<a class="headerlink" href="#simulate-a-dataset" title="Permalink to this headline">¶</a></h2>
-<p>The <code class="docutils literal"><span class="pre">GLM</span></code> class has a very useful method called <code class="docutils literal"><span class="pre">simulate()</span></code>.</p>
+<p>The <tt class="docutils literal"><span class="pre">GLM</span></tt> class has a very useful method called <tt class="docutils literal"><span class="pre">simulate()</span></tt>.</p>
 <p>Since a canonical link function is already specified by the distribution
-parameters, or provided by the user, <code class="docutils literal"><span class="pre">simulate()</span></code> requires
-only the independent variables <code class="docutils literal"><span class="pre">X</span></code> and the coefficients <code class="docutils literal"><span class="pre">beta0</span></code>
-and <code class="docutils literal"><span class="pre">beta</span></code></p>
+parameters, or provided by the user, <tt class="docutils literal"><span class="pre">simulate()</span></tt> requires
+only the independent variables <tt class="docutils literal"><span class="pre">X</span></tt> and the coefficients <tt class="docutils literal"><span class="pre">beta0</span></tt>
+and <tt class="docutils literal"><span class="pre">beta</span></tt></p>
 <div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">n_samples</span><span class="p">,</span> <span class="n">n_features</span> <span class="o">=</span> <span class="mi">10000</span><span class="p">,</span> <span class="mi">100</span>
 
 <span class="c1"># coefficients</span>
@@ -241,21 +241,28 @@ and <code class="docutils literal"><span class="pre">beta</span></code></p>
 </div>
 <div class="section" id="fit-the-model">
 <h3>Fit the model<a class="headerlink" href="#fit-the-model" title="Permalink to this headline">¶</a></h3>
-<p>Fitting the model is accomplished by a single GLM method called <cite>fit()</cite>.
-You can provide data and output pair <cite>(X, y)</cite> i.e.</p>
+<p>Fitting the model is accomplished by a single GLM method called <cite>fit()</cite>.</p>
 <div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">scaler</span> <span class="o">=</span> <span class="n">StandardScaler</span><span class="p">()</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">Xr</span><span class="p">)</span>
 <span class="n">glm_poisson</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">scaler</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">Xr</span><span class="p">),</span> <span class="n">yr</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
+<div class="section" id="slicing-the-model-object">
+<h3>Slicing the model object<a class="headerlink" href="#slicing-the-model-object" title="Permalink to this headline">¶</a></h3>
+<p>Although the model is fit to all values of reg_lambda specified by a regularization
+path, often we are only interested in further analysis for a particular value of
+<tt class="docutils literal"><span class="pre">reg_lambda</span></tt>. We can easily do this by slicing the object.</p>
+<p>For instance <tt class="docutils literal"><span class="pre">model[0]</span></tt> returns an object identical to model but with <tt class="docutils literal"><span class="pre">.fit_</span></tt>
+as a dictionary corresponding to the estimated coefficients for <tt class="docutils literal"><span class="pre">reg_lambda[0]</span></tt>.</p>
+</div>
 <div class="section" id="visualize-the-fit-coefficients">
 <h3>Visualize the fit coefficients<a class="headerlink" href="#visualize-the-fit-coefficients" title="Permalink to this headline">¶</a></h3>
-<p>The estimated coefficients are stored in an instance variable called <code class="docutils literal"><span class="pre">.fit_</span></code>
+<p>The estimated coefficients are stored in an instance variable called <tt class="docutils literal"><span class="pre">.fit_</span></tt>
 which is a list of dictionaries. Each dictionary corresponds to a
-particular <code class="docutils literal"><span class="pre">reg_lambda</span></code></p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">fit_param</span> <span class="o">=</span> <span class="n">glm_poisson</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">fit_</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">beta</span><span class="p">[:],</span> <span class="s1">&#39;bo&#39;</span><span class="p">,</span> <span class="n">label</span> <span class="o">=</span><span class="s1">&#39;bo&#39;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">fit_param</span><span class="p">[</span><span class="s1">&#39;beta&#39;</span><span class="p">][:],</span> <span class="s1">&#39;ro&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;ro&#39;</span><span class="p">)</span>
+particular <tt class="docutils literal"><span class="pre">reg_lambda</span></tt></p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">fit_param</span> <span class="o">=</span> <span class="n">glm_poisson</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">fit_</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">beta</span><span class="p">[:],</span> <span class="s1">&#39;bo&#39;</span><span class="p">,</span> <span class="n">label</span> <span class="o">=</span><span class="s1">&#39;true&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">fit_param</span><span class="p">[</span><span class="s1">&#39;beta&#39;</span><span class="p">][:],</span> <span class="s1">&#39;ro&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;estimated&#39;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;samples&#39;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;outputs&#39;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">bbox_to_anchor</span><span class="o">=</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">1.02</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="o">.</span><span class="mi">102</span><span class="p">),</span> <span class="n">loc</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
@@ -265,25 +272,17 @@ particular <code class="docutils literal"><span class="pre">reg_lambda</span></c
 </div>
 <img alt="../../_images/sphx_glr_plot_poisson_001.png" class="align-center" src="../../_images/sphx_glr_plot_poisson_001.png" />
 </div>
-<div class="section" id="slicing-the-model-object">
-<h3>Slicing the model object<a class="headerlink" href="#slicing-the-model-object" title="Permalink to this headline">¶</a></h3>
-<p>Although the model is fit to all values of reg_lambda specified by a regularization
-path, often we are only interested in further analysis for a particular value of
-<code class="docutils literal"><span class="pre">reg_lambda</span></code>. We can easily do this by slicing the object.</p>
-<p>For instance model[0] returns an object identical to model but with <code class="docutils literal"><span class="pre">.fit_</span></code>
-as a dictionary corresponding to the estimated coefficients for <code class="docutils literal"><span class="pre">reg_lambda[0]</span></code>.</p>
-</div>
 <div class="section" id="make-predictions-based-on-fit-model">
 <h3>Make predictions based on fit model<a class="headerlink" href="#make-predictions-based-on-fit-model" title="Permalink to this headline">¶</a></h3>
-<p>The <code class="docutils literal"><span class="pre">predict()</span></code> method takes two parameters: a numpy 2d array of independent
+<p>The <tt class="docutils literal"><span class="pre">predict()</span></tt> method takes two parameters: a numpy 2d array of independent
 variables and a dictionary of fit parameters. It returns a vector of
 predicted targets.</p>
 <div class="highlight-python"><div class="highlight"><pre><span></span><span class="c1"># Predict targets from test set</span>
-<span class="n">yrhat</span> <span class="o">=</span> <span class="n">glm_poisson</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">scaler</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">Xr</span><span class="p">))</span>
-<span class="n">ythat</span> <span class="o">=</span> <span class="n">glm_poisson</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">scaler</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">Xt</span><span class="p">))</span>
+<span class="n">yrhat</span> <span class="o">=</span> <span class="n">glm_poisson</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">scaler</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">Xr</span><span class="p">))</span>
+<span class="n">ythat</span> <span class="o">=</span> <span class="n">glm_poisson</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">scaler</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">Xt</span><span class="p">))</span>
 
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">yt</span><span class="p">[:</span><span class="mi">100</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;tr&#39;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ythat</span><span class="p">[:</span><span class="mi">100</span><span class="p">],</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;pr&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">yt</span><span class="p">[:</span><span class="mi">100</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;true&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ythat</span><span class="p">[:</span><span class="mi">100</span><span class="p">],</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;predicted&#39;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;samples&#39;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;true and predicted outputs&#39;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">bbox_to_anchor</span><span class="o">=</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">1.02</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="o">.</span><span class="mi">102</span><span class="p">),</span> <span class="n">loc</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
@@ -295,53 +294,33 @@ predicted targets.</p>
 </div>
 <div class="section" id="goodness-of-fit">
 <h3>Goodness of fit<a class="headerlink" href="#goodness-of-fit" title="Permalink to this headline">¶</a></h3>
-<p>The GLM class provides two methods for evaluating goodness of fit: <code class="docutils literal"><span class="pre">deviance()</span></code>
-and <code class="docutils literal"><span class="pre">pseudo_R2()</span></code>. Both of them require the true targets and the predicted targets
-as inputs. <code class="docutils literal"><span class="pre">pseudo_R2()</span></code> additionally requires a null model, which is typically
-the mean of the target variables in the training set.</p>
+<p>The GLM class provides two metrics to evaluate the goodness of fit: <tt class="docutils literal"><span class="pre">deviance</span></tt>
+and <tt class="docutils literal"><span class="pre">pseudo_R2</span></tt>. Both these metrics are implemented in the <tt class="docutils literal"><span class="pre">score()</span></tt> method.
+The default metric, <tt class="docutils literal"><span class="pre">deviance</span></tt> requires the true targets and the predicted targets
+as inputs. <tt class="docutils literal"><span class="pre">pseudo_R2</span></tt> additionally requires a null model, for which the
+best estimate is the mean of the target variables in the training set.</p>
 <div class="highlight-python"><div class="highlight"><pre><span></span><span class="c1"># Compute model deviance</span>
-<span class="n">Dr</span> <span class="o">=</span> <span class="n">glm_poisson</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">yr</span><span class="p">,</span> <span class="n">yrhat</span><span class="p">)</span>
-<span class="n">Dt</span> <span class="o">=</span> <span class="n">glm_poisson</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">yt</span><span class="p">,</span> <span class="n">ythat</span><span class="p">)</span>
+<span class="n">Dr</span> <span class="o">=</span> <span class="n">glm_poisson</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">yr</span><span class="p">,</span> <span class="n">yrhat</span><span class="p">)</span>
+<span class="n">Dt</span> <span class="o">=</span> <span class="n">glm_poisson</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">yt</span><span class="p">,</span> <span class="n">ythat</span><span class="p">)</span>
 <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Dr = </span><span class="si">%f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">Dr</span><span class="p">,</span> <span class="s1">&#39;Dt = </span><span class="si">%f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">Dt</span><span class="p">)</span>
 
-<span class="c1"># Compute pseudo-R2s</span>
-<span class="n">R2r</span> <span class="o">=</span> <span class="n">glm_poisson</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">yr</span><span class="p">,</span> <span class="n">yrhat</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">yr</span><span class="p">),</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;pseudo_R2&#39;</span><span class="p">)</span>
-<span class="n">R2t</span> <span class="o">=</span> <span class="n">glm_poisson</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">yt</span><span class="p">,</span> <span class="n">ythat</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">yr</span><span class="p">),</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;pseudo_R2&#39;</span><span class="p">)</span>
+<span class="c1"># Compute pseudo_R2s</span>
+<span class="n">R2r</span> <span class="o">=</span> <span class="n">glm_poisson</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">yr</span><span class="p">,</span> <span class="n">yrhat</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">yr</span><span class="p">),</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;pseudo_R2&#39;</span><span class="p">)</span>
+<span class="n">R2t</span> <span class="o">=</span> <span class="n">glm_poisson</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">yt</span><span class="p">,</span> <span class="n">ythat</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">yr</span><span class="p">),</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;pseudo_R2&#39;</span><span class="p">)</span>
 <span class="k">print</span><span class="p">(</span><span class="s1">&#39;  R2r =  </span><span class="si">%f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">R2r</span><span class="p">,</span> <span class="s1">&#39; R2r = </span><span class="si">%f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">R2t</span><span class="p">)</span>
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-python"><div class="highlight"><pre><span></span>Dr = 6559.371885 Dt = 6744.392409
-R2r =  0.527815  R2r = 0.498061
-</pre></div>
-</div>
-</div>
-<div class="section" id="multinomial-example">
-<h3>Multinomial example<a class="headerlink" href="#multinomial-example" title="Permalink to this headline">¶</a></h3>
-<p>We can also use <code class="docutils literal"><span class="pre">pyglmnet</span></code> with multinomial case
-where you can provide array of class.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="kn">import</span> <span class="n">make_classification</span>
-<span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">make_classification</span><span class="p">(</span><span class="n">n_samples</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span> <span class="n">n_classes</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
-                           <span class="n">n_informative</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">n_features</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">n_redundant</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-
-<span class="n">glm_mn</span> <span class="o">=</span> <span class="n">GLM</span><span class="p">(</span><span class="n">distr</span><span class="o">=</span><span class="s1">&#39;multinomial&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span>
-               <span class="n">reg_lambda</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.02</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">]),</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
-<span class="n">glm_mn</span><span class="o">.</span><span class="n">threshold</span> <span class="o">=</span> <span class="mf">1e-5</span>
-<span class="n">glm_mn</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
-<span class="n">y_pred</span> <span class="o">=</span> <span class="n">glm_mn</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">)</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-<span class="k">print</span><span class="p">(</span><span class="s1">&#39;Output performance = </span><span class="si">%f</span><span class="s1"> percent.&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">y_pred</span> <span class="o">==</span> <span class="n">y</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span>
-</pre></div>
-</div>
-<p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-python"><div class="highlight"><pre><span></span>Output performance = 0.454500 percent.
+<div class="sphx-glr-script-out highlight-python"><div class="highlight"><pre><span></span>Dr = 8523.540775 Dt = 8673.231144
+R2r =  0.489292  R2r = 0.481403
 </pre></div>
 </div>
 <p><strong>Total running time of the script:</strong>
-(0 minutes 3.421 seconds)</p>
+(0 minutes 0.726 seconds)</p>
 <div class="sphx-glr-download container">
-<strong>Download Python source code:</strong> <a class="reference download internal" href="../../_downloads/plot_poisson.py"><code class="xref download docutils literal"><span class="pre">plot_poisson.py</span></code></a></div>
+<strong>Download Python source code:</strong> <a class="reference download internal" href="../../_downloads/plot_poisson.py"><tt class="xref download docutils literal"><span class="pre">plot_poisson.py</span></tt></a></div>
 <div class="sphx-glr-download container">
-<strong>Download IPython notebook:</strong> <a class="reference download internal" href="../../_downloads/plot_poisson.ipynb"><code class="xref download docutils literal"><span class="pre">plot_poisson.ipynb</span></code></a></div>
+<strong>Download IPython notebook:</strong> <a class="reference download internal" href="../../_downloads/plot_poisson.ipynb"><tt class="xref download docutils literal"><span class="pre">plot_poisson.ipynb</span></tt></a></div>
 </div>
 </div>
 </div>
@@ -353,10 +332,10 @@ where you can provide array of class.</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="../../tutorials/index.html" class="btn btn-neutral float-right" title="Tutorials" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="../../api.html" class="btn btn-neutral float-right" title="API Documentation" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="plot_poisson_2.html" class="btn btn-neutral" title="Canonical Poisson Distribution" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="plot_poissonexp.html" class="btn btn-neutral" title="Poisson (Canonical) Distribution" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -396,7 +375,7 @@ where you can provide array of class.</p>
       <script type="text/javascript" src="../../_static/jquery.js"></script>
       <script type="text/javascript" src="../../_static/underscore.js"></script>
       <script type="text/javascript" src="../../_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   
 

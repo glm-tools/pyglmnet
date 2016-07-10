@@ -33,8 +33,8 @@
 
   
     <link rel="top" title="pyglmnet 0.1.dev documentation" href="../index.html"/>
-        <link rel="next" title="Canonical Poisson Distribution" href="api/plot_poisson_2.html"/>
-        <link rel="prev" title="Getting Started" href="../start.html"/> 
+        <link rel="next" title="Multinomial Distribution" href="api/plot_multinomial.html"/>
+        <link rel="prev" title="Tutorial" href="../tutorial.html"/> 
 
   
   <script src="../_static/js/modernizr.min.js"></script>
@@ -87,9 +87,11 @@
                 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../start.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial.html">Tutorial</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="">Examples Gallery</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#api-gallery">API Gallery</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="api/plot_poisson_2.html">Canonical Poisson Distribution</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/plot_multinomial.html">Multinomial Distribution</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/plot_poissonexp.html">Poisson (Canonical) Distribution</a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/plot_poisson.html">Poisson (Softplus) Distribution</a></li>
 </ul>
 </li>
@@ -97,7 +99,6 @@
 <li class="toctree-l2"><a class="reference internal" href="#benchmark-gallery">Benchmark Gallery</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../tutorials/index.html">Tutorials</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api.html">API Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../developers.html">Developer Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../resources.html">Resources</a></li>
@@ -150,31 +151,37 @@
 <div class="contents local topic" id="contents">
 <p class="topic-title first">Contents</p>
 <ul class="simple">
-<li><a class="reference internal" href="#api-gallery" id="id6">API Gallery</a></li>
-<li><a class="reference internal" href="#application-gallery" id="id7">Application Gallery</a></li>
-<li><a class="reference internal" href="#benchmark-gallery" id="id8">Benchmark Gallery</a></li>
+<li><a class="reference internal" href="#api-gallery" id="id4">API Gallery</a></li>
+<li><a class="reference internal" href="#application-gallery" id="id5">Application Gallery</a></li>
+<li><a class="reference internal" href="#benchmark-gallery" id="id6">Benchmark Gallery</a></li>
 </ul>
 </div>
 <div style='clear:both'></div><div class="section" id="api-gallery">
-<span id="general-examples-api"></span><h2><a class="toc-backref" href="#id6">API Gallery</a><a class="headerlink" href="#api-gallery" title="Permalink to this headline">¶</a></h2>
-<div class="sphx-glr-thumbcontainer" tooltip="This is an example demonstrating how pyglmnet with poisson exponential distribution works."><div class="figure" id="id4">
-<img alt="../_images/sphx_glr_plot_poisson_2_thumb.png" src="../_images/sphx_glr_plot_poisson_2_thumb.png" />
-<p class="caption"><span class="caption-text"><a class="reference internal" href="api/plot_poisson_2.html#sphx-glr-auto-examples-api-plot-poisson-2-py"><span>Canonical Poisson Distribution</span></a></span></p>
+<span id="general-examples-api"></span><h2><a class="toc-backref" href="#id4">API Gallery</a><a class="headerlink" href="#api-gallery" title="Permalink to this headline">¶</a></h2>
+<div class="sphx-glr-thumbcontainer" tooltip="This is an example demonstrating Pyglmnet with multinomial distributed targets, typical in clas..."><div class="figure">
+<img alt="../_images/sphx_glr_plot_multinomial_thumb.png" src="../_images/sphx_glr_plot_multinomial_thumb.png" />
+<p class="caption"><a class="reference internal" href="api/plot_multinomial.html#sphx-glr-auto-examples-api-plot-multinomial-py"><em>Multinomial Distribution</em></a></p>
 </div>
 </div><div class="toctree-wrapper compound">
 </div>
-<div class="sphx-glr-thumbcontainer" tooltip="This is an example demonstrating how pyglmnet works with a Poisson distribution using the softp..."><div class="figure" id="id5">
+<div class="sphx-glr-thumbcontainer" tooltip="This is an example demonstrating ``Pyglmnet`` with the canonical (exponential) link function fo..."><div class="figure">
+<img alt="../_images/sphx_glr_plot_poissonexp_thumb.png" src="../_images/sphx_glr_plot_poissonexp_thumb.png" />
+<p class="caption"><a class="reference internal" href="api/plot_poissonexp.html#sphx-glr-auto-examples-api-plot-poissonexp-py"><em>Poisson (Canonical) Distribution</em></a></p>
+</div>
+</div><div class="toctree-wrapper compound">
+</div>
+<div class="sphx-glr-thumbcontainer" tooltip="For Poisson distributed target variables, the canonical link function is an exponential nonline..."><div class="figure">
 <img alt="../_images/sphx_glr_plot_poisson_thumb.png" src="../_images/sphx_glr_plot_poisson_thumb.png" />
-<p class="caption"><span class="caption-text"><a class="reference internal" href="api/plot_poisson.html#sphx-glr-auto-examples-api-plot-poisson-py"><span>Poisson (Softplus) Distribution</span></a></span></p>
+<p class="caption"><a class="reference internal" href="api/plot_poisson.html#sphx-glr-auto-examples-api-plot-poisson-py"><em>Poisson (Softplus) Distribution</em></a></p>
 </div>
 </div><div class="toctree-wrapper compound">
 </div>
 <div style='clear:both'></div></div>
 <div class="section" id="application-gallery">
-<span id="general-examples-application"></span><h2><a class="toc-backref" href="#id7">Application Gallery</a><a class="headerlink" href="#application-gallery" title="Permalink to this headline">¶</a></h2>
+<span id="general-examples-application"></span><h2><a class="toc-backref" href="#id5">Application Gallery</a><a class="headerlink" href="#application-gallery" title="Permalink to this headline">¶</a></h2>
 <div style='clear:both'></div></div>
 <div class="section" id="benchmark-gallery">
-<span id="general-examples-benchmark"></span><h2><a class="toc-backref" href="#id8">Benchmark Gallery</a><a class="headerlink" href="#benchmark-gallery" title="Permalink to this headline">¶</a></h2>
+<span id="general-examples-benchmark"></span><h2><a class="toc-backref" href="#id6">Benchmark Gallery</a><a class="headerlink" href="#benchmark-gallery" title="Permalink to this headline">¶</a></h2>
 <div style='clear:both'></div></div>
 </div>
 
@@ -185,10 +192,10 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="api/plot_poisson_2.html" class="btn btn-neutral float-right" title="Canonical Poisson Distribution" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="api/plot_multinomial.html" class="btn btn-neutral float-right" title="Multinomial Distribution" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="../start.html" class="btn btn-neutral" title="Getting Started" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="../tutorial.html" class="btn btn-neutral" title="Tutorial" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -228,7 +235,7 @@
       <script type="text/javascript" src="../_static/jquery.js"></script>
       <script type="text/javascript" src="../_static/underscore.js"></script>
       <script type="text/javascript" src="../_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   
 
