@@ -3,6 +3,7 @@ import scipy.sparse as sps
 from sklearn.cross_validation import KFold, cross_val_score
 from sklearn.datasets import make_regression
 from sklearn.preprocessing import StandardScaler
+from sklearn.pipeline import Pipeline
 
 from nose.tools import assert_true, assert_equal, assert_raises
 from numpy.testing import assert_allclose
@@ -54,7 +55,7 @@ def test_glmnet():
     y_pred = glm[2].predict(scaler.transform(X_train))
     assert_equal(y_pred.shape, (X_train.shape[0], ))
     assert_raises(IndexError, glm.__getitem__, [2])
-    glm.score(y_train, y_pred)
+    glm.general_score(y_train, y_pred)
 
     # don't allow slicing if model has not been fit yet.
     glm_poisson = GLM(distr='poisson')
@@ -65,28 +66,11 @@ def test_glmnet():
     assert_raises(ValueError, glm_poisson.fit_predict, X_train[None, ...], y_train)
 
 
-def simple_cv_scorer(obj, X, y):
+def simple_cv_scorer(estimator, X, y):
     """Simple scorer takes average pseudo-R2 from regularization path"""
-    yhats = obj.predict(X)
-    ynull = np.zeros(y.shape) * y.mean()
-    return np.mean([obj.score(y, yhat, ynull, method='pseudo_R2')
-                   for yhat in yhats])
+    scores = estimator.score(X, y)
+    return np.mean(scores)
 
-
-def test_cv():
-    """Simple CV check"""
-    # XXX: don't use scikit-learn for tests.
-    X, y = make_regression()
-
-    glm_normal = GLM(distr='normal', alpha=0.01,
-                     reg_lambda=[0.0, 0.1, 0.2])
-    glm_normal.fit(X, y)
-
-    cv = KFold(X.shape[0], 5)
-    # check that it returns 5 scores
-
-    assert_equal(len(cross_val_score(glm_normal, X, y, cv=cv,
-                 scoring=simple_cv_scorer)), 5)
 
 def test_multinomial():
     """Test all multinomial functionality"""
@@ -108,12 +92,33 @@ def test_multinomial():
     # uniform prediction
     ynull = np.ones(yhat.shape) / yhat.shape[1]
     # pseudo_R2 should be greater than 0
-    assert_true(glm_mn.score(y, yhat, ynull, method='pseudo_R2') > 0.)
-    glm_mn.score(y, yhat)
+    assert_true(glm_mn.general_score(y, yhat, ynull, method='pseudo_R2') > 0.)
+    glm_mn.general_score(y, yhat)
     assert_equal(len(glm_mn.simulate(glm_mn.fit_[0]['beta0'],
                                   glm_mn.fit_[0]['beta'],
                                   X)),
                  X.shape[0])
     # these should raise an exception
-    assert_raises(ValueError, glm_mn.score, y, y, y, 'pseudo_R2')
-    assert_raises(ValueError, glm_mn.score, y, y, None, 'deviance')
+    assert_raises(ValueError, glm_mn.general_score, y, y, y, 'pseudo_R2')
+    assert_raises(ValueError, glm_mn.general_score, y, y, None, 'deviance')
+
+
+def test_sklearn_compatibility():
+    X, y = make_regression(n_samples=1000, n_features=10)
+
+    # Test whether cross validation works
+    glm_normal = GLM(distr='normal', alpha=0.01,
+                     reg_lambda=[0.0, 0.1, 0.2])
+    glm_normal.fit(X, y)
+    cv = KFold(X.shape[0], 5)
+    # check that it returns 5 scores
+    assert_equal(len(cross_val_score(glm_normal, X, y, cv=cv,
+                                     scoring=simple_cv_scorer)), 5)
+
+    # Test sklearn pipelines
+    scaler = StandardScaler()
+    glm = GLM(distr='normal', alpha=0.01,
+              reg_lambda=[0.0, 0.1, 0.2])
+    clf = Pipeline([("scaler", scaler), ("glm", glm)])
+    assert_equal(len(cross_val_score(clf, X, y, cv=cv,
+                                     scoring=simple_cv_scorer)), 5)

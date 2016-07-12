@@ -316,8 +316,8 @@ class GLM(object):
             raise ValueError('Input data should be of type ndarray (got %s).'
                              % type(X))
 
-        n_samples = np.float(X.shape[0])
-        n_features = np.float(X.shape[1])
+        n_samples = X.shape[0]
+        n_features = X.shape[1]
 
         if self.distr == 'multinomial':
             y_bk = y.ravel()
@@ -434,8 +434,27 @@ class GLM(object):
         """
         return self.fit(X, y).predict(X)
 
-    def score(self, y, yhat, ynull=None, method='deviance'):
-        """Score the model.
+    def score(self, X, y):
+        """Scoring function compatible with sklearn.
+        If multiple regularization parameters are fit,
+        an additional step is needed (e.g., take the mean)
+
+        Parameters
+        ----------
+        X: array, shape (n_samples, n_features)
+            Training data
+        y: array, shape (n_samples, [n_classes])
+            True value or label of training data
+
+        Returns
+        -------
+        Generate scores for each regularization parameter
+        """
+        yhats = self.predict(X)
+        return [self.general_score(y, yhat) for yhat in yhats]
+
+    def general_score(self, y, yhat, ynull=None, method='deviance'):
+        """General score function model.
 
         Parameters
         ----------
