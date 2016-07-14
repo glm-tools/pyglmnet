@@ -365,7 +365,7 @@ class GLM(object):
                 g[0] = grad_beta0
                 g[1:] = grad_beta
                 beta = beta - self.learning_rate * g
-                beta[1:] = self._prox(beta[1:], 1. / n_samples * rl * alpha)
+                beta[1:] = self._prox(beta[1:], rl * alpha)
                 L.append(self._loss(beta[0], beta[1:], rl, X, y))
 
                 if t > 1:
