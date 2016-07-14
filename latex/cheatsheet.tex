@@ -1,0 +1,312 @@
+\documentclass[a4paper]{article}
+
+\usepackage[english]{babel}
+\usepackage[utf8x]{inputenc}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage[colorinlistoftodos]{todonotes}
+
+\title{GLM Cheatsheet}
+\author{Pavan Ramkumar}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+We derive the gradients and Hessians of the penalized log likelihood loss to use as updates in the Newton coordinate descent algorithm for GLMs.
+\end{abstract}
+
+
+\section{Cheatsheet}
+
+
+
+\begin{tabular}{l*{6}{c}r}
+distr              & $\mu$ & $\mathcal{L}$ & $J$ & $\partial J / \partial \beta_j$ & $\partial^2 J / \partial \beta_j^2$ \\
+\hline
+poisson	 	& Eq. (1) & Eq. (2) & Eq. (3) & Eq. (4) & Eq. (5) \\
+poissonexp      & Eq. (6) & Eq. (7) & Eq. (8) & Eq. (9) & Eq. (10) \\
+normal            & Eq. (11) & Eq. (12) & Eq. (13) & Eq. (14) & Eq. (15) \\
+binomial          & Eq. (16) & Eq. (17) & Eq. (18) & Eq. (19) & Eq. (20) \\
+multinomial     & Eq. (21) & Eq. (22) & Eq. (23) & Eq. (24) & Eq. (25) \\
+\end{tabular}
+
+%---------
+% Poisson
+%---------
+\section{Poisson: Softplus}
+
+%---------
+\subsection{Mean function}
+\def \poissonmean{
+\begin{align}
+\begin{split}
+z_i = \beta_0 + \sum_j \beta_j x_{ij} \\
+\mu_i = \log( 1 + \exp(z_i) )
+\end{split}
+\end{align}
+}
+\poissonmean
+
+%---------
+\subsection{Log-likelihood function}
+\def \poissonlogL{
+\begin{align}
+\begin{split}
+\mathcal{L} = \sum_i y_i \log(\mu_i) - \sum_i \mu_i
+\end{split}
+\end{align}
+}
+\poissonlogL
+
+%---------
+\subsection{L2-penalized loss function}
+\def \poissonloss{
+\begin{align}
+\begin{split}
+J = \frac{1}{n}\sum_i \left\{ \log( 1 + \exp( \beta_0 + \sum_j \beta_j x_{ij} ) ) \right\} \\
+- \frac{1}{n}\sum_i \left\{ y_i \log( \log( 1 + \exp(\beta_0 + \sum_j \beta_j x_{ij} ) ) ) \right\} \\
++ \lambda (1-\alpha) \frac{1}{2} \sum_j \beta_j^2
+\end{split}
+\end{align}}
+\poissonloss
+
+%---------
+\subsection{Gradient}
+\def \poissongrad{
+\begin{align}
+\begin{split}
+\mu(z_i) &= \log(1 + \exp(z_i)) \\
+\sigma(z_i) &= \frac{1}{1 + \exp(-z_i)} \\
+\frac{\partial J}{\partial \beta_0} &= \frac{1}{n}\sum_i \sigma(z_i) - \frac{1}{n}\sum_i y_i \frac{\sigma(z_i)}{\mu(z_i)} \\
+\frac{\partial J}{\partial \beta_j} &= \frac{1}{n}\sum_i \sigma(z_i) x_{ij} - \frac{1}{n}\sum_i \sigma(z_i) y_i \frac{\sigma(z_i)}{\mu(z_i)}x_{ij} + \lambda (1 - \alpha) \beta_j
+\end{split}
+\end{align}}
+\poissongrad
+
+%---------
+\subsection{Hessian}
+\def \poissonhess{
+\begin{align}
+\begin{split}
+\mu(z_i) &= \log(1 + \exp(z_i)) \\
+\sigma(z_i) &= \frac{1}{1 + \exp(-z_i)} \\
+\frac{\partial^2 J}{\partial \beta_0^2} &= \frac{1}{n}\sum_i \sigma(z_i) (1 - \sigma(z_i)) 
+- \frac{1}{n}\sum_i y_i \left\{ \frac{\sigma(z_i) (1 - \sigma(z_i))}{\mu(z_i)} - \frac{\sigma(z_i)}{\mu(z_i)^2} \right\} \\
+\frac{\partial^2 J}{\partial \beta_j^2} &=  \frac{1}{n}\sum_i \sigma(z_i) (1 - \sigma(z_i)) x_{ij}^2
+- \frac{1}{n}\sum_i y_i \left\{ \frac{\sigma(z_i) (1 - \sigma(z_i))}{\mu(z_i)} - \frac{\sigma(z_i)}{\mu(z_i)^2} \right\} x_{ij}^2
++ \lambda (1 - \alpha)
+\end{split}
+\end{align}}
+\poissonhess
+
+%------------
+% Poissonexp
+%------------
+\section{Poisson: Linearized}
+
+%---------
+\subsection{Mean function}
+\def \poissonexpmean{
+\begin{align}
+\begin{split}
+z_i &= \beta_0 + \sum_j \beta_j x_{ij} \\
+\mu_i &= 
+\begin{cases}
+\exp(z_i), & z_i \leq \eta \\
+\\
+\exp(\eta)z_i + (1-\eta)\exp(\eta), & z_i > \eta
+\end{cases}
+\end{split}
+\end{align}
+}
+\poissonexpmean
+
+%---------
+\subsection{Log-likelihood function}
+\poissonlogL
+
+%---------
+\subsection{L2-penalized loss function}
+\def \poissonexploss{
+\begin{align}
+\begin{split}
+J = -\frac{1}{n} \mathcal{L} + \lambda (1 - \alpha) \frac{1}{2} \sum_j \beta_j^2
+\end{split}
+\end{align}
+}
+\poissonexploss
+
+%---------
+\subsection{Gradient}
+\def \poissonexpgrad{
+\begin{align}
+\begin{split}
+\mu_i &= 
+\begin{cases}
+\exp(z_i),  & z_i \leq \eta \\
+\\
+\exp(\eta)z_i + (1-\eta)\exp(\eta),  & z_i > \eta
+\end{cases}
+\\
+\frac{\partial J}{\partial \beta_0} &= \frac{1}{n}\sum_{i; z_i \leq \eta} (\mu_i - y_i)
++ \frac{1}{n}\sum_{i; z_i > \eta} \eta (1 - y_i/\mu_i) \\
+\frac{\partial J}{\partial \beta_j} &= \frac{1}{n}\sum_{i; z_i \leq \eta} (\mu_i - y_i) x_{ij}
++ \frac{1}{n}\sum_{i; z_i > \eta} \eta (1 - y_i/\mu_i) x_{ij}
+\end{split}
+\end{align}}
+\poissonexpgrad
+
+%---------
+\subsection{Hessian}
+\def \poissonexphess{
+\begin{align}
+\begin{split}
+\mu_i &= 
+\begin{cases}
+\exp(z_i),  & z_i \leq \eta \\
+\\
+\exp(\eta)z_i + (1-\eta)\exp(\eta),  & z_i > \eta
+\end{cases}
+\\
+\frac{\partial^2 J}{\partial \beta_0^2} &= \frac{1}{n}\sum_{i; z_i \leq \eta} \mu_i
+- \frac{1}{n}\sum_{i; z_i > \eta} \exp(\eta) (1 - \eta) \frac{y_i}{\mu_i^2}  \\
+\frac{\partial^2 J}{\partial \beta_j^2} &=  \frac{1}{n}\sum_{i; z_i \leq \eta} \mu_i x_{ij}^2
+- \frac{1}{n}\sum_{i; z_i > \eta} \exp(\eta) (1 - \eta) \frac{y_i}{\mu_i^2} x_{ij}^2
++ \lambda (1 - \alpha)
+\end{split}
+\end{align}}
+\poissonexphess
+
+%---------
+% Normal
+%---------
+\section{Normal}
+
+%---------
+\subsection{Mean function}
+\def \normalmean{
+\begin{align}
+\begin{split}
+z_i &= \beta_0 + \sum_j \beta_j x_{ij} \\
+\mu_i &= z_i
+\end{split}
+\end{align}
+}
+\normalmean
+
+%---------
+\subsection{Log-likelihood function}
+\def \normallogL{
+\begin{align}
+\begin{split}
+\mathcal{L} = -\frac{1}{2} \sum_i (y_i - \mu_i)^2 \\
+\end{split}
+\end{align}
+}
+\normallogL
+
+%---------
+\subsection{L2-penalized loss function}
+\def \normalloss{
+\begin{align}
+\begin{split}
+J = \frac{1}{2n}\sum_i (y_i - (\beta_0 + \sum_j \beta_j x_{ij}))^2 + \lambda (1 - \alpha) \frac{1}{2}\sum_j \beta_j^2\\
+\end{split}
+\end{align}
+}
+\normalloss
+
+%---------
+\subsection{Gradient}
+\def \normalgrad{
+\begin{align}
+\begin{split}
+\mu(z_i) &= z_i \\
+\frac{\partial J}{\partial \beta_0} &= -\frac{1}{n}\sum_i (y_i - \mu_i) \\
+\frac{\partial J}{\partial \beta_j} &= -\frac{1}{n}\sum_i (y_i - \mu_i) x_{ij}
++ \lambda (1 - \alpha) \beta_j 
+\end{split}
+\end{align}}
+\normalgrad
+
+%---------
+\subsection{Hessian}
+\def \normalhess{
+\begin{align}
+\begin{split}
+\frac{\partial^2 J}{\partial \beta_0^2} &= 1 \\
+\frac{\partial^2 J}{\partial \beta_j^2} &=  \frac{1}{n}\sum_i x_{ij}^2
++ \lambda (1 - \alpha)
+\end{split}
+\end{align}}
+\normalhess
+
+%---------
+% Binomial
+%---------
+\section{Binomial}
+
+%---------
+\subsection{Mean function}
+\def \binomialmean{
+\begin{align}
+\begin{split}
+z_i &= \beta_0 + \sum_j \beta_j x_{ij} \\
+\mu_i &= \frac{1}{1+\exp(-z_i)}
+\end{split}
+\end{align}
+}
+\binomialmean
+
+%---------
+\subsection{Log-likelihood function}
+\def \binomiallogL{
+\begin{align}
+\begin{split}
+\mathcal{L} = \sum_i \left\{ y_i \log(\mu_i) + (1-y_i) \log(1 - \mu_i) \right\} \\
+\end{split}
+\end{align}
+}
+\binomiallogL
+
+%---------
+\subsection{L2-penalized loss function}
+\def \binomialloss{
+\begin{align}
+\begin{split}
+J = -\frac{1}{n}\sum_i \left\{ y_i \log(\beta_0 + \sum_j \beta_j x_{ij}) + (1-y_i) \log(1 - (\beta_0 + \sum_j \beta_j x_{ij})) \right\}
++ \lambda (1 - \alpha) \frac{1}{2}\sum_j \beta_j^2\\
+\end{split}
+\end{align}
+}
+\binomialloss
+
+%---------
+\subsection{Gradient}
+\def \binomialgrad{
+\begin{align}
+\begin{split}
+\mu(z_i) &= \frac{1}{1 + \exp(-z_i)} \\
+\frac{\partial J}{\partial \beta_0} &= -\frac{1}{n}\sum_i (y_i - \mu_i) \\
+\frac{\partial J}{\partial \beta_j} &= -\frac{1}{n}\sum_i (y_i - \mu_i) x_{ij}
++ \lambda (1 - \alpha) \beta_j 
+\end{split}
+\end{align}}
+\binomialgrad
+
+%---------
+\subsection{Hessian}
+\def \binomialhess{
+\begin{align}
+\begin{split}
+\frac{\partial^2 J}{\partial \beta_0^2} &= \frac{1}{n}\sum_i \mu_i (1 - \mu_i) \\
+\frac{\partial^2 J}{\partial \beta_j^2} &=  \frac{1}{n}\sum_i \mu_i (1 - \mu_i) x_{ij}^2
++ \lambda (1 - \alpha)
+\end{split}
+\end{align}}
+\binomialhess
+
+\section{Multinomial}
+
+\end{document}
