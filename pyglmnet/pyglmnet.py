@@ -198,7 +198,7 @@ class GLM(object):
         if self.distr == 'poisson':
             logL = 1. / n_samples * np.sum(y * np.log(l) - l)
         elif self.distr == 'poissonexp':
-            logL = 1. / n_samples * np.sum(y * l - l)
+            logL = 1. / n_samples * np.sum(y * np.log(l) - l)
         elif self.distr == 'normal':
             logL = -0.5 * 1. / n_samples * np.sum((y - l)**2)
         elif self.distr == 'binomial':
