@@ -309,14 +309,16 @@ class GLM(object):
         xk: float
             n_samples x 1
         y: float
-            n_samples x 1
+            n_samples x n_classes
         z: float
             n_samples x 1
 
         Returns
         -------
-        gk: float
-        hk: float
+        gk: float:
+            n_classes
+        hk: float:
+            n_classes
         """
         n_samples = np.float(xk.shape[0])
 
@@ -352,8 +354,8 @@ class GLM(object):
 
         elif self.distr == 'multinomial':
             mu = self._qu(z)
-            gk = np.sum((mu - y) * xk)
-            hk = np.sum(mu * (1.0 - mu) * xk ** 2)
+            gk = np.ravel(np.dot(np.transpose(mu - y), xk))
+            hk = np.ravel(np.dot(np.transpose(mu * (1.0 - mu)), (xk ** 2)))
 
         return 1. / n_samples * gk, 1. / n_samples * hk
 
@@ -382,11 +384,11 @@ class GLM(object):
                 # Calculate grad and hess
                 gk, hk = self._gradhess_logloss_1d(xk, y, z)
                 # Add grad and hess or regularization terms
-                gk += [reg_scale * beta[k] if k > 0 else 0.0]
-                hk += [reg_scale if k > 0 else 0.0]
+                gk += np.ravel([reg_scale * beta[k] if k > 0 else 0.0])
+                hk += np.ravel([reg_scale if k > 0 else 0.0])
 
                 # Update parameters, z
-                update = gk / hk
+                update = 1. / hk * gk
                 beta[k], z = beta[k] - update, z - update * xk
         return beta, z
 
