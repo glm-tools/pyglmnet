@@ -311,7 +311,7 @@ class GLM(object):
         y: float
             n_samples x n_classes
         z: float
-            n_samples x 1
+            n_samples x n_classes
 
         Returns
         -------
