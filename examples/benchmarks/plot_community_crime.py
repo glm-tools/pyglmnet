@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 ============================================
-Communities and Crime - sklearn and pyglmnet
+Communities and Crime - scikit-learn and pyglmnet
 ============================================
 
 This is a real application example comparing pyglmnet against scikit using R_2 measure and mean squared error.
@@ -15,18 +15,27 @@ involve the community, such as the percent of the population considered urban, a
 involving law enforcement, such as per capita number of police officers, and percent of officers assigned to drug units."
 
 We've tried to use the same values as possible for similiar parameters used by the two Classes.
-
-by Vinicius
-
 """
+
+########################################################
+
+# Author: Vinicius Marques <vini.type@gmail.com>
+# License: MIT
+
+########################################################
+# First, we can import useful libraries that we will use it later on
+
+########################################################
 
 import matplotlib.pyplot as plt
 import pandas as pd
 from sklearn.metrics import r2_score, mean_squared_error
 import numpy as np
-
-# Split data in train set and test set
+from pyglmnet import GLM
+from sklearn.linear_model import ElasticNet
 from sklearn.cross_validation import train_test_split
+
+########################################################
 
 df = pd.read_csv('community_crime.csv', header=0)
 X = df.values # it returns a numpy array
@@ -43,8 +52,6 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random
 
 ########################################################
 
-from pyglmnet import GLM
-
 # use the default value for reg_lambda
 glm = GLM(distr='normal', alpha=0.2, learning_rate=1e-2, verbose=False, max_iter=1000, tol=1e-3)
 
@@ -60,10 +67,9 @@ mean_square_score_glm = mean_squared_error(y_test, y_pred_glm)
 print("mean square error on test data using pyglmnet : %f" % mean_square_score_glm)
 
 ########################################################
-# sklearn
+# scikit-learn
 
 ########################################################
-from sklearn.linear_model import ElasticNet
 
 alpha = glm[-1].reg_lambda
 
