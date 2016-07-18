@@ -27,7 +27,7 @@ The following should be installed in order to build the documentation.
 
 Shortcut: ``pip install sphinx sphinx-gallery pillow matplotlib``
 
-Some dependencies are necessary to build the documentation (i.e. `sphinx`, `sphinx-gallery` and `matplotlib`). At the root project folder, you can simply run::
+Some dependencies are necessary to build the documentation (i.e. ``sphinx``, ``sphinx-gallery`` and ``matplotlib``). At the root project folder, you can simply run::
 
     make doc-dependencies
 
