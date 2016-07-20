@@ -65,6 +65,10 @@ class GLM(object):
         where lambda is number in reg_lambda list
         default: None, a list of 10 floats spaced logarithmically (base e)
         between 0.5 and 0.01 is generated.
+    solver: str
+        optimization method, can be one of the following
+        'batch-gradient' (vanilla batch gradient descent)
+        'cdfast' (Newton coordinate gradient descent)
     learning_rate: float
         learning rate for gradient descent
         default: 2e-1
@@ -100,6 +104,7 @@ class GLM(object):
 
     def __init__(self, distr='poisson', alpha=0.05,
                  reg_lambda=None,
+                 solver='batch-gradient',
                  learning_rate=2e-1, max_iter=1000,
                  tol=1e-3, eta=4.0, random_state=0, verbose=False):
 
@@ -114,6 +119,7 @@ class GLM(object):
         self.distr = distr
         self.alpha = alpha
         self.reg_lambda = reg_lambda
+        self.solver = solver
         self.learning_rate = learning_rate
         self.max_iter = max_iter
         self.fit_ = None
@@ -198,7 +204,7 @@ class GLM(object):
         if self.distr == 'poisson':
             logL = 1. / n_samples * np.sum(y * np.log(l) - l)
         elif self.distr == 'poissonexp':
-            logL = 1. / n_samples * np.sum(y * l - l)
+            logL = 1. / n_samples * np.sum(y * np.log(l) - l)
         elif self.distr == 'normal':
             logL = -0.5 * 1. / n_samples * np.sum((y - l)**2)
         elif self.distr == 'binomial':
@@ -292,6 +298,100 @@ class GLM(object):
 
         return grad_beta0, grad_beta
 
+    def _gradhess_logloss_1d(self, xk, y, z):
+        """
+        Computes gradient (1st derivative)
+        and Hessian (2nd derivative)
+        of log likelihood for a single coordinate
+
+        Parameters
+        ----------
+        xk: float
+            n_samples x 1
+        y: float
+            n_samples x n_classes
+        z: float
+            n_samples x n_classes
+
+        Returns
+        -------
+        gk: float:
+            n_classes
+        hk: float:
+            n_classes
+        """
+        n_samples = np.float(xk.shape[0])
+
+        if self.distr == 'poisson':
+            mu = self._qu(z)
+            s = expit(z)
+            gk = np.sum(s * xk) - np.sum(y * s / mu * xk)
+
+            grad_s = s * (1 - s)
+            grad_s_by_mu = grad_s / mu - s / (mu ** 2)
+            hk = np.sum(grad_s * xk ** 2) - np.sum(y * grad_s_by_mu * xk ** 2)
+
+        elif self.distr == 'poissonexp':
+            mu = self._qu(z)
+            s = expit(z)
+            gk = np.sum((mu[z <= self.eta] - y[z <= self.eta]) *
+                        xk[z <= self.eta]) + \
+                self.eta * np.sum((1 - y[z > self.eta] / mu[z > self.eta]) *
+                                  xk[z > self.eta])
+            hk = np.sum(mu[z <= self.eta] * xk[z <= self.eta] ** 2) - \
+                np.exp(self.eta) * (1 - self.eta) * \
+                np.sum(y[z > self.eta] / (mu[z > self.eta] ** 2) *
+                       (xk[z > self.eta] ** 2))
+
+        elif self.distr == 'normal':
+            gk = np.sum((z - y) * xk)
+            hk = np.sum(xk * xk)
+
+        elif self.distr == 'binomial':
+            mu = self._qu(z)
+            gk = np.sum((mu - y) * xk)
+            hk = np.sum(mu * (1.0 - mu) * xk ** 2)
+
+        elif self.distr == 'multinomial':
+            mu = self._qu(z)
+            gk = np.ravel(np.dot(np.transpose(mu - y), xk))
+            hk = np.ravel(np.dot(np.transpose(mu * (1.0 - mu)), (xk ** 2)))
+
+        return 1. / n_samples * gk, 1. / n_samples * hk
+
+    def _cdfast(self, X, y, z, ActiveSet, beta, rl):
+        """
+        Performs one cycle of Newton updates for all coordinates
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+        """
+        n_samples = X.shape[0]
+        n_features = X.shape[1]
+        reg_scale = rl * (1 - self.alpha)
+
+        for k in range(0, np.int(n_features) + 1):
+            # Only update parameters in active set
+            if ActiveSet[k] != 0:
+                if k > 0:
+                    xk = np.expand_dims(X[:, k - 1], axis=1)
+                else:
+                    xk = np.ones((n_samples, 1))
+
+                # Calculate grad and hess
+                gk, hk = self._gradhess_logloss_1d(xk, y, z)
+                # Add grad and hess or regularization terms
+                gk += np.ravel([reg_scale * beta[k] if k > 0 else 0.0])
+                hk += np.ravel([reg_scale if k > 0 else 0.0])
+
+                # Update parameters, z
+                update = 1. / hk * gk
+                beta[k], z = beta[k] - update, z - update * xk
+        return beta, z
+
     def fit(self, X, y):
         """The fit function.
 
@@ -316,7 +416,6 @@ class GLM(object):
             raise ValueError('Input data should be of type ndarray (got %s).'
                              % type(X))
 
-        n_samples = np.float(X.shape[0])
         n_features = np.float(X.shape[1])
 
         if self.distr == 'multinomial':
@@ -351,21 +450,38 @@ class GLM(object):
 
             tol = self.tol
             alpha = self.alpha
+
+            # Temporary parameters to update
             beta = np.zeros([n_features + 1, n_classes])
             beta[0] = fit_params[-1]['beta0']
             beta[1:] = fit_params[-1]['beta']
 
-            g = np.zeros([n_features + 1, n_classes])
+            if self.solver == 'batch-gradient':
+                g = np.zeros([n_features + 1, n_classes])
+            elif self.solver == 'cdfast':
+                ActiveSet = np.ones(n_features + 1)     # init active set
+                z = beta[0] + np.dot(X, beta[1:])       # cache z
 
+            # Initialize loss accumulators
             L, DL = list(), list()
             for t in range(0, self.max_iter):
+                if self.solver == 'batch-gradient':
+                    grad_beta0, grad_beta = self._grad_L2loss(
+                        beta[0], beta[1:], rl, X, y)
+                    g[0] = grad_beta0
+                    g[1:] = grad_beta
+                    beta = beta - self.learning_rate * g
+                elif self.solver == 'cdfast':
+                    beta, z = self._cdfast(X, y, z, ActiveSet, beta, rl)
 
-                grad_beta0, grad_beta = self._grad_L2loss(
-                    beta[0], beta[1:], rl, X, y)
-                g[0] = grad_beta0
-                g[1:] = grad_beta
-                beta = beta - self.learning_rate * g
-                beta[1:] = self._prox(beta[1:], 1. / n_samples * rl * alpha)
+                # Apply proximal operator
+                beta[1:] = self._prox(beta[1:], rl * alpha)
+
+                # Update active set
+                if self.solver == 'cdfast':
+                    ActiveSet[np.where(beta[1:] == 0)[0] + 1] = 0
+
+                # Compute and save loss
                 L.append(self._loss(beta[0], beta[1:], rl, X, y))
 
                 if t > 1:

@@ -1,7 +1,7 @@
 import numpy as np
 import scipy.sparse as sps
 from sklearn.cross_validation import KFold, cross_val_score
-from sklearn.datasets import make_regression
+from sklearn.datasets import make_regression, make_classification
 from sklearn.preprocessing import StandardScaler
 
 from nose.tools import assert_true, assert_equal, assert_raises
@@ -13,36 +13,40 @@ from pyglmnet import GLM
 def test_glmnet():
     """Test glmnet."""
     scaler = StandardScaler()
-    n_samples, n_features = 10000, 100
+    n_samples, n_features = 1000, 100
     density = 0.1
     n_lambda = 10
 
     # coefficients
-    beta0 = np.random.rand()
-    beta = sps.rand(n_features, 1, density=density).toarray()
+    beta0 = 1. / (np.float(n_features) + 1.) * \
+        np.random.normal(0.0, 1.0)
+    beta = 1. / (np.float(n_features) + 1.) * \
+        np.random.normal(0.0, 1.0, [n_features, 1])
 
     distrs = ['poisson', 'poissonexp', 'normal', 'binomial']
+    solvers = ['batch-gradient', 'cdfast']
     learning_rate = 2e-1
-    for distr in distrs:
 
-        glm = GLM(distr, learning_rate=learning_rate)
+    for solver in solvers:
+        for distr in distrs:
 
-        assert_true(repr(glm))
+            glm = GLM(distr, learning_rate=learning_rate,
+                      solver=solver)
 
-        np.random.seed(glm.random_state)
-        X_train = np.random.normal(0.0, 1.0, [n_samples, n_features])
-        y_train = glm.simulate(beta0, beta, X_train)
+            assert_true(repr(glm))
 
-        X_train = scaler.fit_transform(X_train)
-        glm.fit(X_train, y_train)
+            np.random.seed(glm.random_state)
+            X_train = np.random.normal(0.0, 1.0, [n_samples, n_features])
+            y_train = glm.simulate(beta0, beta, X_train)
 
-        beta_ = glm.fit_[-2]['beta'][:]
-        assert_allclose(beta[:], beta_, atol=0.5)  # check fit
-        density_ = np.sum(beta_ > 0.1) / float(n_features)
-        assert_allclose(density_, density, atol=0.05)  # check density
+            X_train = scaler.fit_transform(X_train)
+            glm.fit(X_train, y_train)
 
-        y_pred = glm.predict(scaler.transform(X_train))
-        assert_equal(y_pred.shape, (n_lambda, X_train.shape[0]))
+            beta_ = glm.fit_[-1]['beta'][:]
+            assert_allclose(beta[:], beta_, atol=0.5)  # check fit
+
+            y_pred = glm.predict(scaler.transform(X_train))
+            assert_equal(y_pred.shape, (n_lambda, X_train.shape[0]))
 
     # checks for slicing.
     glm = glm[:3]
@@ -117,3 +121,71 @@ def test_multinomial():
     # these should raise an exception
     assert_raises(ValueError, glm_mn.score, y, y, y, 'pseudo_R2')
     assert_raises(ValueError, glm_mn.score, y, y, None, 'deviance')
+
+def test_cdfast():
+    """Test all functionality related to fast coordinate descent"""
+    scaler = StandardScaler()
+    n_samples = 1000
+    n_features = 100
+    n_classes = 5
+    density = 0.1
+
+    distrs = ['poisson', 'poissonexp', 'normal', 'binomial', 'multinomial']
+    for distr in distrs:
+        glm = GLM(distr, solver='cdfast')
+
+        np.random.seed(glm.random_state)
+        if distr != 'multinomial':
+            # coefficients
+            beta0 = np.random.rand()
+            beta = sps.rand(n_features, 1, density=density).toarray()
+            # data
+            X = np.random.normal(0.0, 1.0, [n_samples, n_features])
+            X = scaler.fit_transform(X)
+            y = glm.simulate(beta0, beta, X)
+
+        elif distr == 'multinomial':
+            # coefficients
+            beta0 = 1 / (n_features + 1) * \
+                np.random.normal(0.0, 1.0, n_classes)
+            beta = 1 / (n_features + 1) * \
+                np.random.normal(0.0, 1.0, [n_features, n_classes])
+            # data
+            X, y = make_classification(n_samples=n_samples,
+                                       n_features=n_features,
+                                       n_redundant=0,
+                                       n_informative=n_features,
+                           random_state=1, n_classes=n_classes)
+            y_bk = y.ravel()
+            y = np.zeros([X.shape[0], y.max() + 1])
+            y[np.arange(X.shape[0]), y_bk] = 1
+
+        # compute grad and hess
+        beta_ = np.zeros([n_features+1, beta.shape[1]])
+        beta_[0] = beta0
+        beta_[1:] = beta
+        z = beta_[0] + np.dot(X, beta_[1:])
+        k = 1
+        xk = np.expand_dims(X[:, k - 1], axis=1)
+        gk, hk = glm._gradhess_logloss_1d(xk, y, z)
+
+        # test grad and hess
+        if distr != 'multinomial':
+            assert_equal(np.size(gk), 1)
+            assert_equal(np.size(hk), 1)
+            assert_true(isinstance(gk, float))
+            assert_true(isinstance(hk, float))
+        else:
+            assert_equal(gk.shape[0], n_classes)
+            assert_equal(hk.shape[0], n_classes)
+            assert_true(isinstance(gk, np.ndarray))
+            assert_true(isinstance(hk, np.ndarray))
+            assert_equal(gk.ndim, 1)
+            assert_equal(hk.ndim, 1)
+
+        # test cdfast
+        ActiveSet = np.ones(n_features + 1)
+        rl = glm.reg_lambda[0]
+        beta_ret, z_ret = glm._cdfast(X, y, z, ActiveSet, beta_, rl)
+        assert_equal(beta_ret.shape, beta_.shape)
+        assert_equal(z_ret.shape, z.shape)
