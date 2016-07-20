@@ -27,17 +27,11 @@ The following should be installed in order to build the documentation.
 
 Shortcut: ``pip install sphinx sphinx-gallery pillow matplotlib``
 
-Some dependencies are necessary to build the documentation (i.e. ``sphinx``, ``sphinx-gallery`` and ``matplotlib``). At the root project folder, you can simply run::
-
-    make doc-dependencies
-
 We use ``sphinx`` to generate documentation page. To build documentation page, run::
 
-    make doc
+    make html
 
-All static files will be built in ``_build/html/`` where you can open them using the web browser. To do so, run::
-
-    make doc-run
+All static files will be built in ``_build/html/`` where you can open them using the web browser.
 
 To remove the built files from your local repository, run::
 
@@ -45,4 +39,4 @@ To remove the built files from your local repository, run::
 
 To push built documentation page to ``gh-pages``, simply run::
 
-    make doc-publish
+    make install
