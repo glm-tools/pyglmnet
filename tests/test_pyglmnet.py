@@ -72,8 +72,12 @@ def simple_cv_scorer(obj, X, y):
     """Simple scorer takes average pseudo-R2 from regularization path"""
     yhats = obj.predict(X)
     ynull = np.zeros(y.shape) * y.mean()
-    return np.mean([obj.score(y, yhat, ynull, method='pseudo_R2')
-                   for yhat in yhats])
+    if hasattr(obj, '_final_estimator'):
+        return np.mean([obj._final_estimator.score(y, yhat, ynull, method='pseudo_R2')
+                       for yhat in yhats])
+    else:
+        return np.mean([obj.score(y, yhat, ynull, method='pseudo_R2')
+                        for yhat in yhats])
 
 
 def test_cv():
