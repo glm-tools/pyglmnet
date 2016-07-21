@@ -432,27 +432,8 @@ class GLM(object):
         """
         return self.fit(X, y).predict(X)
 
-    def score(self, X, y):
-        """Scoring function compatible with sklearn.
-        If multiple regularization parameters are fit,
-        an additional step is needed (e.g., take the mean)
-
-        Parameters
-        ----------
-        X: array, shape (n_samples, n_features)
-            Training data
-        y: array, shape (n_samples, [n_classes])
-            True value or label of training data
-
-        Returns
-        -------
-        Generate scores for each regularization parameter
-        """
-        yhats = self.predict(X)
-        return [self.general_score(y, yhat) for yhat in yhats]
-
-    def general_score(self, y, yhat, ynull=None, method='deviance'):
-        """General score function model.
+    def score(self, y, yhat, ynull=None, method='deviance'):
+        """Score the model.
 
         Parameters
         ----------
@@ -465,25 +446,56 @@ class GLM(object):
         method : str
             One of 'pseudo_R2' or 'deviance'
         """
-        y = y.ravel()
-        if self.distr != 'multinomial':
-            yhat = yhat.ravel()
 
-        L1 = utils.log_likelihood(y, yhat, self.distr)
-        if self.distr in ['poisson', 'poissonexp']:
-            LS = utils.log_likelihood(y, y, self.distr)
-        else:
-            LS = 0
+        if (self.distr != 'multinomial' and len(yhat.shape) == 1) or \
+                (self.distr == 'multinomial' and len(yhat.shape) == 2):
 
-        if method == 'deviance':
-            score = -2 * (L1 - LS)
-        elif method == 'pseudo_R2':
-            L0 = utils.log_likelihood(y, ynull, self.distr)
+            y = y.ravel()
+            if self.distr != 'multinomial':
+                yhat = yhat.ravel()
+
+            L1 = utils.log_likelihood(y, yhat, self.distr)
             if self.distr in ['poisson', 'poissonexp']:
-                score = 1 - (LS - L1) / (LS - L0)
+                LS = utils.log_likelihood(y, y, self.distr)
             else:
-                score = 1 - L1 / L0
+                LS = 0
 
+            if method == 'deviance':
+                score = -2 * (L1 - LS)
+            elif method == 'pseudo_R2':
+                L0 = utils.log_likelihood(y, ynull, self.distr)
+                if self.distr in ['poisson', 'poissonexp']:
+                    score = 1 - (LS - L1) / (LS - L0)
+                else:
+                    score = 1 - L1 / L0
+
+        elif (self.distr != 'multinomial' and len(yhat.shape) > 1) or \
+                (self.distr == 'multinomial' and len(yhat.shape) > 2):
+            y = y.ravel()
+            score = list()
+
+            if self.distr in ['poisson', 'poissonexp']:
+                LS = utils.log_likelihood(y, y, self.distr)
+            else:
+                LS = 0
+            if(method == 'pseudo_R2'):
+                L0 = utils.log_likelihood(y, ynull, self.distr)
+
+            for idx in range(yhat.shape[0]):
+
+                if self.distr != 'multinomial':
+                    yhat_this = (yhat[idx, :]).ravel()
+                else:
+                    yhat_this = yhat[idx, :, :]
+                L1 = utils.log_likelihood(y, yhat_this, self.distr)
+
+                if method == 'deviance':
+                    score.append(-2 * (L1 - LS))
+                elif method == 'pseudo_R2':
+                    if self.distr in ['poisson', 'poissonexp']:
+                        score.append(1 - (LS - L1) / (LS - L0))
+                    else:
+                        score.append(1 - L1 / L0)
         return score
 
     def simulate(self, beta0, beta, X):
