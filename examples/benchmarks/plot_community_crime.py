@@ -53,15 +53,11 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random
 ########################################################
 
 # use the default value for reg_lambda
-glm = GLM(distr='normal', alpha=0.2, learning_rate=1e-2, verbose=False, max_iter=1000, tol=1e-3)
+glm = GLM(distr='normal', alpha=0.05, learning_rate=2e-1, verbose=False, max_iter=1000, tol=1e-3)
 
-from sklearn import preprocessing
-scaler = preprocessing.StandardScaler().fit(X_train)
-glm.fit(scaler.transform(X_train), y_train)
-
-y_pred_glm = glm[-1].predict(scaler.transform(X_test))
-
-r2_score_glm = glm[-1].score(y_test, y_pred_glm, np.mean(y_train), method='pseudo_R2')
+glm.fit(X_train, y_train)
+y_pred_glm = glm[-1].predict(X_test)
+r2_score_glm = r2_score(y_test, y_pred_glm)
 print("r^2 on test data using pyglmnet : %f" % r2_score_glm)
 mean_square_score_glm = mean_squared_error(y_test, y_pred_glm)
 print("mean square error on test data using pyglmnet : %f" % mean_square_score_glm)
@@ -75,7 +71,7 @@ alpha = glm[-1].reg_lambda
 
 # l1_ratio is similar to alpha in GLM class
 # alpha is similar to reg_lambda in GLM class
-enet = ElasticNet(alpha=alpha, l1_ratio=0.2, max_iter=100)
+enet = ElasticNet(alpha=alpha, l1_ratio=0.05, max_iter=100)
 y_pred_enet = enet.fit(X_train, y_train).predict(X_test)
 r2_score_enet = r2_score(y_test, y_pred_enet)
 print("r^2 on test data using sklearn : %f" % r2_score_enet)
