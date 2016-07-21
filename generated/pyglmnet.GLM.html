@@ -150,7 +150,7 @@
 <h1>pyglmnet.GLM<a class="headerlink" href="#pyglmnet-glm" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="pyglmnet.GLM">
-<em class="property">class </em><tt class="descclassname">pyglmnet.</tt><tt class="descname">GLM</tt><big>(</big><em>distr='poisson'</em>, <em>alpha=0.05</em>, <em>reg_lambda=None</em>, <em>learning_rate=0.2</em>, <em>max_iter=1000</em>, <em>tol=0.001</em>, <em>eta=4.0</em>, <em>random_state=0</em>, <em>verbose=False</em><big>)</big><a class="headerlink" href="#pyglmnet.GLM" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">pyglmnet.</tt><tt class="descname">GLM</tt><big>(</big><em>distr='poisson'</em>, <em>alpha=0.05</em>, <em>reg_lambda=None</em>, <em>solver='batch-gradient'</em>, <em>learning_rate=0.2</em>, <em>max_iter=1000</em>, <em>tol=0.001</em>, <em>eta=4.0</em>, <em>random_state=0</em>, <em>verbose=False</em><big>)</big><a class="headerlink" href="#pyglmnet.GLM" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generalized Linear Model (GLM)</p>
 <p>This class implements elastic-net regularized generalized linear models.
 The core algorithm is defined in the article.</p>
@@ -177,9 +177,13 @@ min_(beta0, beta) -L + lambda * P
 where lambda is number in reg_lambda list
 default: None, a list of 10 floats spaced logarithmically (base e)
 between 0.5 and 0.01 is generated.</dd>
+<dt>solver: str</dt>
+<dd>optimization method, can be one of the following
+&#8216;batch-gradient&#8217; (vanilla batch gradient descent)
+&#8216;cdfast&#8217; (Newton coordinate gradient descent)</dd>
 <dt>learning_rate: float</dt>
 <dd>learning rate for gradient descent
-default: 1e-2</dd>
+default: 2e-1</dd>
 <dt>max_iter: int</dt>
 <dd>maximum iterations for the model,
 default: 1000</dd>
@@ -208,7 +212,7 @@ default: False</dd>
 </div>
 <dl class="method">
 <dt id="pyglmnet.GLM.__init__">
-<tt class="descname">__init__</tt><big>(</big><em>distr='poisson'</em>, <em>alpha=0.05</em>, <em>reg_lambda=None</em>, <em>learning_rate=0.2</em>, <em>max_iter=1000</em>, <em>tol=0.001</em>, <em>eta=4.0</em>, <em>random_state=0</em>, <em>verbose=False</em><big>)</big><a class="headerlink" href="#pyglmnet.GLM.__init__" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">__init__</tt><big>(</big><em>distr='poisson'</em>, <em>alpha=0.05</em>, <em>reg_lambda=None</em>, <em>solver='batch-gradient'</em>, <em>learning_rate=0.2</em>, <em>max_iter=1000</em>, <em>tol=0.001</em>, <em>eta=4.0</em>, <em>random_state=0</em>, <em>verbose=False</em><big>)</big><a class="headerlink" href="#pyglmnet.GLM.__init__" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <p class="rubric">Methods</p>
@@ -218,47 +222,23 @@ default: False</dd>
 <col width="90%" />
 </colgroup>
 <tbody valign="top">
-<tr class="row-odd"><td><tt class="xref py py-obj docutils literal"><span class="pre">GLM.L2loss</span></tt></td>
+<tr class="row-odd"><td><a class="reference internal" href="#pyglmnet.GLM.__init__" title="pyglmnet.GLM.__init__"><tt class="xref py py-obj docutils literal"><span class="pre">__init__</span></tt></a>([distr,&nbsp;alpha,&nbsp;reg_lambda,&nbsp;solver,&nbsp;...])</td>
 <td></td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="#pyglmnet.GLM.__init__" title="pyglmnet.GLM.__init__"><tt class="xref py py-obj docutils literal"><span class="pre">__init__</span></tt></a>([distr,&nbsp;alpha,&nbsp;reg_lambda,&nbsp;...])</td>
-<td></td>
-</tr>
-<tr class="row-odd"><td><tt class="xref py py-obj docutils literal"><span class="pre">copy</span></tt>()</td>
+<tr class="row-even"><td><tt class="xref py py-obj docutils literal"><span class="pre">copy</span></tt>()</td>
 <td>Return a copy of the object.</td>
 </tr>
-<tr class="row-even"><td><tt class="xref py py-obj docutils literal"><span class="pre">fit</span></tt>(X,&nbsp;y)</td>
+<tr class="row-odd"><td><tt class="xref py py-obj docutils literal"><span class="pre">fit</span></tt>(X,&nbsp;y)</td>
 <td>The fit function.</td>
 </tr>
-<tr class="row-odd"><td><tt class="xref py py-obj docutils literal"><span class="pre">fit_predict</span></tt>(X,&nbsp;y)</td>
+<tr class="row-even"><td><tt class="xref py py-obj docutils literal"><span class="pre">fit_predict</span></tt>(X,&nbsp;y)</td>
 <td>Fit the model and predict on the same data.</td>
 </tr>
-<tr class="row-even"><td><tt class="xref py py-obj docutils literal"><span class="pre">get_params</span></tt>([deep])</td>
-<td></td>
-</tr>
-<tr class="row-odd"><td><tt class="xref py py-obj docutils literal"><span class="pre">GLM.grad_L2loss</span></tt></td>
-<td></td>
-</tr>
-<tr class="row-even"><td><tt class="xref py py-obj docutils literal"><span class="pre">GLM.lmb</span></tt></td>
-<td></td>
-</tr>
-<tr class="row-odd"><td><tt class="xref py py-obj docutils literal"><span class="pre">GLM.logL</span></tt></td>
-<td></td>
-</tr>
-<tr class="row-even"><td><tt class="xref py py-obj docutils literal"><span class="pre">GLM.loss</span></tt></td>
-<td></td>
-</tr>
-<tr class="row-odd"><td><tt class="xref py py-obj docutils literal"><span class="pre">GLM.penalty</span></tt></td>
+<tr class="row-odd"><td><tt class="xref py py-obj docutils literal"><span class="pre">get_params</span></tt>([deep])</td>
 <td></td>
 </tr>
 <tr class="row-even"><td><tt class="xref py py-obj docutils literal"><span class="pre">predict</span></tt>(X)</td>
 <td>Predict labels.</td>
-</tr>
-<tr class="row-odd"><td><tt class="xref py py-obj docutils literal"><span class="pre">GLM.prox</span></tt></td>
-<td></td>
-</tr>
-<tr class="row-even"><td><tt class="xref py py-obj docutils literal"><span class="pre">GLM.qu</span></tt></td>
-<td></td>
 </tr>
 <tr class="row-odd"><td><tt class="xref py py-obj docutils literal"><span class="pre">score</span></tt>(y,&nbsp;yhat[,&nbsp;ynull,&nbsp;method])</td>
 <td>Score the model.</td>

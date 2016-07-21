@@ -32,7 +32,10 @@
   
 
   
-    <link rel="top" title="pyglmnet 0.1.dev documentation" href="../../index.html"/> 
+    <link rel="top" title="pyglmnet 0.1.dev documentation" href="../../index.html"/>
+        <link rel="up" title="Examples Gallery" href="../index.html"/>
+        <link rel="next" title="Communities and Crime - scikit-learn and pyglmnet" href="../benchmarks/plot_community_crime.html"/>
+        <link rel="prev" title="Poisson (Softplus) Distribution" href="plot_poisson.html"/> 
 
   
   <script src="../../_static/js/modernizr.min.js"></script>
@@ -82,11 +85,22 @@
           
             
             
-                <ul>
+                <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../start.html">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tutorial.html">Tutorial</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../index.html">Examples Gallery</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Examples Gallery</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#api-gallery">API Gallery</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="plot_multinomial.html">Multinomial Distribution</a></li>
+<li class="toctree-l3"><a class="reference internal" href="plot_poissonexp.html">Poisson (Canonical) Distribution</a></li>
+<li class="toctree-l3"><a class="reference internal" href="plot_poisson.html">Poisson (Softplus) Distribution</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="">Canonical Poisson Distribution</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#application-gallery">Application Gallery</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#benchmark-gallery">Benchmark Gallery</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="../../api.html">API Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../developers.html">Developer Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../resources.html">Resources</a></li>
@@ -119,6 +133,8 @@
 <div role="navigation" aria-label="breadcrumbs navigation">
   <ul class="wy-breadcrumbs">
     <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+        <li><a href="../index.html">Examples Gallery</a> &raquo;</li>
       
     <li>Canonical Poisson Distribution</li>
     <li class="wy-breadcrumbs-aside">
@@ -236,11 +252,12 @@ poisson exponential distribution works.</p>
 <span class="k">print</span><span class="p">(</span><span class="n">grad_beta</span><span class="p">[:</span><span class="mi">5</span><span class="p">])</span>
 </pre></div>
 </div>
-<div class="highlight-pytb"><div class="highlight"><pre><span></span><span class="gt">Traceback (most recent call last):</span>
-  File <span class="nb">&quot;/Users/pavanramkumar/anaconda/lib/python2.7/site-packages/sphinx_gallery/gen_rst.py&quot;</span>, line <span class="m">467</span>, in <span class="n">execute_script</span>
-    <span class="k">exec</span><span class="p">(</span><span class="n">code_block</span><span class="p">,</span> <span class="n">example_globals</span><span class="p">)</span>
-  File <span class="nb">&quot;&lt;string&gt;&quot;</span>, line <span class="m">2</span>, in <span class="n">&lt;module&gt;</span>
-<span class="gr">AttributeError</span>: <span class="n">&#39;GLM&#39; object has no attribute &#39;_grad_L2loss&#39;</span>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-python"><div class="highlight"><pre><span></span> [[ 0.01591953]
+[-0.01561483]
+[ 0.01905783]
+[-0.00142021]
+[-0.02142419]]
 </pre></div>
 </div>
 <p>Use one model to predict</p>
@@ -260,17 +277,17 @@ poisson exponential distribution works.</p>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
-<img alt="../../_images/sphx_glr_plot_poisson_2_003.png" class="align-center" src="../../_images/sphx_glr_plot_poisson_2_003.png" />
+<img alt="../../_images/sphx_glr_plot_poisson_2_002.png" class="align-center" src="../../_images/sphx_glr_plot_poisson_2_002.png" />
 <p>compute pseudo R-square</p>
 <div class="highlight-python"><div class="highlight"><pre><span></span><span class="k">print</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">yt</span><span class="p">,</span> <span class="n">ythat</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">yr</span><span class="p">),</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;pseudo_R2&#39;</span><span class="p">))</span>
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-python"><div class="highlight"><pre><span></span><span class="mf">0.727906295161</span>
+<div class="sphx-glr-script-out highlight-python"><div class="highlight"><pre><span></span><span class="o">-</span><span class="mf">0.0073333728265</span>
 </pre></div>
 </div>
 <p><strong>Total running time of the script:</strong>
-(0 minutes 3.956 seconds)</p>
+(0 minutes 0.660 seconds)</p>
 <div class="sphx-glr-download container">
 <strong>Download Python source code:</strong> <a class="reference download internal" href="../../_downloads/plot_poisson_2.py"><tt class="xref download docutils literal"><span class="pre">plot_poisson_2.py</span></tt></a></div>
 <div class="sphx-glr-download container">
@@ -281,6 +298,15 @@ poisson exponential distribution works.</p>
            </div>
           </div>
           <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../benchmarks/plot_community_crime.html" class="btn btn-neutral float-right" title="Communities and Crime - scikit-learn and pyglmnet" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="plot_poisson.html" class="btn btn-neutral" title="Poisson (Softplus) Distribution" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
   
 
   <hr/>

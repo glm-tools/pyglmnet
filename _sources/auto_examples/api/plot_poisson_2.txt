@@ -186,15 +186,16 @@ Gradient of loss function
 
 
 
-.. code-block:: pytb
 
-    Traceback (most recent call last):
-      File "/Users/pavanramkumar/anaconda/lib/python2.7/site-packages/sphinx_gallery/gen_rst.py", line 467, in execute_script
-        exec(code_block, example_globals)
-      File "<string>", line 2, in <module>
-    AttributeError: 'GLM' object has no attribute '_grad_L2loss'
+.. rst-class:: sphx-glr-script-out
 
+ Out::
 
+      [[ 0.01591953]
+     [-0.01561483]
+     [ 0.01905783]
+     [-0.00142021]
+     [-0.02142419]]
 
 
 Use one model to predict
@@ -231,7 +232,7 @@ Visualize predicted output
 
 
 
-.. image:: /auto_examples/api/images/sphx_glr_plot_poisson_2_003.png
+.. image:: /auto_examples/api/images/sphx_glr_plot_poisson_2_002.png
     :align: center
 
 
@@ -252,11 +253,11 @@ compute pseudo R-square
 
  Out::
 
-      0.727906295161
+      -0.0073333728265
 
 
 **Total running time of the script:**
-(0 minutes 3.956 seconds)
+(0 minutes 0.660 seconds)
 
 
 
