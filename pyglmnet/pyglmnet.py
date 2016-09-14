@@ -65,6 +65,13 @@ class GLM(object):
         where lambda is number in reg_lambda list
         default: None, a list of 10 floats spaced logarithmically (base e)
         between 0.5 and 0.01 is generated.
+    group: list or ndarray
+        dimension: n_features
+        each entry of the list/ array should contain an int from 1 to n_groups
+        that specify group membership for each parameter (not beta_0)
+        note: if you do not want to specify a group for a specific parameter,
+        set it to zero
+        default: None
     solver: str
         optimization method, can be one of the following
         'batch-gradient' (vanilla batch gradient descent)
@@ -106,7 +113,7 @@ class GLM(object):
                  reg_lambda=None,
                  solver='batch-gradient',
                  learning_rate=2e-1, max_iter=1000,
-                 tol=1e-3, eta=4.0, random_state=0, verbose=False):
+                 tol=1e-3, eta=4.0, random_state=0, verbose=False, group=None):
 
         if reg_lambda is None:
             reg_lambda = np.logspace(np.log(0.5), np.log(0.01), 10,
@@ -119,6 +126,7 @@ class GLM(object):
         self.distr = distr
         self.alpha = alpha
         self.reg_lambda = reg_lambda
+        self.group = group
         self.solver = solver
         self.learning_rate = learning_rate
         self.max_iter = max_iter
@@ -135,6 +143,7 @@ class GLM(object):
                 ('distr', self.distr),
                 ('alpha', self.alpha),
                 ('reg_lambda', self.reg_lambda),
+                ('group', self.group),
                 ('learning_rate', self.learning_rate),
                 ('max_iter', self.max_iter),
                 ('tol', self.tol),
@@ -240,9 +249,24 @@ class GLM(object):
         J = -L + reg_lambda * P
         return J
 
-    def _prox(self, X, l):
+    def _prox(self, beta, thresh):
         """Proximal operator."""
-        return np.sign(X) * (np.abs(X) - l) * (np.abs(X) > l)
+        if self.group is None:
+            # The default case: soft thresholding
+            return np.sign(beta) * (np.abs(beta) - thresh) * \
+                (np.abs(beta) > thresh)
+        else:
+            # Group sparsity case: apply group sparsity operator
+            unique_labels = np.unique(self.group)
+            group_norms = np.abs(beta)
+
+            for group_id in unique_labels:
+                if group_id != 0:
+                    group_norms[self.group == group_id] = \
+                        np.linalg.norm(beta[self.group == group_id], 2)
+
+            return (beta - thresh * beta / group_norms) * \
+                (group_norms > thresh)
 
     def _grad_L2loss(self, beta0, beta, reg_lambda, X, y):
         """The gradient."""
@@ -411,6 +435,11 @@ class GLM(object):
         # Implements batch gradient descent (i.e. vanilla gradient descent by
         # computing gradient over entire training set)
         np.random.seed(self.random_state)
+
+        if self.group is not None:
+            self.group = np.array(self.group)
+            if self.group.shape[0] != X.shape[1]:
+                raise ValueError('group should be (n_features,)')
 
         if not isinstance(X, np.ndarray):
             raise ValueError('Input data should be of type ndarray (got %s).'
