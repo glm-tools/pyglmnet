@@ -98,7 +98,7 @@ class GLM(object):
     >>> glm[2].predict(X_test)
     """
 
-    def __init__(self, distr='poisson', alpha=0.05,
+    def __init__(self, distr='poisson', alpha=0.5,
                  reg_lambda=None,
                  learning_rate=2e-1, max_iter=1000,
                  tol=1e-3, eta=4.0, random_state=0, verbose=False):
