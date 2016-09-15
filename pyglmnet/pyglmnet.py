@@ -221,8 +221,8 @@ class GLM(object):
     def _penalty(self, beta):
         """The penalty."""
         alpha = self.alpha
-        P = 0.5 * (1 - alpha) * np.linalg.norm(beta, 2) + \
-            alpha * np.linalg.norm(beta, 1)
+        P = 0.5 * (1 - alpha) * np.linalg.norm(beta, 2) ** 2 + \
+            alpha * np.linalg.norm(beta, 1) ** 2
         return P
 
     def _loss(self, beta0, beta, reg_lambda, X, y):
@@ -236,7 +236,7 @@ class GLM(object):
         """Quadratic loss."""
         alpha = self.alpha
         L = self._logL(beta0, beta, X, y)
-        P = 0.5 * (1 - alpha) * np.linalg.norm(beta, 2)
+        P = 0.5 * (1 - alpha) * np.linalg.norm(beta, 2) ** 2
         J = -L + reg_lambda * P
         return J
 
