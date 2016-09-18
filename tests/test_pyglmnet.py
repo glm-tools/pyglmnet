@@ -9,6 +9,35 @@ from numpy.testing import assert_allclose
 
 from pyglmnet import GLM
 
+def test_group_lasso():
+    """Group Lasso test."""
+    n_samples, n_features = 100, 90
+
+    # assign group ids
+    groups = np.zeros(90)
+    groups[0:29] = 1
+    groups[30:59] = 2
+    groups[60:] = 3
+
+    # sample random coefficients
+    beta0 = np.random.normal(0.0, 1.0, 1)
+    beta = np.random.normal(0.0, 1.0, n_features)
+    beta[groups == 2] = 0.
+
+    # create an instance of the GLM class
+    glm_group = GLM(distr='poisson', alpha=1.)
+
+    # simulate training data
+    Xr = np.random.normal(0.0, 1.0, [n_samples, n_features])
+    yr = glm_group.simulate(beta0, beta, Xr)
+
+    # simulate testing data
+    Xt = np.random.normal(0.0, 1.0, [n_samples, n_features])
+    yt = glm_group.simulate(beta0, beta, Xt)
+
+    # scale and fit
+    scaler = StandardScaler().fit(Xr)
+    glm_group.fit(scaler.transform(Xr), yr)
 
 def test_glmnet():
     """Test glmnet."""
