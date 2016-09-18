@@ -59,16 +59,16 @@ class GLM(object):
         of the loss function i.e.
         P(beta) = 0.5 * (1-alpha) * |beta|_2^2 + alpha * |beta|_1
         default: 0.5
-    reg_lambda: ndarray or list
+    reg_lambda: ndarray | list | None
         array of regularized parameters of penalty term i.e.
         min_(beta0, beta) -L + lambda * P
         where lambda is number in reg_lambda list
         default: None, a list of 10 floats spaced logarithmically (base e)
         between 0.5 and 0.01 is generated.
-    group: list or ndarray
+    group: ndarray | list | None
         dimension: n_features
         each entry of the list/ array should contain an int from 1 to n_groups
-        that specify group membership for each parameter (not beta_0)
+        that specify group membership for each parameter (not beta0)
         note: if you do not want to specify a group for a specific parameter,
         set it to zero
         default: None
@@ -257,10 +257,10 @@ class GLM(object):
                 (np.abs(beta) > thresh)
         else:
             # Group sparsity case: apply group sparsity operator
-            unique_labels = np.unique(self.group)
+            group_ids = np.unique(self.group)
             group_norms = np.abs(beta)
 
-            for group_id in unique_labels:
+            for group_id in group_ids:
                 if group_id != 0:
                     group_norms[self.group == group_id] = \
                         np.linalg.norm(beta[self.group == group_id], 2)
@@ -432,15 +432,20 @@ class GLM(object):
         self : instance of GLM
             The fitted model.
         """
-        # Implements batch gradient descent (i.e. vanilla gradient descent by
-        # computing gradient over entire training set)
+
         np.random.seed(self.random_state)
 
+        # checks for group
         if self.group is not None:
             self.group = np.array(self.group)
+            # shape check
             if self.group.shape[0] != X.shape[1]:
                 raise ValueError('group should be (n_features,)')
+            # int check
+            if np.all([isinstance(g, int) for g in self.group]):
+                raise ValueError('all entries of group should be integers')
 
+        # type check for data matrix
         if not isinstance(X, np.ndarray):
             raise ValueError('Input data should be of type ndarray (got %s).'
                              % type(X))

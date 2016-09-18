@@ -15,17 +15,17 @@ def test_group_lasso():
 
     # assign group ids
     groups = np.zeros(90)
-    groups[0:29]=1
-    groups[30:59]=2
-    groups[60:]=3
+    groups[0:29] = 1
+    groups[30:59] = 2
+    groups[60:] = 3
 
     # sample random coefficients
-    beta0 = np.random.normal(0.0,1.0,1)
-    beta = np.random.normal(0.0,1.0,n_features)
+    beta0 = np.random.normal(0.0, 1.0, 1)
+    beta = np.random.normal(0.0, 1.0, n_features)
     beta[groups == 2] = 0.
 
     # create an instance of the GLM class
-    glm_group = GLM(distr='poisson', verbose=False, alpha=1.)
+    glm_group = GLM(distr='poisson', alpha=1.)
 
     # simulate training data
     Xr = np.random.normal(0.0, 1.0, [n_samples, n_features])
