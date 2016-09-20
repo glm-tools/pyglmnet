@@ -46,7 +46,16 @@ class GLM(object):
         min_(beta0, beta) [-L + lamda * P]
     where
         L is log-likelihood term
-        P is elastic-net penalty term
+        P is elastic-net penalty term with
+        optional Tikhonov regularization and group Lasso constraints, i.e.
+        P(beta) = 0.5 * (1-alpha) * L2penalty + alpha * L1penalty
+            where the L2 penalty is the Tikhonov regularizer ||Tau * beta||_2^2
+            which defaults to ridge-like L1 penalty if Tau is identity
+            and the L1 penalty is the group Lasso term: sum_g (||beta_g||_2)
+            which is sum of the L2 norm over groups, g
+            and defaults to Lasso-like L1 penalty
+            if each beta belongs to a separate group.
+
 
     Parameters
     ----------
@@ -55,23 +64,28 @@ class GLM(object):
         'poisson' or 'poissonexp' or 'normal' or 'binomial' or 'multinomial'
         default: 'poisson'
     alpha: float
-        the weighting between L1 and L2 norm in the penalty term
-        of the loss function i.e.
-        P(beta) = 0.5 * (1-alpha) * |beta|_2^2 + alpha * |beta|_1
+        the weighting between L1 penalty and L2 penalty term
+        of the loss function
         default: 0.5
+    Tau: ndarray | None
+        n_features x n_features
+        the Tikhonov matrix
+        default: None, in which case Tau is identity
+        and the L2 penalty is ridge-like
+    group: ndarray | list | None
+        n_features
+        a list of group identities for each parameter beta
+        each entry of the list/ array should contain an int from 1 to n_groups
+        that specify group membership for each parameter (except beta0)
+        note: if you do not want to specify a group for a specific parameter,
+        set it to zero
+        default: None, in which case it defaults to L1 regularization
     reg_lambda: ndarray | list | None
         array of regularized parameters of penalty term i.e.
         min_(beta0, beta) -L + lambda * P
         where lambda is number in reg_lambda list
         default: None, a list of 10 floats spaced logarithmically (base e)
         between 0.5 and 0.01 is generated.
-    group: ndarray | list | None
-        dimension: n_features
-        each entry of the list/ array should contain an int from 1 to n_groups
-        that specify group membership for each parameter (not beta0)
-        note: if you do not want to specify a group for a specific parameter,
-        set it to zero
-        default: None
     solver: str
         optimization method, can be one of the following
         'batch-gradient' (vanilla batch gradient descent)
@@ -110,10 +124,11 @@ class GLM(object):
     """
 
     def __init__(self, distr='poisson', alpha=0.5,
+                 Tau=None, group=None,
                  reg_lambda=None,
                  solver='batch-gradient',
                  learning_rate=2e-1, max_iter=1000,
-                 tol=1e-3, eta=4.0, random_state=0, verbose=False, group=None):
+                 tol=1e-3, eta=4.0, random_state=0, verbose=False):
 
         if reg_lambda is None:
             reg_lambda = np.logspace(np.log(0.5), np.log(0.01), 10,
@@ -126,6 +141,7 @@ class GLM(object):
         self.distr = distr
         self.alpha = alpha
         self.reg_lambda = reg_lambda
+        self.Tau = Tau
         self.group = group
         self.solver = solver
         self.learning_rate = learning_rate
@@ -142,8 +158,9 @@ class GLM(object):
             (
                 ('distr', self.distr),
                 ('alpha', self.alpha),
-                ('reg_lambda', self.reg_lambda),
+                ('Tau', self.Tau),
                 ('group', self.group),
+                ('reg_lambda', self.reg_lambda),
                 ('learning_rate', self.learning_rate),
                 ('max_iter', self.max_iter),
                 ('tol', self.tol),
@@ -227,11 +244,46 @@ class GLM(object):
             logL = 1. / n_samples * np.sum(y * np.log(l))
         return logL
 
+    def _L2penalty(self, beta):
+        """The L2 penalty"""
+        # Compute the L2 penalty
+        Tau = self.Tau
+        if Tau is None:
+            # Ridge=like penalty
+            L2penalty = np.linalg.norm(beta, 2) ** 2
+        else:
+            # Tikhonov penalty
+            if (Tau.shape[0] != beta.shape[0] or \
+            Tau.shape[1] != beta.shape[0]):
+                raise ValueError('Tau should be (n_features x n_features)')
+            else:
+                L2penalty = np.linalg.norm(Tau * beta, 2) ** 2
+        return L2penalty
+
+    def _L1penalty(self, beta):
+        """The L1 penalty"""
+        # Compute the L1 penalty
+        group = self.group
+        if group is None:
+            # Lasso-like penalty
+            L1penalty = np.linalg.norm(beta, 1)
+        else:
+            # Group sparsity case: apply group sparsity operator
+            group_ids = np.unique(self.group)
+            L1penalty = 0.0
+            for group_id in group_ids:
+                if group_id != 0:
+                    L1penalty += \
+                        np.linalg.norm(beta[self.group == group_id], 2)
+            L1penalty += np.linalg.norm(beta[self.group == 0], 1)
+        return L1penalty
+
     def _penalty(self, beta):
         """The penalty."""
         alpha = self.alpha
-        P = 0.5 * (1 - alpha) * np.linalg.norm(beta, 2) ** 2 + \
-            alpha * np.linalg.norm(beta, 1) ** 2
+        # Combine L1 and L2 penalty terms
+        P = 0.5 * (1 - alpha) * self._L2penalty(beta) + \
+                   alpha * self._L1penalty(beta)
         return P
 
     def _loss(self, beta0, beta, reg_lambda, X, y):
@@ -245,7 +297,7 @@ class GLM(object):
         """Quadratic loss."""
         alpha = self.alpha
         L = self._logL(beta0, beta, X, y)
-        P = 0.5 * (1 - alpha) * np.linalg.norm(beta, 2) ** 2
+        P = 0.5 * (1 - alpha) * self._L2penalty(beta)
         J = -L + reg_lambda * P
         return J
 
@@ -272,6 +324,12 @@ class GLM(object):
         """The gradient."""
         n_samples = np.float(X.shape[0])
         alpha = self.alpha
+
+        Tau = self.Tau
+        if Tau is None:
+            Tau = np.eye(beta.shape[0])
+        InvCov = np.dot(Tau.T, Tau)
+
         z = beta0 + np.dot(X, beta)
         s = expit(z)
 
@@ -281,7 +339,8 @@ class GLM(object):
             grad_beta = 1. / n_samples * \
                 (np.transpose(np.dot(np.transpose(s), X) -
                               np.dot(np.transpose(y * s / q), X))) + \
-                reg_lambda * (1 - alpha) * beta
+                reg_lambda * (1 - alpha) * \
+                    np.dot(InvCov, beta)
 
         elif self.distr == 'poissonexp':
             q = self._qu(z)
@@ -298,19 +357,22 @@ class GLM(object):
                 np.transpose(np.dot((1 - y[selector] / q[selector]).T,
                                     X[selector, :]))
             grad_beta *= 1. / n_samples
-            grad_beta += reg_lambda * (1 - alpha) * beta
+            grad_beta += reg_lambda * (1 - alpha) * \
+                np.dot(InvCov, beta)
 
         elif self.distr == 'normal':
             grad_beta0 = 1. / n_samples * np.sum(z - y)
             grad_beta = 1. / n_samples * \
                 np.transpose(np.dot(np.transpose(z - y), X)) \
-                + reg_lambda * (1 - alpha) * beta
+                + reg_lambda * (1 - alpha) * \
+                np.dot(InvCov, beta)
 
         elif self.distr == 'binomial':
             grad_beta0 = 1. / n_samples * np.sum(s - y)
             grad_beta = 1. / n_samples * \
                 np.transpose(np.dot(np.transpose(s - y), X)) \
-                + reg_lambda * (1 - alpha) * beta
+                + reg_lambda * (1 - alpha) * \
+                np.dot(InvCov, beta)
 
         elif self.distr == 'multinomial':
             # this assumes that y is already as a one-hot encoding
@@ -318,7 +380,8 @@ class GLM(object):
             grad_beta0 = -1. / n_samples * np.sum(y - pred, axis=0)
             grad_beta = -1. / n_samples * \
                 np.transpose(np.dot(np.transpose(y - pred), X)) \
-                + reg_lambda * (1 - alpha) * beta
+                + reg_lambda * (1 - alpha) * \
+                np.dot(InvCov, beta)
 
         return grad_beta0, grad_beta
 
@@ -389,9 +452,31 @@ class GLM(object):
 
         Parameters
         ----------
-
+        X : array
+            shape (n_samples, n_features)
+            The input data
+        y : array
+            Labels to the data
+            shape (n_features, 1)
+        z:  array
+            beta[0] + X * beta[1:]
+            shape (n_features, 1)
+        ActiveSet: array
+            Active set storing which betas are non-zero
+            shape (n_features + 1, 1)
+        beta: array
+            Parameters to be updated
+            shape (n_features + 1, 1)
+        rl: float
+            Regularization lambda
         Returns
         -------
+        beta: array
+            Updated parameters
+            shape (n_features + 1, 1)
+        z: array
+            beta[0] + X * beta[1:]
+            shape (n_features, 1)
         """
         n_samples = X.shape[0]
         n_features = X.shape[1]
@@ -405,11 +490,19 @@ class GLM(object):
                 else:
                     xk = np.ones((n_samples, 1))
 
-                # Calculate grad and hess
+                # Calculate grad and hess of log likelihood term
                 gk, hk = self._gradhess_logloss_1d(xk, y, z)
-                # Add grad and hess or regularization terms
-                gk += np.ravel([reg_scale * beta[k] if k > 0 else 0.0])
-                hk += np.ravel([reg_scale if k > 0 else 0.0])
+
+                # Add grad and hess of regularization term
+                if self.Tau is None:
+                    gk_reg = beta[k]
+                    hk_reg = 1.0
+                else:
+                    InvCov = np.dot(self.Tau.T, self.Tau)
+                    gk_reg = np.sum(InvCov[k - 1, :] * beta[1:])
+                    hk_reg = InvCov[k - 1, k - 1]
+                gk += np.ravel([reg_scale * gk_reg if k > 0 else 0.0])
+                hk += np.ravel([reg_scale * hk_reg if k > 0 else 0.0])
 
                 # Update parameters, z
                 update = 1. / hk * gk

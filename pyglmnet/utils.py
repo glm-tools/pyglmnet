@@ -68,3 +68,10 @@ def log_likelihood(y, yhat, distr):
             msg = 'yhat and ynull must be (n_samples, n_class) ndarrays'
             raise ValueError(msg)
         return np.sum(y * np.log(yhat))
+
+def tikhonov_from_prior(PriorCov, n_samples):
+    """Given a prior covariance matrix, returns a Tikhonov matrix"""
+    [U, S, V] = np.linalg.svd(PriorCov, full_matrices=False)
+    Tau = np.dot(np.diag(1. / np.sqrt(S)), U)
+    Tau = 1. / np.sqrt(np.float(n_samples)) * Tau / Tau.max()
+    return Tau
