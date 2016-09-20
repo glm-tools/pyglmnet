@@ -69,6 +69,7 @@ def log_likelihood(y, yhat, distr):
             raise ValueError(msg)
         return np.sum(y * np.log(yhat))
 
+
 def tikhonov_from_prior(PriorCov, n_samples):
     """Given a prior covariance matrix, returns a Tikhonov matrix"""
     [U, S, V] = np.linalg.svd(PriorCov, full_matrices=False)

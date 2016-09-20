@@ -253,8 +253,8 @@ class GLM(object):
             L2penalty = np.linalg.norm(beta, 2) ** 2
         else:
             # Tikhonov penalty
-            if (Tau.shape[0] != beta.shape[0] or \
-            Tau.shape[1] != beta.shape[0]):
+            if (Tau.shape[0] != beta.shape[0] or
+               Tau.shape[1] != beta.shape[0]):
                 raise ValueError('Tau should be (n_features x n_features)')
             else:
                 L2penalty = np.linalg.norm(Tau * beta, 2) ** 2
@@ -283,7 +283,7 @@ class GLM(object):
         alpha = self.alpha
         # Combine L1 and L2 penalty terms
         P = 0.5 * (1 - alpha) * self._L2penalty(beta) + \
-                   alpha * self._L1penalty(beta)
+            alpha * self._L1penalty(beta)
         return P
 
     def _loss(self, beta0, beta, reg_lambda, X, y):
@@ -340,7 +340,7 @@ class GLM(object):
                 (np.transpose(np.dot(np.transpose(s), X) -
                               np.dot(np.transpose(y * s / q), X))) + \
                 reg_lambda * (1 - alpha) * \
-                    np.dot(InvCov, beta)
+                np.dot(InvCov, beta)
 
         elif self.distr == 'poissonexp':
             q = self._qu(z)
