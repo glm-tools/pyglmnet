@@ -78,26 +78,6 @@ API Gallery
    :hidden:
 
    /auto_examples/api/plot_poisson
-
-.. raw:: html
-
-    <div class="sphx-glr-thumbcontainer" tooltip="This is an example demonstrating how pyglmnet with poisson exponential distribution works.">
-
-.. only:: html
-
-    .. figure:: /auto_examples/api/images/thumb/sphx_glr_plot_poisson_2_thumb.png
-
-        :ref:`sphx_glr_auto_examples_api_plot_poisson_2.py`
-
-.. raw:: html
-
-    </div>
-
-
-.. toctree::
-   :hidden:
-
-   /auto_examples/api/plot_poisson_2
 .. raw:: html
 
     <div style='clear:both'></div>

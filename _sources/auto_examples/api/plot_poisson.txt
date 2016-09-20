@@ -221,12 +221,12 @@ best estimate is the mean of the target variables in the training set.
 
  Out::
 
-      Dr = 8556.886090 Dt = 8609.500331
-      R2r =  0.487294  R2r = 0.485213
+      Dr = 8589.692278 Dt = 8641.959270
+      R2r =  0.485328  R2r = 0.483272
 
 
 **Total running time of the script:**
-(0 minutes 1.262 seconds)
+(0 minutes 1.011 seconds)
 
 
 

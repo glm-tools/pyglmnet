@@ -150,7 +150,7 @@
 <h1>pyglmnet.GLM<a class="headerlink" href="#pyglmnet-glm" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="pyglmnet.GLM">
-<em class="property">class </em><tt class="descclassname">pyglmnet.</tt><tt class="descname">GLM</tt><big>(</big><em>distr='poisson'</em>, <em>alpha=0.05</em>, <em>reg_lambda=None</em>, <em>solver='batch-gradient'</em>, <em>learning_rate=0.2</em>, <em>max_iter=1000</em>, <em>tol=0.001</em>, <em>eta=4.0</em>, <em>random_state=0</em>, <em>verbose=False</em><big>)</big><a class="headerlink" href="#pyglmnet.GLM" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">pyglmnet.</tt><tt class="descname">GLM</tt><big>(</big><em>distr='poisson'</em>, <em>alpha=0.5</em>, <em>Tau=None</em>, <em>group=None</em>, <em>reg_lambda=None</em>, <em>solver='batch-gradient'</em>, <em>learning_rate=0.2</em>, <em>max_iter=1000</em>, <em>tol=0.001</em>, <em>eta=4.0</em>, <em>random_state=0</em>, <em>verbose=False</em><big>)</big><a class="headerlink" href="#pyglmnet.GLM" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generalized Linear Model (GLM)</p>
 <p>This class implements elastic-net regularized generalized linear models.
 The core algorithm is defined in the article.</p>
@@ -158,8 +158,18 @@ The core algorithm is defined in the article.</p>
 <div>min_(beta0, beta) [-L + lamda * P]</div></blockquote>
 <dl class="docutils">
 <dt>where</dt>
-<dd>L is log-likelihood term
-P is elastic-net penalty term</dd>
+<dd><p class="first">L is log-likelihood term
+P is elastic-net penalty term with
+optional Tikhonov regularization and group Lasso constraints, i.e.
+P(beta) = 0.5 * (1-alpha) * L2penalty + alpha * L1penalty</p>
+<blockquote class="last">
+<div>where the L2 penalty is the Tikhonov regularizer ||Tau * beta||_2^2
+which defaults to ridge-like L1 penalty if Tau is identity
+and the L1 penalty is the group Lasso term: sum_g (||beta_g||_2)
+which is sum of the L2 norm over groups, g
+and defaults to Lasso-like L1 penalty
+if each beta belongs to a separate group.</div></blockquote>
+</dd>
 </dl>
 <dl class="docutils">
 <dt>distr: str</dt>
@@ -167,11 +177,23 @@ P is elastic-net penalty term</dd>
 &#8216;poisson&#8217; or &#8216;poissonexp&#8217; or &#8216;normal&#8217; or &#8216;binomial&#8217; or &#8216;multinomial&#8217;
 default: &#8216;poisson&#8217;</dd>
 <dt>alpha: float</dt>
-<dd>the weighting between L1 and L2 norm in the penalty term
-of the loss function i.e.
-P(beta) = 0.5 * (1-alpha) * <a href="#id1"><span class="problematic" id="id2">|</span></a>beta|_2^2 + alpha * <a href="#id3"><span class="problematic" id="id4">|</span></a>beta|_1
+<dd>the weighting between L1 penalty and L2 penalty term
+of the loss function
 default: 0.5</dd>
-<dt>reg_lambda: ndarray or list</dt>
+<dt>Tau: ndarray | None</dt>
+<dd>the Tikhonov matrix
+dimension: n_features x n_features
+default: None, in which case Tau is identity
+and the L2 penalty is ridge-like</dd>
+<dt>group: ndarray | list | None</dt>
+<dd>a list of group identities for each parameter beta
+each entry of the list/ array should contain an int from 1 to n_groups
+that specify group membership for each parameter (except beta0)
+note: if you do not want to specify a group for a specific parameter,
+set it to zero
+dimension: n_features
+default: None, in which case it defaults to L1 regularization</dd>
+<dt>reg_lambda: ndarray | list | None</dt>
 <dd>array of regularized parameters of penalty term i.e.
 min_(beta0, beta) -L + lambda * P
 where lambda is number in reg_lambda list
@@ -212,7 +234,7 @@ default: False</dd>
 </div>
 <dl class="method">
 <dt id="pyglmnet.GLM.__init__">
-<tt class="descname">__init__</tt><big>(</big><em>distr='poisson'</em>, <em>alpha=0.05</em>, <em>reg_lambda=None</em>, <em>solver='batch-gradient'</em>, <em>learning_rate=0.2</em>, <em>max_iter=1000</em>, <em>tol=0.001</em>, <em>eta=4.0</em>, <em>random_state=0</em>, <em>verbose=False</em><big>)</big><a class="headerlink" href="#pyglmnet.GLM.__init__" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">__init__</tt><big>(</big><em>distr='poisson'</em>, <em>alpha=0.5</em>, <em>Tau=None</em>, <em>group=None</em>, <em>reg_lambda=None</em>, <em>solver='batch-gradient'</em>, <em>learning_rate=0.2</em>, <em>max_iter=1000</em>, <em>tol=0.001</em>, <em>eta=4.0</em>, <em>random_state=0</em>, <em>verbose=False</em><big>)</big><a class="headerlink" href="#pyglmnet.GLM.__init__" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <p class="rubric">Methods</p>
@@ -222,7 +244,7 @@ default: False</dd>
 <col width="90%" />
 </colgroup>
 <tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="#pyglmnet.GLM.__init__" title="pyglmnet.GLM.__init__"><tt class="xref py py-obj docutils literal"><span class="pre">__init__</span></tt></a>([distr,&nbsp;alpha,&nbsp;reg_lambda,&nbsp;solver,&nbsp;...])</td>
+<tr class="row-odd"><td><a class="reference internal" href="#pyglmnet.GLM.__init__" title="pyglmnet.GLM.__init__"><tt class="xref py py-obj docutils literal"><span class="pre">__init__</span></tt></a>([distr,&nbsp;alpha,&nbsp;Tau,&nbsp;group,&nbsp;...])</td>
 <td></td>
 </tr>
 <tr class="row-even"><td><tt class="xref py py-obj docutils literal"><span class="pre">copy</span></tt>()</td>

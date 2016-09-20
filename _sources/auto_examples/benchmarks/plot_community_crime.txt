@@ -96,8 +96,8 @@ pyglmnet
 
  Out::
 
-      r^2 on test data using pyglmnet : 0.709078
-    mean square error on test data using pyglmnet : 0.010949
+      r^2 on test data using pyglmnet : 0.713155
+    mean square error on test data using pyglmnet : 0.010795
 
 
 scikit-learn
@@ -153,7 +153,7 @@ Plot the values of the test dataset, the predicted values computed by scikit and
 
 
 **Total running time of the script:**
-(0 minutes 0.898 seconds)
+(0 minutes 5.335 seconds)
 
 
 

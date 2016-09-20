@@ -85,11 +85,11 @@ Predict and score the output
 
  Out::
 
-      Percentage correct = 0.587100 percent.
+      Percentage correct = 0.575100 percent.
 
 
 **Total running time of the script:**
-(0 minutes 0.454 seconds)
+(0 minutes 0.551 seconds)
 
 
 
