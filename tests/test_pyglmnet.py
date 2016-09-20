@@ -9,6 +9,65 @@ from numpy.testing import assert_allclose
 
 from pyglmnet import GLM
 
+def test_tikhonov():
+    """Tikhonov regularization test"""
+    n_samples, n_features = 1000, 100
+
+    # design covariance matrix of parameters
+    Gam = 15.
+    PriorCov = np.zeros([n_features, n_features])
+    for i in np.arange(0, n_features):
+        for j in np.arange(i, n_features):
+            PriorCov[i, j] = np.exp(-Gam * 1./ (np.float(n_features) ** 2) * \
+                (np.float(i) - np.float(j)) ** 2)
+            PriorCov[j, i] = PriorCov[i, j]
+            if i == j:
+                PriorCov[i, j] += 0.01
+    PriorCov = 1./ np.max(PriorCov) * PriorCov
+
+    # sample parameters as multivariate normal
+    beta0 = np.random.randn()
+    beta = np.random.multivariate_normal(np.zeros(n_features), PriorCov)
+
+    # sample train and test data
+    glm_sim = GLM(distr='poisson')
+    X = np.random.randn(n_samples, n_features)
+    y = glm_sim.simulate(beta0, beta, X)
+
+    from sklearn.cross_validation import train_test_split
+    Xtrain, Xtest, ytrain, ytest = \
+        train_test_split(X, y, test_size=0.5, random_state=42)
+
+    # design tikhonov matrix
+    [U, S, V] = np.linalg.svd(PriorCov, full_matrices=False)
+    Tau = np.dot(np.diag(1. / np.sqrt(S)), U)
+    Tau = 1. / np.sqrt(np.float(n_samples)) * Tau / Tau.max()
+
+    # fit model with batch gradient
+    glm_tikhonov = GLM(distr='poisson', alpha=0.0, Tau=Tau, solver='batch-gradient', tol=1e-5)
+    glm_tikhonov.fit(Xtrain, ytrain);
+
+    ytrain_hat = glm_tikhonov[-1].predict(Xtrain)
+    ytest_hat = glm_tikhonov[-1].predict(Xtest)
+
+    R2_train = dict()
+    R2_test = dict()
+    R2_train['tikhonov'] = glm_tikhonov[-1].score(ytrain, ytrain_hat, np.mean(ytrain), method='pseudo_R2')
+    R2_test['tikhonov'] = glm_tikhonov[-1].score(ytest, ytest_hat, np.mean(ytrain), method='pseudo_R2')
+
+    # fit model with cdfast
+    glm_tikhonov = GLM(distr='poisson', alpha=0.0, Tau=Tau, solver='cdfast', tol=1e-5)
+    glm_tikhonov.fit(Xtrain, ytrain);
+
+    ytrain_hat = glm_tikhonov[-1].predict(Xtrain)
+    ytest_hat = glm_tikhonov[-1].predict(Xtest)
+
+    R2_train = dict()
+    R2_test = dict()
+    R2_train['tikhonov'] = glm_tikhonov[-1].score(ytrain, ytrain_hat, np.mean(ytrain), method='pseudo_R2')
+    R2_test['tikhonov'] = glm_tikhonov[-1].score(ytest, ytest_hat, np.mean(ytrain), method='pseudo_R2')
+
+
 def test_group_lasso():
     """Group Lasso test."""
     n_samples, n_features = 100, 90
