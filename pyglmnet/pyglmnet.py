@@ -50,7 +50,7 @@ class GLM(object):
         optional Tikhonov regularization and group Lasso constraints, i.e.
         P(beta) = 0.5 * (1-alpha) * L2penalty + alpha * L1penalty
             where the L2 penalty is the Tikhonov regularizer ||Tau * beta||_2^2
-            which defaults to ridge-like L1 penalty if Tau is identity
+            which defaults to ridge-like L2 penalty if Tau is identity
             and the L1 penalty is the group Lasso term: sum_g (||beta_g||_2)
             which is sum of the L2 norm over groups, g
             and defaults to Lasso-like L1 penalty
@@ -257,7 +257,7 @@ class GLM(object):
                Tau.shape[1] != beta.shape[0]):
                 raise ValueError('Tau should be (n_features x n_features)')
             else:
-                L2penalty = np.linalg.norm(Tau * beta, 2) ** 2
+                L2penalty = np.linalg.norm(np.dot(Tau, beta), 2) ** 2
         return L2penalty
 
     def _L1penalty(self, beta):
@@ -453,30 +453,31 @@ class GLM(object):
         Parameters
         ----------
         X : array
-            shape (n_samples, n_features)
+            n_samples x n_features
             The input data
         y : array
             Labels to the data
-            shape (n_features, 1)
+            n_samples x 1
         z:  array
+            n_samples x 1
             beta[0] + X * beta[1:]
-            shape (n_features, 1)
         ActiveSet: array
+            n_features + 1 x 1
             Active set storing which betas are non-zero
-            shape (n_features + 1, 1)
         beta: array
+            n_features + 1 x 1
             Parameters to be updated
-            shape (n_features + 1, 1)
         rl: float
             Regularization lambda
+
         Returns
         -------
         beta: array
+            (n_features + 1) x 1
             Updated parameters
-            shape (n_features + 1, 1)
         z: array
             beta[0] + X * beta[1:]
-            shape (n_features, 1)
+            (n_features + 1) x 1
         """
         n_samples = X.shape[0]
         n_features = X.shape[1]

@@ -57,7 +57,7 @@ def test_tikhonov():
 
     # fit model with cdfast
     glm_tikhonov = GLM(distr='poisson', alpha=0.0, Tau=Tau, solver='cdfast', tol=1e-5)
-    glm_tikhonov.fit(Xtrain, ytrain);
+    glm_tikhonov.fit(Xtrain, ytrain)
 
     ytrain_hat = glm_tikhonov[-1].predict(Xtrain)
     ytest_hat = glm_tikhonov[-1].predict(Xtest)
