@@ -61,7 +61,7 @@ class GLM(object):
     ----------
     distr: str
         distribution family can be one of the following
-        'poisson' or 'poissonexp' or 'normal' or 'binomial' or 'multinomial'
+        'gaussian' | 'binomial' | 'poisson' | 'softplus' | 'multinomial'
         default: 'poisson'
     alpha: float
         the weighting between L1 penalty and L2 penalty term
@@ -207,15 +207,15 @@ class GLM(object):
 
     def _qu(self, z):
         """The non-linearity."""
-        if self.distr == 'poisson':
+        if self.distr == 'softplus':
             qu = np.log1p(np.exp(z))
-        elif self.distr == 'poissonexp':
+        elif self.distr == 'poisson':
             qu = deepcopy(z)
             slope = np.exp(self.eta)
             intercept = (1 - self.eta) * slope
             qu[z > self.eta] = z[z > self.eta] * slope + intercept
             qu[z <= self.eta] = np.exp(z[z <= self.eta])
-        elif self.distr == 'normal':
+        elif self.distr == 'gaussian':
             qu = z
         elif self.distr == 'binomial':
             qu = expit(z)
@@ -233,11 +233,11 @@ class GLM(object):
         """The log likelihood."""
         n_samples = np.float(X.shape[0])
         l = self._lmb(beta0, beta, X)
-        if self.distr == 'poisson':
+        if self.distr == 'softplus':
             logL = 1. / n_samples * np.sum(y * np.log(l) - l)
-        elif self.distr == 'poissonexp':
+        elif self.distr == 'poisson':
             logL = 1. / n_samples * np.sum(y * np.log(l) - l)
-        elif self.distr == 'normal':
+        elif self.distr == 'gaussian':
             logL = -0.5 * 1. / n_samples * np.sum((y - l)**2)
         elif self.distr == 'binomial':
             # analytical formula
@@ -339,7 +339,7 @@ class GLM(object):
         z = beta0 + np.dot(X, beta)
         s = expit(z)
 
-        if self.distr == 'poisson':
+        if self.distr == 'softplus':
             q = self._qu(z)
             grad_beta0 = 1. / n_samples * (np.sum(s) - np.sum(y * s / q))
             grad_beta = 1. / n_samples * \
@@ -348,7 +348,7 @@ class GLM(object):
                 reg_lambda * (1 - alpha) * \
                 np.dot(InvCov, beta)
 
-        elif self.distr == 'poissonexp':
+        elif self.distr == 'poisson':
             q = self._qu(z)
             grad_beta0 = np.sum(q[z <= self.eta] - y[z <= self.eta]) + \
                 np.sum(1 - y[z > self.eta] / q[z > self.eta]) * self.eta
@@ -366,7 +366,7 @@ class GLM(object):
             grad_beta += reg_lambda * (1 - alpha) * \
                 np.dot(InvCov, beta)
 
-        elif self.distr == 'normal':
+        elif self.distr == 'gaussian':
             grad_beta0 = 1. / n_samples * np.sum(z - y)
             grad_beta = 1. / n_samples * \
                 np.transpose(np.dot(np.transpose(z - y), X)) \
@@ -415,7 +415,7 @@ class GLM(object):
         """
         n_samples = np.float(xk.shape[0])
 
-        if self.distr == 'poisson':
+        if self.distr == 'softplus':
             mu = self._qu(z)
             s = expit(z)
             gk = np.sum(s * xk) - np.sum(y * s / mu * xk)
@@ -424,7 +424,7 @@ class GLM(object):
             grad_s_by_mu = grad_s / mu - s / (mu ** 2)
             hk = np.sum(grad_s * xk ** 2) - np.sum(y * grad_s_by_mu * xk ** 2)
 
-        elif self.distr == 'poissonexp':
+        elif self.distr == 'poisson':
             mu = self._qu(z)
             s = expit(z)
             gk = np.sum((mu[z <= self.eta] - y[z <= self.eta]) *
@@ -436,7 +436,7 @@ class GLM(object):
                 np.sum(y[z > self.eta] / (mu[z > self.eta] ** 2) *
                        (xk[z > self.eta] ** 2))
 
-        elif self.distr == 'normal':
+        elif self.distr == 'gaussian':
             gk = np.sum((z - y) * xk)
             hk = np.sum(xk * xk)
 
@@ -732,7 +732,7 @@ class GLM(object):
                 yhat = yhat.ravel()
 
             L1 = utils.log_likelihood(y, yhat, self.distr)
-            if self.distr in ['poisson', 'poissonexp']:
+            if self.distr in ['softplus', 'poisson']:
                 LS = utils.log_likelihood(y, y, self.distr)
             else:
                 LS = 0
@@ -741,7 +741,7 @@ class GLM(object):
                 score = -2 * (L1 - LS)
             elif self.score_metric == 'pseudo_R2':
                 L0 = utils.log_likelihood(y, self.ynull_, self.distr)
-                if self.distr in ['poisson', 'poissonexp']:
+                if self.distr in ['softplus', 'poisson']:
                     score = 1 - (LS - L1) / (LS - L0)
                 else:
                     score = 1 - L1 / L0
@@ -752,7 +752,7 @@ class GLM(object):
             y = y.ravel()
             score = list()
 
-            if self.distr in ['poisson', 'poissonexp']:
+            if self.distr in ['softplus', 'poisson']:
                 LS = utils.log_likelihood(y, y, self.distr)
             else:
                 LS = 0
@@ -769,7 +769,7 @@ class GLM(object):
                 if self.score_metric == 'deviance':
                     score.append(-2 * (L1 - LS))
                 elif self.score_metric == 'pseudo_R2':
-                    if self.distr in ['poisson', 'poissonexp']:
+                    if self.distr in ['softplus', 'poisson']:
                         score.append(1 - (LS - L1) / (LS - L0))
                     else:
                         score.append(1 - L1 / L0)
@@ -779,9 +779,9 @@ class GLM(object):
     def simulate(self, beta0, beta, X):
         """Simulate data."""
         np.random.seed(self.random_state)
-        if self.distr == 'poisson' or self.distr == 'poissonexp':
+        if self.distr == 'softplus' or self.distr == 'poisson':
             y = np.random.poisson(self._lmb(beta0, beta, X))
-        if self.distr == 'normal':
+        if self.distr == 'gaussian':
             y = np.random.normal(self._lmb(beta0, beta, X))
         if self.distr == 'binomial':
             y = np.random.binomial(1, self._lmb(beta0, beta, X))

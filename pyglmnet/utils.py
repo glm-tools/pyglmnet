@@ -51,7 +51,7 @@ def label_binarizer(y):
 def log_likelihood(y, yhat, distr):
     """Helper to compute the log likelihood."""
     eps = np.spacing(1)
-    if distr in ['poisson', 'poissonexp']:
+    if distr in ['softplus', 'poisson']:
         return np.sum(y * np.log(eps + yhat) - yhat)
     elif distr == 'binomial':
         # Log likelihood of model under consideration
@@ -59,7 +59,7 @@ def log_likelihood(y, yhat, distr):
             np.sum(y * np.log((yhat == 0) + yhat) / np.mean(yhat) +
                    (1 - y) * np.log((yhat == 1) +
                                     1 - yhat) / (1 - np.mean(yhat)))
-    elif distr == 'normal':
+    elif distr == 'gaussian':
         return np.sum((y - yhat)**2)
     elif distr == 'multinomial':
         y = label_binarizer(y)

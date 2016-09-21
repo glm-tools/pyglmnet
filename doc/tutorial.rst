@@ -40,7 +40,7 @@ and show how we can optimize this cost function
 Poisson-like GLM
 ----------------
 The `pyglmnet` implementation comes with `poisson`, `binomial`
-and `normal` distributions, but for illustration, we will walk you
+and `gaussian` distributions, but for illustration, we will walk you
 through a particular adaptation of the canonical Poisson generalized
 linear model (GLM).
 
@@ -59,7 +59,7 @@ intensity function, conditioned on :math:`(\beta_0, \beta)` and
 :math:`q(z) = \exp(z)` is the nonlinearity.
 
 For numerical reasons, let's adopt a stabilizing non-linearity, known as the
-softplus or the smooth rectifier `Dugas et al., 2001
+`softplus` or the smooth rectifier `Dugas et al., 2001
 <http://papers.nips.cc/paper/1920-incorporating-second-order-functional-knowledge-for-better-option-pricing.pdf>`_,
 and adopted by Jonathan Pillow's and Liam Paninski's groups for neural data
 analysis.
