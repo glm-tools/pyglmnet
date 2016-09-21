@@ -103,6 +103,8 @@ class GLM(object):
     eta: float
         a threshold parameter that linearizes the exp() function above eta
         default: 4.0
+    score_metric: str
+        specifies the scoring metric. one of either 'deviance' or 'pseudo_R2'
     random_state: int
         seed of the random number generator used to initialize the solution
     verbose: boolean or int
@@ -128,7 +130,8 @@ class GLM(object):
                  reg_lambda=None,
                  solver='batch-gradient',
                  learning_rate=2e-1, max_iter=1000,
-                 tol=1e-3, eta=4.0, random_state=0, verbose=False):
+                 tol=1e-3, eta=4.0, score_metric='deviance',
+                 random_state=0, verbose=False):
 
         if reg_lambda is None:
             reg_lambda = np.logspace(np.log(0.5), np.log(0.01), 10,
@@ -147,8 +150,10 @@ class GLM(object):
         self.learning_rate = learning_rate
         self.max_iter = max_iter
         self.fit_ = None
+        self.ynull_ = None
         self.tol = tol
         self.eta = eta
+        self.score_metric = score_metric
         self.random_state = random_state
         self.verbose = verbose
         set_log_level(verbose)
@@ -165,6 +170,7 @@ class GLM(object):
                 ('max_iter', self.max_iter),
                 ('tol', self.tol),
                 ('eta', self.eta),
+                ('score_metric', self.score_metric),
                 ('random_state', self.random_state),
                 ('verbose', self.verbose)
             )
@@ -625,7 +631,11 @@ class GLM(object):
             fit_params[-1]['beta0'] = beta[0]
             fit_params[-1]['beta'] = beta[1:]
 
+        # Update the estimated variables
         self.fit_ = fit_params
+        self.ynull_ = np.mean(y)
+
+        # Return
         return self
 
     def predict(self, X):
@@ -678,38 +688,91 @@ class GLM(object):
         """
         return self.fit(X, y).predict(X)
 
-    def score(self, y, yhat, ynull=None, method='deviance'):
+    def score(self, X, y):
         """Score the model.
 
         Parameters
         ----------
-        y : array, shape (n_samples, [n_classes])
+        X : array,
+            (n_samples, n_features)
             The true labels.
-        yhat : array, shape (n_samples, [n_classes])
+        y : array,
+            (n_samples, [n_classes])
             The estimated labels.
-        ynull : None | array, shape (n_samples, [n_classes])
-            The labels for the null model. Must be None if method is 'deviance'
-        method : str
-            One of 'pseudo_R2' or 'deviance'
+
+        Returns
+        -------
+        score: array | float
+            array when score is called by a list of estimators `glm.score()`
+            float when score is called by a sliced estimator `glm[0].score()`
+
+            Note that if you want compatibility with sciki-learn's
+            pipeline, cross_val_score, or GridSearchCV then you should
+            only pass sliced estimators:
+
+            from sklearn.grid_search import GridSearchCV
+            from sklearn.cross_validation import cross_val_score
+            grid = GridSearchCV(glm[0])
+            grid = cross_val_score(glm[0], X, y, cv=10)
         """
-        y = y.ravel()
-        if self.distr != 'multinomial':
-            yhat = yhat.ravel()
 
-        L1 = utils.log_likelihood(y, yhat, self.distr)
-        if self.distr in ['poisson', 'poissonexp']:
-            LS = utils.log_likelihood(y, y, self.distr)
-        else:
-            LS = 0
+        # If the model has not been fit it cannot be scored
+        if self.ynull_ is None:
+            raise ValueError('Model must be fit before prediction can \
+                              be scored')
 
-        if method == 'deviance':
-            score = -2 * (L1 - LS)
-        elif method == 'pseudo_R2':
-            L0 = utils.log_likelihood(y, ynull, self.distr)
+        yhat = self.predict(X)
+
+        if isinstance(self.fit_, dict):
+            # Compute scalar score for a single model fit
+            # (corresponding to a reg_lambda)
+            y = y.ravel()
+
+            if self.distr != 'multinomial':
+                yhat = yhat.ravel()
+
+            L1 = utils.log_likelihood(y, yhat, self.distr)
             if self.distr in ['poisson', 'poissonexp']:
-                score = 1 - (LS - L1) / (LS - L0)
+                LS = utils.log_likelihood(y, y, self.distr)
             else:
-                score = 1 - L1 / L0
+                LS = 0
+
+            if self.score_metric == 'deviance':
+                score = -2 * (L1 - LS)
+            elif self.score_metric == 'pseudo_R2':
+                L0 = utils.log_likelihood(y, self.ynull_, self.distr)
+                if self.distr in ['poisson', 'poissonexp']:
+                    score = 1 - (LS - L1) / (LS - L0)
+                else:
+                    score = 1 - L1 / L0
+
+        elif isinstance(self.fit_, list):
+            # Compute array of scores for each model fit
+            # (corresponding to a reg_lambda)
+            y = y.ravel()
+            score = list()
+
+            if self.distr in ['poisson', 'poissonexp']:
+                LS = utils.log_likelihood(y, y, self.distr)
+            else:
+                LS = 0
+            if(self.score_metric == 'pseudo_R2'):
+                L0 = utils.log_likelihood(y, self.ynull_, self.distr)
+
+            for idx in range(yhat.shape[0]):
+                if self.distr != 'multinomial':
+                    yhat_this = (yhat[idx, :]).ravel()
+                else:
+                    yhat_this = yhat[idx, :, :]
+                L1 = utils.log_likelihood(y, yhat_this, self.distr)
+
+                if self.score_metric == 'deviance':
+                    score.append(-2 * (L1 - LS))
+                elif self.score_metric == 'pseudo_R2':
+                    if self.distr in ['poisson', 'poissonexp']:
+                        score.append(1 - (LS - L1) / (LS - L0))
+                    else:
+                        score.append(1 - L1 / L0)
 
         return score
 
