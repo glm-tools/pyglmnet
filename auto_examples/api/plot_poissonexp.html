@@ -228,7 +228,7 @@ between exponential and linearized exponential.</p>
 <span class="c1"># create regularization parameters for model</span>
 <span class="n">reg_lambda</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logspace</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mf">0.5</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mf">0.01</span><span class="p">),</span> <span class="mi">10</span><span class="p">,</span> <span class="n">base</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
 <span class="n">glm_poissonexp</span> <span class="o">=</span> <span class="n">GLM</span><span class="p">(</span><span class="n">distr</span><span class="o">=</span><span class="s1">&#39;poissonexp&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span>
-            <span class="n">max_iter</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">learning_rate</span><span class="o">=</span><span class="mf">2e-1</span><span class="p">,</span>
+            <span class="n">max_iter</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">learning_rate</span><span class="o">=</span><span class="mf">2e-1</span><span class="p">,</span> <span class="n">score_metric</span><span class="o">=</span><span class="s1">&#39;pseudo_R2&#39;</span><span class="p">,</span>
             <span class="n">reg_lambda</span><span class="o">=</span><span class="n">reg_lambda</span><span class="p">,</span> <span class="n">eta</span><span class="o">=</span><span class="mf">4.0</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -274,15 +274,15 @@ between exponential and linearized exponential.</p>
 </div>
 <img alt="../../_images/sphx_glr_plot_poissonexp_002.png" class="align-center" src="../../_images/sphx_glr_plot_poissonexp_002.png" />
 <p>Compute pseudo R2</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="k">print</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">yt</span><span class="p">,</span> <span class="n">ythat</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">yr</span><span class="p">),</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;pseudo_R2&#39;</span><span class="p">))</span>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="k">print</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">Xt</span><span class="p">,</span> <span class="n">yt</span><span class="p">))</span>
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-python"><div class="highlight"><pre><span></span><span class="mf">0.726617291697</span>
+<div class="sphx-glr-script-out highlight-python"><div class="highlight"><pre><span></span><span class="mf">0.726391914176</span>
 </pre></div>
 </div>
 <p><strong>Total running time of the script:</strong>
-(0 minutes 1.199 seconds)</p>
+(0 minutes 1.202 seconds)</p>
 <div class="sphx-glr-download container">
 <strong>Download Python source code:</strong> <a class="reference download internal" href="../../_downloads/plot_poissonexp.py"><tt class="xref download docutils literal"><span class="pre">plot_poissonexp.py</span></tt></a></div>
 <div class="sphx-glr-download container">

@@ -151,18 +151,16 @@ plt.show()
 # ^^^^^^^^^^^^^^^
 # The GLM class provides two metrics to evaluate the goodness of fit: ``deviance``
 # and ``pseudo_R2``. Both these metrics are implemented in the ``score()`` method.
-# The default metric, ``deviance`` requires the true targets and the predicted targets
-# as inputs. ``pseudo_R2`` additionally requires a null model, for which the
-# best estimate is the mean of the target variables in the training set.
 
 ##########################################################
 
 # Compute model deviance
-Dr = glm_poisson[-1].score(yr, yrhat)
-Dt = glm_poisson[-1].score(yt, ythat)
+Dr = glm_poisson[-1].score(Xr, yr)
+Dt = glm_poisson[-1].score(Xt, yt)
 print('Dr = %f' % Dr, 'Dt = %f' % Dt)
 
 # Compute pseudo_R2s
-R2r = glm_poisson[-1].score(yr, yrhat, np.mean(yr), method='pseudo_R2')
-R2t = glm_poisson[-1].score(yt, ythat, np.mean(yr), method='pseudo_R2')
+glm_poisson.score_metric = 'pseudo_R2'
+R2r = glm_poisson[-1].score(Xr, yr)
+R2t = glm_poisson[-1].score(Xt, yt)
 print('  R2r =  %f' % R2r, ' R2r = %f' % R2t)

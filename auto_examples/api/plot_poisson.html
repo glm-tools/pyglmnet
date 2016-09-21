@@ -295,28 +295,26 @@ predicted targets.</p>
 <div class="section" id="goodness-of-fit">
 <h3>Goodness of fit<a class="headerlink" href="#goodness-of-fit" title="Permalink to this headline">¶</a></h3>
 <p>The GLM class provides two metrics to evaluate the goodness of fit: <tt class="docutils literal"><span class="pre">deviance</span></tt>
-and <tt class="docutils literal"><span class="pre">pseudo_R2</span></tt>. Both these metrics are implemented in the <tt class="docutils literal"><span class="pre">score()</span></tt> method.
-The default metric, <tt class="docutils literal"><span class="pre">deviance</span></tt> requires the true targets and the predicted targets
-as inputs. <tt class="docutils literal"><span class="pre">pseudo_R2</span></tt> additionally requires a null model, for which the
-best estimate is the mean of the target variables in the training set.</p>
+and <tt class="docutils literal"><span class="pre">pseudo_R2</span></tt>. Both these metrics are implemented in the <tt class="docutils literal"><span class="pre">score()</span></tt> method.</p>
 <div class="highlight-python"><div class="highlight"><pre><span></span><span class="c1"># Compute model deviance</span>
-<span class="n">Dr</span> <span class="o">=</span> <span class="n">glm_poisson</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">yr</span><span class="p">,</span> <span class="n">yrhat</span><span class="p">)</span>
-<span class="n">Dt</span> <span class="o">=</span> <span class="n">glm_poisson</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">yt</span><span class="p">,</span> <span class="n">ythat</span><span class="p">)</span>
+<span class="n">Dr</span> <span class="o">=</span> <span class="n">glm_poisson</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">Xr</span><span class="p">,</span> <span class="n">yr</span><span class="p">)</span>
+<span class="n">Dt</span> <span class="o">=</span> <span class="n">glm_poisson</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">Xt</span><span class="p">,</span> <span class="n">yt</span><span class="p">)</span>
 <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Dr = </span><span class="si">%f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">Dr</span><span class="p">,</span> <span class="s1">&#39;Dt = </span><span class="si">%f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">Dt</span><span class="p">)</span>
 
 <span class="c1"># Compute pseudo_R2s</span>
-<span class="n">R2r</span> <span class="o">=</span> <span class="n">glm_poisson</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">yr</span><span class="p">,</span> <span class="n">yrhat</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">yr</span><span class="p">),</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;pseudo_R2&#39;</span><span class="p">)</span>
-<span class="n">R2t</span> <span class="o">=</span> <span class="n">glm_poisson</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">yt</span><span class="p">,</span> <span class="n">ythat</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">yr</span><span class="p">),</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;pseudo_R2&#39;</span><span class="p">)</span>
+<span class="n">glm_poisson</span><span class="o">.</span><span class="n">score_metric</span> <span class="o">=</span> <span class="s1">&#39;pseudo_R2&#39;</span>
+<span class="n">R2r</span> <span class="o">=</span> <span class="n">glm_poisson</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">Xr</span><span class="p">,</span> <span class="n">yr</span><span class="p">)</span>
+<span class="n">R2t</span> <span class="o">=</span> <span class="n">glm_poisson</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">Xt</span><span class="p">,</span> <span class="n">yt</span><span class="p">)</span>
 <span class="k">print</span><span class="p">(</span><span class="s1">&#39;  R2r =  </span><span class="si">%f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">R2r</span><span class="p">,</span> <span class="s1">&#39; R2r = </span><span class="si">%f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">R2t</span><span class="p">)</span>
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-python"><div class="highlight"><pre><span></span>Dr = 8589.692278 Dt = 8641.959270
-R2r =  0.485328  R2r = 0.483272
+<div class="sphx-glr-script-out highlight-python"><div class="highlight"><pre><span></span>Dr = 8593.871393 Dt = 8646.284211
+R2r =  0.485077  R2r = 0.483014
 </pre></div>
 </div>
 <p><strong>Total running time of the script:</strong>
-(0 minutes 1.011 seconds)</p>
+(0 minutes 0.911 seconds)</p>
 <div class="sphx-glr-download container">
 <strong>Download Python source code:</strong> <a class="reference download internal" href="../../_downloads/plot_poisson.py"><tt class="xref download docutils literal"><span class="pre">plot_poisson.py</span></tt></a></div>
 <div class="sphx-glr-download container">

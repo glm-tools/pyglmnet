@@ -196,22 +196,20 @@ Goodness of fit
 ^^^^^^^^^^^^^^^
 The GLM class provides two metrics to evaluate the goodness of fit: ``deviance``
 and ``pseudo_R2``. Both these metrics are implemented in the ``score()`` method.
-The default metric, ``deviance`` requires the true targets and the predicted targets
-as inputs. ``pseudo_R2`` additionally requires a null model, for which the
-best estimate is the mean of the target variables in the training set.
 
 
 .. code-block:: python
 
 
     # Compute model deviance
-    Dr = glm_poisson[-1].score(yr, yrhat)
-    Dt = glm_poisson[-1].score(yt, ythat)
+    Dr = glm_poisson[-1].score(Xr, yr)
+    Dt = glm_poisson[-1].score(Xt, yt)
     print('Dr = %f' % Dr, 'Dt = %f' % Dt)
 
     # Compute pseudo_R2s
-    R2r = glm_poisson[-1].score(yr, yrhat, np.mean(yr), method='pseudo_R2')
-    R2t = glm_poisson[-1].score(yt, ythat, np.mean(yr), method='pseudo_R2')
+    glm_poisson.score_metric = 'pseudo_R2'
+    R2r = glm_poisson[-1].score(Xr, yr)
+    R2t = glm_poisson[-1].score(Xt, yt)
     print('  R2r =  %f' % R2r, ' R2r = %f' % R2t)
 
 
@@ -221,12 +219,12 @@ best estimate is the mean of the target variables in the training set.
 
  Out::
 
-      Dr = 8589.692278 Dt = 8641.959270
-      R2r =  0.485328  R2r = 0.483272
+      Dr = 8593.871393 Dt = 8646.284211
+      R2r =  0.485077  R2r = 0.483014
 
 
 **Total running time of the script:**
-(0 minutes 1.011 seconds)
+(0 minutes 0.911 seconds)
 
 
 
