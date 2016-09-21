@@ -117,7 +117,7 @@ from pyglmnet import GLM
 # create regularization parameters for model
 reg_lambda = np.logspace(np.log(0.5), np.log(0.01), 10, base=np.exp(1))
 glm_poissonexp = GLM(distr='poissonexp', verbose=False, alpha=0.05,
-            max_iter=1000, learning_rate=2e-1,
+            max_iter=1000, learning_rate=2e-1, score_metric='pseudo_R2',
             reg_lambda=reg_lambda, eta=4.0)
 
 
@@ -176,4 +176,4 @@ plt.show()
 
 ########################################################
 
-print(m.score(yt, ythat, np.mean(yr), method='pseudo_R2'))
+print(m.score(Xt, yt))
