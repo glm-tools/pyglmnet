@@ -30,7 +30,7 @@ def test_tikhonov():
     beta = np.random.multivariate_normal(np.zeros(n_features), PriorCov)
 
     # sample train and test data
-    glm_sim = GLM(distr='poisson')
+    glm_sim = GLM(distr='poisson', score_metric='pseudo_R2')
     X = np.random.randn(n_samples, n_features)
     y = glm_sim.simulate(beta0, beta, X)
 
@@ -44,7 +44,12 @@ def test_tikhonov():
     Tau = 1. / np.sqrt(np.float(n_samples)) * Tau / Tau.max()
 
     # fit model with batch gradient
-    glm_tikhonov = GLM(distr='poisson', alpha=0.0, Tau=Tau, solver='batch-gradient', tol=1e-5)
+    glm_tikhonov = GLM(distr='poisson',
+                       alpha=0.0,
+                       Tau=Tau,
+                       solver='batch-gradient',
+                       tol=1e-5,
+                       score_metric='pseudo_R2')
     glm_tikhonov.fit(Xtrain, ytrain);
 
     ytrain_hat = glm_tikhonov[-1].predict(Xtrain)
@@ -52,11 +57,16 @@ def test_tikhonov():
 
     R2_train = dict()
     R2_test = dict()
-    R2_train['tikhonov'] = glm_tikhonov[-1].score(ytrain, ytrain_hat, np.mean(ytrain), method='pseudo_R2')
-    R2_test['tikhonov'] = glm_tikhonov[-1].score(ytest, ytest_hat, np.mean(ytrain), method='pseudo_R2')
+    R2_train['tikhonov'] = glm_tikhonov[-1].score(Xtrain, ytrain)
+    R2_test['tikhonov'] = glm_tikhonov[-1].score(Xtest, ytest)
 
     # fit model with cdfast
-    glm_tikhonov = GLM(distr='poisson', alpha=0.0, Tau=Tau, solver='cdfast', tol=1e-5)
+    glm_tikhonov = GLM(distr='poisson',
+                       alpha=0.0,
+                       Tau=Tau,
+                       solver='cdfast',
+                       tol=1e-5,
+                       score_metric='pseudo_R2')
     glm_tikhonov.fit(Xtrain, ytrain)
 
     ytrain_hat = glm_tikhonov[-1].predict(Xtrain)
@@ -64,8 +74,8 @@ def test_tikhonov():
 
     R2_train = dict()
     R2_test = dict()
-    R2_train['tikhonov'] = glm_tikhonov[-1].score(ytrain, ytrain_hat, np.mean(ytrain), method='pseudo_R2')
-    R2_test['tikhonov'] = glm_tikhonov[-1].score(ytest, ytest_hat, np.mean(ytrain), method='pseudo_R2')
+    R2_train['tikhonov'] = glm_tikhonov[-1].score(Xtrain, ytrain)
+    R2_test['tikhonov'] = glm_tikhonov[-1].score(Xtest, ytest)
 
 
 def test_group_lasso():
@@ -113,13 +123,14 @@ def test_glmnet():
 
     distrs = ['poisson', 'poissonexp', 'normal', 'binomial']
     solvers = ['batch-gradient', 'cdfast']
+    score_metric = 'pseudo_R2'
     learning_rate = 2e-1
 
     for solver in solvers:
         for distr in distrs:
 
             glm = GLM(distr, learning_rate=learning_rate,
-                      solver=solver)
+                      solver=solver, score_metric=score_metric)
 
             assert_true(repr(glm))
 
@@ -146,7 +157,7 @@ def test_glmnet():
     y_pred = glm[2].predict(scaler.transform(X_train))
     assert_equal(y_pred.shape, (X_train.shape[0], ))
     assert_raises(IndexError, glm.__getitem__, [2])
-    glm.score(y_train, y_pred)
+    glm.score(X_train, y_train)
 
     # don't allow slicing if model has not been fit yet.
     glm_poisson = GLM(distr='poisson')
@@ -160,10 +171,7 @@ def test_glmnet():
 def simple_cv_scorer(obj, X, y):
     """Simple scorer takes average pseudo-R2 from regularization path"""
     yhats = obj.predict(X)
-    ynull = np.zeros(y.shape) * y.mean()
-    return np.mean([obj.score(y, yhat, ynull, method='pseudo_R2')
-                   for yhat in yhats])
-
+    return np.mean([obj.score(X, y) for yhat in yhats])
 
 def test_cv():
     """Simple CV check"""
@@ -175,8 +183,8 @@ def test_cv():
     glm_normal.fit(X, y)
 
     cv = KFold(X.shape[0], 5)
-    # check that it returns 5 scores
 
+    # check that it returns 5 scores
     assert_equal(len(cross_val_score(glm_normal, X, y, cv=cv,
                  scoring=simple_cv_scorer)), 5)
 
@@ -197,18 +205,24 @@ def test_multinomial():
 
     # pick one as yhat
     yhat = y_pred[0]
+
     # uniform prediction
     ynull = np.ones(yhat.shape) / yhat.shape[1]
+
     # pseudo_R2 should be greater than 0
-    assert_true(glm_mn.score(y, yhat, ynull, method='pseudo_R2') > 0.)
-    glm_mn.score(y, yhat)
+    assert_true(glm_mn[-1].score(X, y) > 0.)
     assert_equal(len(glm_mn.simulate(glm_mn.fit_[0]['beta0'],
                                   glm_mn.fit_[0]['beta'],
                                   X)),
                  X.shape[0])
-    # these should raise an exception
-    assert_raises(ValueError, glm_mn.score, y, y, y, 'pseudo_R2')
-    assert_raises(ValueError, glm_mn.score, y, y, None, 'deviance')
+
+    # check that score is computed for sliced estimator
+    scorelist = glm_mn[-1].score(X, y)
+    assert_equal(scorelist.shape[0], 1)
+
+    # check that score is computed for all lambdas
+    scorelist = glm_mn.score(X, y)
+    assert_equal(scorelist.shape[0], y_pred.shape[0])
 
 def test_cdfast():
     """Test all functionality related to fast coordinate descent"""
