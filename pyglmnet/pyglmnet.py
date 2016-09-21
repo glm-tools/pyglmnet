@@ -702,9 +702,11 @@ class GLM(object):
 
         Returns
         -------
-        score: array | float
-            array when score is called by a list of estimators `glm.score()`
-            float when score is called by a sliced estimator `glm[0].score()`
+        score: array
+            array when score is called by a list of estimators:
+            `glm.score()`
+            singleton array when score is called by a sliced estimator:
+            `glm[0].score()`
 
             Note that if you want compatibility with sciki-learn's
             pipeline, cross_val_score, or GridSearchCV then you should
@@ -716,6 +718,10 @@ class GLM(object):
             grid = cross_val_score(glm[0], X, y, cv=10)
         """
 
+        if self.score_metric not in ['deviance', 'pseudo_R2']:
+            raise ValueError('score_metric has to be one of' +
+                             ' deviance or pseudo_R2')
+
         # If the model has not been fit it cannot be scored
         if self.ynull_ is None:
             raise ValueError('Model must be fit before prediction can \
@@ -723,58 +729,38 @@ class GLM(object):
 
         yhat = self.predict(X)
 
+        y = y.ravel()
+
+        score = list()
+        # Check whether we have a list of estimators or a single estimator
         if isinstance(self.fit_, dict):
-            # Compute scalar score for a single model fit
-            # (corresponding to a reg_lambda)
-            y = y.ravel()
+            yhat = yhat[np.newaxis, ...]
 
+        if self.distr in ['poisson', 'poissonexp']:
+            LS = utils.log_likelihood(y, y, self.distr)
+        else:
+            LS = 0
+        if(self.score_metric == 'pseudo_R2'):
+            L0 = utils.log_likelihood(y, self.ynull_, self.distr)
+
+        # Compute array of scores for each model fit
+        # (corresponding to a reg_lambda)
+        for idx in range(yhat.shape[0]):
             if self.distr != 'multinomial':
-                yhat = yhat.ravel()
-
-            L1 = utils.log_likelihood(y, yhat, self.distr)
-            if self.distr in ['poisson', 'poissonexp']:
-                LS = utils.log_likelihood(y, y, self.distr)
+                yhat_this = (yhat[idx, :]).ravel()
             else:
-                LS = 0
+                yhat_this = yhat[idx, :, :]
+            L1 = utils.log_likelihood(y, yhat_this, self.distr)
 
             if self.score_metric == 'deviance':
-                score = -2 * (L1 - LS)
+                score.append(-2 * (L1 - LS))
             elif self.score_metric == 'pseudo_R2':
-                L0 = utils.log_likelihood(y, self.ynull_, self.distr)
                 if self.distr in ['poisson', 'poissonexp']:
-                    score = 1 - (LS - L1) / (LS - L0)
+                    score.append(1 - (LS - L1) / (LS - L0))
                 else:
-                    score = 1 - L1 / L0
+                    score.append(1 - L1 / L0)
 
-        elif isinstance(self.fit_, list):
-            # Compute array of scores for each model fit
-            # (corresponding to a reg_lambda)
-            y = y.ravel()
-            score = list()
-
-            if self.distr in ['poisson', 'poissonexp']:
-                LS = utils.log_likelihood(y, y, self.distr)
-            else:
-                LS = 0
-            if(self.score_metric == 'pseudo_R2'):
-                L0 = utils.log_likelihood(y, self.ynull_, self.distr)
-
-            for idx in range(yhat.shape[0]):
-                if self.distr != 'multinomial':
-                    yhat_this = (yhat[idx, :]).ravel()
-                else:
-                    yhat_this = yhat[idx, :, :]
-                L1 = utils.log_likelihood(y, yhat_this, self.distr)
-
-                if self.score_metric == 'deviance':
-                    score.append(-2 * (L1 - LS))
-                elif self.score_metric == 'pseudo_R2':
-                    if self.distr in ['poisson', 'poissonexp']:
-                        score.append(1 - (LS - L1) / (LS - L0))
-                    else:
-                        score.append(1 - L1 / L0)
-
-        return score
+        return np.array(score)
 
     def simulate(self, beta0, beta, X):
         """Simulate data."""

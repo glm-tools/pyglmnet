@@ -210,19 +210,19 @@ def test_multinomial():
     ynull = np.ones(yhat.shape) / yhat.shape[1]
 
     # pseudo_R2 should be greater than 0
-    assert_true(glm_mn.score(X, y) > 0.)
-    glm_mn.score(X, y)
+    assert_true(glm_mn[-1].score(X, y) > 0.)
     assert_equal(len(glm_mn.simulate(glm_mn.fit_[0]['beta0'],
                                   glm_mn.fit_[0]['beta'],
                                   X)),
                  X.shape[0])
 
     # check that score is computed for sliced estimator
-    assert_true(isinstance(glm_mn[-1].score(X, y), float))
+    scorelist = glm_mn[-1].score(X, y)
+    assert_equal(scorelist.shape[0], 1)
 
     # check that score is computed for all lambdas
-    assert_equal(len(glm_mn.score(X, y)),
-                 y_pred.shape[0])
+    scorelist = glm_mn.score(X, y)
+    assert_equal(scorelist.shape[0], y_pred.shape[0])
 
 def test_cdfast():
     """Test all functionality related to fast coordinate descent"""
