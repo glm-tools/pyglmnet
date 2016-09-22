@@ -30,7 +30,7 @@ def test_tikhonov():
     beta = np.random.multivariate_normal(np.zeros(n_features), PriorCov)
 
     # sample train and test data
-    glm_sim = GLM(distr='poisson', score_metric='pseudo_R2')
+    glm_sim = GLM(distr='softplus', score_metric='pseudo_R2')
     X = np.random.randn(n_samples, n_features)
     y = glm_sim.simulate(beta0, beta, X)
 
@@ -44,7 +44,7 @@ def test_tikhonov():
     Tau = 1. / np.sqrt(np.float(n_samples)) * Tau / Tau.max()
 
     # fit model with batch gradient
-    glm_tikhonov = GLM(distr='poisson',
+    glm_tikhonov = GLM(distr='softplus',
                        alpha=0.0,
                        Tau=Tau,
                        solver='batch-gradient',
@@ -61,7 +61,7 @@ def test_tikhonov():
     R2_test['tikhonov'] = glm_tikhonov[-1].score(Xtest, ytest)
 
     # fit model with cdfast
-    glm_tikhonov = GLM(distr='poisson',
+    glm_tikhonov = GLM(distr='softplus',
                        alpha=0.0,
                        Tau=Tau,
                        solver='cdfast',
@@ -94,7 +94,7 @@ def test_group_lasso():
     beta[groups == 2] = 0.
 
     # create an instance of the GLM class
-    glm_group = GLM(distr='poisson', alpha=1.)
+    glm_group = GLM(distr='softplus', alpha=1.)
 
     # simulate training data
     Xr = np.random.normal(0.0, 1.0, [n_samples, n_features])
@@ -121,7 +121,7 @@ def test_glmnet():
     beta = 1. / (np.float(n_features) + 1.) * \
         np.random.normal(0.0, 1.0, [n_features, 1])
 
-    distrs = ['poisson', 'poissonexp', 'normal', 'binomial']
+    distrs = ['softplus', 'poisson', 'gaussian', 'binomial']
     solvers = ['batch-gradient', 'cdfast']
     score_metric = 'pseudo_R2'
     learning_rate = 2e-1
@@ -160,7 +160,7 @@ def test_glmnet():
     glm.score(X_train, y_train)
 
     # don't allow slicing if model has not been fit yet.
-    glm_poisson = GLM(distr='poisson')
+    glm_poisson = GLM(distr='softplus')
     assert_raises(ValueError, glm_poisson.__getitem__, 2)
 
     # test fit_predict
@@ -178,7 +178,7 @@ def test_cv():
     # XXX: don't use scikit-learn for tests.
     X, y = make_regression()
 
-    glm_normal = GLM(distr='normal', alpha=0.01,
+    glm_normal = GLM(distr='gaussian', alpha=0.01,
                      reg_lambda=[0.0, 0.1, 0.2])
     glm_normal.fit(X, y)
 
@@ -232,7 +232,7 @@ def test_cdfast():
     n_classes = 5
     density = 0.1
 
-    distrs = ['poisson', 'poissonexp', 'normal', 'binomial', 'multinomial']
+    distrs = ['softplus', 'poisson', 'gaussian', 'binomial', 'multinomial']
     for distr in distrs:
         glm = GLM(distr, solver='cdfast')
 

@@ -1,23 +1,21 @@
 # -*- coding: utf-8 -*-
 """
-===============================
-Poisson (Softplus) Distribution
-===============================
+==============================
+Poisson (Canonical) Distribution
+==============================
 
-For Poisson distributed target variables, the canonical link function is an
-exponential nonlinearity. However, the gradient of the loss function that uses
-this nonlinearity is typically unstable.
+This is an example demonstrating ``Pyglmnet`` with
+the canonical (exponential) link function for Poisson distributed targets.
 
-This is an example demonstrating how pyglmnet
-works with a Poisson distribution using the softplus nonlinearity.
+Here, we deal with the numerical instability of the exponential
+link function by linearizing it above a certain threshold, ``eta``.
 
-Here, for the default ``distr = 'poisson'`` option, we use the
-softplus function: ``log(1+exp())``.
+This canonical link can be used by specifying ``distr`` = ``'poisson'``.
 
 """
 
 ########################################################
-# First, let's import useful libraries that we will use it later on.
+# Let's import useful libraries that we will use it later on
 
 ########################################################
 
@@ -26,25 +24,87 @@ softplus function: ``log(1+exp())``.
 
 import numpy as np
 import scipy.sparse as sps
-from sklearn.preprocessing import StandardScaler
+from scipy.special import expit
+from copy import deepcopy
 import matplotlib.pyplot as plt
+from sklearn.preprocessing import StandardScaler
 
 ########################################################
-# Here are inputs that you can provide when you instantiate the `GLM` class.
-# If not provided, it will be set to the respective defaults
 #
-# - `distr`: str (`'poisson'` or `'poissonexp'` or `'normal'` or `'binomial'` or `'multinomial'`)
-#     default: `'poisson'`
-# - `alpha`: float (the weighting between L1 and L2 norm)
-#     default: 0.05
-# - `reg_lambda`: array (array of regularization parameters)
-#     default: `np.logspace(np.log(0.5), np.log(0.01), 10, base=np.exp(1))`
-# - `learning_rate`: float (learning rate for gradient descent)
-#     default: 2e-1
-# - `max_iter`: int (maximum iteration for the model)
-#     default: 1000
+# Consider the negative log-likelihood loss function
 
 ########################################################
+
+########################################################
+# .. math::
+#
+#     J = \sum_i \lambda_i - y_i \log \lambda_i
+#
+# Instead of the canonical link, we define \lambda as follows:
+#
+# .. math::
+#
+#     \lambda_i =
+#     \begin{cases}
+#         \exp(z_i), & \text{if}\ z_i \leq \eta \\
+#         \\
+#          \exp(\eta)z_i + (1-\eta)\exp(\eta), & \text{if}\ z_i \gt \eta
+#     \end{cases}
+#
+# where
+#
+# .. math::
+#
+#     z_i = \beta_0 + \sum_j \beta_j x_{ij}
+#
+# Taking gradients,
+#
+# .. math::
+#
+#     \frac{\partial J}{\partial \beta_j} = \sum_i \frac{\partial J}{\partial \lambda_i} \frac{\partial \lambda_i}{\partial z_i} \frac{\partial z_i}{\partial \beta_j}
+#
+#
+# .. math::
+#
+#     \frac{\partial J}{\partial \beta_0} =
+#     \begin{cases}
+#         \sum_i \Big(\lambda_i - y_i\Big), & \text{if}\ z_i \leq \eta \\
+#         \\
+#         \exp(\eta) \sum_i \Big(1 - \frac{\lambda_i}{y_i}\Big), & \text{if}\ z_i \gt \eta
+#     \end{cases}
+#
+# .. math::
+#     \frac{\partial J}{\partial \beta_j} =
+#     \begin{cases}
+#         \sum_i \Big(\lambda_i - y_i\Big)x_{ij}, & \text{if}\ z_i \leq \eta \\
+#         \\
+#         \exp(\eta) \sum_i \Big(1 - \frac{\lambda_i}{y_i}\Big)x_{ij}, & \text{if}\ z_i \gt \eta
+#     \end{cases}
+#
+
+########################################################
+#
+# Let's write a piece of code to visualize the difference
+# between exponential and linearized exponential.
+
+########################################################
+z = np.linspace(0., 10., 100)
+
+eta = 4.0
+qu = deepcopy(z)
+slope = np.exp(eta)
+intercept = (1 - eta) * slope
+qu[z > eta] = z[z > eta] * slope + intercept
+qu[z <= eta] = np.exp(z[z <= eta])
+
+plt.plot(z, qu, label='lineared exp')
+plt.plot(z, np.exp(z), label='exp')
+plt.ylim([0, 1000])
+plt.xlabel('x')
+plt.ylabel('y')
+plt.legend(bbox_to_anchor=(0., 1.02, 1., .102), loc=1,
+           ncol=2, borderaxespad=0.)
+plt.show()
 
 ########################################################
 # Import ``GLM`` class from ``pyglmnet``
@@ -54,113 +114,66 @@ import matplotlib.pyplot as plt
 # import GLM model
 from pyglmnet import GLM
 
-# create regularize parameters for model
+# create regularization parameters for model
 reg_lambda = np.logspace(np.log(0.5), np.log(0.01), 10, base=np.exp(1))
-glm_poisson = GLM(distr='poisson', verbose=False, alpha=0.05,
-            max_iter=1000, learning_rate=2e-1,
-            reg_lambda=reg_lambda)
+glm_poissonexp = GLM(distr='poisson', verbose=False, alpha=0.05,
+            max_iter=1000, learning_rate=2e-1, score_metric='pseudo_R2',
+            reg_lambda=reg_lambda, eta=4.0)
 
-##########################################################
-# Simulate a dataset
-# ------------------
-# The ``GLM`` class has a very useful method called ``simulate()``.
-#
-# Since a canonical link function is already specified by the distribution
-# parameters, or provided by the user, ``simulate()`` requires
-# only the independent variables ``X`` and the coefficients ``beta0``
-# and ``beta``
 
-##########################################################
+########################################################
 
+# Dataset size
 n_samples, n_features = 10000, 100
 
-# coefficients
+# baseline term
 beta0 = np.random.normal(0.0, 1.0, 1)
+# sparse model terms
 beta = sps.rand(n_features, 1, 0.1)
 beta = np.array(beta.todense())
 
 # training data
 Xr = np.random.normal(0.0, 1.0, [n_samples, n_features])
-yr = glm_poisson.simulate(beta0, beta, Xr)
+yr = glm_poissonexp.simulate(beta0, beta, Xr)
 
 # testing data
 Xt = np.random.normal(0.0, 1.0, [n_samples, n_features])
-yt = glm_poisson.simulate(beta0, beta, Xt)
+yt = glm_poissonexp.simulate(beta0, beta, Xt)
 
-##########################################################
-# Fit the model
-# ^^^^^^^^^^^^^
-# Fitting the model is accomplished by a single GLM method called `fit()`.
+########################################################
+# Fit model to training data
 
-##########################################################
+########################################################
 
 scaler = StandardScaler().fit(Xr)
-glm_poisson.fit(scaler.transform(Xr), yr)
+glm_poissonexp.fit(scaler.transform(Xr),yr);
 
-##########################################################
-# Slicing the model object
-# ^^^^^^^^^^^^^^^^^^^^^^^^
-# Although the model is fit to all values of reg_lambda specified by a regularization
-# path, often we are only interested in further analysis for a particular value of
-# ``reg_lambda``. We can easily do this by slicing the object.
-#
-# For instance ``model[0]`` returns an object identical to model but with ``.fit_``
-# as a dictionary corresponding to the estimated coefficients for ``reg_lambda[0]``.
+########################################################
+# Use one model to predict
 
-##########################################################
-# Visualize the fit coefficients
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-# The estimated coefficients are stored in an instance variable called ``.fit_``
-# which is a list of dictionaries. Each dictionary corresponds to a
-# particular ``reg_lambda``
+########################################################
 
-##########################################################
+m = glm_poissonexp[-1]
+this_model_param = m.fit_
+yrhat = m.predict(scaler.transform(Xr))
+ythat = m.predict(scaler.transform(Xt))
 
-fit_param = glm_poisson[-1].fit_
-plt.plot(beta[:], 'bo', label ='true')
-plt.plot(fit_param['beta'][:], 'ro', label='estimated')
-plt.xlabel('samples')
-plt.ylabel('outputs')
-plt.legend(bbox_to_anchor=(0., 1.02, 1., .102), loc=1,
-           ncol=2, borderaxespad=0.)
-plt.show()
+########################################################
+# Visualize predicted output
 
-##########################################################
-# Make predictions based on fit model
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-# The ``predict()`` method takes two parameters: a numpy 2d array of independent
-# variables and a dictionary of fit parameters. It returns a vector of
-# predicted targets.
+########################################################
 
-##########################################################
-
-# Predict targets from test set
-yrhat = glm_poisson[-1].predict(scaler.transform(Xr))
-ythat = glm_poisson[-1].predict(scaler.transform(Xt))
-
-plt.plot(yt[:100], label='true')
-plt.plot(ythat[:100], 'r', label='predicted')
+plt.plot(yt[:100], label='tr')
+plt.plot(ythat[:100], 'r', label='pr')
 plt.xlabel('samples')
 plt.ylabel('true and predicted outputs')
 plt.legend(bbox_to_anchor=(0., 1.02, 1., .102), loc=1,
            ncol=2, borderaxespad=0.)
 plt.show()
 
-##########################################################
-# Goodness of fit
-# ^^^^^^^^^^^^^^^
-# The GLM class provides two metrics to evaluate the goodness of fit: ``deviance``
-# and ``pseudo_R2``. Both these metrics are implemented in the ``score()`` method.
+########################################################
+# Compute pseudo R2
 
-##########################################################
+########################################################
 
-# Compute model deviance
-Dr = glm_poisson[-1].score(Xr, yr)
-Dt = glm_poisson[-1].score(Xt, yt)
-print('Dr = %f' % Dr, 'Dt = %f' % Dt)
-
-# Compute pseudo_R2s
-glm_poisson.score_metric = 'pseudo_R2'
-R2r = glm_poisson[-1].score(Xr, yr)
-R2t = glm_poisson[-1].score(Xt, yt)
-print('  R2r =  %f' % R2r, ' R2r = %f' % R2t)
+print(m.score(Xt, yt))
