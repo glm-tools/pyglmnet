@@ -762,7 +762,6 @@ class GLM(object):
 
         return np.array(score)
 
-
     def simulate(self, beta0, beta, X):
         """Simulate data."""
         np.random.seed(self.random_state)
