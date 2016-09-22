@@ -28,13 +28,6 @@ but only for linear and logistic regression.
 
 **Pyglmnet** is a response to this fragmentation. Here are some highlights.
 
-- We follow the same approach and notations as in
-[Friedman, J., Hastie, T., & Tibshirani, R. (2010)](https://core.ac.uk/download/files/153/6287975.pdf)
-and the accompanying widely popular [R package](https://web.stanford.edu/~hastie/glmnet/glmnet_alpha.html).
-
-- Pyglmnet's API is designed to be compatible with scikit-learn,
-so you can deploy `Pipeline` tools such as `GridSearchCV()` and `cross_val_score()`.
-
 - Pyglmnet provides a wide range of noise models
 (and paired canonical link functions):
 `'gaussian'`, `'binomial'`, `'multinomial'`, '`poisson`', and `'softplus'`.
@@ -44,14 +37,21 @@ ridge, lasso, elastic net,
 [group lasso](https://en.wikipedia.org/wiki/Proximal_gradient_methods_for_learning#Group_lasso),
 and [Tikhonov regularization](https://en.wikipedia.org/wiki/Tikhonov_regularization).
 
-- It provides a cyclical coordinate descent optimizer with
+- Pyglmnet's API is designed to be compatible with scikit-learn,
+so you can deploy `Pipeline` tools such as `GridSearchCV()` and `cross_val_score()`.
+
+- We follow the same approach and notations as in
+[Friedman, J., Hastie, T., & Tibshirani, R. (2010)](https://core.ac.uk/download/files/153/6287975.pdf)
+and the accompanying widely popular [R package](https://web.stanford.edu/~hastie/glmnet/glmnet_alpha.html).
+
+- We have implemented a cyclical coordinate descent optimizer with
 Newton update, active sets, update caching, and warm restarts.
 This optimization approach is identical to the one used in R package.
 
 - A number of Python wrappers exist for the R glmnet package
 (e.g. [here](https://github.com/civisanalytics/python-glmnet) and [here](https://github.com/dwf/glmnet-python))
 but in contrast to these, Pyglmnet is a pure python implementation.
-Therefore, it is easy to modify and introduced additional noise models
+Therefore, it is easy to modify and introduce additional noise models
 and regularizers in the future.
 
 For more details, please see our release notes accompanying
@@ -73,7 +73,7 @@ $ python setup.py develop install
 
 ### Getting Started
 
-Here is an example on how to use `GLM` class.
+Here is an example on how to use the `GLM` estimator.
 
 ```python
 import numpy as np
