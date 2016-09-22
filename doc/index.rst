@@ -62,6 +62,7 @@ Contents
    install
    start
    tutorial
+   cheatsheet
    auto_examples/index
    api
    developers
