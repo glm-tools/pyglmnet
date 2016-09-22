@@ -33,7 +33,7 @@
 
   
     <link rel="top" title="pyglmnet 0.1.dev documentation" href="index.html"/>
-        <link rel="next" title="Examples Gallery" href="auto_examples/index.html"/>
+        <link rel="next" title="Cheatsheet" href="cheatsheet.html"/>
         <link rel="prev" title="Getting Started" href="start.html"/> 
 
   
@@ -100,6 +100,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#implementation">Implementation</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="cheatsheet.html">Cheatsheet</a></li>
 <li class="toctree-l1"><a class="reference internal" href="auto_examples/index.html">Examples Gallery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api.html">API Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="developers.html">Developer Documentation</a></li>
@@ -177,7 +178,7 @@ and show how we can optimize this cost function</p>
 <div class="section" id="poisson-like-glm">
 <h2>Poisson-like GLM<a class="headerlink" href="#poisson-like-glm" title="Permalink to this headline">¶</a></h2>
 <p>The <cite>pyglmnet</cite> implementation comes with <cite>poisson</cite>, <cite>binomial</cite>
-and <cite>normal</cite> distributions, but for illustration, we will walk you
+and <cite>gaussian</cite> distributions, but for illustration, we will walk you
 through a particular adaptation of the canonical Poisson generalized
 linear model (GLM).</p>
 <p>For the Poisson GLM, <span class="math">\(\lambda_i\)</span> is the rate parameter of an
@@ -193,7 +194,7 @@ are linear coefficients. <span class="math">\(\lambda_i\)</span> is also known a
 intensity function, conditioned on <span class="math">\((\beta_0, \beta)\)</span> and
 <span class="math">\(q(z) = \exp(z)\)</span> is the nonlinearity.</p>
 <p>For numerical reasons, let&#8217;s adopt a stabilizing non-linearity, known as the
-softplus or the smooth rectifier <a class="reference external" href="http://papers.nips.cc/paper/1920-incorporating-second-order-functional-knowledge-for-better-option-pricing.pdf">Dugas et al., 2001</a>,
+<cite>softplus</cite> or the smooth rectifier <a class="reference external" href="http://papers.nips.cc/paper/1920-incorporating-second-order-functional-knowledge-for-better-option-pricing.pdf">Dugas et al., 2001</a>,
 and adopted by Jonathan Pillow&#8217;s and Liam Paninski&#8217;s groups for neural data
 analysis.
 See for instance: <a class="reference external" href="http://www.nature.com/neuro/journal/v17/n10/abs/nn.3800.html">Park et al., 2014</a>.</p>
@@ -489,7 +490,7 @@ pseudo code on how algorithm works soon.</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="auto_examples/index.html" class="btn btn-neutral float-right" title="Examples Gallery" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="cheatsheet.html" class="btn btn-neutral float-right" title="Cheatsheet" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="start.html" class="btn btn-neutral" title="Getting Started" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>

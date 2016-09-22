@@ -35,7 +35,7 @@
     <link rel="top" title="pyglmnet 0.1.dev documentation" href="../../index.html"/>
         <link rel="up" title="Examples Gallery" href="../index.html"/>
         <link rel="next" title="API Documentation" href="../../api.html"/>
-        <link rel="prev" title="Poisson (Softplus) Distribution" href="../api/plot_poisson.html"/> 
+        <link rel="prev" title="Poisson (Softplus) Distribution" href="../api/plot_softplus.html"/> 
 
   
   <script src="../../_static/js/modernizr.min.js"></script>
@@ -89,6 +89,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../start.html">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cheatsheet.html">Cheatsheet</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../index.html">Examples Gallery</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="../index.html#api-gallery">API Gallery</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../index.html#application-gallery">Application Gallery</a></li>
@@ -185,7 +186,7 @@ involving law enforcement, such as per capita number of police officers, and per
 </div>
 <p>pyglmnet</p>
 <div class="highlight-python"><div class="highlight"><pre><span></span><span class="c1"># use the default value for reg_lambda</span>
-<span class="n">glm</span> <span class="o">=</span> <span class="n">GLM</span><span class="p">(</span><span class="n">distr</span><span class="o">=</span><span class="s1">&#39;normal&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">learning_rate</span><span class="o">=</span><span class="mf">2e-1</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">max_iter</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">)</span>
+<span class="n">glm</span> <span class="o">=</span> <span class="n">GLM</span><span class="p">(</span><span class="n">distr</span><span class="o">=</span><span class="s1">&#39;gaussian&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">learning_rate</span><span class="o">=</span><span class="mf">2e-1</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">max_iter</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">)</span>
 
 <span class="n">glm</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
 <span class="n">y_pred_glm</span> <span class="o">=</span> <span class="n">glm</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
@@ -231,7 +232,7 @@ mean square error on test data using sklearn : 0.009977
 </div>
 <img alt="../../_images/sphx_glr_plot_community_crime_001.png" class="align-center" src="../../_images/sphx_glr_plot_community_crime_001.png" />
 <p><strong>Total running time of the script:</strong>
-(0 minutes 6.279 seconds)</p>
+(0 minutes 4.400 seconds)</p>
 <div class="sphx-glr-download container">
 <strong>Download Python source code:</strong> <a class="reference download internal" href="../../_downloads/plot_community_crime.py"><tt class="xref download docutils literal"><span class="pre">plot_community_crime.py</span></tt></a></div>
 <div class="sphx-glr-download container">
@@ -248,7 +249,7 @@ mean square error on test data using sklearn : 0.009977
         <a href="../../api.html" class="btn btn-neutral float-right" title="API Documentation" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="../api/plot_poisson.html" class="btn btn-neutral" title="Poisson (Softplus) Distribution" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="../api/plot_softplus.html" class="btn btn-neutral" title="Poisson (Softplus) Distribution" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

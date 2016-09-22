@@ -45,26 +45,6 @@ API Gallery
 
 .. only:: html
 
-    .. figure:: /auto_examples/api/images/thumb/sphx_glr_plot_poissonexp_thumb.png
-
-        :ref:`sphx_glr_auto_examples_api_plot_poissonexp.py`
-
-.. raw:: html
-
-    </div>
-
-
-.. toctree::
-   :hidden:
-
-   /auto_examples/api/plot_poissonexp
-
-.. raw:: html
-
-    <div class="sphx-glr-thumbcontainer" tooltip="For Poisson distributed target variables, the canonical link function is an exponential nonline...">
-
-.. only:: html
-
     .. figure:: /auto_examples/api/images/thumb/sphx_glr_plot_poisson_thumb.png
 
         :ref:`sphx_glr_auto_examples_api_plot_poisson.py`
@@ -78,6 +58,26 @@ API Gallery
    :hidden:
 
    /auto_examples/api/plot_poisson
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="For Poisson distributed target variables, the canonical link function is an exponential nonline...">
+
+.. only:: html
+
+    .. figure:: /auto_examples/api/images/thumb/sphx_glr_plot_softplus_thumb.png
+
+        :ref:`sphx_glr_auto_examples_api_plot_softplus.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_examples/api/plot_softplus
 .. raw:: html
 
     <div style='clear:both'></div>

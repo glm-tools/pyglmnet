@@ -53,7 +53,7 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random
 ########################################################
 
 # use the default value for reg_lambda
-glm = GLM(distr='normal', alpha=0.05, learning_rate=2e-1, verbose=False, max_iter=1000, tol=1e-3)
+glm = GLM(distr='gaussian', alpha=0.05, learning_rate=2e-1, verbose=False, max_iter=1000, tol=1e-3)
 
 glm.fit(X_train, y_train)
 y_pred_glm = glm[-1].predict(X_test)
