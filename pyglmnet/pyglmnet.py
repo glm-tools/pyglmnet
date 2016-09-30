@@ -184,7 +184,7 @@ class GLM(object):
         for more details.
         """
         for parameter, value in parameters.items():
-            self.setattr(parameter, value)
+            setattr(self, parameter, value)
 
     def __repr__(self):
         """Description of the object."""
