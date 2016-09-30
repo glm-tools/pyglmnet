@@ -176,6 +176,15 @@ class GLM(object):
             )
         )
 
+    def set_params(**parameters):
+        """
+        Method for setting class parameters, as required by sciki-learn's
+        GridSearchCV. See http://scikit-learn.org/stable/developers/contributing.html#get-params-and-set-params
+        for more details.
+        """
+        for parameter, value in parameters.items():
+            self.setattr(parameter, value)
+
     def __repr__(self):
         """Description of the object."""
         reg_lambda = self.reg_lambda
