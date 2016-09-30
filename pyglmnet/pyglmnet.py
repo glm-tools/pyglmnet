@@ -176,10 +176,11 @@ class GLM(object):
             )
         )
 
-    def set_params(**parameters):
+    def set_params(self, **parameters):
         """
         Method for setting class parameters, as required by sciki-learn's
-        GridSearchCV. See http://scikit-learn.org/stable/developers/contributing.html#get-params-and-set-params
+        GridSearchCV. See
+        http://scikit-learn.org/stable/developers/contributing.html#get-params-and-set-params
         for more details.
         """
         for parameter, value in parameters.items():
