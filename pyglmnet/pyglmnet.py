@@ -127,19 +127,18 @@ class GLM(object):
 
     def __init__(self, distr='poisson', alpha=0.5,
                  Tau=None, group=None,
-                 reg_lambda=None,
+                 reg_lambda=0.1,
                  solver='batch-gradient',
                  learning_rate=2e-1, max_iter=1000,
                  tol=1e-3, eta=4.0, score_metric='deviance',
                  random_state=0, verbose=False):
 
-        if reg_lambda is None:
-            reg_lambda = np.logspace(np.log(0.5), np.log(0.01), 10,
-                                     base=np.exp(1))
-        if not isinstance(reg_lambda, (list, np.ndarray)):
-            reg_lambda = [reg_lambda]
-        if not isinstance(max_iter, int):
-            max_iter = int(max_iter)
+        #self.reg_lambda = np.logspace(np.log(0.5), np.log(0.01), 10,
+        #                         base=np.exp(1))
+        #if not isinstance(reg_lambda, (list, np.ndarray)):
+        #    reg_lambda = [reg_lambda]
+        #if not isinstance(max_iter, int):
+        #    max_iter = int(max_iter)
 
         self.distr = distr
         self.alpha = alpha
@@ -159,22 +158,20 @@ class GLM(object):
         set_log_level(verbose)
 
     def get_params(self, deep=False):
-        return dict(
-            (
-                ('distr', self.distr),
-                ('alpha', self.alpha),
-                ('Tau', self.Tau),
-                ('group', self.group),
-                ('reg_lambda', self.reg_lambda),
-                ('learning_rate', self.learning_rate),
-                ('max_iter', self.max_iter),
-                ('tol', self.tol),
-                ('eta', self.eta),
-                ('score_metric', self.score_metric),
-                ('random_state', self.random_state),
-                ('verbose', self.verbose)
-            )
-        )
+        params = {'distr': self.distr,
+                  'alpha': self.alpha,
+                  'reg_lambda': self.reg_lambda,
+                  'Tau': self.Tau,
+                  'group': self.group,
+                  'solver': self.solver,
+                  'learning_rate': self.learning_rate,
+                  'max_iter': self.max_iter,
+                  'tol': self.tol,
+                  'eta': self.eta,
+                  'score_metric': self.score_metric,
+                  'random_state': self.random_state,
+                  'verbose': self.verbose}
+        return params
 
     def set_params(self, **parameters):
         """
@@ -184,7 +181,8 @@ class GLM(object):
         for more details.
         """
         for parameter, value in parameters.items():
-            self.setattr(parameter, value)
+            setattr(self, parameter, value)
+        return self
 
     def __repr__(self):
         """Description of the object."""
@@ -192,11 +190,12 @@ class GLM(object):
         s = '<\nDistribution | %s' % self.distr
         s += '\nalpha | %0.2f' % self.alpha
         s += '\nmax_iter | %0.2f' % self.max_iter
-        if len(reg_lambda) > 1:
-            s += ('\nlambda: %0.2f to %0.2f\n>'
-                  % (reg_lambda[0], reg_lambda[-1]))
-        else:
-            s += '\nlambda: %0.2f\n>' % reg_lambda[0]
+        s += '\nlambda: %0.2f\n>' % reg_lambda
+        #if len(reg_lambda) > 1:
+        #    s += ('\nlambda: %0.2f to %0.2f\n>'
+        #          % (reg_lambda[0], reg_lambda[-1]))
+        #else:
+        #    s += '\nlambda: %0.2f\n>' % reg_lambda[0]
         return s
 
     def __getitem__(self, key):
