@@ -1,7 +1,7 @@
 # pyglmnet
 ### A python implementation of elastic-net regularized generalized linear models
 
-[![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)](https://github.com/pavanramkumar/pyglmnet/blob/master/LICENSE) [![Travis](https://api.travis-ci.org/pavanramkumar/pyglmnet.svg?branch=master "Travis")](https://travis-ci.org/pavanramkumar/pyglmnet) [![Codecov](https://img.shields.io/codecov/c/github/pavanramkumar/pyglmnet.svg?maxAge=2592000)](https://codecov.io/github/pavanramkumar/pyglmnet/coverage.svg?precision=0)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)](https://github.com/pavanramkumar/pyglmnet/blob/master/LICENSE) [![Travis](https://api.travis-ci.org/pavanramkumar/pyglmnet.svg?branch=master "Travis")](https://travis-ci.org/pavanramkumar/pyglmnet) [![Codecov](https://codecov.io/github/pavanramkumar/pyglmnet/coverage.svg?precision=0)](https://codecov.io/gh/pavanramkumar/pyglmnet)
 [![Gitter](https://badges.gitter.im/pavanramkumar/pyglmnet.svg)](https://gitter.im/pavanramkumar/pyglmnet?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
 [Generalized linear models](https://en.wikipedia.org/wiki/Generalized_linear_model)
