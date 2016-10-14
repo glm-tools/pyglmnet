@@ -1,8 +1,7 @@
 # pyglmnet
 ### A python implementation of elastic-net regularized generalized linear models
 
-[![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)](https://github.com/pavanramkumar/pyglmnet/blob/master/LICENSE) [![Travis](https://api.travis-ci.org/pavanramkumar/pyglmnet.svg?branch=master "Travis")](https://travis-ci.org/pavanramkumar/pyglmnet)
-[![Coverage Status](https://coveralls.io/repos/github/pavanramkumar/pyglmnet/badge.svg?branch=master)](https://coveralls.io/github/pavanramkumar/pyglmnet?branch=master)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)](https://github.com/pavanramkumar/pyglmnet/blob/master/LICENSE) [![Travis](https://api.travis-ci.org/pavanramkumar/pyglmnet.svg?branch=master "Travis")](https://travis-ci.org/pavanramkumar/pyglmnet) [![Codecov](https://img.shields.io/codecov/c/github/pavanramkumar/pyglmnet.svg?maxAge=2592000)](https://codecov.io/gh/pavanramkumar/pyglmnet)
 [![Gitter](https://badges.gitter.im/pavanramkumar/pyglmnet.svg)](https://gitter.im/pavanramkumar/pyglmnet?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
 [Generalized linear models](https://en.wikipedia.org/wiki/Generalized_linear_model)
@@ -118,8 +117,8 @@ Here is an [extensive tutorial](http://pavanramkumar.github.io/pyglmnet/tutorial
 on GLMs, optimization and pseudo-code.
 
 Here are [slides](https://pavanramkumar.github.io/pydata-chicago-2016)
-from a recent talk at [PyData Chicago 2016](http://pydata.org/chicago2016/schedule/presentation/15/)
-and corresponding [tutorial notebooks](http://github.com/pavanramkumar/pydata-chicago-2016).
+from a recent talk at [PyData Chicago 2016](http://pydata.org/chicago2016/schedule/presentation/15/), corresponding [tutorial notebooks](http://github.com/pavanramkumar/pydata-chicago-2016)
+and a [video](https://www.youtube.com/watch?v=zXec96KD1uA).
 
 ### How to contribute?
 
