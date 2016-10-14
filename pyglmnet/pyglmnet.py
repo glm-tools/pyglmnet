@@ -6,6 +6,8 @@ from copy import deepcopy
 import numpy as np
 from scipy.special import expit
 from . import utils
+import numbers
+from sklearn.base import BaseEstimator
 
 logger = logging.getLogger('pyglmnet')
 logger.addHandler(logging.StreamHandler())
@@ -127,7 +129,7 @@ class GLM(object):
 
     def __init__(self, distr='poisson', alpha=0.5,
                  Tau=None, group=None,
-                 reg_lambda=None,
+                 reg_lambda=[1.0],
                  solver='batch-gradient',
                  learning_rate=2e-1, max_iter=1000,
                  tol=1e-3, eta=4.0, score_metric='deviance',
@@ -178,13 +180,14 @@ class GLM(object):
 
     def set_params(self, **parameters):
         """
-        Method for setting class parameters, as required by sciki-learn's
+        Method for setting class parameters, as required by scikit-learn's
         GridSearchCV. See
         http://scikit-learn.org/stable/developers/contributing.html#get-params-and-set-params
         for more details.
         """
         for parameter, value in parameters.items():
             setattr(self, parameter, value)
+        return self
 
     def __repr__(self):
         """Description of the object."""
@@ -576,10 +579,16 @@ class GLM(object):
         beta0_hat = 1 / (n_features + 1) * \
             np.random.normal(0.0, 1.0, n_classes)
         beta_hat = 1 / (n_features + 1) * \
-            np.random.normal(0.0, 1.0, [n_features, n_classes])
+            np.random.normal(0.0, 1.0, [int(n_features), n_classes])
         fit_params = list()
 
         logger.info('Looping through the regularization path')
+        #check if self.reg_lambda is a number or a list,
+        #if a number, cast it to an iterable with a length of 1
+        if isinstance(self.reg_lambda, numbers.Number):
+            temp = self.reg_lambda
+            self.reg_lambda = [temp]
+
         for l, rl in enumerate(self.reg_lambda):
             fit_params.append({'beta0': beta0_hat, 'beta': beta_hat})
             logger.info('Lambda: %6.4f' % rl)
@@ -596,12 +605,12 @@ class GLM(object):
             alpha = self.alpha
 
             # Temporary parameters to update
-            beta = np.zeros([n_features + 1, n_classes])
+            beta = np.zeros([int(n_features) + 1, n_classes])
             beta[0] = fit_params[-1]['beta0']
             beta[1:] = fit_params[-1]['beta']
 
             if self.solver == 'batch-gradient':
-                g = np.zeros([n_features + 1, n_classes])
+                g = np.zeros([int(n_features) + 1, n_classes])
             elif self.solver == 'cdfast':
                 ActiveSet = np.ones(n_features + 1)     # init active set
                 z = beta[0] + np.dot(X, beta[1:])       # cache z
@@ -770,7 +779,10 @@ class GLM(object):
                 else:
                     score.append(1 - L1 / L0)
 
-        return np.array(score)
+        if isinstance(score, numbers.Number):
+            return score
+        else:
+            return np.array(score)
 
     def simulate(self, beta0, beta, X):
         """Simulate data."""
