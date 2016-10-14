@@ -533,7 +533,7 @@ class GLM(object):
             The fitted model.
         """
 
-        np.random.seed(self.random_state)
+        np.random.RandomState(self.random_state)
 
         # checks for group
         if self.group is not None:
@@ -764,7 +764,7 @@ class GLM(object):
 
     def simulate(self, beta0, beta, X):
         """Simulate data."""
-        np.random.seed(self.random_state)
+        np.random.RandomState(self.random_state)
         if self.distr == 'softplus' or self.distr == 'poisson':
             y = np.random.poisson(self._lmb(beta0, beta, X))
         if self.distr == 'gaussian':
