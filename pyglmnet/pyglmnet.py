@@ -770,7 +770,7 @@ class GLM(object):
         y = y.ravel()
 
         yhat = self.predict(X) if self.distr != 'multinomial' \
-                               else self.predict_proba(X)
+            else self.predict_proba(X)
         score = list()
         # Check whether we have a list of estimators or a single estimator
         if isinstance(self.fit_, dict):
