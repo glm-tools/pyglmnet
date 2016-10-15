@@ -667,6 +667,46 @@ class GLM(object):
             yhat = self._lmb(self.fit_['beta0'], self.fit_['beta'], X)
         yhat = np.asarray(yhat)
         yhat = yhat[..., 0] if self.distr != 'multinomial' else yhat
+
+        # if multinomial get the argmax()
+        if self.distr == 'multinomial':
+            yhat = yhat.argmax(axis=1)
+
+        return yhat
+
+    def predict_proba(self, X):
+        """Predict class probability for multinomial
+
+        Parameters
+        ----------
+        X : array
+            shape (n_samples, n_features)
+            The data for prediction.
+
+        Returns
+        -------
+        yhat : array
+            shape ([n_lambda], n_samples)
+            The predicted labels. A 1D array if predicting on only
+            one lambda (compatible with scikit-learn API). Otherwise,
+            returns a 2D array.
+        """
+        if self.distr != 'multinomial':
+            raise ValueError('This is only applicable for \
+                              the multinomial distribution.')
+
+        if not isinstance(X, np.ndarray):
+            raise ValueError('Input data should be of type ndarray (got %s).'
+                             % type(X))
+
+        if isinstance(self.fit_, list):
+            yhat = list()
+            for fit in self.fit_:
+                yhat.append(self._lmb(fit['beta0'], fit['beta'], X))
+        else:
+            yhat = self._lmb(self.fit_['beta0'], self.fit_['beta'], X)
+        yhat = np.asarray(yhat)
+
         return yhat
 
     def fit_predict(self, X, y):
@@ -729,7 +769,8 @@ class GLM(object):
 
         y = y.ravel()
 
-        yhat = self.predict(X)
+        yhat = self.predict(X) if self.distr != 'multinomial' \
+                               else self.predict_proba(X)
         score = list()
         # Check whether we have a list of estimators or a single estimator
         if isinstance(self.fit_, dict):
