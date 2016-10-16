@@ -60,7 +60,7 @@ glm_mn.fit(X, y)
 
 ########################################################
 
-y_pred = glm_mn[-1].predict(X).argmax(axis=1)
+y_pred = glm_mn[-1].predict(X)
 print('Percentage correct = %f percent.' % (y_pred == y).mean())
 
 ########################################################
