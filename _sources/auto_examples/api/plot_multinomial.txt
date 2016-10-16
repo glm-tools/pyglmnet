@@ -74,25 +74,22 @@ Predict and score the output
 .. code-block:: python
 
 
-    y_pred = glm_mn[-1].predict(X).argmax(axis=1)
+    y_pred = glm_mn[-1].predict(X)
     print('Percentage correct = %f percent.' % (y_pred == y).mean())
 
 
 
 
-.. code-block:: pytb
 
-    Traceback (most recent call last):
-      File "/Users/pavanramkumar/anaconda/lib/python2.7/site-packages/sphinx_gallery/gen_rst.py", line 467, in execute_script
-        exec(code_block, example_globals)
-      File "<string>", line 2, in <module>
-    ValueError: axis(=1) out of bounds
+.. rst-class:: sphx-glr-script-out
 
+ Out::
 
+      Percentage correct = 0.587300 percent.
 
 
 **Total running time of the script:**
-(0 minutes 0.461 seconds)
+(0 minutes 0.454 seconds)
 
 
 
