@@ -219,12 +219,12 @@ and ``pseudo_R2``. Both these metrics are implemented in the ``score()`` method.
 
  Out::
 
-      Dr = 7298.414037 Dt = 7304.237829
-      R2r =  0.368852  R2r = 0.369294
+      Dr = 9535.886693 Dt = 9402.302334
+      R2r =  0.451381  R2r = 0.452995
 
 
 **Total running time of the script:**
-(0 minutes 1.110 seconds)
+(0 minutes 0.877 seconds)
 
 
 

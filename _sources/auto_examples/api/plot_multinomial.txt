@@ -80,16 +80,19 @@ Predict and score the output
 
 
 
+.. code-block:: pytb
 
-.. rst-class:: sphx-glr-script-out
+    Traceback (most recent call last):
+      File "/Users/pavanramkumar/anaconda/lib/python2.7/site-packages/sphinx_gallery/gen_rst.py", line 467, in execute_script
+        exec(code_block, example_globals)
+      File "<string>", line 2, in <module>
+    ValueError: axis(=1) out of bounds
 
- Out::
 
-      Percentage correct = 0.600400 percent.
 
 
 **Total running time of the script:**
-(0 minutes 0.519 seconds)
+(0 minutes 0.461 seconds)
 
 
 

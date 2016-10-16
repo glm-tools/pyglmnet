@@ -19,6 +19,7 @@ pyglmnet.GLM
       ~GLM.fit_predict
       ~GLM.get_params
       ~GLM.predict
+      ~GLM.predict_proba
       ~GLM.score
       ~GLM.simulate
    
