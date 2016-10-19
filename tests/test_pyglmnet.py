@@ -200,11 +200,11 @@ def test_multinomial():
     grad_beta0, grad_beta = glm_mn._grad_L2loss(beta[0], beta[1:], 0, X, y)
     assert_true(grad_beta0[0] != grad_beta0[1])
     glm_mn.fit(X, y)
-    y_pred = glm_mn.predict(X)
-    assert_equal(y_pred.shape, (3, X.shape[0], 2))  # n_lambdas x n_samples x n_classes
+    y_pred_proba = glm_mn.predict_proba(X)
+    assert_equal(y_pred_proba.shape, (3, X.shape[0], 2))  # n_lambdas x n_samples x n_classes
 
     # pick one as yhat
-    yhat = y_pred[0]
+    yhat = y_pred_proba[0]
 
     # uniform prediction
     ynull = np.ones(yhat.shape) / yhat.shape[1]
@@ -222,7 +222,7 @@ def test_multinomial():
 
     # check that score is computed for all lambdas
     scorelist = glm_mn.score(X, y)
-    assert_equal(scorelist.shape[0], y_pred.shape[0])
+    assert_equal(scorelist.shape[0], y_pred_proba.shape[0])
 
 def test_cdfast():
     """Test all functionality related to fast coordinate descent"""
