@@ -7,6 +7,7 @@ dependencies:
     - pip install sphinx-gallery
     - pip install scipy
     - pip install scikit-learn
+    - easy_install statsmodels
     - pip install -e .
     - pip install pandas
     - pip install sphinx_bootstrap_theme
