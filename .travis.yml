@@ -1,3 +1,4 @@
+language: r
 language: python
 before_install:
   - wget -q http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh
