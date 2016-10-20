@@ -24,8 +24,8 @@ The implementation is aimed to suit users of the popular GLM
 To the extent possible we have designed the package to conform to
 `scikit-learn <https://scikit-learn.org>`_'s API standards.
 
-[`Repository <https://github.com/pavanramkumar/pyglmnet>`_]
-[`Documentation <http://pavanramkumar.github.io/pyglmnet>`_]
+[`Repository <https://github.com/glm-tools/pyglmnet>`_]
+[`Documentation <http://glm-tools.github.io/pyglmnet>`_]
 
 
 A brief introduction to GLMs
@@ -72,5 +72,5 @@ Questions / Errors / Bugs
 =========================
 
 If you have a question about the code or find errors or bugs,
-please `report it here <https://github.com/pavanramkumar/pyglmnet/issues>`__.
+please `report it here <https://github.com/glm-tools/pyglmnet/issues>`__.
 For more specific question, feel free to email us directly.

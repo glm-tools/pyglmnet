@@ -1,8 +1,8 @@
 # pyglmnet
 ### A python implementation of elastic-net regularized generalized linear models
 
-[![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)](https://github.com/pavanramkumar/pyglmnet/blob/master/LICENSE) [![Travis](https://api.travis-ci.org/pavanramkumar/pyglmnet.svg?branch=master "Travis")](https://travis-ci.org/pavanramkumar/pyglmnet) [![Codecov](https://codecov.io/github/pavanramkumar/pyglmnet/coverage.svg?precision=0)](https://codecov.io/gh/pavanramkumar/pyglmnet)
-[![Gitter](https://badges.gitter.im/pavanramkumar/pyglmnet.svg)](https://gitter.im/pavanramkumar/pyglmnet?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)](https://github.com/glm-tools/pyglmnet/blob/master/LICENSE) [![Travis](https://api.travis-ci.org/glm-tools/pyglmnet.svg?branch=master "Travis")](https://travis-ci.org/glm-tools/pyglmnet) [![Codecov](https://codecov.io/github/glm-tools/pyglmnet/coverage.svg?precision=0)](https://codecov.io/gh/glm-tools/pyglmnet)
+[![Gitter](https://badges.gitter.im/glm-tools/pyglmnet.svg)](https://gitter.im/pavanramkumar/pyglmnet?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
 [Generalized linear models](https://en.wikipedia.org/wiki/Generalized_linear_model)
 are well-established tools for regression and classification and are widely
@@ -61,7 +61,7 @@ the 0.1 PyPI release (coming soon).
 Clone the repository.
 
 ```bash
-$ git clone http://github.com/pavanramkumar/pyglmnet
+$ git clone http://github.com/glm-tools/pyglmnet
 ```
 
 Install `pyglmnet` using `setup.py` as follows
@@ -109,11 +109,11 @@ yhat_test = glm.predict(scaler.transform(X_test))
 deviance = glm.score(X_test, y_test)
 ```
 
-[More pyglmnet examples and use cases](http://pavanramkumar.github.io/pyglmnet/auto_examples/index.html).
+[More pyglmnet examples and use cases](http://glm-tools.github.io/pyglmnet/auto_examples/index.html).
 
 ### Tutorial
 
-Here is an [extensive tutorial](http://pavanramkumar.github.io/pyglmnet/tutorial.html)
+Here is an [extensive tutorial](http://glm-tools.github.io/pyglmnet/tutorial.html)
 on GLMs, optimization and pseudo-code.
 
 Here are [slides](https://pavanramkumar.github.io/pydata-chicago-2016)
@@ -122,7 +122,7 @@ and a [video](https://www.youtube.com/watch?v=zXec96KD1uA).
 
 ### How to contribute?
 
-We welcome pull requests. Please see our [developer documentation page](http://pavanramkumar.github.io/pyglmnet/developers.html) for more details.
+We welcome pull requests. Please see our [developer documentation page](http://glm-tools.github.io/pyglmnet/developers.html) for more details.
 
 ### Author
 

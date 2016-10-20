@@ -54,7 +54,7 @@ install: dependencies
 	@echo "#### Installing pyglmnet ####"
 	python setup.py develop install
 	@echo "#### Pyglmnet installed successfully ####"
-	@echo "#### Access http://pavanramkumar.github.io/pyglmnet/index.html for more information and tutorials ####"
+	@echo "#### Access http://glm-tools.github.io/pyglmnet/index.html for more information and tutorials ####"
 
 .PHONY: all
 all: clean test install doc-dependencies doc

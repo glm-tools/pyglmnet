@@ -7,7 +7,7 @@ Contributing
 
 We welcome any pull requests.
 
-* Fork the `repository <https://github.com/pavanramkumar/pyglmnet>`_
+* Fork the `repository <https://github.com/glm-tools/pyglmnet>`_
 * Develop and push to your branch
 * Create new pull requests
 
