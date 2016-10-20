@@ -4,7 +4,6 @@ At present, we compare scikit-learn, R, statsmodels and pyglmnet
 """
 import time
 import numpy as np
-import pandas as pd
 
 from pyglmnet import GLM
 import statsmodels.api as sm
@@ -16,6 +15,7 @@ from rpy2.robjects.packages import importr
 from rpy2.robjects import pandas2ri
 pandas2ri.activate()
 
+
 class BenchmarkGLM(object):
     """
     envs: list
@@ -24,6 +24,12 @@ class BenchmarkGLM(object):
 
     distr: str
         one of 'gaussian', 'binomial', 'poisson'
+
+    alpha: float
+        the ratio between L1 and L2 regularization in elastic net
+
+    reg_lambda: float
+        regularization parameter
     """
 
     def __init__(self,
@@ -101,7 +107,7 @@ class BenchmarkGLM(object):
                         start = time.time()
                         model.fit(X_train, y_train)
                         stop = time.time()
-                        tmp.append(stop-start)
+                        tmp.append(stop - start)
                     res[env]['time'] = np.min(tmp) * 1e3
                 else:
                     res[env]['score'] = -999.
@@ -152,7 +158,11 @@ class BenchmarkGLM(object):
 
                 # fit-predict-score
                 try:
-                    fit = glmnet.glmnet(X_train, y_train, family=distr, alpha=self.alpha, nlambda=1)
+                    fit = glmnet.glmnet(X_train,
+                                        y_train,
+                                        family=distr,
+                                        alpha=self.alpha,
+                                        nlambda=1)
                     tmp = predict(fit, newx=X_test, s=0)
 
                     y_test_hat = np.zeros(y_test.shape[0])
@@ -171,7 +181,11 @@ class BenchmarkGLM(object):
                     tmp = list()
                     for r in range(n_repeats):
                         start = time.time()
-                        fit = glmnet.glmnet(X_train, y_train, family=distr, alpha=self.alpha, nlambda=1)
+                        fit = glmnet.glmnet(X_train,
+                                            y_train,
+                                            family=distr,
+                                            alpha=self.alpha,
+                                            nlambda=1)
                         stop = time.time()
                         tmp.append(stop - start)
                     res[env]['time'] = np.min(tmp) * 1e3
