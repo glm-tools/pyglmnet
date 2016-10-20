@@ -9,7 +9,7 @@ DESCRIPTION = descr
 MAINTAINER = 'Pavan Ramkumar'
 MAINTAINER_EMAIL = 'pavan.ramkumar@gmail.com'
 LICENSE = 'MIT'
-DOWNLOAD_URL = 'https://github.com/pavanramkumar/pyglmnet.git'
+DOWNLOAD_URL = 'https://github.com/glm-tools/pyglmnet.git'
 VERSION = '0.1.dev0'
 
 if __name__ == "__main__":

@@ -31,7 +31,7 @@ To install ``pyglmnet``, first clone the repository
 
 .. code-block:: bash
 
-    git clone http://github.com/pavanramkumar/pyglmnet
+    git clone http://github.com/glm-tools/pyglmnet
 
 Then run ``setup.py`` to install the library
 
