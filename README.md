@@ -53,6 +53,27 @@ but in contrast to these, Pyglmnet is a pure python implementation.
 Therefore, it is easy to modify and introduce additional noise models
 and regularizers in the future.
 
+### Benchmarks
+
+Here is table comparing `pyglmnet` against
+`scikit-learn`'s `linear_model`, `statsmodels`, and `R`.
+
+The numbers below are run time (in milliseconds) to fit a
+$1000$ samples x $100$ predictors sparse matrix
+(density $0.05$). This was done on a c. 2011 Macbook Pro,
+so your numbers may vary.
+
+| distr     | pyglmnet   | scikit-learn  | statsmodels | R      |
+|:----------|-----------:|--------------:|------------:|-------:|
+|gaussian   | 6.8        | 1.2           | 29.8        | 10.3   |
+|binomial   | 16.3       | 4.5           | 89.3        | --     |
+|poisson    | 5.8        | --            | 117.2       | 156.1  |
+
+We provide a function called `BenchMarkGLM()` in `pyglmnet.datasets`
+if you would like to run these benchmarks yourself, but you need to take
+care of the dependencies: `scikit-learn`, `Rpy2`, and `statsmodels`
+yourself.
+
 For more details, please see our release notes accompanying
 the 0.1 PyPI release (coming soon).
 
