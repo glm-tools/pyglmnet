@@ -10,8 +10,6 @@ install:
     - conda create -n testenv --yes pip python=2.7
     - source activate testenv
     - conda install --yes --quiet numpy=1.10.4 scipy=0.17 scikit-learn=0.17 nose coverage
-    - easy_install statsmodels
-    - pip install rpy2
     - pip install -q flake8
     - pip install coverage codecov
     - python setup.py install
