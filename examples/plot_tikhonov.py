@@ -49,26 +49,10 @@ from tqdm import tqdm
 import matplotlib.pyplot as plt
 
 ########################################################
-# Download and read data files
+# Download and fetch data files
 
-import wget
-import subprocess
-subprocess.call('rm -rf /tmp/glm-tools', shell=True)
-subprocess.call('mkdir /tmp/glm-tools', shell=True)
-
-subprocess.call('curl -o /tmp/glm-tools/fixations.csv https://raw.githubusercontent.com/glm-tools/datasets/master/tikhonov/fixations.csv', shell=True)
-subprocess.call('curl -o /tmp/glm-tools/probes.csv https://raw.githubusercontent.com/glm-tools/datasets/master/tikhonov/probes.csv', shell=True)
-subprocess.call('curl -o /tmp/glm-tools/spiketimes.csv https://raw.githubusercontent.com/glm-tools/datasets/master/tikhonov/spiketimes.csv', shell=True)
-
-fixations_filename = '/tmp/glm-tools/fixations.csv'
-probes_filename = '/tmp/glm-tools/probes.csv'
-spiketimes_filename = '/tmp/glm-tools/spiketimes.csv'
-
-########################################################
-
-probes_df = pd.read_csv(probes_filename)
-fixations_df = pd.read_csv(fixations_filename)
-spikes_df = pd.read_csv(spiketimes_filename, header=None)
+from pyglmnet.datasets import fetch_tikhonov_data
+fixations_df, probes_df, spikes_df = fetch_tikhonov_data(dpath='/tmp/glm-tools')
 spiketimes = np.squeeze(spikes_df.values)
 
 ########################################################
@@ -78,11 +62,11 @@ spiketimes = np.squeeze(spikes_df.values)
 
 n_spatial_basis = 36
 n_temporal_basis = 7
-strf_ = STRF(patch_size=50, sigma=5,
-             n_spatial_basis=n_spatial_basis,
-             n_temporal_basis=n_temporal_basis)
-spatial_basis = strf_.make_gaussian_basis()
-strf_.visualize_gaussian_basis(spatial_basis)
+strf_model = STRF(patch_size=50, sigma=5,
+                  n_spatial_basis=n_spatial_basis,
+                  n_temporal_basis=n_temporal_basis)
+spatial_basis = strf_model.make_gaussian_basis()
+strf_model.visualize_gaussian_basis(spatial_basis)
 
 ########################################################
 # Design temporal basis functions
@@ -91,9 +75,9 @@ strf_.visualize_gaussian_basis(spatial_basis)
 
 time_points = np.linspace(-100., 100., 10.)
 centers = [-75., -50., -25., 0, 25., 50., 75.]
-temporal_basis = strf_.make_raised_cosine_temporal_basis(time_points=time_points,
-                                                         centers=centers,
-                                                         widths=10.*np.ones(7))
+temporal_basis = strf_model.make_raised_cosine_temporal_basis(time_points=time_points,
+                                                              centers=centers,
+                                                              widths=10.*np.ones(7))
 plt.plot(time_points, temporal_basis)
 plt.show()
 
@@ -153,20 +137,23 @@ for fx in tqdm(fixations_df.index[:1000]):
         probe_row = probes_df.loc[probe_id]['y_probe']
         probe_col = probes_df.loc[probe_id]['x_probe']
 
-        if ((probe_row - fix_row) > -n_shape / 2 and             (probe_row - fix_row) < n_shape / 2 and             (probe_col - fix_col) > -n_shape / 2 and             (probe_col - fix_col) < n_shape / 2):
+        if ((probe_row - fix_row) > -n_shape / 2 and
+            (probe_row - fix_row) < n_shape / 2 and
+            (probe_col - fix_col) > -n_shape / 2 and
+            (probe_col - fix_col) < n_shape / 2):
 
             # Get probe timestamp relative to fixation
             probe_time = probes_df.loc[probe_id]['t_probe']
             probe_bin = np.where(bin_template < (probe_time - fixation_time))[0][-1]
 
             # Define an image based on the relative locations
-            I = np.zeros(shape=(n_shape, n_shape))
+            img = np.zeros(shape=(n_shape, n_shape))
             row = -np.round(probe_row - fix_row) + n_shape/2 - 1
             col = np.round(probe_col - fix_col) + n_shape/2 - 1
-            I[row, col] = 1
+            img[row, col] = 1
 
             # Compute projection
-            basis_projection = strf_.project_to_spatial_basis(I, spatial_basis)
+            basis_projection = strf_model.project_to_spatial_basis(img, spatial_basis)
             this_fixation_spatial_features[probe_bin, :] = basis_projection
 
     # Count spikes in window of interest relative to fixation
@@ -187,7 +174,7 @@ for fx in tqdm(fixations_df.index[:1000]):
     fixation_id = np.concatenate((fixation_id, -999. * np.ones(n_zero_bins)), axis=0)
 
 # Convolve with temporal basis
-features = strf_.convolve_with_temporal_basis(spatial_features, temporal_basis)
+features = strf_model.convolve_with_temporal_basis(spatial_features, temporal_basis)
 
 # Remove zeropad
 features = features[fixation_id != -999.]
@@ -213,13 +200,13 @@ plt.show()
 
 #################################################################
 
-PriorCov = strf_.design_prior_covariance(sigma_temporal=3., sigma_spatial=5.)
+prior_cov = strf_model.design_prior_covariance(sigma_temporal=3., sigma_spatial=5.)
 
-plt.imshow(PriorCov, cmap='Greys', interpolation='none')
+plt.imshow(prior_cov, cmap='Greys', interpolation='none')
 plt.colorbar()
 plt.show()
 
-np.shape(PriorCov)
+np.shape(prior_cov)
 
 ########################################################
 # Fit models
@@ -233,7 +220,7 @@ Xtrain, Xtest, Ytrain, Ytest = train_test_split(features, spike_counts, test_siz
 
 from pyglmnet import utils
 n_samples = Xtrain.shape[0]
-Tau = utils.tikhonov_from_prior(PriorCov, n_samples)
+Tau = utils.tikhonov_from_prior(prior_cov, n_samples)
 
 glm = GLM(distr='poisson', alpha=0., Tau=Tau, score_metric='pseudo_R2', random_state=42)
 glm.fit(Xtrain, Ytrain)
@@ -247,7 +234,7 @@ weights = glm[cvopt_lambda].fit_['beta']
 
 ########################################################
 for time_bin_ in range(n_temporal_basis):
-    RF = strf_.make_image_from_spatial_basis(spatial_basis,
+    RF = strf_model.make_image_from_spatial_basis(spatial_basis,
                                              weights[range(time_bin_,
                                                            n_spatial_basis * n_temporal_basis,
                                                            n_temporal_basis)])
