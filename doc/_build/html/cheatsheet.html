@@ -1,0 +1,348 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Cheatsheet &mdash; pyglmnet 0.1.dev documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="stylesheet" href="_static/gallery.css" type="text/css" />
+  
+
+  
+    <link rel="top" title="pyglmnet 0.1.dev documentation" href="index.html"/>
+        <link rel="next" title="Examples Gallery" href="auto_examples/index.html"/>
+        <link rel="prev" title="Tutorial" href="tutorial.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> pyglmnet
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1.dev
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="start.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Cheatsheet</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#poisson-softplus">Poisson: <cite>softplus</cite></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#poisson-linearized-poisson">Poisson (linearized): <cite>poisson</cite></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#gaussian-gaussian">Gaussian: <cite>gaussian</cite></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#logistic-binomial">Logistic: <cite>binomial</cite></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="auto_examples/index.html">Examples Gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="developers.html">Developer Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="resources.html">Resources</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">pyglmnet</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>Cheatsheet</li>
+    <li class="wy-breadcrumbs-aside">
+      
+        
+          <a href="_sources/cheatsheet.txt" rel="nofollow"> View page source</a>
+        
+      
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="cheatsheet">
+<h1>Cheatsheet<a class="headerlink" href="#cheatsheet" title="Permalink to this headline">¶</a></h1>
+<p>This is a simple cheatsheet with the gradients and Hessians
+of the penalized log likelihood loss to use as updates in the
+Newton coordinate descent algorithm for GLMs.</p>
+<div class="section" id="poisson-softplus">
+<h2>Poisson: <cite>softplus</cite><a class="headerlink" href="#poisson-softplus" title="Permalink to this headline">¶</a></h2>
+<p><strong>Mean Function</strong></p>
+<div class="math">
+\[\begin{split}z_i = \beta_0 + \sum_j \beta_j x_{ij} \\
+\mu_i = \log( 1 + \exp(z_i) )\end{split}\]</div>
+<p><strong>Log-likelihood function</strong></p>
+<div class="math">
+\[\mathcal{L} = \sum_i y_i \log(\mu_i) - \sum_i \mu_i\]</div>
+<p><strong>L2-penalized loss function</strong></p>
+<div class="math">
+\[\begin{split}J = \frac{1}{n}\sum_i \left\{ \log( 1 + \exp( \beta_0 + \sum_j \beta_j x_{ij} ) ) \right\} \\
+- \frac{1}{n}\sum_i \left\{ y_i \log( \log( 1 + \exp(\beta_0 + \sum_j \beta_j x_{ij} ) ) ) \right\} \\
++ \lambda (1-\alpha) \frac{1}{2} \sum_j \beta_j^2\end{split}\]</div>
+<p><strong>Gradient</strong></p>
+<div class="math">
+\[\begin{split}\mu(z_i) &amp;= \log(1 + \exp(z_i)) \\
+\sigma(z_i) &amp;= \frac{1}{1 + \exp(-z_i)} \\
+\frac{\partial J}{\partial \beta_0} &amp;= \frac{1}{n}\sum_i \sigma(z_i) - \frac{1}{n}\sum_i y_i \frac{\sigma(z_i)}{\mu(z_i)} \\
+\frac{\partial J}{\partial \beta_j} &amp;= \frac{1}{n}\sum_i \sigma(z_i) x_{ij} - \frac{1}{n}\sum_i \sigma(z_i) y_i \frac{\sigma(z_i)}{\mu(z_i)}x_{ij} + \lambda (1 - \alpha) \beta_j\end{split}\]</div>
+<p><strong>Hessian</strong></p>
+<div class="math">
+\[\begin{split}\mu(z_i) &amp;= \log(1 + \exp(z_i)) \\
+\sigma(z_i) &amp;= \frac{1}{1 + \exp(-z_i)} \\
+\frac{\partial^2 J}{\partial \beta_0^2} &amp;= \frac{1}{n}\sum_i \sigma(z_i) (1 - \sigma(z_i))
+- \frac{1}{n}\sum_i y_i \left\{ \frac{\sigma(z_i) (1 - \sigma(z_i))}{\mu(z_i)} - \frac{\sigma(z_i)}{\mu(z_i)^2} \right\} \\
+\frac{\partial^2 J}{\partial \beta_j^2} &amp;=  \frac{1}{n}\sum_i \sigma(z_i) (1 - \sigma(z_i)) x_{ij}^2
+- \frac{1}{n}\sum_i y_i \left\{ \frac{\sigma(z_i) (1 - \sigma(z_i))}{\mu(z_i)} - \frac{\sigma(z_i)}{\mu(z_i)^2} \right\} x_{ij}^2
++ \lambda (1 - \alpha)\end{split}\]</div>
+</div>
+<div class="section" id="poisson-linearized-poisson">
+<h2>Poisson (linearized): <cite>poisson</cite><a class="headerlink" href="#poisson-linearized-poisson" title="Permalink to this headline">¶</a></h2>
+<p><strong>Mean Function</strong></p>
+<div class="math">
+\[\begin{split}z_i &amp;= \beta_0 + \sum_j \beta_j x_{ij} \\
+\mu_i &amp;=
+\begin{cases}
+\exp(z_i), &amp; z_i \leq \eta \\
+\\
+\exp(\eta)z_i + (1-\eta)\exp(\eta), &amp; z_i &gt; \eta
+\end{cases}\end{split}\]</div>
+<p><strong>Log-likelihood function</strong></p>
+<div class="math">
+\[\mathcal{L} = \sum_i y_i \log(\mu_i) - \sum_i \mu_i\]</div>
+<p><strong>L2-penalized loss function</strong></p>
+<div class="math">
+\[J = -\frac{1}{n} \mathcal{L} + \lambda (1 - \alpha) \frac{1}{2} \sum_j \beta_j^2\]</div>
+<p><strong>Gradient</strong></p>
+<div class="math">
+\[\begin{split}\mu_i &amp;=
+\begin{cases}
+\exp(z_i),  &amp; z_i \leq \eta \\
+\\
+\exp(\eta)z_i + (1-\eta)\exp(\eta),  &amp; z_i &gt; \eta
+\end{cases}
+\\
+\frac{\partial J}{\partial \beta_0} &amp;= \frac{1}{n}\sum_{i; z_i \leq \eta} (\mu_i - y_i)
++ \frac{1}{n}\sum_{i; z_i &gt; \eta} \eta (1 - y_i/\mu_i) \\
+\frac{\partial J}{\partial \beta_j} &amp;= \frac{1}{n}\sum_{i; z_i \leq \eta} (\mu_i - y_i) x_{ij}
++ \frac{1}{n}\sum_{i; z_i &gt; \eta} \eta (1 - y_i/\mu_i) x_{ij}\end{split}\]</div>
+<p><strong>Hessian</strong></p>
+<div class="math">
+\[\begin{split}\mu_i &amp;=
+\begin{cases}
+\exp(z_i),  &amp; z_i \leq \eta \\
+\\
+\exp(\eta)z_i + (1-\eta)\exp(\eta),  &amp; z_i &gt; \eta
+\end{cases}
+\\
+\frac{\partial^2 J}{\partial \beta_0^2} &amp;= \frac{1}{n}\sum_{i; z_i \leq \eta} \mu_i
+- \frac{1}{n}\sum_{i; z_i &gt; \eta} \exp(\eta) (1 - \eta) \frac{y_i}{\mu_i^2}  \\
+\frac{\partial^2 J}{\partial \beta_j^2} &amp;=  \frac{1}{n}\sum_{i; z_i \leq \eta} \mu_i x_{ij}^2
+- \frac{1}{n}\sum_{i; z_i &gt; \eta} \exp(\eta) (1 - \eta) \frac{y_i}{\mu_i^2} x_{ij}^2
++ \lambda (1 - \alpha)\end{split}\]</div>
+</div>
+<div class="section" id="gaussian-gaussian">
+<h2>Gaussian: <cite>gaussian</cite><a class="headerlink" href="#gaussian-gaussian" title="Permalink to this headline">¶</a></h2>
+<p><strong>Mean Function</strong></p>
+<div class="math">
+\[\begin{split}z_i &amp;= \beta_0 + \sum_j \beta_j x_{ij} \\
+\mu_i &amp;= z_i\end{split}\]</div>
+<p><strong>Log-likelihood function</strong></p>
+<div class="math">
+\[\begin{split}\mathcal{L} = -\frac{1}{2} \sum_i (y_i - \mu_i)^2 \\\end{split}\]</div>
+<p><strong>L2-penalized loss function</strong></p>
+<div class="math">
+\[\begin{split}J = \frac{1}{2n}\sum_i (y_i - (\beta_0 + \sum_j \beta_j x_{ij}))^2 +
+\lambda (1 - \alpha) \frac{1}{2}\sum_j \beta_j^2\\\end{split}\]</div>
+<p><strong>Gradient</strong></p>
+<div class="math">
+\[\begin{split}\mu(z_i) &amp;= z_i \\
+\frac{\partial J}{\partial \beta_0} &amp;= -\frac{1}{n}\sum_i (y_i - \mu_i) \\
+\frac{\partial J}{\partial \beta_j} &amp;= -\frac{1}{n}\sum_i (y_i - \mu_i) x_{ij}
++ \lambda (1 - \alpha) \beta_j\end{split}\]</div>
+<p><strong>Hessian</strong></p>
+<div class="math">
+\[\begin{split}\frac{\partial^2 J}{\partial \beta_0^2} &amp;= 1 \\
+\frac{\partial^2 J}{\partial \beta_j^2} &amp;=  \frac{1}{n}\sum_i x_{ij}^2
++ \lambda (1 - \alpha)\end{split}\]</div>
+</div>
+<div class="section" id="logistic-binomial">
+<h2>Logistic: <cite>binomial</cite><a class="headerlink" href="#logistic-binomial" title="Permalink to this headline">¶</a></h2>
+<p><strong>Mean Function</strong></p>
+<div class="math">
+\[\begin{split}z_i &amp;= \beta_0 + \sum_j \beta_j x_{ij} \\
+\mu_i &amp;= \frac{1}{1+\exp(-z_i)}\end{split}\]</div>
+<p><strong>Log-likelihood function</strong></p>
+<div class="math">
+\[\begin{split}\mathcal{L} = \sum_i \left\{ y_i \log(\mu_i) + (1-y_i) \log(1 - \mu_i) \right\} \\\end{split}\]</div>
+<p><strong>L2-penalized loss function</strong></p>
+<div class="math">
+\[\begin{split}J = -\frac{1}{n}\sum_i \left\{ y_i \log(\beta_0 + \sum_j \beta_j x_{ij}) +
+(1-y_i) \log(1 - (\beta_0 + \sum_j \beta_j x_{ij})) \right\}
++ \lambda (1 - \alpha) \frac{1}{2}\sum_j \beta_j^2\\\end{split}\]</div>
+<p><strong>Gradient</strong></p>
+<div class="math">
+\[\begin{split}\mu(z_i) &amp;= \frac{1}{1 + \exp(-z_i)} \\
+\frac{\partial J}{\partial \beta_0} &amp;= -\frac{1}{n}\sum_i (y_i - \mu_i) \\
+\frac{\partial J}{\partial \beta_j} &amp;= -\frac{1}{n}\sum_i (y_i - \mu_i) x_{ij}
++ \lambda (1 - \alpha) \beta_j\end{split}\]</div>
+<p><strong>Hessian</strong></p>
+<div class="math">
+\[\begin{split}\frac{\partial^2 J}{\partial \beta_0^2} &amp;= \frac{1}{n}\sum_i \mu_i (1 - \mu_i) \\
+\frac{\partial^2 J}{\partial \beta_j^2} &amp;=  \frac{1}{n}\sum_i \mu_i (1 - \mu_i) x_{ij}^2
++ \lambda (1 - \alpha)\end{split}\]</div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="auto_examples/index.html" class="btn btn-neutral float-right" title="Examples Gallery" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="tutorial.html" class="btn btn-neutral" title="Tutorial" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, Pavan Ramkumar.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.1.dev',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

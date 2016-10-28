@@ -1,0 +1,264 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Python implementation of elastic-net regularized generalized linear models &mdash; pyglmnet 0.1.dev documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="stylesheet" href="_static/gallery.css" type="text/css" />
+  
+
+  
+    <link rel="top" title="pyglmnet 0.1.dev documentation" href="#"/>
+        <link rel="next" title="Installation" href="install.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="#" class="icon icon-home"> pyglmnet
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1.dev
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="start.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cheatsheet.html">Cheatsheet</a></li>
+<li class="toctree-l1"><a class="reference internal" href="auto_examples/index.html">Examples Gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="developers.html">Developer Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="resources.html">Resources</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="#">pyglmnet</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="#">Docs</a> &raquo;</li>
+      
+    <li>Python implementation of elastic-net regularized generalized linear models</li>
+    <li class="wy-breadcrumbs-aside">
+      
+        
+          <a href="_sources/index.txt" rel="nofollow"> View page source</a>
+        
+      
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="python-implementation-of-elastic-net-regularized-generalized-linear-models">
+<h1>Python implementation of elastic-net regularized generalized linear models<a class="headerlink" href="#python-implementation-of-elastic-net-regularized-generalized-linear-models" title="Permalink to this headline">¶</a></h1>
+<p><code class="docutils literal"><span class="pre">pyglmnet</span> <span class="pre">0.1.dev</span></code> is a Python library implementing elastic-net
+regularized generalized linear models (GLM).</p>
+<p>At present <code class="docutils literal"><span class="pre">scikit-learn</span></code> only offers
+<a class="reference external" href="http://scikit-learn.org/stable/modules/linear_model.html#elastic-net">elastic net regularization</a>
+for linear regression.</p>
+<p>Here, we offer a pure Python implementation of linear, logistic, multinomial, and Poisson regression
+with elastic net regularization.</p>
+<p>We follow the same notations and approach as in
+<a class="reference external" href="https://core.ac.uk/download/files/153/6287975.pdf">Friedman, J., Hastie, T., &amp; Tibshirani, R. (2010)</a>.
+The implementation is aimed to suit users of the popular GLM
+<a class="reference external" href="https://web.stanford.edu/~hastie/glmnet/glmnet_alpha.html">R package</a>.
+To the extent possible we have designed the package to conform to
+<a class="reference external" href="https://scikit-learn.org">scikit-learn</a>&#8216;s API standards.</p>
+<p>[<a class="reference external" href="https://github.com/pavanramkumar/pyglmnet">Repository</a>]
+[<a class="reference external" href="http://pavanramkumar.github.io/pyglmnet">Documentation</a>]</p>
+<div class="section" id="a-brief-introduction-to-glms">
+<h2>A brief introduction to GLMs<a class="headerlink" href="#a-brief-introduction-to-glms" title="Permalink to this headline">¶</a></h2>
+<p>Linear models are estimated as</p>
+<div class="math">
+\[y = \beta_0 + X\beta + \epsilon\]</div>
+<p>The parameters <span class="math">\(\beta_0, \beta\)</span> are estimated using ordinary least squares, under the
+implicit assumption the <span class="math">\(y\)</span> is normally distributed.</p>
+<p>Generalized linear models allow us to generalize this approach to point-wise
+nonlinearities <span class="math">\(q(.)\)</span> and a family of exponential distributions for <span class="math">\(y\)</span>.</p>
+<div class="math">
+\[y = q(\beta_0 + X\beta) + \epsilon\]</div>
+<p>Regularized GLMs are estimated by minimizing a loss function specified by
+the penalized negative log-likelihood. The elastic net penalty interpolates
+between L2 and L1 norm. Thus, we solve the following optimization problem:</p>
+<div class="math">
+\[\min_{\beta_0, \beta} \frac{1}{N} \sum_{i = 1}^N \mathcal{L} (y_i, \beta_0 + \beta^T x_i)
++ \lambda [ \frac{1}{2}(1 - \alpha)\| \beta \|_2^2 + \alpha \| \beta \|_1 ]\]</div>
+</div>
+<div class="section" id="contents">
+<h2>Contents<a class="headerlink" href="#contents" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="start.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cheatsheet.html">Cheatsheet</a></li>
+<li class="toctree-l1"><a class="reference internal" href="auto_examples/index.html">Examples Gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="developers.html">Developer Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="resources.html">Resources</a></li>
+</ul>
+</div>
+</div>
+<div class="section" id="questions-errors-bugs">
+<h2>Questions / Errors / Bugs<a class="headerlink" href="#questions-errors-bugs" title="Permalink to this headline">¶</a></h2>
+<p>If you have a question about the code or find errors or bugs,
+please <a class="reference external" href="https://github.com/pavanramkumar/pyglmnet/issues">report it here</a>.
+For more specific question, feel free to email us directly.</p>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="install.html" class="btn btn-neutral float-right" title="Installation" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, Pavan Ramkumar.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.1.dev',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
