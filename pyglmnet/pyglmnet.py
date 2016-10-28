@@ -7,7 +7,6 @@ import numpy as np
 from scipy.special import expit
 from . import utils
 import numbers
-from sklearn.base import BaseEstimator
 
 logger = logging.getLogger('pyglmnet')
 logger.addHandler(logging.StreamHandler())
