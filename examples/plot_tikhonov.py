@@ -44,8 +44,6 @@ import pandas as pd
 from pyglmnet import GLM
 from spykes.strf import STRF
 
-from tqdm import tqdm
-
 import matplotlib.pyplot as plt
 
 ########################################################
@@ -113,7 +111,7 @@ spike_counts = np.zeros((0,))
 fixation_id = np.zeros((0,))
 
 # For each fixation
-for fx in tqdm(fixations_df.index[:1000]):
+for fx in fixations_df.index[:1000]:
 
     # Fixation time
     fixation_time = fixations_df.loc[fx]['t_fix_f']
