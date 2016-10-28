@@ -144,7 +144,10 @@ class GLM(object):
         #     reg_lambda = [reg_lambda]
         #
         if reg_lambda is None:
-            reg_lambda = np.logspace(np.log(0.5), np.log(0.01), 10, base=np.exp(1))
+            reg_lambda = np.logspace(np.log(0.5),
+                                     np.log(0.01),
+                                     10,
+                                     base=np.exp(1))
 
         if not isinstance(max_iter, int):
             max_iter = int(max_iter)
@@ -342,17 +345,17 @@ class GLM(object):
             group_norms = np.abs(beta)
 
             for group_id in group_ids:
-                if group_id != 0 and not np.all(beta[self.group == group_id] == 0.0):
+                if group_id != 0
+                and not np.all(beta[self.group == group_id] == 0.0):
                     group_norms[self.group == group_id] = \
                         np.linalg.norm(beta[self.group == group_id], 2)
-
 
             not_zeros = beta != 0.0
             result = np.zeros(shape=beta.shape)
             good_idxs = group_norms > thresh
             good_idxs = good_idxs & not_zeros
-            result[good_idxs] = ( beta[good_idxs] - thresh * beta[good_idxs] / group_norms[good_idxs])
-
+            result[good_idxs] = ( beta[good_idxs] - thresh * beta[good_idxs] /
+                                 group_norms[good_idxs])
             return result
 
     def _grad_L2loss(self, beta0, beta, reg_lambda, X, y):
@@ -601,8 +604,10 @@ class GLM(object):
         fit_params = list()
 
         logger.info('Looping through the regularization path')
+        #######
         #check if self.reg_lambda is a number or a list,
         #if a number, cast it to an iterable with a length of 1
+        ######
         if isinstance(self.reg_lambda, numbers.Number):
             temp = self.reg_lambda
             self.reg_lambda = [temp]
