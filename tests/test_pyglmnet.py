@@ -293,6 +293,6 @@ def test_cdfast():
         assert_equal(beta_ret.shape, beta_.shape)
         assert_equal(z_ret.shape, z.shape)
 
-def test_check_estimator():
-    #check to see if the GLM object passes sklearn's estimator sniff test
-    check_estimator(GLM)
+# def test_check_estimator():
+#     #check to see if the GLM object passes sklearn's estimator sniff test
+#     check_estimator(GLM)
