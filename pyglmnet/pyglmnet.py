@@ -345,8 +345,8 @@ class GLM(object):
             group_norms = np.abs(beta)
 
             for group_id in group_ids:
-                if group_id != 0
-                and not np.all(beta[self.group == group_id] == 0.0):
+                if group_id != 0 \
+                   and not np.all(beta[self.group == group_id] == 0.0):
                     group_norms[self.group == group_id] = \
                         np.linalg.norm(beta[self.group == group_id], 2)
 
@@ -354,7 +354,7 @@ class GLM(object):
             result = np.zeros(shape=beta.shape)
             good_idxs = group_norms > thresh
             good_idxs = good_idxs & not_zeros
-            result[good_idxs] = ( beta[good_idxs] - thresh * beta[good_idxs] /
+            result[good_idxs] = (beta[good_idxs] - thresh * beta[good_idxs] /
                                  group_norms[good_idxs])
             return result
 
@@ -604,10 +604,8 @@ class GLM(object):
         fit_params = list()
 
         logger.info('Looping through the regularization path')
-        #######
-        #check if self.reg_lambda is a number or a list,
-        #if a number, cast it to an iterable with a length of 1
-        ######
+        # check if self.reg_lambda is a number or a list,
+        # if a number, cast it to an iterable with a length of 1
         if isinstance(self.reg_lambda, numbers.Number):
             temp = self.reg_lambda
             self.reg_lambda = [temp]
