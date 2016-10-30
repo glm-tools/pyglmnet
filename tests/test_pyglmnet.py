@@ -1,6 +1,5 @@
 import numpy as np
 import scipy.sparse as sps
-from sklearn.cross_validation import KFold, cross_val_score
 from sklearn.datasets import make_regression, make_classification
 from sklearn.preprocessing import StandardScaler
 from sklearn.utils.estimator_checks import check_estimator

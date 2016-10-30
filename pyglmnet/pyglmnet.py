@@ -2,11 +2,10 @@
 
 import logging
 from copy import deepcopy
-import collections
 import numpy as np
 from scipy.special import expit
 from . import utils
-import numbers
+
 
 logger = logging.getLogger('pyglmnet')
 logger.addHandler(logging.StreamHandler())
@@ -187,26 +186,12 @@ class GLM(object):
             )
         )
 
-    def set_params(self, **parameters):
-        """
-        Method for setting class parameters, as required by scikit-learn's
-        GridSearchCV. See
-        http://scikit-learn.org/stable/developers/contributing.html#get-params-and-set-params
-        for more details.
-        """
-        for parameter, value in parameters.items():
-            setattr(self, parameter, value)
-        return self
-
     def __repr__(self):
         """Description of the object."""
         reg_lambda = self.reg_lambda
         s = '<\nDistribution | %s' % self.distr
         s += '\nalpha | %0.2f' % self.alpha
         s += '\nmax_iter | %0.2f' % self.max_iter
-
-        if not isinstance(reg_lambda, collections.Iterable):
-            reg_lambda = [reg_lambda]
 
         if len(reg_lambda) > 1:
             s += ('\nlambda: %0.2f to %0.2f\n>'
@@ -604,11 +589,7 @@ class GLM(object):
         fit_params = list()
 
         logger.info('Looping through the regularization path')
-        # check if self.reg_lambda is a number or a list,
-        # if a number, cast it to an iterable with a length of 1
-        if isinstance(self.reg_lambda, numbers.Number):
-            temp = self.reg_lambda
-            self.reg_lambda = [temp]
+
 
         for l, rl in enumerate(self.reg_lambda):
             fit_params.append({'beta0': beta0_hat, 'beta': beta_hat})
@@ -800,9 +781,7 @@ class GLM(object):
                 else:
                     score.append(1 - L1 / L0)
 
-        if isinstance(score, numbers.Number):
-            return score
-        else:
+
             return np.array(score)
 
     def simulate(self, beta0, beta, X):
