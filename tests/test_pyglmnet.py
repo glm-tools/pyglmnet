@@ -1,8 +1,8 @@
 import numpy as np
 import scipy.sparse as sps
-from sklearn.cross_validation import KFold, cross_val_score
 from sklearn.datasets import make_regression, make_classification
 from sklearn.preprocessing import StandardScaler
+from sklearn.utils.estimator_checks import check_estimator
 
 from nose.tools import assert_true, assert_equal, assert_raises
 from numpy.testing import assert_allclose
@@ -291,3 +291,7 @@ def test_cdfast():
         beta_ret, z_ret = glm._cdfast(X, y, z, ActiveSet, beta_, rl)
         assert_equal(beta_ret.shape, beta_.shape)
         assert_equal(z_ret.shape, z.shape)
+
+# def test_check_estimator():
+#     #check to see if the GLM object passes sklearn's estimator sniff test
+#     check_estimator(GLM)

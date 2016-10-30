@@ -2,10 +2,10 @@
 
 import logging
 from copy import deepcopy
-
 import numpy as np
 from scipy.special import expit
 from . import utils
+
 
 logger = logging.getLogger('pyglmnet')
 logger.addHandler(logging.StreamHandler())
@@ -125,19 +125,29 @@ class GLM(object):
     >>> glm[2].predict(X_test)
     """
 
-    def __init__(self, distr='poisson', alpha=0.5,
-                 Tau=None, group=None,
+    def __init__(self, distr='poisson',
+                 alpha=0.5,
+                 Tau=None,
+                 group=None,
                  reg_lambda=None,
                  solver='batch-gradient',
-                 learning_rate=2e-1, max_iter=1000,
-                 tol=1e-3, eta=4.0, score_metric='deviance',
-                 random_state=0, verbose=False):
+                 learning_rate=2e-1,
+                 max_iter=1000,
+                 tol=1e-3,
+                 eta=4.0,
+                 score_metric='deviance',
+                 random_state=0,
+                 verbose=False):
 
+        # if not isinstance(reg_lambda, (list, np.ndarray)):
+        #     reg_lambda = [reg_lambda]
+        #
         if reg_lambda is None:
-            reg_lambda = np.logspace(np.log(0.5), np.log(0.01), 10,
+            reg_lambda = np.logspace(np.log(0.5),
+                                     np.log(0.01),
+                                     10,
                                      base=np.exp(1))
-        if not isinstance(reg_lambda, (list, np.ndarray)):
-            reg_lambda = [reg_lambda]
+
         if not isinstance(max_iter, int):
             max_iter = int(max_iter)
 
@@ -182,6 +192,7 @@ class GLM(object):
         s = '<\nDistribution | %s' % self.distr
         s += '\nalpha | %0.2f' % self.alpha
         s += '\nmax_iter | %0.2f' % self.max_iter
+
         if len(reg_lambda) > 1:
             s += ('\nlambda: %0.2f to %0.2f\n>'
                   % (reg_lambda[0], reg_lambda[-1]))
@@ -319,12 +330,18 @@ class GLM(object):
             group_norms = np.abs(beta)
 
             for group_id in group_ids:
-                if group_id != 0:
+                if group_id != 0 \
+                   and not np.all(beta[self.group == group_id] == 0.0):
                     group_norms[self.group == group_id] = \
                         np.linalg.norm(beta[self.group == group_id], 2)
 
-            return (beta - thresh * beta / group_norms) * \
-                (group_norms > thresh)
+            not_zeros = beta != 0.0
+            result = np.zeros(shape=beta.shape)
+            good_idxs = group_norms > thresh
+            good_idxs = good_idxs & not_zeros
+            result[good_idxs] = (beta[good_idxs] - thresh * beta[good_idxs] /
+                                 group_norms[good_idxs])
+            return result
 
     def _grad_L2loss(self, beta0, beta, reg_lambda, X, y):
         """The gradient."""
@@ -537,11 +554,13 @@ class GLM(object):
 
         # checks for group
         if self.group is not None:
-            self.group = np.array(self.group)
+            self.group = np.array(self.group, dtype=np.int32)
+
             # shape check
             if self.group.shape[0] != X.shape[1]:
                 raise ValueError('group should be (n_features,)')
             # int check
+
             if np.all([isinstance(g, int) for g in self.group]):
                 raise ValueError('all entries of group should be integers')
 
@@ -564,10 +583,12 @@ class GLM(object):
         beta0_hat = 1 / (n_features + 1) * \
             np.random.normal(0.0, 1.0, n_classes)
         beta_hat = 1 / (n_features + 1) * \
-            np.random.normal(0.0, 1.0, [n_features, n_classes])
+            np.random.normal(0.0, 1.0, [int(n_features), n_classes])
         fit_params = list()
 
         logger.info('Looping through the regularization path')
+
+
         for l, rl in enumerate(self.reg_lambda):
             fit_params.append({'beta0': beta0_hat, 'beta': beta_hat})
             logger.info('Lambda: %6.4f' % rl)
@@ -584,12 +605,12 @@ class GLM(object):
             alpha = self.alpha
 
             # Temporary parameters to update
-            beta = np.zeros([n_features + 1, n_classes])
+            beta = np.zeros([int(n_features) + 1, n_classes])
             beta[0] = fit_params[-1]['beta0']
             beta[1:] = fit_params[-1]['beta']
 
             if self.solver == 'batch-gradient':
-                g = np.zeros([n_features + 1, n_classes])
+                g = np.zeros([int(n_features) + 1, n_classes])
             elif self.solver == 'cdfast':
                 ActiveSet = np.ones(n_features + 1)     # init active set
                 z = beta[0] + np.dot(X, beta[1:])       # cache z
@@ -807,7 +828,8 @@ class GLM(object):
                 else:
                     score.append(1 - L1 / L0)
 
-        return np.array(score)
+
+            return np.array(score)
 
     def simulate(self, beta0, beta, X):
         """Simulate data."""
