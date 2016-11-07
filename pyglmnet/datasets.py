@@ -24,7 +24,8 @@ def fetch_tikhonov_data(dpath='/tmp/glm-tools'):
     spikes_df: DataFrame
         data frame with spike count data
     """
-    os.rmdir(dpath)
+    if not os.path.exists(dpath):
+        os.rmdir(dpath)
     os.mkdir(dpath)
 
     base_url = "https://raw.githubusercontent.com/glm-tools/datasets/master"
