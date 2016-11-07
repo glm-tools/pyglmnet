@@ -10,8 +10,9 @@ with a multivariate Gaussian prior. Here, we demonstrate how pyglmnet's Tikhonov
 regularizer can be used to estimate spatiotemporal receptive fields (RFs) from
 neural data.
 
-Neurons in many brain areas, including the FEF have RFs, defined as regions in
-the visual field where visual stimuli are most likely to result in spiking activity.
+Neurons in many brain areas, including the frontal eye fields (FEF) have RFs,
+defined as regions in the visual field where visual stimuli are most likely
+to result in spiking activity.
 
 These spatial RFs need not be static, they can vary in time in a systematic way.
 We want to characterize how such spatiotemporal RFs (STRFs) remap from one
@@ -36,8 +37,6 @@ Department of Neurobiology, Northwestern University.
 ########################################################
 # Imports
 
-########################################################
-
 import numpy as np
 import pandas as pd
 
@@ -56,8 +55,6 @@ spiketimes = np.squeeze(spikes_df.values)
 ########################################################
 # Design spatial basis functions
 
-########################################################
-
 n_spatial_basis = 36
 n_temporal_basis = 7
 strf_model = STRF(patch_size=50, sigma=5,
@@ -69,8 +66,6 @@ strf_model.visualize_gaussian_basis(spatial_basis)
 ########################################################
 # Design temporal basis functions
 
-########################################################
-
 time_points = np.linspace(-100., 100., 10.)
 centers = [-75., -50., -25., 0, 25., 50., 75.]
 temporal_basis = strf_model.make_raised_cosine_temporal_basis(time_points=time_points,
@@ -81,8 +76,6 @@ plt.show()
 
 ########################################################
 # Design parameters
-
-########################################################
 
 # Spatial extent
 n_shape = 50
@@ -99,8 +92,6 @@ n_zero_bins = np.floor((window[1] - window[0]) / binsize / 2)
 
 ########################################################
 # Build design matrix
-
-########################################################
 
 bin_template = np.arange(window[0], window[1] + binsize, binsize)
 n_bins = len(bin_template) - 1
@@ -180,23 +171,17 @@ features = features[fixation_id != -999.]
 ########################################################
 # Visualize the distribution of spike counts
 
-########################################################
-
 plt.hist(spike_counts, 10)
 plt.show()
 
 ########################################################
 # Plot a few rows of the design matrix
 
-########################################################
-
 plt.imshow(features[30:150,:], interpolation='none')
 plt.show()
 
 #################################################################
 # Design prior covariance matrix for Tikhonov regularization
-
-#################################################################
 
 prior_cov = strf_model.design_prior_covariance(sigma_temporal=3., sigma_spatial=5.)
 
@@ -208,8 +193,6 @@ np.shape(prior_cov)
 
 ########################################################
 # Fit models
-
-########################################################
 
 from sklearn.cross_validation import train_test_split
 Xtrain, Xtest, Ytrain, Ytest = train_test_split(features, spike_counts, test_size=0.2, random_state=42)
@@ -230,7 +213,6 @@ weights = glm[cvopt_lambda].fit_['beta']
 ########################################################
 # Visualize
 
-########################################################
 for time_bin_ in range(n_temporal_basis):
     RF = strf_model.make_image_from_spatial_basis(spatial_basis,
                                              weights[range(time_bin_,
