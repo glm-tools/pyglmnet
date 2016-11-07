@@ -220,7 +220,7 @@ from pyglmnet import utils
 n_samples = Xtrain.shape[0]
 Tau = utils.tikhonov_from_prior(prior_cov, n_samples)
 
-glm = GLM(distr='poisson', alpha=0., Tau=Tau, score_metric='pseudo_R2', random_state=42)
+glm = GLM(distr='poisson', alpha=0., Tau=Tau, score_metric='pseudo_R2')
 glm.fit(Xtrain, Ytrain)
 cvopt_lambda = glm.score(Xtest, Ytest).argmax()
 print("train score: %f" % glm[cvopt_lambda].score(Xtrain, Ytrain))
