@@ -6,6 +6,7 @@ import pandas as pd
 import os
 import shutil
 
+
 def fetch_tikhonov_data(dpath='/tmp/glm-tools'):
     """
     Downloads data for Tikhonov example and returns data frames
