@@ -1,8 +1,8 @@
-.. _general_examples:
+.. _general_examples_benchmark:
 
 Examples Gallery
-================
+----------------
 
 .. contents:: Contents
    :local:
-   :depth: 3
+   :depth: 2
