@@ -137,8 +137,8 @@ for fx in fixations_df.index[:1000]:
 
             # Define an image based on the relative locations
             img = np.zeros(shape=(n_shape, n_shape))
-            row = -np.round(probe_row - fix_row) + n_shape/2 - 1
-            col = np.round(probe_col - fix_col) + n_shape/2 - 1
+            row = -np.round(probe_row - fix_row) + n_shape / 2 - 1
+            col = np.round(probe_col - fix_col) + n_shape / 2 - 1
             img[row, col] = 1
 
             # Compute projection
