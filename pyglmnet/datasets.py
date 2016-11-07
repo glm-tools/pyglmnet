@@ -4,7 +4,7 @@ A set of convenience functions to download datasets for illustrative examples
 import urllib
 import pandas as pd
 import os
-
+import shutil
 
 def fetch_tikhonov_data(dpath='/tmp/glm-tools'):
     """
@@ -24,8 +24,8 @@ def fetch_tikhonov_data(dpath='/tmp/glm-tools'):
     spikes_df: DataFrame
         data frame with spike count data
     """
-    if not os.path.exists(dpath):
-        os.rmdir(dpath)
+    if os.path.exists(dpath):
+        shutil.rmtree(dpath)
     os.mkdir(dpath)
 
     base_url = "https://raw.githubusercontent.com/glm-tools/datasets/master"
