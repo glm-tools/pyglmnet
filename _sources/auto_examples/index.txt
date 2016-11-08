@@ -1,19 +1,7 @@
-.. _general_examples:
+.. _general_examples_benchmark:
 
 Examples Gallery
-================
-
-.. contents:: Contents
-   :local:
-   :depth: 3
-.. raw:: html
-
-    <div style='clear:both'></div>
-
-.. _general_examples_api:
-
-API Gallery
------------
+----------------
 
 .. contents:: Contents
    :local:
@@ -25,9 +13,9 @@ API Gallery
 
 .. only:: html
 
-    .. figure:: /auto_examples/api/images/thumb/sphx_glr_plot_multinomial_thumb.png
+    .. figure:: /auto_examples/images/thumb/sphx_glr_plot_multinomial_thumb.png
 
-        :ref:`sphx_glr_auto_examples_api_plot_multinomial.py`
+        :ref:`sphx_glr_auto_examples_plot_multinomial.py`
 
 .. raw:: html
 
@@ -37,7 +25,7 @@ API Gallery
 .. toctree::
    :hidden:
 
-   /auto_examples/api/plot_multinomial
+   /auto_examples/plot_multinomial
 
 .. raw:: html
 
@@ -45,9 +33,9 @@ API Gallery
 
 .. only:: html
 
-    .. figure:: /auto_examples/api/images/thumb/sphx_glr_plot_poisson_thumb.png
+    .. figure:: /auto_examples/images/thumb/sphx_glr_plot_poisson_thumb.png
 
-        :ref:`sphx_glr_auto_examples_api_plot_poisson.py`
+        :ref:`sphx_glr_auto_examples_plot_poisson.py`
 
 .. raw:: html
 
@@ -57,7 +45,7 @@ API Gallery
 .. toctree::
    :hidden:
 
-   /auto_examples/api/plot_poisson
+   /auto_examples/plot_poisson
 
 .. raw:: html
 
@@ -65,9 +53,9 @@ API Gallery
 
 .. only:: html
 
-    .. figure:: /auto_examples/api/images/thumb/sphx_glr_plot_softplus_thumb.png
+    .. figure:: /auto_examples/images/thumb/sphx_glr_plot_softplus_thumb.png
 
-        :ref:`sphx_glr_auto_examples_api_plot_softplus.py`
+        :ref:`sphx_glr_auto_examples_plot_softplus.py`
 
 .. raw:: html
 
@@ -77,31 +65,7 @@ API Gallery
 .. toctree::
    :hidden:
 
-   /auto_examples/api/plot_softplus
-.. raw:: html
-
-    <div style='clear:both'></div>
-
-.. _general_examples_application:
-
-Application Gallery
--------------------
-
-.. contents:: Contents
-   :local:
-   :depth: 2
-.. raw:: html
-
-    <div style='clear:both'></div>
-
-.. _general_examples_benchmark:
-
-Benchmark Gallery
------------------
-
-.. contents:: Contents
-   :local:
-   :depth: 2
+   /auto_examples/plot_softplus
 
 .. raw:: html
 
@@ -109,9 +73,9 @@ Benchmark Gallery
 
 .. only:: html
 
-    .. figure:: /auto_examples/benchmarks/images/thumb/sphx_glr_plot_community_crime_thumb.png
+    .. figure:: /auto_examples/images/thumb/sphx_glr_plot_community_crime_thumb.png
 
-        :ref:`sphx_glr_auto_examples_benchmarks_plot_community_crime.py`
+        :ref:`sphx_glr_auto_examples_plot_community_crime.py`
 
 .. raw:: html
 
@@ -121,7 +85,27 @@ Benchmark Gallery
 .. toctree::
    :hidden:
 
-   /auto_examples/benchmarks/plot_community_crime
+   /auto_examples/plot_community_crime
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Tikhonov regularization is a generalized form of L2-regularization. It allows us to articulate ...">
+
+.. only:: html
+
+    .. figure:: /auto_examples/images/thumb/sphx_glr_plot_tikhonov_thumb.png
+
+        :ref:`sphx_glr_auto_examples_plot_tikhonov.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_examples/plot_tikhonov
 .. raw:: html
 
     <div style='clear:both'></div>

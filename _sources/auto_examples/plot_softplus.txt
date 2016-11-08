@@ -1,6 +1,6 @@
 
 
-.. _sphx_glr_auto_examples_api_plot_softplus.py:
+.. _sphx_glr_auto_examples_plot_softplus.py:
 
 
 ===============================
@@ -155,7 +155,7 @@ particular ``reg_lambda``
 
 
 
-.. image:: /auto_examples/api/images/sphx_glr_plot_softplus_001.png
+.. image:: /auto_examples/images/sphx_glr_plot_softplus_001.png
     :align: center
 
 
@@ -186,7 +186,7 @@ predicted targets.
 
 
 
-.. image:: /auto_examples/api/images/sphx_glr_plot_softplus_002.png
+.. image:: /auto_examples/images/sphx_glr_plot_softplus_002.png
     :align: center
 
 
@@ -219,12 +219,12 @@ and ``pseudo_R2``. Both these metrics are implemented in the ``score()`` method.
 
  Out::
 
-      Dr = 10324.901977 Dt = 10611.451226
-      R2r =  0.421473  R2r = 0.411519
+      Dr = 9151.414998 Dt = 9057.855236
+      R2r =  0.414869  R2r = 0.410168
 
 
 **Total running time of the script:**
-(0 minutes 0.757 seconds)
+(0 minutes 0.836 seconds)
 
 
 

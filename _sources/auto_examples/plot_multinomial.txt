@@ -1,6 +1,6 @@
 
 
-.. _sphx_glr_auto_examples_api_plot_multinomial.py:
+.. _sphx_glr_auto_examples_plot_multinomial.py:
 
 
 =========================
@@ -85,11 +85,11 @@ Predict and score the output
 
  Out::
 
-      Percentage correct = 0.587300 percent.
+      Percentage correct = 0.590400 percent.
 
 
 **Total running time of the script:**
-(0 minutes 0.454 seconds)
+(0 minutes 0.526 seconds)
 
 
 

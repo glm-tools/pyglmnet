@@ -1,6 +1,6 @@
 
 
-.. _sphx_glr_auto_examples_api_plot_poisson.py:
+.. _sphx_glr_auto_examples_plot_poisson.py:
 
 
 ==============================
@@ -115,7 +115,7 @@ between exponential and linearized exponential.
 
 
 
-.. image:: /auto_examples/api/images/sphx_glr_plot_poisson_001.png
+.. image:: /auto_examples/images/sphx_glr_plot_poisson_001.png
     :align: center
 
 
@@ -219,7 +219,7 @@ Visualize predicted output
 
 
 
-.. image:: /auto_examples/api/images/sphx_glr_plot_poisson_002.png
+.. image:: /auto_examples/images/sphx_glr_plot_poisson_002.png
     :align: center
 
 
@@ -240,11 +240,11 @@ Compute pseudo R2
 
  Out::
 
-      [ 0.93603983]
+      [ 0.9363166]
 
 
 **Total running time of the script:**
-(0 minutes 26.775 seconds)
+(0 minutes 11.875 seconds)
 
 
 
