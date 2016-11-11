@@ -34,7 +34,7 @@ df , group_idxs= fetch_group_lasso_datasets()
 
 print("Data retrieved")
 print("Dataframe: ")
-print df.head()
+print(df.head())
 
 #set up the group lasso GLM model
 
