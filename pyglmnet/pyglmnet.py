@@ -323,8 +323,14 @@ class GLM(object):
                     group_norms[self.group == group_id] = \
                         np.linalg.norm(beta[self.group == group_id], 2)
 
-            return (beta - thresh * beta / group_norms) * \
-                (group_norms > thresh)
+            nzero_norms = group_norms > 0.0
+            over_thresh = group_norms > thresh
+            idxs_to_update = nzero_norms & over_thresh
+
+            result = beta
+            result[idxs_to_update] = (beta[idxs_to_update] - thresh * beta[idxs_to_update] / group_norms[idxs_to_update])
+
+            return result
 
     def _grad_L2loss(self, beta0, beta, reg_lambda, X, y):
         """The gradient."""
@@ -538,11 +544,12 @@ class GLM(object):
         # checks for group
         if self.group is not None:
             self.group = np.array(self.group)
+            self.group.dtype = np.int64
             # shape check
             if self.group.shape[0] != X.shape[1]:
                 raise ValueError('group should be (n_features,)')
             # int check
-            if np.all([isinstance(g, int) for g in self.group]):
+            if not np.all([isinstance(g, np.int64) for g in self.group]):
                 raise ValueError('all entries of group should be integers')
 
         # type check for data matrix

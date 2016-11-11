@@ -8,6 +8,7 @@ import shutil
 import tempfile
 import itertools
 import numpy as np
+from scipy.misc import comb
 
 
 def fetch_tikhonov_data(dpath='/tmp/glm-tools'):
@@ -128,11 +129,9 @@ def fetch_group_lasso_datasets():
         return feature_vector
 
 
-    positive_url = "http://genes.mit.edu/burgelab/ \
-                    maxent/ssdata/MEMset/train5_hs"
+    positive_url = "http://genes.mit.edu/burgelab/maxent/ssdata/MEMset/train5_hs"
 
-    negative_url = "http://genes.mit.edu/burgelab/\
-                    maxent/ssdata/MEMset/train0_5_hs"
+    negative_url = "http://genes.mit.edu/burgelab/maxent/ssdata/MEMset/train0_5_hs"
 
     pos_file = tempfile.NamedTemporaryFile(bufsize=0)
     neg_file = tempfile.NamedTemporaryFile(bufsize=0)
@@ -140,12 +139,13 @@ def fetch_group_lasso_datasets():
     urllib.urlretrieve(positive_url, pos_file.name)
     urllib.urlretrieve(negative_url, neg_file.name)
 
+
     positive_sequences = [str(line.strip().upper()) for idx, line in
-                          pos_file.readlines()
+                          enumerate(pos_file.readlines())
                           if ">" not in line and idx < 2 * 8000]
 
     negative_sequences = [str(line.strip().upper()) for idx, line in
-                          neg_file.readlines()
+                          enumerate(neg_file.readlines())
                           if ">" not in line and
                           idx < 2 * len(positive_sequences)]
 

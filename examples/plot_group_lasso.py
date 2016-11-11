@@ -13,6 +13,7 @@ in a group-wise fashion based on domain knowledge.
 
 from pyglmnet import GLM
 from pyglmnet.datasets import fetch_group_lasso_datasets
+import numpy as np
 
 ##########################################################
 #
@@ -26,16 +27,21 @@ from pyglmnet.datasets import fetch_group_lasso_datasets
 #
 ##########################################################
 
+print("Retrieving data...")
 
-df = fetch_group_lasso_datasets()
+df , group_idxs= fetch_group_lasso_datasets()
+
+
+print("Data retrieved")
+print("Dataframe: ")
+print df.head()
 
 #set up the group lasso GLM model
 
 gl_glm = GLM(distr="binomial",
              group=group_idxs,
-             max_iter=100000,
-             learning_rate=1e-2,
-             tol=1e-5,
+             max_iter=10000,
+             tol=1e-3,
              score_metric="deviance",
              alpha=1.0,
              reg_lambda=np.logspace(np.log(100), np.log(0.01), 10, base=np.exp(1)))
@@ -44,9 +50,8 @@ gl_glm = GLM(distr="binomial",
 #set up the non group GLM model
 
 glm = GLM(distr="binomial",
-          max_iter=100000,
-          learning_rate=1e-2,
-          tol=1e-5,
+          max_iter=10000,
+          tol=1e-3,
           score_metric="deviance",
           alpha=1.0,
           reg_lambda=np.logspace(np.log(100), np.log(0.01), 10, base=np.exp(1)))
