@@ -558,6 +558,7 @@ class GLM(object):
                              % type(X))
 
         n_features = np.float(X.shape[1])
+        n_features = np.int64(n_features)
 
         if self.distr == 'multinomial':
             y = utils.label_binarizer(y)
@@ -566,6 +567,7 @@ class GLM(object):
                 y = y[:, np.newaxis]
 
         n_classes = y.shape[1] if self.distr == 'multinomial' else 1
+        n_classes = np.int64(n_classes)
 
         # Initialize parameters
         beta0_hat = 1 / (n_features + 1) * \
