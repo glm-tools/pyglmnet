@@ -51,111 +51,118 @@ def fetch_tikhonov_data(dpath='/tmp/glm-tools'):
     return fixations_df, probes_df, spikes_df
 
 
-    def fetch_group_lasso_datasets():
-        """
-        Downloads and formats data needed for the group lasso example.
+def fetch_group_lasso_datasets():
+    """
+    Downloads and formats data needed for the group lasso example.
 
-        Returns:
-        --------
-        design_matrix: pandas.DataFrame
-            pandas dataframe with formatted data and labels
+    Returns:
+    --------
+    design_matrix: pandas.DataFrame
+        pandas dataframe with formatted data and labels
 
-        groups: list
-            list of group indicies, the value of the ith position in the list
-            is the group number for the ith regression coefficient
+    groups: list
+        list of group indicies, the value of the ith position in the list
+        is the group number for the ith regression coefficient
 
-        """
-
-
-        # helper functions
-
-        def find_interaction_index(seq, subseq, alphabet = "ATGC", all_possible_len_n_interactions = None):
-            n = len(subseq)
-            alphabet_interactions = [set(p) for p in list(itertools.combinations_with_replacement(alphabet, n))]
-
-            num_interactions = len(alphabet_interactions)
-            if all_possible_len_n_interactions is None:
-                all_possible_len_n_interactions = [set(interaction) for
-                                                   interaction in
-                                                   list(itertools.combinations_with_replacement(seq, n))]
-
-            subseq = set(subseq)
-
-            group_index = num_interactions * all_possible_len_n_interactions.index(subseq)
-            value_index = alphabet_interactions.index(subseq)
-
-            final_index = group_index + value_index
-            return final_index
+    """
 
 
-        def create_group_indicies_list(seqlength = 7, alphabet = "ATGC", interactions = [1, 2, 3], include_extra=True):
-            alphabet_length = len(alphabet)
-            index_groups = []
-            if include_extra:
-                index_groups.append(0)
-            group_count = 1
-            for inter in interactions:
-                n_interactions = comb(seqlength, inter)
-                n_alphabet_combos = comb(alphabet_length, inter, repetition = True)
+    # helper functions
 
-                for x1 in range(int(n_interactions)):
-                    for x2 in range(int(n_alphabet_combos)):
-                        index_groups.append(int(group_count))
+    def find_interaction_index(seq, subseq, alphabet = "ATGC", all_possible_len_n_interactions = None):
+        n = len(subseq)
+        alphabet_interactions = [set(p) for p in list(itertools.combinations_with_replacement(alphabet, n))]
 
-                    group_count += 1
-            return index_groups
+        num_interactions = len(alphabet_interactions)
+        if all_possible_len_n_interactions is None:
+            all_possible_len_n_interactions = [set(interaction) for
+                                               interaction in
+                                               list(itertools.combinations_with_replacement(seq, n))]
 
-        def create_feature_vector_for_sequence(seq, alphabet = "ATGC", interactions = [1, 2, 3]):
-            interactions_seqs = []
-            feature_vector_length = sum([comb(len(seq), inter) * comb(len(alphabet), inter, repetition = True) for inter in interactions]) + 1
+        subseq = set(subseq)
 
-            feature_vector = np.zeros(int(feature_vector_length))
-            feature_vector[0] = 1.0
-            for inter in interactions:
-                #interactions at the current level
-                cur_interactions = [set(p) for p in list(itertools.combinations(seq, inter))]
-                interaction_idxs = [find_interaction_index(seq, cur_inter , all_possible_len_n_interactions=cur_interactions)+1
-                                    for cur_inter in cur_interactions]
-                feature_vector[interaction_idxs] = 1.0
+        group_index = num_interactions * all_possible_len_n_interactions.index(subseq)
+        value_index = alphabet_interactions.index(subseq)
 
-            return feature_vector
+        final_index = group_index + value_index
+        return final_index
 
 
-        positive_url = "http://genes.mit.edu/burgelab/ \
-                        maxent/ssdata/MEMset/train5_hs"
+    def create_group_indicies_list(seqlength = 7,
+                                   alphabet = "ATGC",
+                                   interactions = [1, 2, 3],
+                                   include_extra=True):
+        alphabet_length = len(alphabet)
+        index_groups = []
+        if include_extra:
+            index_groups.append(0)
+        group_count = 1
+        for inter in interactions:
+            n_interactions = comb(seqlength, inter)
+            n_alphabet_combos = comb(alphabet_length,
+                                     inter,
+                                     repetition = True)
 
-        negative_url = "http://genes.mit.edu/burgelab/\
-                        maxent/ssdata/MEMset/train0_5_hs"
+            for x1 in range(int(n_interactions)):
+                for x2 in range(int(n_alphabet_combos)):
+                    index_groups.append(int(group_count))
 
-        pos_file = tempfile.NamedTemporaryFile(bufsize=0)
-        neg_file = tempfile.NamedTemporaryFile(bufsize=0)
+                group_count += 1
+        return index_groups
 
-        urllib.urlretrieve(positive_url, pos_file.name)
-        urllib.urlretrieve(negative_url, neg_file.name)
+    def create_feature_vector_for_sequence(seq,
+                                           alphabet = "ATGC",
+                                           interactions = [1, 2, 3]):
+        interactions_seqs = []
+        feature_vector_length = sum([comb(len(seq), inter) * comb(len(alphabet), inter, repetition = True) for inter in interactions]) + 1
 
-        positive_sequences = [str(line.strip().upper()) for idx, line in
-                              pos_file.readlines()
-                              if ">" not in line and idx < 2 * 8000]
+        feature_vector = np.zeros(int(feature_vector_length))
+        feature_vector[0] = 1.0
+        for inter in interactions:
+            #interactions at the current level
+            cur_interactions = [set(p) for p in list(itertools.combinations(seq, inter))]
+            interaction_idxs = [find_interaction_index(seq, cur_inter , all_possible_len_n_interactions=cur_interactions)+1
+                                for cur_inter in cur_interactions]
+            feature_vector[interaction_idxs] = 1.0
 
-        negative_sequences = [str(line.strip().upper()) for idx, line in
-                              neg_file.readlines()
-                              if ">" not in line and
-                              idx < 2 * len(positive_sequences)]
-
-        assert len(positive_sequences) == len(negative_sequences),\
-        "Something not right, lengths were not the same: p={pos} n={neg}"\
-        .format(pos=len(positive_sequences),neg=len(negative_sequences))
+        return feature_vector
 
 
-        positive_vector_matrix = np.array([create_feature_vector_for_sequence(s) for s in positive_sequences])
-        negative_vector_matrix = np.array([create_feature_vector_for_sequence(s) for s in negative_sequences])
+    positive_url = "http://genes.mit.edu/burgelab/ \
+                    maxent/ssdata/MEMset/train5_hs"
 
-        df = pd.DataFrame(data=np.vstack((positive_vector_matrix, negative_vector_matrix)))
-        df.loc[0:positive_vector_matrix.shape[0], "Label"] = 1.0
-        df.loc[positive_vector_matrix.shape[0]:, "Label"] = 0.0
+    negative_url = "http://genes.mit.edu/burgelab/\
+                    maxent/ssdata/MEMset/train0_5_hs"
 
-        design_matrix = df
+    pos_file = tempfile.NamedTemporaryFile(bufsize=0)
+    neg_file = tempfile.NamedTemporaryFile(bufsize=0)
 
-        groups = create_group_indicies_list()
+    urllib.urlretrieve(positive_url, pos_file.name)
+    urllib.urlretrieve(negative_url, neg_file.name)
 
-        return design_matrix, groups
+    positive_sequences = [str(line.strip().upper()) for idx, line in
+                          pos_file.readlines()
+                          if ">" not in line and idx < 2 * 8000]
+
+    negative_sequences = [str(line.strip().upper()) for idx, line in
+                          neg_file.readlines()
+                          if ">" not in line and
+                          idx < 2 * len(positive_sequences)]
+
+    assert len(positive_sequences) == len(negative_sequences),\
+    "Something not right, lengths were not the same: p={pos} n={neg}"\
+    .format(pos=len(positive_sequences),neg=len(negative_sequences))
+
+
+    positive_vector_matrix = np.array([create_feature_vector_for_sequence(s) for s in positive_sequences])
+    negative_vector_matrix = np.array([create_feature_vector_for_sequence(s) for s in negative_sequences])
+
+    df = pd.DataFrame(data=np.vstack((positive_vector_matrix, negative_vector_matrix)))
+    df.loc[0:positive_vector_matrix.shape[0], "Label"] = 1.0
+    df.loc[positive_vector_matrix.shape[0]:, "Label"] = 0.0
+
+    design_matrix = df
+
+    groups = create_group_indicies_list()
+
+    return design_matrix, groups
