@@ -40,9 +40,8 @@ print(df.head())
 
 gl_glm = GLM(distr="binomial",
              group=group_idxs,
-             max_iter=10000,
-             tol=1e-3,
-             score_metric="deviance",
+             tol=1e-4,
+             score_metric="pseudo_R2",
              alpha=1.0,
              reg_lambda=np.logspace(np.log(100), np.log(0.01), 10, base=np.exp(1)))
 
@@ -50,9 +49,8 @@ gl_glm = GLM(distr="binomial",
 #set up the non group GLM model
 
 glm = GLM(distr="binomial",
-          max_iter=10000,
-          tol=1e-3,
-          score_metric="deviance",
+          tol=1e-4,
+          score_metric="pseudo_R2",
           alpha=1.0,
           reg_lambda=np.logspace(np.log(100), np.log(0.01), 10, base=np.exp(1)))
 
