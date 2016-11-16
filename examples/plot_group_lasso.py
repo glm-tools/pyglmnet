@@ -14,6 +14,7 @@ in a group-wise fashion based on domain knowledge.
 from pyglmnet import GLM
 from pyglmnet.datasets import fetch_group_lasso_datasets
 import numpy as np
+import random
 
 ##########################################################
 #
@@ -59,12 +60,16 @@ print("glm: ", glm)
 
 # Set up the training and testing sets.
 X = df[df.columns.difference(["Label"]).values]
-X_train = X.iloc[0:4000, :]
-X_test = X.iloc[4000:, :]
+
+test_idxs = random.sample(list(range(X.shape[0])), 1000)
+train_idxs = list( set(list(range(X.shape[0]))).difference(set(test_idxs)) )
+
+X_train = X.iloc[train_idxs, :]
+X_test = X.iloc[test_idxs, :]
 
 y = df.loc[:, "Label"]
-y_train = y.iloc[0:4000]
-y_test = y.iloc[4000:]
+y_train = y.iloc[train_idxs]
+y_test = y.iloc[test_idxs]
 
 
 print("Fitting models")
