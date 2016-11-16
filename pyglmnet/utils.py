@@ -5,6 +5,7 @@ A few miscellaneous helper functions for pyglmnet.py
 import numpy as np
 from copy import copy
 
+
 def softmax(w):
     """Softmax function of given array of number w
 
