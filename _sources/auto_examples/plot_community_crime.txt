@@ -3,21 +3,18 @@
 .. _sphx_glr_auto_examples_plot_community_crime.py:
 
 
-============================================
-Communities and Crime - scikit-learn and pyglmnet
-============================================
+======================
+Communities and Crime
+======================
 
-This is a real application example comparing pyglmnet against scikit using R_2 measure and mean squared error.
-The used dataset was preprocessed fom the original dataset (it can be found at: http://archive.ics.uci.edu/ml/datasets/Communities+and+Crime)
+This is a real dataset of per capita violent crime, with demographic
+data comprising 128 attributes from 1994 counties in the US.
 
-A quick view to the dataset information:
-"Many variables are included so that algorithms that select or learn weights for attributes could be tested.
-However, clearly unrelated attributes were not included; attributes were picked if there was any plausible connection
-to crime (N=122), plus the attribute to be predicted (Per Capita Violent Crimes). The variables included in the dataset
-involve the community, such as the percent of the population considered urban, and the median family income, and
-involving law enforcement, such as per capita number of police officers, and percent of officers assigned to drug units."
+The original dataset can be found here:
+http://archive.ics.uci.edu/ml/datasets/Communities+and+Crime)
 
-We've tried to use the same values as possible for similiar parameters used by the two Classes.
+The target variables are normalized to lie in a [0, 1] range.
+We preprocessed this dataset to exclude attributes with missing values.
 
 
 .. code-block:: python
@@ -32,61 +29,68 @@ We've tried to use the same values as possible for similiar parameters used by t
 
 
 
-First, we can import useful libraries that we will use it later on
+Imports
 
 
 .. code-block:: python
 
 
-    import matplotlib.pyplot as plt
-    import pandas as pd
-    from sklearn.metrics import r2_score, mean_squared_error
     import numpy as np
-    from pyglmnet import GLM
-    from sklearn.linear_model import ElasticNet
+    import matplotlib.pyplot as plt
     from sklearn.cross_validation import train_test_split
+    from pyglmnet import GLM, datasets
 
 
 
 
 
 
+
+Download and preprocess data files
 
 
 .. code-block:: python
 
 
-    df = pd.read_csv('community_crime.csv', header=0)
-    X = df.values # it returns a numpy array
+    X, y = datasets.fetch_community_crime_data('/tmp/glm-tools')
     n_samples, n_features = X.shape
 
-    # att128 is the labeled attribute and it's defined as:
-    #   ViolentCrimesPerPop: total number of violent crimes per 100K popuation (numeric - decimal) GOAL attribute (to be predicted)
-    X, y = np.array(df.drop(['att128'], axis=1)), np.array(df['att128'])
-
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=0)
 
 
 
 
 
 
+Split the data into training and test sets
 
-pyglmnet
+
+.. code-block:: python
+
+
+    X_train, X_test, y_train, y_test = \
+        train_test_split(X, y, test_size=0.33, random_state=0)
+
+
+
+
+
+
+
+Fit a gaussian distributed GLM with elastic net regularization
 
 
 .. code-block:: python
 
 
     # use the default value for reg_lambda
-    glm = GLM(distr='gaussian', alpha=0.05, learning_rate=2e-1, verbose=False, max_iter=1000, tol=1e-3)
+    glm = GLM(distr='gaussian', alpha=0.05, score_metric='pseudo_R2')
 
+    # fit model
     glm.fit(X_train, y_train)
-    y_pred_glm = glm[-1].predict(X_test)
-    r2_score_glm = r2_score(y_test, y_pred_glm)
-    print("r^2 on test data using pyglmnet : %f" % r2_score_glm)
-    mean_square_score_glm = mean_squared_error(y_test, y_pred_glm)
-    print("mean square error on test data using pyglmnet : %f" % mean_square_score_glm)
+
+    # score the test set prediction
+    y_test_hat = glm[-1].predict(X_test)
+    print ("test set pseudo R^2 = %f" % glm[-1].score(X_test, y_test))
 
 
 
@@ -96,52 +100,20 @@ pyglmnet
 
  Out::
 
-      r^2 on test data using pyglmnet : 0.713155
-    mean square error on test data using pyglmnet : 0.010795
+      test set pseudo R^2 = 0.625327
 
 
-scikit-learn
-
-
-.. code-block:: python
-
-
-    alpha = glm[-1].reg_lambda
-
-    # l1_ratio is similar to alpha in GLM class
-    # alpha is similar to reg_lambda in GLM class
-    enet = ElasticNet(alpha=alpha, l1_ratio=0.05, max_iter=100)
-    y_pred_enet = enet.fit(X_train, y_train).predict(X_test)
-    r2_score_enet = r2_score(y_test, y_pred_enet)
-    print("r^2 on test data using sklearn : %f" % r2_score_enet)
-    mean_square_score_enet = mean_squared_error(y_test, y_pred_enet)
-    print("mean square error on test data using sklearn : %f" % mean_square_score_enet)
-
-
-
-
-
-.. rst-class:: sphx-glr-script-out
-
- Out::
-
-      r^2 on test data using sklearn : 0.734910
-    mean square error on test data using sklearn : 0.009977
-
-
-Plot the values of the test dataset, the predicted values computed by scikit and pyglmnet
+Plot the true and predicted test set target values
 
 
 .. code-block:: python
 
 
-    #plotting the predictions
-    plt.plot(y_test, label='real testing values')
-    plt.plot(y_pred_enet, 'r', label='scikit prediction')
-    plt.plot(y_pred_glm, 'g', label='pyglmnet prediction')
-    plt.xlabel('sample')
-    plt.ylabel('predicted value')
-    plt.legend(bbox_to_anchor=(0., 1.02, 1., .102), loc=1, ncol=2, borderaxespad=0.)
+    plt.plot(y_test[:50], 'ko-')
+    plt.plot(y_test_hat[:50], 'ro-')
+    plt.legend(['true', 'pred'], frameon=False)
+    plt.xlabel('Counties')
+    plt.ylabel('Per capita violent crime')
     plt.show()
 
 
@@ -153,7 +125,7 @@ Plot the values of the test dataset, the predicted values computed by scikit and
 
 
 **Total running time of the script:**
-(0 minutes 2.283 seconds)
+(0 minutes 7.741 seconds)
 
 
 

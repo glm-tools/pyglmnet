@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Communities and Crime - scikit-learn and pyglmnet &mdash; pyglmnet 0.1.dev documentation</title>
+  <title>Communities and Crime &mdash; pyglmnet 0.1.dev documentation</title>
   
 
   
@@ -34,8 +34,8 @@
   
     <link rel="top" title="pyglmnet 0.1.dev documentation" href="../index.html"/>
         <link rel="up" title="Examples Gallery" href="index.html"/>
-        <link rel="next" title="Spatiotemporal receptive field mapping with Tikhonov regularization" href="plot_tikhonov.html"/>
-        <link rel="prev" title="Poisson (Softplus) Distribution" href="plot_softplus.html"/> 
+        <link rel="next" title="Group Lasso Example" href="plot_group_lasso.html"/>
+        <link rel="prev" title="Multinomial Distribution" href="plot_multinomial.html"/> 
 
   
   <script src="../_static/js/modernizr.min.js"></script>
@@ -92,9 +92,10 @@
 <li class="toctree-l1"><a class="reference internal" href="../cheatsheet.html">Cheatsheet</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Examples Gallery</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="plot_multinomial.html">Multinomial Distribution</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="">Communities and Crime</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plot_group_lasso.html">Group Lasso Example</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plot_poisson.html">Poisson (Canonical) Distribution</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plot_softplus.html">Poisson (Softplus) Distribution</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="">Communities and Crime - scikit-learn and pyglmnet</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plot_tikhonov.html">Spatiotemporal receptive field mapping with Tikhonov regularization</a></li>
 </ul>
 </li>
@@ -133,7 +134,7 @@
       
         <li><a href="index.html">Examples Gallery</a> &raquo;</li>
       
-    <li>Communities and Crime - scikit-learn and pyglmnet</li>
+    <li>Communities and Crime</li>
     <li class="wy-breadcrumbs-aside">
       
         
@@ -147,91 +148,63 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="communities-and-crime-scikit-learn-and-pyglmnet">
-<span id="sphx-glr-auto-examples-plot-community-crime-py"></span><h1>Communities and Crime - scikit-learn and pyglmnet<a class="headerlink" href="#communities-and-crime-scikit-learn-and-pyglmnet" title="Permalink to this headline">¶</a></h1>
-<p>This is a real application example comparing pyglmnet against scikit using R_2 measure and mean squared error.
-The used dataset was preprocessed fom the original dataset (it can be found at: <a class="reference external" href="http://archive.ics.uci.edu/ml/datasets/Communities+and+Crime">http://archive.ics.uci.edu/ml/datasets/Communities+and+Crime</a>)</p>
-<p>A quick view to the dataset information:
-&#8220;Many variables are included so that algorithms that select or learn weights for attributes could be tested.
-However, clearly unrelated attributes were not included; attributes were picked if there was any plausible connection
-to crime (N=122), plus the attribute to be predicted (Per Capita Violent Crimes). The variables included in the dataset
-involve the community, such as the percent of the population considered urban, and the median family income, and
-involving law enforcement, such as per capita number of police officers, and percent of officers assigned to drug units.&#8221;</p>
-<p>We&#8217;ve tried to use the same values as possible for similiar parameters used by the two Classes.</p>
+  <div class="section" id="communities-and-crime">
+<span id="sphx-glr-auto-examples-plot-community-crime-py"></span><h1>Communities and Crime<a class="headerlink" href="#communities-and-crime" title="Permalink to this headline">¶</a></h1>
+<p>This is a real dataset of per capita violent crime, with demographic
+data comprising 128 attributes from 1994 counties in the US.</p>
+<p>The original dataset can be found here:
+<a class="reference external" href="http://archive.ics.uci.edu/ml/datasets/Communities+and+Crime">http://archive.ics.uci.edu/ml/datasets/Communities+and+Crime</a>)</p>
+<p>The target variables are normalized to lie in a [0, 1] range.
+We preprocessed this dataset to exclude attributes with missing values.</p>
 <div class="highlight-python"><div class="highlight"><pre><span></span><span class="c1"># Author: Vinicius Marques &lt;vini.type@gmail.com&gt;</span>
 <span class="c1"># License: MIT</span>
 </pre></div>
 </div>
-<p>First, we can import useful libraries that we will use it later on</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="kn">as</span> <span class="nn">pd</span>
-<span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">r2_score</span><span class="p">,</span> <span class="n">mean_squared_error</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">pyglmnet</span> <span class="kn">import</span> <span class="n">GLM</span>
-<span class="kn">from</span> <span class="nn">sklearn.linear_model</span> <span class="kn">import</span> <span class="n">ElasticNet</span>
+<p>Imports</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
 <span class="kn">from</span> <span class="nn">sklearn.cross_validation</span> <span class="kn">import</span> <span class="n">train_test_split</span>
+<span class="kn">from</span> <span class="nn">pyglmnet</span> <span class="kn">import</span> <span class="n">GLM</span><span class="p">,</span> <span class="n">datasets</span>
 </pre></div>
 </div>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;community_crime.csv&#39;</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-<span class="n">X</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">values</span> <span class="c1"># it returns a numpy array</span>
+<p>Download and preprocess data files</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">datasets</span><span class="o">.</span><span class="n">fetch_community_crime_data</span><span class="p">(</span><span class="s1">&#39;/tmp/glm-tools&#39;</span><span class="p">)</span>
 <span class="n">n_samples</span><span class="p">,</span> <span class="n">n_features</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span>
-
-<span class="c1"># att128 is the labeled attribute and it&#39;s defined as:</span>
-<span class="c1">#   ViolentCrimesPerPop: total number of violent crimes per 100K popuation (numeric - decimal) GOAL attribute (to be predicted)</span>
-<span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">drop</span><span class="p">([</span><span class="s1">&#39;att128&#39;</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;att128&#39;</span><span class="p">])</span>
-
-<span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.25</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>pyglmnet</p>
+<p>Split the data into training and test sets</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> \
+    <span class="n">train_test_split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.33</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Fit a gaussian distributed GLM with elastic net regularization</p>
 <div class="highlight-python"><div class="highlight"><pre><span></span><span class="c1"># use the default value for reg_lambda</span>
-<span class="n">glm</span> <span class="o">=</span> <span class="n">GLM</span><span class="p">(</span><span class="n">distr</span><span class="o">=</span><span class="s1">&#39;gaussian&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">learning_rate</span><span class="o">=</span><span class="mf">2e-1</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">max_iter</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">)</span>
+<span class="n">glm</span> <span class="o">=</span> <span class="n">GLM</span><span class="p">(</span><span class="n">distr</span><span class="o">=</span><span class="s1">&#39;gaussian&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">score_metric</span><span class="o">=</span><span class="s1">&#39;pseudo_R2&#39;</span><span class="p">)</span>
 
+<span class="c1"># fit model</span>
 <span class="n">glm</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
-<span class="n">y_pred_glm</span> <span class="o">=</span> <span class="n">glm</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
-<span class="n">r2_score_glm</span> <span class="o">=</span> <span class="n">r2_score</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">y_pred_glm</span><span class="p">)</span>
-<span class="k">print</span><span class="p">(</span><span class="s2">&quot;r^2 on test data using pyglmnet : </span><span class="si">%f</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">r2_score_glm</span><span class="p">)</span>
-<span class="n">mean_square_score_glm</span> <span class="o">=</span> <span class="n">mean_squared_error</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">y_pred_glm</span><span class="p">)</span>
-<span class="k">print</span><span class="p">(</span><span class="s2">&quot;mean square error on test data using pyglmnet : </span><span class="si">%f</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">mean_square_score_glm</span><span class="p">)</span>
-</pre></div>
-</div>
-<p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-python"><div class="highlight"><pre><span></span>  r^2 on test data using pyglmnet : 0.713155
-mean square error on test data using pyglmnet : 0.010795
-</pre></div>
-</div>
-<p>scikit-learn</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">alpha</span> <span class="o">=</span> <span class="n">glm</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">reg_lambda</span>
 
-<span class="c1"># l1_ratio is similar to alpha in GLM class</span>
-<span class="c1"># alpha is similar to reg_lambda in GLM class</span>
-<span class="n">enet</span> <span class="o">=</span> <span class="n">ElasticNet</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span> <span class="n">l1_ratio</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">max_iter</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
-<span class="n">y_pred_enet</span> <span class="o">=</span> <span class="n">enet</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
-<span class="n">r2_score_enet</span> <span class="o">=</span> <span class="n">r2_score</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">y_pred_enet</span><span class="p">)</span>
-<span class="k">print</span><span class="p">(</span><span class="s2">&quot;r^2 on test data using sklearn : </span><span class="si">%f</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">r2_score_enet</span><span class="p">)</span>
-<span class="n">mean_square_score_enet</span> <span class="o">=</span> <span class="n">mean_squared_error</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">y_pred_enet</span><span class="p">)</span>
-<span class="k">print</span><span class="p">(</span><span class="s2">&quot;mean square error on test data using sklearn : </span><span class="si">%f</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">mean_square_score_enet</span><span class="p">)</span>
+<span class="c1"># score the test set prediction</span>
+<span class="n">y_test_hat</span> <span class="o">=</span> <span class="n">glm</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+<span class="k">print</span> <span class="p">(</span><span class="s2">&quot;test set pseudo R^2 = </span><span class="si">%f</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">glm</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">))</span>
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-python"><div class="highlight"><pre><span></span>  r^2 on test data using sklearn : 0.734910
-mean square error on test data using sklearn : 0.009977
+<div class="sphx-glr-script-out highlight-python"><div class="highlight"><pre><span></span>test set pseudo R^2 = 0.625327
 </pre></div>
 </div>
-<p>Plot the values of the test dataset, the predicted values computed by scikit and pyglmnet</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="c1">#plotting the predictions</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;real testing values&#39;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">y_pred_enet</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;scikit prediction&#39;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">y_pred_glm</span><span class="p">,</span> <span class="s1">&#39;g&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;pyglmnet prediction&#39;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;sample&#39;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;predicted value&#39;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">bbox_to_anchor</span><span class="o">=</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">1.02</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="o">.</span><span class="mi">102</span><span class="p">),</span> <span class="n">loc</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">ncol</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">borderaxespad</span><span class="o">=</span><span class="mf">0.</span><span class="p">)</span>
+<p>Plot the true and predicted test set target values</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">y_test</span><span class="p">[:</span><span class="mi">50</span><span class="p">],</span> <span class="s1">&#39;ko-&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">y_test_hat</span><span class="p">[:</span><span class="mi">50</span><span class="p">],</span> <span class="s1">&#39;ro-&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">([</span><span class="s1">&#39;true&#39;</span><span class="p">,</span> <span class="s1">&#39;pred&#39;</span><span class="p">],</span> <span class="n">frameon</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Counties&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Per capita violent crime&#39;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
 <img alt="../_images/sphx_glr_plot_community_crime_001.png" class="align-center" src="../_images/sphx_glr_plot_community_crime_001.png" />
 <p><strong>Total running time of the script:</strong>
-(0 minutes 2.283 seconds)</p>
+(0 minutes 7.741 seconds)</p>
 <div class="sphx-glr-download container">
 <strong>Download Python source code:</strong> <a class="reference download internal" href="../_downloads/plot_community_crime.py"><tt class="xref download docutils literal"><span class="pre">plot_community_crime.py</span></tt></a></div>
 <div class="sphx-glr-download container">
@@ -245,10 +218,10 @@ mean square error on test data using sklearn : 0.009977
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="plot_tikhonov.html" class="btn btn-neutral float-right" title="Spatiotemporal receptive field mapping with Tikhonov regularization" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="plot_group_lasso.html" class="btn btn-neutral float-right" title="Group Lasso Example" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="plot_softplus.html" class="btn btn-neutral" title="Poisson (Softplus) Distribution" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="plot_multinomial.html" class="btn btn-neutral" title="Multinomial Distribution" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

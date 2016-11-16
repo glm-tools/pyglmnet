@@ -29,6 +29,46 @@ Examples Gallery
 
 .. raw:: html
 
+    <div class="sphx-glr-thumbcontainer" tooltip="This is a real dataset of per capita violent crime, with demographic data comprising 128 attrib...">
+
+.. only:: html
+
+    .. figure:: /auto_examples/images/thumb/sphx_glr_plot_community_crime_thumb.png
+
+        :ref:`sphx_glr_auto_examples_plot_community_crime.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_examples/plot_community_crime
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This is an example demonstrating Pyglmnet with multinomial the group lasso regularization, typi...">
+
+.. only:: html
+
+    .. figure:: /auto_examples/images/thumb/sphx_glr_plot_group_lasso_thumb.png
+
+        :ref:`sphx_glr_auto_examples_plot_group_lasso.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_examples/plot_group_lasso
+
+.. raw:: html
+
     <div class="sphx-glr-thumbcontainer" tooltip="This is an example demonstrating ``Pyglmnet`` with the canonical (exponential) link function fo...">
 
 .. only:: html
@@ -66,26 +106,6 @@ Examples Gallery
    :hidden:
 
    /auto_examples/plot_softplus
-
-.. raw:: html
-
-    <div class="sphx-glr-thumbcontainer" tooltip="This is a real application example comparing pyglmnet against scikit using R_2 measure and mean...">
-
-.. only:: html
-
-    .. figure:: /auto_examples/images/thumb/sphx_glr_plot_community_crime_thumb.png
-
-        :ref:`sphx_glr_auto_examples_plot_community_crime.py`
-
-.. raw:: html
-
-    </div>
-
-
-.. toctree::
-   :hidden:
-
-   /auto_examples/plot_community_crime
 
 .. raw:: html
 

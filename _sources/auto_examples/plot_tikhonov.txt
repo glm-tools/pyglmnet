@@ -335,8 +335,8 @@ Fit models
 
  Out::
 
-      train score: 0.002285
-    test score: 0.001265
+      train score: 0.002106
+    test score: 0.001164
 
 
 Visualize
@@ -368,7 +368,7 @@ Visualize
 
 
 **Total running time of the script:**
-(1 minutes 50.869 seconds)
+(0 minutes 41.110 seconds)
 
 
 
