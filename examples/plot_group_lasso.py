@@ -57,15 +57,22 @@ glm = GLM(distr="binomial",
 print("gl_glm: ", gl_glm)
 print("glm: ", glm)
 
+# Set up the training and testing sets.
 X = df[df.columns.difference(["Label"]).values]
+X_train = X.iloc[0:4000, :]
+X_test = X.iloc[4000:, :]
+
 y = df.loc[:, "Label"]
+y_train = y.iloc[0:4000]
+y_test = y.iloc[4000:]
+
 
 print("Fitting models")
-gl_glm.fit(X.values, y.values)
-glm.fit(X.values, y.values)
+gl_glm.fit(X_train.values, y_train.values)
+glm.fit(X_train.values, y_train.values)
 print("Model fitting complete.")
 print("\n\n")
 
 
-print("Group lasso post fitting score: ", gl_glm.score(X.values, y.values))
-print("Non-group lasso post fitting score: ", glm.score(X.values, y.values))
+print("Group lasso post fitting score: ", gl_glm.score(X_test.values, y_test.values))
+print("Non-group lasso post fitting score: ", glm.score(X_test.values, y_test.values))
