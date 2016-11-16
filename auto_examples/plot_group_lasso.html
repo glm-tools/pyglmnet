@@ -160,13 +160,6 @@ in a group-wise fashion based on domain knowledge.</p>
 <span class="kn">import</span> <span class="nn">random</span>
 </pre></div>
 </div>
-<div class="highlight-pytb"><div class="highlight"><pre><span></span><span class="gt">Traceback (most recent call last):</span>
-  File <span class="nb">&quot;/Users/pavanramkumar/anaconda/lib/python2.7/site-packages/sphinx_gallery/gen_rst.py&quot;</span>, line <span class="m">467</span>, in <span class="n">execute_script</span>
-    <span class="k">exec</span><span class="p">(</span><span class="n">code_block</span><span class="p">,</span> <span class="n">example_globals</span><span class="p">)</span>
-  File <span class="nb">&quot;&lt;string&gt;&quot;</span>, line <span class="m">3</span>, in <span class="n">&lt;module&gt;</span>
-<span class="gr">ImportError</span>: <span class="n">cannot import name fetch_group_lasso_datasets</span>
-</pre></div>
-</div>
 <p>Group Lasso Example
 similar to method found in:
 <a class="reference external" href="ftp://ftp.stat.math.ethz.ch/Manuscripts/buhlmann/lukas-sara-peter.pdf">ftp://ftp.stat.math.ethz.ch/Manuscripts/buhlmann/lukas-sara-peter.pdf</a></p>
@@ -229,15 +222,49 @@ site or not.</p>
 <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Non-group lasso post fitting score: &quot;</span><span class="p">,</span> <span class="n">glm</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">X_test</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">y_test</span><span class="o">.</span><span class="n">values</span><span class="p">))</span>
 </pre></div>
 </div>
-<div class="highlight-pytb"><div class="highlight"><pre><span></span><span class="gt">Traceback (most recent call last):</span>
-  File <span class="nb">&quot;/Users/pavanramkumar/anaconda/lib/python2.7/site-packages/sphinx_gallery/gen_rst.py&quot;</span>, line <span class="m">467</span>, in <span class="n">execute_script</span>
-    <span class="k">exec</span><span class="p">(</span><span class="n">code_block</span><span class="p">,</span> <span class="n">example_globals</span><span class="p">)</span>
-  File <span class="nb">&quot;&lt;string&gt;&quot;</span>, line <span class="m">4</span>, in <span class="n">&lt;module&gt;</span>
-<span class="gr">NameError</span>: <span class="n">name &#39;fetch_group_lasso_datasets&#39; is not defined</span>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-python"><div class="highlight"><pre><span></span>  Retrieving data...
+Data retrieved
+Dataframe:
+   0  1  2  3  4  5  6  7  8  9  ...    930  931  932  933  934  935  936  \
+0  1  1  0  1  0  1  0  0  0  0  ...      0    0    0    0    0    0    0
+1  1  0  0  0  1  1  0  0  0  1  ...      0    0    0    0    0    0    0
+2  1  1  0  1  0  1  0  0  0  0  ...      0    0    0    0    0    0    0
+3  1  1  1  0  0  1  1  0  0  0  ...      0    0    0    0    0    0    0
+4  1  0  0  0  1  0  1  1  0  0  ...      0    0    0    0    0    0    0
+
+   937  938  Label
+0    0    0      1
+1    0    0      1
+2    0    0      1
+3    0    0      1
+4    0    0      1
+
+[5 rows x 940 columns]
+gl_glm:  &lt;
+Distribution | binomial
+alpha | 1.00
+max_iter | 1000.00
+lambda: 100.00 to 0.01
+&gt;
+glm:  &lt;
+Distribution | binomial
+alpha | 1.00
+max_iter | 1000.00
+lambda: 100.00 to 0.01
+&gt;
+Fitting models
+Model fitting complete.
+
+
+
+Group lasso post fitting score:  [ 0.31214045  0.31701564  0.32167658  0.09503428  0.10014802]
+Non-group lasso post fitting score:  [  1.20247071e-04   1.04087812e-04   8.99707630e-05   7.76741899e-05
+   7.63045243e-03]
 </pre></div>
 </div>
 <p><strong>Total running time of the script:</strong>
-(0 minutes 0.000 seconds)</p>
+(0 minutes 31.275 seconds)</p>
 <div class="sphx-glr-download container">
 <strong>Download Python source code:</strong> <a class="reference download internal" href="../_downloads/plot_group_lasso.py"><tt class="xref download docutils literal"><span class="pre">plot_group_lasso.py</span></tt></a></div>
 <div class="sphx-glr-download container">

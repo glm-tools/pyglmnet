@@ -240,11 +240,11 @@ Compute pseudo R2
 
  Out::
 
-      [ 0.91903097]
+      [ 0.94612397]
 
 
 **Total running time of the script:**
-(1 minutes 10.372 seconds)
+(1 minutes 18.763 seconds)
 
 
 
