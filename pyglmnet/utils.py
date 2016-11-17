@@ -3,6 +3,7 @@ A few miscellaneous helper functions for pyglmnet.py
 """
 
 import numpy as np
+from copy import copy
 
 
 def softmax(w):
@@ -70,9 +71,37 @@ def log_likelihood(y, yhat, distr):
         return np.sum(y * np.log(yhat))
 
 
-def tikhonov_from_prior(PriorCov, n_samples):
-    """Given a prior covariance matrix, returns a Tikhonov matrix"""
-    [U, S, V] = np.linalg.svd(PriorCov, full_matrices=False)
-    Tau = np.dot(np.diag(1. / np.sqrt(S)), U)
-    Tau = 1. / np.sqrt(np.float(n_samples)) * Tau / Tau.max()
+def tikhonov_from_prior(prior_cov, n_samples, threshold=0.0001):
+    """Given a prior covariance matrix, returns a Tikhonov matrix
+
+    Parameters
+    ----------
+    prior_cov: array \n
+        prior covariance matrix of shape (n_features x n_features)
+    n_samples: int \n
+        number of samples
+    threshold: float \n
+        ratio of largest to smallest singular value to
+        approximate matrix inversion using SVD
+
+    Returns
+    -------
+    Tau: array \n
+        Tikhonov matrix of shape (n_features x n_features)
+    """
+
+    [U, S, V] = np.linalg.svd(prior_cov, full_matrices=False)
+
+    S_ratio = S / S.max()
+
+    nonzero_indices = np.where(S_ratio > threshold)[0]
+    zero_indices = np.where(S_ratio <= threshold)[0]
+
+    S_inv = copy(np.sqrt(S))
+    S_inv[zero_indices] = threshold
+    S_inv[nonzero_indices] = 1. / S_inv[nonzero_indices]
+
+    Tau = np.dot(np.diag(S_inv), V)
+    n_features = Tau.shape[0]
+    Tau = 1. / n_features * Tau
     return Tau
