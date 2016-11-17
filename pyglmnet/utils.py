@@ -71,13 +71,28 @@ def log_likelihood(y, yhat, distr):
         return np.sum(y * np.log(yhat))
 
 
-def tikhonov_from_prior(PriorCov, n_samples):
-    """Given a prior covariance matrix, returns a Tikhonov matrix"""
-    """Given a prior covariance matrix, returns a Tikhonov matrix"""
-    [U, S, V] = np.linalg.svd(PriorCov, full_matrices=False)
+def tikhonov_from_prior(prior_cov, n_samples, threshold=0.0001):
+    """Given a prior covariance matrix, returns a Tikhonov matrix
+
+    Parameters
+    ----------
+    prior_cov: array \n
+        prior covariance matrix of shape (n_features x n_features)
+    n_samples: int \n
+        number of samples
+    threshold: float \n
+        ratio of largest to smallest singular value to
+        approximate matrix inversion using SVD
+
+    Returns
+    -------
+    Tau: array \n
+        Tikhonov matrix of shape (n_features x n_features)
+    """
+
+    [U, S, V] = np.linalg.svd(prior_cov, full_matrices=False)
 
     S_ratio = S / S.max()
-    threshold = 0.0001
 
     nonzero_indices = np.where(S_ratio > threshold)[0]
     zero_indices = np.where(S_ratio <= threshold)[0]
