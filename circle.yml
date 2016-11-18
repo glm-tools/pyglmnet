@@ -9,7 +9,7 @@ dependencies:
     - pip install scikit-learn
     - pip install -e .
     - pip install pandas
-    - pip install sphinx_bootstrap_theme
+    - pip install sphinx_bootstrap_theme numpydoc
     - pip install -e git+http://github.com/KordingLab/spykes.git#egg=spykes
     # we need to do this here so the datasets will be cached
     # pipefail is necessary to propagate exit codes
@@ -20,6 +20,8 @@ test:
     # workaround - make html returns 0 even if examples fail to build
     # (see https://github.com/sphinx-gallery/sphinx-gallery/issues/45)
     - cat ~/log.txt && if grep -q "Traceback (most recent call last):" ~/log.txt; then false; else true; fi
+    - bundle install:
+        timeout: 1200
 
 general:
   artifacts:
