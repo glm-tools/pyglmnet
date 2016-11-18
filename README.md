@@ -78,6 +78,12 @@ For more details, please see our release notes accompanying
 the 0.1 PyPI release (coming soon).
 
 ### Installation
+Now `pip` installable!
+```bash
+$ pip install pyglmnet
+```
+
+Manual installation instructions below:
 
 Clone the repository.
 
@@ -158,6 +164,7 @@ We welcome pull requests. Please see our [developer documentation page](http://g
 * [Daniel Acuna](http:/github.com/daniel-acuna)
 * [Hugo Fernandes](http:/github.com/hugoguh)
 * [Eva Dyer](http:/github.com/evadyer)
+* [Matt Antalek](https://github.com/themantalope)
 
 ### Acknowledgments
 
