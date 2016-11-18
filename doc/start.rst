@@ -14,7 +14,7 @@ Here is a brief example of how to use the ``GLM()`` class.
 .. code:: python
 
     # create an instance of the GLM class
-    glm = GLM(distr='poisson', verbose=True, alpha=0.05)
+    glm = GLM(distr='poisson')
 
 .. code:: python
 
@@ -30,22 +30,27 @@ Here is a brief example of how to use the ``GLM()`` class.
 .. code:: python
 
     # simulate training data
-    Xr = np.random.normal(0.0, 1.0, [n_samples, n_features])
-    yr = glm.simulate(beta0, beta, Xr)
+    Xtrain = np.random.normal(0.0, 1.0, [n_samples, n_features])
+    ytrain = glm.simulate(beta0, beta, Xtrain)
 
 .. code:: python
 
     # simulate testing data
-    Xt = np.random.normal(0.0, 1.0, [n_samples, n_features])
-    yt = glm.simulate(beta0, beta, Xt)
+    Xtest = np.random.normal(0.0, 1.0, [n_samples, n_features])
+    ytest = glm.simulate(beta0, beta, Xtest)
 
 .. code:: python
 
     # fit the model on the training data
-    scaler = StandardScaler().fit(Xr)
-    glm.fit(scaler.transform(Xr), yr)
+    scaler = StandardScaler().fit(Xtrain)
+    glm.fit(scaler.transform(Xtrain), ytrain)
 
 .. code:: python
 
     # predict using fitted model on the test data
-    yhat = glm.predict(scaler.transform(Xt))
+    yhat = glm.predict(scaler.transform(Xtest))
+
+.. code:: python
+
+    # score the model on test data
+    deviance = glm.score(scaler.transform(Xtest), ytest)
