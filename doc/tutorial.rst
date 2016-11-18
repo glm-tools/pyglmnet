@@ -2,9 +2,15 @@
 Tutorial
 ========
 
-This is a tutorial on Elastic net Regularized Generalized Linear Models.
-We will go through the math and gradient descent algorithm to
-in order to optimize GLM cost function.
+This is a tutorial on elastic net regularized generalized linear models.
+We will go through the math to setup the penalized negative log-likelihood
+loss function and the coordinate descent algorithm for optimization.
+
+Here are some other resources from a
+`recent talk <https:github.com/pavanramkumar/pydata-chicago-2016>`_.
+
+At present this tutorial does not cover Tikhonov regularization or group lasso,
+but we look forward to adding more material shortly.
 
 **Reference**
 Jerome Friedman, Trevor Hastie and Rob Tibshirani. (2010).
@@ -26,23 +32,24 @@ Journal of Statistical Software, Vol. 33(1), 1-22 `[pdf]
 GLM with elastic net penalty
 ----------------------------
 
-In Generalized Linear Model (GLM), we mainly want to solve the following problem.
+In the elastic net regularized generalized Linear Model (GLM), we
+want to solve the following problem.
 
 .. math::
 
-    \min_{\beta_0, \beta} \frac{1}{N} \sum_{i = 1}^N w_i \ell (y_i, \beta_0 + \beta^T x_i)
+    \min_{\beta_0, \beta} \frac{1}{N} \sum_{i = 1}^N \ell (y_i, \beta_0 + \beta^T x_i)
     + \lambda [0.5(1 - \alpha)\| \beta \|_2^2 + \alpha \| \beta \|_1]
 
-where :math:`\ell (y_i, \beta_0 + \beta^T x_i)` is negative log-likelihood of
-an observation :math:`i`. Here, we will go through Poisson link function case
+where :math:`\ell (y_i, \beta_0 + \beta^T x_i)` is the negative log-likelihood of
+an observation :math:`i`. Here, we will go through the softplus link function case
 and show how we can optimize this cost function
 
 Poisson-like GLM
 ----------------
-The `pyglmnet` implementation comes with `poisson`, `binomial`
-and `gaussian` distributions, but for illustration, we will walk you
-through a particular adaptation of the canonical Poisson generalized
-linear model (GLM).
+The `pyglmnet` implementation comes with `poisson`, `binomial`,
+`gaussian`, and `multinomial` distributions, but for illustration,
+we will walk you through a particular adaptation of the canonical
+Poisson generalized linear model (GLM).
 
 For the Poisson GLM, :math:`\lambda_i` is the rate parameter of an
 inhomogeneous linear-nonlinear Poisson (LNP) process with instantaneous
@@ -76,9 +83,6 @@ can use gradient ascent (descent) to optimize it.
 
 .. math::    \lambda_i = q(\beta_0 + \beta^T x_i) = \log(1 + \exp(\beta_0 +
                            \beta^T x_i))
-
-[There is more to be said about this issue; ref. Sara Solla's GLM lectures
-concerning moment generating functions and strict definitions of GLMs]\
 
 .. code-block:: python
 
@@ -155,8 +159,8 @@ where :math:`\mathcal{L}(\beta_0, \beta)` is the Poisson log-likelihood and
          return J
 
 
-Gradients descent
------------------
+Gradient descent
+----------------
 
 To calculate the gradients of the cost function with respect to :math:`\beta_0` and
 :math:`\beta`, let's plug in the definitions for the log likelihood and penalty terms from above.
@@ -237,8 +241,10 @@ Let's define these gradients
 
 
 Note that this is all we need for a classic batch gradient descent implementation.
+(for the ``'batch-gradient'`` solver).
+
 However, let's also derive the Hessian terms that will be useful for second-order
-optimization methods.
+optimization methods implemented in the ``'cdfast'`` solver.
 
 Hessian terms
 -------------
@@ -297,6 +303,9 @@ Plugging all these in, we get
                     + reg_lambda * (1-alpha)
         return hess_beta0, hess_beta
 
+Also see the `cheatsheet <https://glm-tools.github.io/>`_ for calculus required
+to derive gradients and Hessians for other distributions.
+
 Cyclical co-ordinate descent
 ----------------------------
 
@@ -346,7 +355,7 @@ If :math:`\beta_k^{t}` has been zero-ed out, we remove :math:`k` from the active
         return np.sign(X) * (np.abs(X) - l) * (np.abs(X) > l)
 
 
-**Efficient z update**
+**Caching the z update step**
 
 Next, we want to update :math:`\beta_{k+1}` at the next time step :math:`t+1`.
 For this we need the gradient and Hessian terms, :math:`\tilde{g}_{k+1}` and
@@ -444,10 +453,3 @@ regularization parameters is known as the regularization path, and the trick of
 initializing each model with the previous model's solution is known as a warm restart.
 
 In practice, this significantly speeds up convergence.
-
-
-Implementation
---------------
-
-The optimization step is implemented in ``fit`` method in ``GLM``. We will add
-pseudo code on how algorithm works soon.

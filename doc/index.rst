@@ -65,6 +65,7 @@ Contents
    auto_examples/index
    api
    developers
+   requests
    resources
 
 Questions / Errors / Bugs

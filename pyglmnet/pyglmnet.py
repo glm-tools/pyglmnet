@@ -43,6 +43,7 @@ class GLM(object):
     The regularized GLM minimizes the penalized negative log likelihood:
 
     .. math::
+
         \min_{\\beta_0, \\beta} \\frac{1}{N}
         \sum_{i = 1}^N \mathcal{L} (y_i, \\beta_0 + \\beta^T x_i)
         + \lambda [ \\frac{1}{2}(1 - \\alpha) \mathcal{P}_2 +
@@ -52,6 +53,7 @@ class GLM(object):
     L2 (Tikhonov) and generalized L1 (Group Lasso) penalties, given by:
 
     .. math::
+
         \mathcal{P}_2 & = & \|\Gamma \\beta \|_2^2 \\
         \mathcal{P}_1 & = & \sum_g \|\\beta_{j,g}\|_2
 
