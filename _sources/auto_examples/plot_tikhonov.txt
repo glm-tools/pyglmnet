@@ -3,9 +3,9 @@
 .. _sphx_glr_auto_examples_plot_tikhonov.py:
 
 
-====================================================================
-Spatiotemporal receptive field mapping with Tikhonov regularization
-====================================================================
+========================
+Tikhonov Regularization
+========================
 
 Tikhonov regularization is a generalized form of L2-regularization. It allows
 us to articulate our prior knowlege about correlations between different predictors
@@ -368,7 +368,7 @@ Visualize
 
 
 **Total running time of the script:**
-(0 minutes 24.114 seconds)
+(0 minutes 21.777 seconds)
 
 
 

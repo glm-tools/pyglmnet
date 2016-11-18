@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Communities and Crime &mdash; pyglmnet 0.1.dev documentation</title>
+  <title>Community and Crime &mdash; pyglmnet 0.1.dev documentation</title>
   
 
   
@@ -34,7 +34,7 @@
   
     <link rel="top" title="pyglmnet 0.1.dev documentation" href="../index.html"/>
         <link rel="up" title="Examples Gallery" href="index.html"/>
-        <link rel="next" title="Group Lasso Example" href="plot_group_lasso.html"/>
+        <link rel="next" title="Group Lasso Regularization" href="plot_group_lasso.html"/>
         <link rel="prev" title="Multinomial Distribution" href="plot_multinomial.html"/> 
 
   
@@ -92,15 +92,14 @@
 <li class="toctree-l1"><a class="reference internal" href="../cheatsheet.html">Cheatsheet</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Examples Gallery</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="plot_multinomial.html">Multinomial Distribution</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="">Communities and Crime</a></li>
-<li class="toctree-l2"><a class="reference internal" href="plot_group_lasso.html">Group Lasso Example</a></li>
-<li class="toctree-l2"><a class="reference internal" href="plot_poisson.html">Poisson (Canonical) Distribution</a></li>
-<li class="toctree-l2"><a class="reference internal" href="plot_softplus.html">Poisson (Softplus) Distribution</a></li>
-<li class="toctree-l2"><a class="reference internal" href="plot_tikhonov.html">Spatiotemporal receptive field mapping with Tikhonov regularization</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="">Community and Crime</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plot_group_lasso.html">Group Lasso Regularization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plot_tikhonov.html">Tikhonov Regularization</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../api.html">API Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../developers.html">Developer Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../requests.html">Requests for pull requests</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../resources.html">Resources</a></li>
 </ul>
 
@@ -134,7 +133,7 @@
       
         <li><a href="index.html">Examples Gallery</a> &raquo;</li>
       
-    <li>Communities and Crime</li>
+    <li>Community and Crime</li>
     <li class="wy-breadcrumbs-aside">
       
         
@@ -148,14 +147,15 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="communities-and-crime">
-<span id="sphx-glr-auto-examples-plot-community-crime-py"></span><h1>Communities and Crime<a class="headerlink" href="#communities-and-crime" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="community-and-crime">
+<span id="sphx-glr-auto-examples-plot-community-crime-py"></span><h1>Community and Crime<a class="headerlink" href="#community-and-crime" title="Permalink to this headline">¶</a></h1>
 <p>This is a real dataset of per capita violent crime, with demographic
 data comprising 128 attributes from 1994 counties in the US.</p>
 <p>The original dataset can be found here:
-<a class="reference external" href="http://archive.ics.uci.edu/ml/datasets/Communities+and+Crime">http://archive.ics.uci.edu/ml/datasets/Communities+and+Crime</a>)</p>
-<p>The target variables are normalized to lie in a [0, 1] range.
-We preprocessed this dataset to exclude attributes with missing values.</p>
+<a class="reference external" href="http://archive.ics.uci.edu/ml/datasets/Communities+and+Crime">http://archive.ics.uci.edu/ml/datasets/Communities+and+Crime</a></p>
+<p>The target variables (per capita violent crime) are normalized to lie in
+a [0, 1] range. We preprocessed this dataset to exclude attributes with
+missing values.</p>
 <div class="highlight-python"><div class="highlight"><pre><span></span><span class="c1"># Author: Vinicius Marques &lt;vini.type@gmail.com&gt;</span>
 <span class="c1"># License: MIT</span>
 </pre></div>
@@ -186,11 +186,11 @@ We preprocessed this dataset to exclude attributes with missing values.</p>
 
 <span class="c1"># score the test set prediction</span>
 <span class="n">y_test_hat</span> <span class="o">=</span> <span class="n">glm</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
-<span class="k">print</span> <span class="p">(</span><span class="s2">&quot;test set pseudo R^2 = </span><span class="si">%f</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">glm</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">))</span>
+<span class="k">print</span> <span class="p">(</span><span class="s2">&quot;test set pseudo $R^2$ = </span><span class="si">%f</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">glm</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">))</span>
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-python"><div class="highlight"><pre><span></span>test set pseudo R^2 = 0.625327
+<div class="sphx-glr-script-out highlight-python"><div class="highlight"><pre><span></span>test set pseudo $R^2$ = 0.625327
 </pre></div>
 </div>
 <p>Plot the true and predicted test set target values</p>
@@ -199,12 +199,18 @@ We preprocessed this dataset to exclude attributes with missing values.</p>
 <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">([</span><span class="s1">&#39;true&#39;</span><span class="p">,</span> <span class="s1">&#39;pred&#39;</span><span class="p">],</span> <span class="n">frameon</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Counties&#39;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Per capita violent crime&#39;</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="n">right</span><span class="o">=</span><span class="s1">&#39;off&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">top</span><span class="o">=</span><span class="s1">&#39;off&#39;</span><span class="p">)</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="s1">&#39;top&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="s1">&#39;right&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
 <img alt="../_images/sphx_glr_plot_community_crime_001.png" class="align-center" src="../_images/sphx_glr_plot_community_crime_001.png" />
 <p><strong>Total running time of the script:</strong>
-(0 minutes 7.723 seconds)</p>
+(0 minutes 5.541 seconds)</p>
 <div class="sphx-glr-download container">
 <strong>Download Python source code:</strong> <a class="reference download internal" href="../_downloads/plot_community_crime.py"><tt class="xref download docutils literal"><span class="pre">plot_community_crime.py</span></tt></a></div>
 <div class="sphx-glr-download container">
@@ -218,7 +224,7 @@ We preprocessed this dataset to exclude attributes with missing values.</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="plot_group_lasso.html" class="btn btn-neutral float-right" title="Group Lasso Example" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="plot_group_lasso.html" class="btn btn-neutral float-right" title="Group Lasso Regularization" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="plot_multinomial.html" class="btn btn-neutral" title="Multinomial Distribution" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>

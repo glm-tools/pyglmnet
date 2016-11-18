@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-====================================================================
-Spatiotemporal receptive field mapping with Tikhonov regularization
-====================================================================
+========================
+Tikhonov Regularization
+========================
 
 Tikhonov regularization is a generalized form of L2-regularization. It allows
 us to articulate our prior knowlege about correlations between different predictors

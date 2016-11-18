@@ -49,7 +49,7 @@ Examples Gallery
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="This is an example demonstrating Pyglmnet with multinomial the group lasso regularization, typi...">
+    <div class="sphx-glr-thumbcontainer" tooltip="This is an example demonstrating Pyglmnet with group lasso regularization, typical in regressio...">
 
 .. only:: html
 
@@ -66,46 +66,6 @@ Examples Gallery
    :hidden:
 
    /auto_examples/plot_group_lasso
-
-.. raw:: html
-
-    <div class="sphx-glr-thumbcontainer" tooltip="This is an example demonstrating ``Pyglmnet`` with the canonical (exponential) link function fo...">
-
-.. only:: html
-
-    .. figure:: /auto_examples/images/thumb/sphx_glr_plot_poisson_thumb.png
-
-        :ref:`sphx_glr_auto_examples_plot_poisson.py`
-
-.. raw:: html
-
-    </div>
-
-
-.. toctree::
-   :hidden:
-
-   /auto_examples/plot_poisson
-
-.. raw:: html
-
-    <div class="sphx-glr-thumbcontainer" tooltip="For Poisson distributed target variables, the canonical link function is an exponential nonline...">
-
-.. only:: html
-
-    .. figure:: /auto_examples/images/thumb/sphx_glr_plot_softplus_thumb.png
-
-        :ref:`sphx_glr_auto_examples_plot_softplus.py`
-
-.. raw:: html
-
-    </div>
-
-
-.. toctree::
-   :hidden:
-
-   /auto_examples/plot_softplus
 
 .. raw:: html
 

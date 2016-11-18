@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Group Lasso Example &mdash; pyglmnet 0.1.dev documentation</title>
+  <title>Group Lasso Regularization &mdash; pyglmnet 0.1.dev documentation</title>
   
 
   
@@ -34,8 +34,8 @@
   
     <link rel="top" title="pyglmnet 0.1.dev documentation" href="../index.html"/>
         <link rel="up" title="Examples Gallery" href="index.html"/>
-        <link rel="next" title="Poisson (Canonical) Distribution" href="plot_poisson.html"/>
-        <link rel="prev" title="Communities and Crime" href="plot_community_crime.html"/> 
+        <link rel="next" title="Tikhonov Regularization" href="plot_tikhonov.html"/>
+        <link rel="prev" title="Community and Crime" href="plot_community_crime.html"/> 
 
   
   <script src="../_static/js/modernizr.min.js"></script>
@@ -92,15 +92,14 @@
 <li class="toctree-l1"><a class="reference internal" href="../cheatsheet.html">Cheatsheet</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Examples Gallery</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="plot_multinomial.html">Multinomial Distribution</a></li>
-<li class="toctree-l2"><a class="reference internal" href="plot_community_crime.html">Communities and Crime</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="">Group Lasso Example</a></li>
-<li class="toctree-l2"><a class="reference internal" href="plot_poisson.html">Poisson (Canonical) Distribution</a></li>
-<li class="toctree-l2"><a class="reference internal" href="plot_softplus.html">Poisson (Softplus) Distribution</a></li>
-<li class="toctree-l2"><a class="reference internal" href="plot_tikhonov.html">Spatiotemporal receptive field mapping with Tikhonov regularization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plot_community_crime.html">Community and Crime</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="">Group Lasso Regularization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plot_tikhonov.html">Tikhonov Regularization</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../api.html">API Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../developers.html">Developer Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../requests.html">Requests for pull requests</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../resources.html">Resources</a></li>
 </ul>
 
@@ -134,7 +133,7 @@
       
         <li><a href="index.html">Examples Gallery</a> &raquo;</li>
       
-    <li>Group Lasso Example</li>
+    <li>Group Lasso Regularization</li>
     <li class="wy-breadcrumbs-aside">
       
         
@@ -148,85 +147,34 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="group-lasso-example">
-<span id="sphx-glr-auto-examples-plot-group-lasso-py"></span><h1>Group Lasso Example<a class="headerlink" href="#group-lasso-example" title="Permalink to this headline">¶</a></h1>
-<p>This is an example demonstrating Pyglmnet with
-multinomial the group lasso regularization, typical in regression
-problems where it is reasonable to impose penalties to model parameters
-in a group-wise fashion based on domain knowledge.</p>
+  <div class="section" id="group-lasso-regularization">
+<span id="sphx-glr-auto-examples-plot-group-lasso-py"></span><h1>Group Lasso Regularization<a class="headerlink" href="#group-lasso-regularization" title="Permalink to this headline">¶</a></h1>
+<p>This is an example demonstrating Pyglmnet with group lasso regularization,
+typical in regression problems where it is reasonable to impose penalties
+to model parameters in a group-wise fashion based on domain knowledge.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="c1"># Author: Matthew Antalek &lt;matthew.antalek@northwestern.edu&gt;</span>
+<span class="c1"># License: MIT</span>
+</pre></div>
+</div>
 <div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pyglmnet</span> <span class="kn">import</span> <span class="n">GLM</span>
 <span class="kn">from</span> <span class="nn">pyglmnet.datasets</span> <span class="kn">import</span> <span class="n">fetch_group_lasso_datasets</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">random</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
 </pre></div>
 </div>
 <p>Group Lasso Example
-similar to method found in:
+applied to the same dataset found in:
 <a class="reference external" href="ftp://ftp.stat.math.ethz.ch/Manuscripts/buhlmann/lukas-sara-peter.pdf">ftp://ftp.stat.math.ethz.ch/Manuscripts/buhlmann/lukas-sara-peter.pdf</a></p>
 <p>The task here is to determine which base pairs and positions within a 7-mer
-sequence are most important to predicting if the sequence contains a splice
+sequence are predictive of whether the sequence contains a splice
 site or not.</p>
-<hr class="docutils" />
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="k">print</span><span class="p">(</span><span class="s2">&quot;Retrieving data...&quot;</span><span class="p">)</span>
-
-<span class="n">df</span> <span class="p">,</span> <span class="n">group_idxs</span><span class="o">=</span> <span class="n">fetch_group_lasso_datasets</span><span class="p">()</span>
-
-
-<span class="k">print</span><span class="p">(</span><span class="s2">&quot;Data retrieved&quot;</span><span class="p">)</span>
-<span class="k">print</span><span class="p">(</span><span class="s2">&quot;Dataframe: &quot;</span><span class="p">)</span>
+<p>Read and preprocess data</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">df</span> <span class="p">,</span> <span class="n">group_idxs</span><span class="o">=</span> <span class="n">fetch_group_lasso_datasets</span><span class="p">()</span>
 <span class="k">print</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">head</span><span class="p">())</span>
-
-<span class="c1">#set up the group lasso GLM model</span>
-
-<span class="n">gl_glm</span> <span class="o">=</span> <span class="n">GLM</span><span class="p">(</span><span class="n">distr</span><span class="o">=</span><span class="s2">&quot;binomial&quot;</span><span class="p">,</span>
-             <span class="n">group</span><span class="o">=</span><span class="n">group_idxs</span><span class="p">,</span>
-             <span class="n">tol</span><span class="o">=</span><span class="mf">1e-2</span><span class="p">,</span>
-             <span class="n">score_metric</span><span class="o">=</span><span class="s2">&quot;pseudo_R2&quot;</span><span class="p">,</span>
-             <span class="n">alpha</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
-             <span class="n">reg_lambda</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">logspace</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">100</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mf">0.01</span><span class="p">),</span> <span class="mi">5</span><span class="p">,</span> <span class="n">base</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="mi">1</span><span class="p">)))</span>
-
-
-<span class="c1">#set up the non group GLM model</span>
-
-<span class="n">glm</span> <span class="o">=</span> <span class="n">GLM</span><span class="p">(</span><span class="n">distr</span><span class="o">=</span><span class="s2">&quot;binomial&quot;</span><span class="p">,</span>
-          <span class="n">tol</span><span class="o">=</span><span class="mf">1e-2</span><span class="p">,</span>
-          <span class="n">score_metric</span><span class="o">=</span><span class="s2">&quot;pseudo_R2&quot;</span><span class="p">,</span>
-          <span class="n">alpha</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
-          <span class="n">reg_lambda</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">logspace</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">100</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mf">0.01</span><span class="p">),</span> <span class="mi">5</span><span class="p">,</span> <span class="n">base</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="mi">1</span><span class="p">)))</span>
-
-<span class="k">print</span><span class="p">(</span><span class="s2">&quot;gl_glm: &quot;</span><span class="p">,</span> <span class="n">gl_glm</span><span class="p">)</span>
-<span class="k">print</span><span class="p">(</span><span class="s2">&quot;glm: &quot;</span><span class="p">,</span> <span class="n">glm</span><span class="p">)</span>
-
-<span class="c1"># Set up the training and testing sets.</span>
-<span class="n">X</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">difference</span><span class="p">([</span><span class="s2">&quot;Label&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">values</span><span class="p">]</span>
-
-<span class="n">test_idxs</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])),</span> <span class="mi">1000</span><span class="p">)</span>
-<span class="n">train_idxs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span> <span class="nb">set</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])))</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">test_idxs</span><span class="p">))</span> <span class="p">)</span>
-
-<span class="n">X_train</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">train_idxs</span><span class="p">,</span> <span class="p">:]</span>
-<span class="n">X_test</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">test_idxs</span><span class="p">,</span> <span class="p">:]</span>
-
-<span class="n">y</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">&quot;Label&quot;</span><span class="p">]</span>
-<span class="n">y_train</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">train_idxs</span><span class="p">]</span>
-<span class="n">y_test</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">test_idxs</span><span class="p">]</span>
-
-
-<span class="k">print</span><span class="p">(</span><span class="s2">&quot;Fitting models&quot;</span><span class="p">)</span>
-<span class="n">gl_glm</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">y_train</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
-<span class="n">glm</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">y_train</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
-<span class="k">print</span><span class="p">(</span><span class="s2">&quot;Model fitting complete.&quot;</span><span class="p">)</span>
-<span class="k">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">)</span>
-
-
-<span class="k">print</span><span class="p">(</span><span class="s2">&quot;Group lasso post fitting score: &quot;</span><span class="p">,</span> <span class="n">gl_glm</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">X_test</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">y_test</span><span class="o">.</span><span class="n">values</span><span class="p">))</span>
-<span class="k">print</span><span class="p">(</span><span class="s2">&quot;Non-group lasso post fitting score: &quot;</span><span class="p">,</span> <span class="n">glm</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">X_test</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">y_test</span><span class="o">.</span><span class="n">values</span><span class="p">))</span>
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-python"><div class="highlight"><pre><span></span>  Retrieving data...
-Data retrieved
-Dataframe:
-   0  1  2  3  4  5  6  7  8  9  ...    930  931  932  933  934  935  936  \
+<div class="sphx-glr-script-out highlight-python"><div class="highlight"><pre><span></span>  0  1  2  3  4  5  6  7  8  9  ...    930  931  932  933  934  935  936  \
 0  1  1  0  1  0  1  0  0  0  0  ...      0    0    0    0    0    0    0
 1  1  0  0  0  1  1  0  0  0  1  ...      0    0    0    0    0    0    0
 2  1  1  0  1  0  1  0  0  0  0  ...      0    0    0    0    0    0    0
@@ -241,7 +189,40 @@ Dataframe:
 4    0    0      1
 
 [5 rows x 940 columns]
-gl_glm:  &lt;
+</pre></div>
+</div>
+<p>Set up the training and testing sets</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">X</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">difference</span><span class="p">([</span><span class="s2">&quot;Label&quot;</span><span class="p">])]</span><span class="o">.</span><span class="n">values</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">&quot;Label&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+
+<span class="kn">from</span> <span class="nn">sklearn.cross_validation</span> <span class="kn">import</span> <span class="n">train_test_split</span>
+<span class="n">Xtrain</span><span class="p">,</span> <span class="n">Xtest</span><span class="p">,</span> <span class="n">ytrain</span><span class="p">,</span> <span class="n">ytest</span> <span class="o">=</span> \
+    <span class="n">train_test_split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Setup the models</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="c1">#set up the group lasso GLM model</span>
+<span class="n">gl_glm</span> <span class="o">=</span> <span class="n">GLM</span><span class="p">(</span><span class="n">distr</span><span class="o">=</span><span class="s2">&quot;binomial&quot;</span><span class="p">,</span>
+             <span class="n">tol</span><span class="o">=</span><span class="mf">1e-2</span><span class="p">,</span>
+             <span class="n">group</span><span class="o">=</span><span class="n">group_idxs</span><span class="p">,</span>
+             <span class="n">score_metric</span><span class="o">=</span><span class="s2">&quot;pseudo_R2&quot;</span><span class="p">,</span>
+             <span class="n">alpha</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+             <span class="n">reg_lambda</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">logspace</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">100</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mf">0.01</span><span class="p">),</span> <span class="mi">5</span><span class="p">,</span> <span class="n">base</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="mi">1</span><span class="p">)))</span>
+
+
+<span class="c1">#set up the lasso model</span>
+<span class="n">glm</span> <span class="o">=</span> <span class="n">GLM</span><span class="p">(</span><span class="n">distr</span><span class="o">=</span><span class="s2">&quot;binomial&quot;</span><span class="p">,</span>
+          <span class="n">tol</span><span class="o">=</span><span class="mf">1e-2</span><span class="p">,</span>
+          <span class="n">score_metric</span><span class="o">=</span><span class="s2">&quot;pseudo_R2&quot;</span><span class="p">,</span>
+          <span class="n">alpha</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+          <span class="n">reg_lambda</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">logspace</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">100</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mf">0.01</span><span class="p">),</span> <span class="mi">5</span><span class="p">,</span> <span class="n">base</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="mi">1</span><span class="p">)))</span>
+
+<span class="k">print</span><span class="p">(</span><span class="s2">&quot;gl_glm: &quot;</span><span class="p">,</span> <span class="n">gl_glm</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="s2">&quot;glm: &quot;</span><span class="p">,</span> <span class="n">glm</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-python"><div class="highlight"><pre><span></span>  gl_glm:  &lt;
 Distribution | binomial
 alpha | 1.00
 max_iter | 1000.00
@@ -253,18 +234,38 @@ alpha | 1.00
 max_iter | 1000.00
 lambda: 100.00 to 0.01
 &gt;
-Fitting models
-Model fitting complete.
-
-
-
-Group lasso post fitting score:  [ 0.31214045  0.31701564  0.32167658  0.09503428  0.10014802]
-Non-group lasso post fitting score:  [  1.20247071e-04   1.04087812e-04   8.99707630e-05   7.76741899e-05
-   7.63045243e-03]
 </pre></div>
 </div>
+<p>Fit models</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">gl_glm</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">Xtrain</span><span class="p">,</span> <span class="n">ytrain</span><span class="p">)</span>
+<span class="n">glm</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">Xtrain</span><span class="p">,</span> <span class="n">ytrain</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Visualize model scores on test set</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">semilogx</span><span class="p">(</span><span class="n">gl_glm</span><span class="o">.</span><span class="n">reg_lambda</span><span class="p">,</span> <span class="n">gl_glm</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">Xtest</span><span class="p">,</span> <span class="n">ytest</span><span class="p">),</span> <span class="s1">&#39;go-&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">semilogx</span><span class="p">(</span><span class="n">gl_glm</span><span class="o">.</span><span class="n">reg_lambda</span><span class="p">,</span> <span class="n">gl_glm</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">Xtrain</span><span class="p">,</span> <span class="n">ytrain</span><span class="p">),</span> <span class="s1">&#39;go--&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">semilogx</span><span class="p">(</span><span class="n">glm</span><span class="o">.</span><span class="n">reg_lambda</span><span class="p">,</span> <span class="n">glm</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">Xtest</span><span class="p">,</span> <span class="n">ytest</span><span class="p">),</span> <span class="s1">&#39;ro-&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">semilogx</span><span class="p">(</span><span class="n">glm</span><span class="o">.</span><span class="n">reg_lambda</span><span class="p">,</span> <span class="n">glm</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">Xtrain</span><span class="p">,</span> <span class="n">ytrain</span><span class="p">),</span> <span class="s1">&#39;ro--&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">([</span><span class="s1">&#39;Group Lasso: test&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;Group Lasso: train&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;Lasso: test&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;Lasso: train&#39;</span><span class="p">],</span> <span class="n">frameon</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="s1">&#39;best&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;$\lambda$&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;pseudo-$R^2$&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">([</span><span class="o">-</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.7</span><span class="p">])</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="n">right</span><span class="o">=</span><span class="s1">&#39;off&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">top</span><span class="o">=</span><span class="s1">&#39;off&#39;</span><span class="p">)</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="s1">&#39;top&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="s1">&#39;right&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<img alt="../_images/sphx_glr_plot_group_lasso_001.png" class="align-center" src="../_images/sphx_glr_plot_group_lasso_001.png" />
 <p><strong>Total running time of the script:</strong>
-(0 minutes 31.275 seconds)</p>
+(0 minutes 25.994 seconds)</p>
 <div class="sphx-glr-download container">
 <strong>Download Python source code:</strong> <a class="reference download internal" href="../_downloads/plot_group_lasso.py"><tt class="xref download docutils literal"><span class="pre">plot_group_lasso.py</span></tt></a></div>
 <div class="sphx-glr-download container">
@@ -278,10 +279,10 @@ Non-group lasso post fitting score:  [  1.20247071e-04   1.04087812e-04   8.9970
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="plot_poisson.html" class="btn btn-neutral float-right" title="Poisson (Canonical) Distribution" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="plot_tikhonov.html" class="btn btn-neutral float-right" title="Tikhonov Regularization" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="plot_community_crime.html" class="btn btn-neutral" title="Communities and Crime" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="plot_community_crime.html" class="btn btn-neutral" title="Community and Crime" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

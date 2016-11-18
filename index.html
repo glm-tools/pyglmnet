@@ -91,6 +91,7 @@
 <li class="toctree-l1"><a class="reference internal" href="auto_examples/index.html">Examples Gallery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api.html">API Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="developers.html">Developer Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="requests.html">Requests for pull requests</a></li>
 <li class="toctree-l1"><a class="reference internal" href="resources.html">Resources</a></li>
 </ul>
 
@@ -138,19 +139,11 @@
             
   <div class="section" id="python-implementation-of-elastic-net-regularized-generalized-linear-models">
 <h1>Python implementation of elastic-net regularized generalized linear models<a class="headerlink" href="#python-implementation-of-elastic-net-regularized-generalized-linear-models" title="Permalink to this headline">¶</a></h1>
-<p><tt class="docutils literal"><span class="pre">pyglmnet</span> <span class="pre">0.1.dev</span></tt> is a Python library implementing elastic-net
-regularized generalized linear models (GLM).</p>
-<p>At present <tt class="docutils literal"><span class="pre">scikit-learn</span></tt> only offers
-<a class="reference external" href="http://scikit-learn.org/stable/modules/linear_model.html#elastic-net">elastic net regularization</a>
-for linear regression.</p>
-<p>Here, we offer a pure Python implementation of linear, logistic, multinomial, and Poisson regression
-with elastic net regularization.</p>
-<p>We follow the same notations and approach as in
-<a class="reference external" href="https://core.ac.uk/download/files/153/6287975.pdf">Friedman, J., Hastie, T., &amp; Tibshirani, R. (2010)</a>.
-The implementation is aimed to suit users of the popular GLM
-<a class="reference external" href="https://web.stanford.edu/~hastie/glmnet/glmnet_alpha.html">R package</a>.
-To the extent possible we have designed the package to conform to
-<a class="reference external" href="https://scikit-learn.org">scikit-learn</a>&#8216;s API standards.</p>
+<p>Pyglmnet is a Python library implementing generalized linear models (GLMs)
+with advanced regularization options. It provides a wide range of noise models
+(with paired canonical link functions) including gaussian, binomial, multinomial,
+poisson, and softplus. It supports a wide range of regularizers: ridge, lasso,
+elastic net, group lasso, and Tikhonov regularization.</p>
 <p>[<a class="reference external" href="https://github.com/glm-tools/pyglmnet">Repository</a>]
 [<a class="reference external" href="http://glm-tools.github.io/pyglmnet">Documentation</a>]</p>
 <div class="section" id="a-brief-introduction-to-glms">
@@ -169,7 +162,15 @@ the penalized negative log-likelihood. The elastic net penalty interpolates
 between L2 and L1 norm. Thus, we solve the following optimization problem:</p>
 <div class="math">
 \[\min_{\beta_0, \beta} \frac{1}{N} \sum_{i = 1}^N \mathcal{L} (y_i, \beta_0 + \beta^T x_i)
-+ \lambda [ \frac{1}{2}(1 - \alpha)\| \beta \|_2^2 + \alpha \| \beta \|_1 ]\]</div>
++ \lambda [ \frac{1}{2}(1 - \alpha) \mathcal{P}_2 + \alpha \mathcal{P}_1 ]\]</div>
+<p>where <span class="math">\(\mathcal{P}_2\)</span> and <span class="math">\(\mathcal{P}_1\)</span> are the generalized
+L2 (Tikhonov) and generalized L1 (Group Lasso) penalties, given by:</p>
+<div class="math">
+\[\begin{split}\mathcal{P}_2 &amp; = &amp; \|\Gamma \beta \|_2^2 \\
+\mathcal{P}_1 &amp; = &amp; \sum_g \|\beta_{j,g}\|_2\end{split}\]</div>
+<p>where <span class="math">\(\Gamma\)</span> is the Tikhonov matrix: a square factorization of the inverse
+covariance matrix and <span class="math">\(\beta_{j,g}\)</span> is the <span class="math">\(j\)</span> th coefficient of
+group <span class="math">\(g\)</span>.</p>
 </div>
 <div class="section" id="contents">
 <h2>Contents<a class="headerlink" href="#contents" title="Permalink to this headline">¶</a></h2>
@@ -182,6 +183,7 @@ between L2 and L1 norm. Thus, we solve the following optimization problem:</p>
 <li class="toctree-l1"><a class="reference internal" href="auto_examples/index.html">Examples Gallery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api.html">API Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="developers.html">Developer Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="requests.html">Requests for pull requests</a></li>
 <li class="toctree-l1"><a class="reference internal" href="resources.html">Resources</a></li>
 </ul>
 </div>

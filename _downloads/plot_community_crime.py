@@ -1,17 +1,18 @@
 # -*- coding: utf-8 -*-
 """
 ======================
-Communities and Crime
+Community and Crime
 ======================
 
 This is a real dataset of per capita violent crime, with demographic
 data comprising 128 attributes from 1994 counties in the US.
 
 The original dataset can be found here:
-http://archive.ics.uci.edu/ml/datasets/Communities+and+Crime)
+http://archive.ics.uci.edu/ml/datasets/Communities+and+Crime
 
-The target variables are normalized to lie in a [0, 1] range.
-We preprocessed this dataset to exclude attributes with missing values.
+The target variables (per capita violent crime) are normalized to lie in
+a [0, 1] range. We preprocessed this dataset to exclude attributes with
+missing values.
 """
 
 ########################################################
@@ -50,7 +51,7 @@ glm.fit(X_train, y_train)
 
 # score the test set prediction
 y_test_hat = glm[-1].predict(X_test)
-print ("test set pseudo R^2 = %f" % glm[-1].score(X_test, y_test))
+print ("test set pseudo $R^2$ = %f" % glm[-1].score(X_test, y_test))
 
 ########################################################
 # Plot the true and predicted test set target values
@@ -60,4 +61,10 @@ plt.plot(y_test_hat[:50], 'ro-')
 plt.legend(['true', 'pred'], frameon=False)
 plt.xlabel('Counties')
 plt.ylabel('Per capita violent crime')
+
+plt.tick_params(axis='y', right='off')
+plt.tick_params(axis='x', top='off')
+ax = plt.gca()
+ax.spines['top'].set_visible(False)
+ax.spines['right'].set_visible(False)
 plt.show()
