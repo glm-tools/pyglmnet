@@ -17,6 +17,8 @@
 .idea/sqlDataSources.xml
 .idea/dynamic.xml
 .idea/uiDesigner.xml
+.pypirc
+
 
 # Gradle:
 .idea/gradle.xml
