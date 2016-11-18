@@ -55,12 +55,12 @@ class GLM(object):
         \mathcal{P}_2 & = & \|\Gamma \\beta \|_2^2 \\
         \mathcal{P}_1 & = & \sum_g \|\\beta_{j,g}\|_2
 
-    where :math:`\Gamma` is the Tikhonov matrix: a square factorization of the inverse
-    covariance matrix and :math:`\\beta_{j,g}` is the :math:`j` th coefficient of
-    group :math:`g`.
+    where :math:`\Gamma` is the Tikhonov matrix: a square factorization
+    of the inverse covariance matrix and :math:`\\beta_{j,g}` is the
+    :math:`j` th coefficient of group :math:`g`.
 
-    The generalized L2 penalty defaults to the ridge penalty when :math:`\Gamma`
-    is identity.
+    The generalized L2 penalty defaults to the ridge penalty when
+    :math:`\Gamma` is identity.
 
     The generalized L1 penalty defaults to the lasso penalty when each
     :math:`\\beta` belongs to its own group.
