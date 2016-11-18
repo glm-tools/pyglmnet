@@ -53,7 +53,7 @@ $ twine upload -r pypitest --config-file=.pypirc dist/pyglmnet-<version number>.
 To make sure the test worked, head over to the [PyPI test page](https://testpypi.python.org/pypi).
 You should see `pyglmnet <version number>` near the top of the list (if you head directly over).
 
-Great, looks like it worked. let's register, upload and release for real!
+Great, looks like it worked. Let's register, upload and release for real!
 
 ```bash
 $ twine register -r pypi --config-file=.pypirc dist/pyglmnet-<version number>.tar.gz
