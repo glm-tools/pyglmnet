@@ -39,76 +39,87 @@ def set_log_level(verbose):
 
 
 class GLM(object):
-    """Generalized Linear Model (GLM)
+    """Class for estimating regularized generalized linear models (GLM).
+    The regularized GLM minimizes the penalized negative log likelihood:
 
-    This class implements elastic-net regularized generalized linear models.
-    The core algorithm is defined in the article.
-        min_(beta0, beta) [-L + lamda * P]
-    where
-        L is log-likelihood term
-        P is elastic-net penalty term with
-        optional Tikhonov regularization and group Lasso constraints, i.e.
-        P(beta) = 0.5 * (1-alpha) * L2penalty + alpha * L1penalty
-            where the L2 penalty is the Tikhonov regularizer ||Tau * beta||_2^2
-            which defaults to ridge-like L2 penalty if Tau is identity
-            and the L1 penalty is the group Lasso term: sum_g (||beta_g||_2)
-            which is sum of the L2 norm over groups, g
-            and defaults to Lasso-like L1 penalty
-            if each beta belongs to a separate group.
+    .. math::
 
+        \min_{\\beta_0, \\beta} \\frac{1}{N}
+        \sum_{i = 1}^N \mathcal{L} (y_i, \\beta_0 + \\beta^T x_i)
+        + \lambda [ \\frac{1}{2}(1 - \\alpha) \mathcal{P}_2 +
+                    \\alpha \mathcal{P}_1 ]
+
+    where :math:`\mathcal{P}_2` and :math:`\mathcal{P}_1` are the generalized
+    L2 (Tikhonov) and generalized L1 (Group Lasso) penalties, given by:
+
+    .. math::
+
+        \mathcal{P}_2 = \|\Gamma \\beta \|_2^2 \\
+        \mathcal{P}_1 = \sum_g \|\\beta_{j,g}\|_2
+
+    where :math:`\Gamma` is the Tikhonov matrix: a square factorization
+    of the inverse covariance matrix and :math:`\\beta_{j,g}` is the
+    :math:`j` th coefficient of group :math:`g`.
+
+    The generalized L2 penalty defaults to the ridge penalty when
+    :math:`\Gamma` is identity.
+
+    The generalized L1 penalty defaults to the lasso penalty when each
+    :math:`\\beta` belongs to its own group.
 
     Parameters
     ----------
-    distr: str
+    distr : str \n
         distribution family can be one of the following
-        'gaussian' | 'binomial' | 'poisson' | 'softplus' | 'multinomial'
-        default: 'poisson'
-    alpha: float
+        'gaussian' | 'binomial' | 'poisson' | 'softplus' | 'multinomial' \n
+        default: 'poisson'.
+    alpha : float \n
         the weighting between L1 penalty and L2 penalty term
-        of the loss function
+        of the loss function. \n
         default: 0.5
-    Tau: ndarray | None
-        n_features x n_features
-        the Tikhonov matrix
+    Tau : array | None \n
+        the (n_features, n_features) Tikhonov matrix. \n
         default: None, in which case Tau is identity
         and the L2 penalty is ridge-like
-    group: ndarray | list | None
-        n_features
-        a list of group identities for each parameter beta
-        each entry of the list/ array should contain an int from 1 to n_groups
-        that specify group membership for each parameter (except beta0)
-        note: if you do not want to specify a group for a specific parameter,
-        set it to zero
+    group : array | list | None \n
+        the (n_features, )
+        list or array of group identities for each parameter :math:`\\beta`. \n
+        Each entry of the list/ array should contain an int from 1 to n_groups
+        that specify group membership for each parameter
+        (except :math:`\\beta_0`). \n
+        If you do not want to specify a group for a specific parameter,
+        set it to zero. \n
         default: None, in which case it defaults to L1 regularization
-    reg_lambda: ndarray | list | None
-        array of regularized parameters of penalty term i.e.
-        min_(beta0, beta) -L + lambda * P
-        where lambda is number in reg_lambda list
+    reg_lambda : array | list | None \n
+        array of regularized parameters :math:`\\lambda` of penalty term. \n
         default: None, a list of 10 floats spaced logarithmically (base e)
-        between 0.5 and 0.01 is generated.
-    solver: str
+        between 0.5 and 0.01. \n
+    solver : str \n
         optimization method, can be one of the following
         'batch-gradient' (vanilla batch gradient descent)
-        'cdfast' (Newton coordinate gradient descent)
-    learning_rate: float
-        learning rate for gradient descent
+        'cdfast' (Newton coordinate gradient descent). \n
+        default: 'batch-gradient'
+    learning_rate : float \n
+        learning rate for gradient descent. \n
         default: 2e-1
-    max_iter: int
-        maximum iterations for the model,
+    max_iter : int \n
+        maximum iterations for the model. \n
         default: 1000
-    tol: float
+    tol : float \n
         convergence threshold or stopping criteria.
-        Optimization loop will stop below setting threshold
+        Optimization loop will stop below setting threshold. \n
         default: 1e-3
-    eta: float
-        a threshold parameter that linearizes the exp() function above eta
+    eta : float \n
+        a threshold parameter that linearizes the exp() function above eta. \n
         default: 4.0
-    score_metric: str
-        specifies the scoring metric. one of either 'deviance' or 'pseudo_R2'
-    random_state: int
-        seed of the random number generator used to initialize the solution
-    verbose: boolean or int
-        if True it will print the output while iterating
+    score_metric : str \n
+        specifies the scoring metric.
+        one of either 'deviance' or 'pseudo_R2'. \n
+        default: 'deviance'
+    random_state : int \n
+        seed of the random number generator used to initialize the solution. \n
+        default: 0
+    verbose : boolean or int \n
         default: False
 
     Reference
@@ -202,7 +213,17 @@ class GLM(object):
         return glm
 
     def copy(self):
-        """Return a copy of the object."""
+        """Return a copy of the object.
+
+        Parameters
+        ----------
+        none:
+
+        Returns
+        -------
+        self: instance of GLM \n
+            A copy of the GLM instance.
+        """
         return deepcopy(self)
 
     def _qu(self, z):
@@ -529,15 +550,15 @@ class GLM(object):
 
         Parameters
         ----------
-        X : array
-            shape (n_samples, n_features)
-            The input data
-        y : array
-            Labels to the data
+        X : array \n
+            The input data of shape (n_samples, n_features)
+
+        y : array \n
+            The target data
 
         Returns
         -------
-        self : instance of GLM
+        self : instance of GLM \n
             The fitted model.
         """
 
@@ -649,21 +670,20 @@ class GLM(object):
         return self
 
     def predict(self, X):
-        """Predict labels.
+        """Predict targets.
 
         Parameters
         ----------
-        X : array
-            shape (n_samples, n_features)
-            The data for prediction.
+        X : array \n
+            Input data for prediction, of shape (n_samples, n_features)
 
         Returns
         -------
-        yhat : array
-            shape ([n_lambda], n_samples)
-            The predicted labels. A 1D array if predicting on only
-            one lambda (compatible with scikit-learn API). Otherwise,
-            returns a 2D array.
+        yhat : array \n
+            The predicted targets of shape ([n_lambda], n_samples) \n
+            A 1D array if predicting on only
+            one reg_lambda (compatible with scikit-learn API). \n
+            Otherwise, returns a 2D array.
         """
         if not isinstance(X, np.ndarray):
             raise ValueError('Input data should be of type ndarray (got %s).'
@@ -692,17 +712,23 @@ class GLM(object):
 
         Parameters
         ----------
-        X : array
-            shape (n_samples, n_features)
-            The data for prediction.
+        X : array \n
+            Input data for prediction, of shape (n_samples, n_features)
 
         Returns
         -------
-        yhat : array
-            shape ([n_lambda], n_samples)
-            The predicted labels. A 1D array if predicting on only
-            one lambda (compatible with scikit-learn API). Otherwise,
-            returns a 2D array.
+        yhat : array \n
+            The predicted targets of shape
+            ([n_lambda], n_samples, n_classes). \n
+            A 2D array if predicting on only
+            one lambda (compatible with scikit-learn API). \n
+            Otherwise, returns a 3D array.
+
+        Raises
+        ------
+        Works only for the multinomial distribution.
+        Raises error otherwise.
+
         """
         if self.distr != 'multinomial':
             raise ValueError('This is only applicable for \
@@ -727,17 +753,18 @@ class GLM(object):
 
         Parameters
         ----------
-        X : array
-            shape (n_samples, n_features)
-            The data for fit and prediction.
+        X : array \n
+            The input data to fit and predict,
+            of shape (n_samples, n_features)
+
 
         Returns
         -------
-        yhat : array
-            shape ([n_lambda], n_samples)
-            The predicted labels. A 1D array if predicting on only
-            one lambda (compatible with scikit-learn API). Otherwise,
-            returns a 2D array.
+        yhat : array \n
+            The predicted targets of shape ([n_lambda], n_samples). \n
+            A 1D array if predicting on only
+            one lambda (compatible with scikit-learn API). \n
+            Otherwise, returns a 2D array.
         """
         return self.fit(X, y).predict(X)
 
@@ -746,29 +773,32 @@ class GLM(object):
 
         Parameters
         ----------
-        X : array,
-            (n_samples, n_features)
-            The true labels.
-        y : array,
-            (n_samples, [n_classes])
-            The estimated labels.
+        X : array \n
+            The input data whose prediction will be scored,
+            of shape (n_samples, n_features).
+        y : array \n
+            The true targets against which to score the predicted targets,
+            of shape (n_samples, [n_classes]).
 
         Returns
         -------
         score: array
             array when score is called by a list of estimators:
-            `glm.score()`
+            :code:`glm.score()`\n
             singleton array when score is called by a sliced estimator:
-            `glm[0].score()`
+            :code:`glm[0].score()`\n
 
             Note that if you want compatibility with sciki-learn's
-            pipeline, cross_val_score, or GridSearchCV then you should
-            only pass sliced estimators:
+            :code:`pipeline()`, :code:`cross_val_score()`,
+            or :code:`GridSearchCV()` then you should
+            only pass sliced estimators: \n
 
-            from sklearn.grid_search import GridSearchCV
-            from sklearn.cross_validation import cross_val_score
-            grid = GridSearchCV(glm[0])
-            grid = cross_val_score(glm[0], X, y, cv=10)
+            .. code:: python
+
+                from sklearn.grid_search import GridSearchCV
+                from sklearn.cross_validation import cross_val_score
+                grid = GridSearchCV(glm[0])
+                grid = cross_val_score(glm[0], X, y, cv=10)
         """
 
         if self.score_metric not in ['deviance', 'pseudo_R2']:
@@ -821,7 +851,22 @@ class GLM(object):
         return np.array(score)
 
     def simulate(self, beta0, beta, X):
-        """Simulate data."""
+        """Simulate target data under a generative model.
+
+        Parameters
+        ----------
+        X: array
+            design matrix of shape (n_samples, n_features)
+        beta0: float
+            intercept coefficient
+        beta: array
+            coefficients of shape (n_features, 1)
+
+        Returns
+        -------
+        y: array
+            simulated target data of shape (n_samples, 1)
+        """
         np.random.RandomState(self.random_state)
         if self.distr == 'softplus' or self.distr == 'poisson':
             y = np.random.poisson(self._lmb(beta0, beta, X))
