@@ -74,9 +74,6 @@ if you would like to run these benchmarks yourself, but you need to take
 care of the dependencies: `scikit-learn`, `Rpy2`, and `statsmodels`
 yourself.
 
-For more details, please see our release notes accompanying
-the 0.1 PyPI release (coming soon).
-
 ### Installation
 Now `pip` installable!
 ```bash

@@ -1,6 +1,7 @@
 #! /usr/bin/env python
 import setuptools  # noqa; we are using a setuptools namespace
 from numpy.distutils.core import setup
+import pyglmnet
 
 descr = """Elastic-net regularized generalized linear models."""
 
@@ -10,7 +11,7 @@ MAINTAINER = 'Pavan Ramkumar'
 MAINTAINER_EMAIL = 'pavan.ramkumar@gmail.com'
 LICENSE = 'MIT'
 DOWNLOAD_URL = 'https://github.com/glm-tools/pyglmnet.git'
-VERSION = '1.0.0'
+VERSION = pyglmnet.__version__
 
 if __name__ == "__main__":
     setup(name=DISTNAME,
@@ -20,7 +21,7 @@ if __name__ == "__main__":
           license=LICENSE,
           version=VERSION,
           download_url=DOWNLOAD_URL,
-          long_description=open('README.md').read(),
+          long_description=open('README.rst').read(),
           classifiers=[
               'Intended Audience :: Science/Research',
               'Intended Audience :: Developers',
