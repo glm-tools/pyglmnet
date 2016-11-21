@@ -200,7 +200,7 @@ Visualize model scores on test set
 
 
 **Total running time of the script:**
-(0 minutes 25.994 seconds)
+(0 minutes 39.737 seconds)
 
 
 

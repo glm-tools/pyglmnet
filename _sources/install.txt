@@ -27,7 +27,13 @@ To install ``scikit-learn`` follow these
 
 Get pyglmnet
 ------------
-To install ``pyglmnet``, first clone the repository
+If you would like to install the latest stable release:
+
+.. code-block:: bash
+
+    pip install pyglmnet
+
+To install the development version of ``pyglmnet``, first clone the repository
 
 .. code-block:: bash
 

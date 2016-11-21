@@ -132,7 +132,7 @@ Plot the true and predicted test set target values
 
 
 **Total running time of the script:**
-(0 minutes 5.541 seconds)
+(0 minutes 10.912 seconds)
 
 
 
