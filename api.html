@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>API Documentation &mdash; pyglmnet 1.0.0 documentation</title>
+  <title>API Documentation &mdash; pyglmnet 1.0.1 documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="pyglmnet 1.0.0 documentation" href="index.html"/>
+    <link rel="top" title="pyglmnet 1.0.1 documentation" href="index.html"/>
         <link rel="next" title="Developer Documentation" href="developers.html"/>
         <link rel="prev" title="Tikhonov Regularization" href="auto_examples/plot_tikhonov.html"/> 
 
@@ -63,7 +63,7 @@
             
             
               <div class="version">
-                1.0.0
+                1.0.1
               </div>
             
           
@@ -147,7 +147,7 @@
 <h2>Classes<a class="headerlink" href="#classes" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="pyglmnet.GLM">
-<em class="property">class </em><tt class="descclassname">pyglmnet.</tt><tt class="descname">GLM</tt><big>(</big><em>distr='poisson'</em>, <em>alpha=0.5</em>, <em>Tau=None</em>, <em>group=None</em>, <em>reg_lambda=None</em>, <em>solver='batch-gradient'</em>, <em>learning_rate=0.2</em>, <em>max_iter=1000</em>, <em>tol=0.001</em>, <em>eta=4.0</em>, <em>score_metric='deviance'</em>, <em>random_state=0</em>, <em>verbose=False</em><big>)</big><a class="headerlink" href="#pyglmnet.GLM" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">pyglmnet.</tt><tt class="descname">GLM</tt><big>(</big><em>distr='poisson'</em>, <em>alpha=0.5</em>, <em>Tau=None</em>, <em>group=None</em>, <em>reg_lambda=None</em>, <em>solver='batch-gradient'</em>, <em>learning_rate=0.2</em>, <em>max_iter=1000</em>, <em>tol=0.001</em>, <em>eta=2.0</em>, <em>score_metric='deviance'</em>, <em>random_state=0</em>, <em>verbose=False</em><big>)</big><a class="headerlink" href="#pyglmnet.GLM" title="Permalink to this definition">¶</a></dt>
 <dd><p>Class for estimating regularized generalized linear models (GLM).
 The regularized GLM minimizes the penalized negative log likelihood:</p>
 <div class="math">
@@ -232,7 +232,7 @@ Optimization loop will stop below setting threshold.</p>
 <p><strong>eta</strong> : float</p>
 <blockquote>
 <div><p>a threshold parameter that linearizes the exp() function above eta.</p>
-<p>default: 4.0</p>
+<p>default: 2.0</p>
 </div></blockquote>
 <p><strong>score_metric</strong> : str</p>
 <blockquote>
@@ -516,7 +516,7 @@ only pass sliced estimators:</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.0.0',
+            VERSION:'1.0.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true
