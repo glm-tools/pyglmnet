@@ -90,9 +90,9 @@ Poisson (linearized): `poisson`
     \end{cases}
     \\
     \frac{\partial J}{\partial \beta_0} &= \frac{1}{n}\sum_{i; z_i \leq \eta} (\mu_i - y_i)
-    + \frac{1}{n}\sum_{i; z_i > \eta} \eta (1 - y_i/\mu_i) \\
+    + \frac{1}{n}\sum_{i; z_i > \eta} \exp(\eta) (1 - y_i/\mu_i) \\
     \frac{\partial J}{\partial \beta_j} &= \frac{1}{n}\sum_{i; z_i \leq \eta} (\mu_i - y_i) x_{ij}
-    + \frac{1}{n}\sum_{i; z_i > \eta} \eta (1 - y_i/\mu_i) x_{ij}
+    + \frac{1}{n}\sum_{i; z_i > \eta} \exp(\eta) (1 - y_i/\mu_i) x_{ij}
 
 **Hessian**
 
@@ -106,9 +106,9 @@ Poisson (linearized): `poisson`
     \end{cases}
     \\
     \frac{\partial^2 J}{\partial \beta_0^2} &= \frac{1}{n}\sum_{i; z_i \leq \eta} \mu_i
-    - \frac{1}{n}\sum_{i; z_i > \eta} \exp(\eta) (1 - \eta) \frac{y_i}{\mu_i^2}  \\
+    + \frac{1}{n}\sum_{i; z_i > \eta} \exp(\eta)^2 \frac{y_i}{\mu_i^2}  \\
     \frac{\partial^2 J}{\partial \beta_j^2} &=  \frac{1}{n}\sum_{i; z_i \leq \eta} \mu_i x_{ij}^2
-    - \frac{1}{n}\sum_{i; z_i > \eta} \exp(\eta) (1 - \eta) \frac{y_i}{\mu_i^2} x_{ij}^2
+    + \frac{1}{n}\sum_{i; z_i > \eta} \exp(\eta)^2 \frac{y_i}{\mu_i^2} x_{ij}^2
     + \lambda (1 - \alpha)
 
 Gaussian: `gaussian`
