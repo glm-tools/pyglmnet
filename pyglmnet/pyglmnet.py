@@ -459,8 +459,8 @@ class GLM(object):
             s = expit(z)
             gk = np.sum((mu[z <= self.eta] - y[z <= self.eta]) *
                         xk[z <= self.eta]) + \
-                np.exp(self.eta) * np.sum((1 - y[z > self.eta] / \
-                    mu[z > self.eta]) * xk[z > self.eta])
+                np.exp(self.eta) * np.sum((1 - y[z > self.eta] /
+                        mu[z > self.eta]) * xk[z > self.eta])
             hk = np.sum(mu[z <= self.eta] * xk[z <= self.eta] ** 2) + \
                 np.exp(self.eta) ** 2 * \
                 np.sum(y[z > self.eta] / (mu[z > self.eta] ** 2) *
