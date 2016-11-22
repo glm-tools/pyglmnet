@@ -111,7 +111,7 @@ class GLM(object):
         default: 1e-3
     eta : float \n
         a threshold parameter that linearizes the exp() function above eta. \n
-        default: 4.0
+        default: 2.0
     score_metric : str \n
         specifies the scoring metric.
         one of either 'deviance' or 'pseudo_R2'. \n
@@ -141,7 +141,7 @@ class GLM(object):
                  reg_lambda=None,
                  solver='batch-gradient',
                  learning_rate=2e-1, max_iter=1000,
-                 tol=1e-3, eta=4.0, score_metric='deviance',
+                 tol=1e-3, eta=2.0, score_metric='deviance',
                  random_state=0, verbose=False):
 
         if reg_lambda is None:
@@ -380,7 +380,8 @@ class GLM(object):
         elif self.distr == 'poisson':
             q = self._qu(z)
             grad_beta0 = np.sum(q[z <= self.eta] - y[z <= self.eta]) + \
-                np.sum(1 - y[z > self.eta] / q[z > self.eta]) * self.eta
+                np.sum(1 - y[z > self.eta] / q[z > self.eta]) * \
+                np.exp(self.eta)
             grad_beta0 *= 1. / n_samples
 
             grad_beta = np.zeros([X.shape[1], 1])
@@ -388,7 +389,7 @@ class GLM(object):
             grad_beta += np.transpose(np.dot((q[selector] - y[selector]).T,
                                              X[selector, :]))
             selector = np.where(z.ravel() > self.eta)[0]
-            grad_beta += self.eta * \
+            grad_beta += np.exp(self.eta) * \
                 np.transpose(np.dot((1 - y[selector] / q[selector]).T,
                                     X[selector, :]))
             grad_beta *= 1. / n_samples
@@ -458,10 +459,10 @@ class GLM(object):
             s = expit(z)
             gk = np.sum((mu[z <= self.eta] - y[z <= self.eta]) *
                         xk[z <= self.eta]) + \
-                self.eta * np.sum((1 - y[z > self.eta] / mu[z > self.eta]) *
-                                  xk[z > self.eta])
-            hk = np.sum(mu[z <= self.eta] * xk[z <= self.eta] ** 2) - \
-                np.exp(self.eta) * (1 - self.eta) * \
+                np.exp(self.eta) * np.sum((1 - y[z > self.eta] / \
+                    mu[z > self.eta]) * xk[z > self.eta])
+            hk = np.sum(mu[z <= self.eta] * xk[z <= self.eta] ** 2) + \
+                np.exp(self.eta) ** 2 * \
                 np.sum(y[z > self.eta] / (mu[z > self.eta] ** 2) *
                        (xk[z > self.eta] ** 2))
 
