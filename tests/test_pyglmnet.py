@@ -7,7 +7,8 @@ from sklearn.preprocessing import StandardScaler
 from nose.tools import assert_true, assert_equal, assert_raises
 from numpy.testing import assert_allclose
 
-from pyglmnet import GLM
+from pyglmnet import GLM, _grad_L2loss
+
 
 def test_tikhonov():
     """Tikhonov regularization test"""
@@ -197,7 +198,8 @@ def test_multinomial():
 
     # test gradient
     beta = np.zeros([4, 2])
-    grad_beta0, grad_beta = glm_mn._grad_L2loss(beta[0], beta[1:], 0, X, y)
+    grad_beta0, grad_beta = _grad_L2loss(glm_mn.distr, glm_mn.alpha,
+                                         beta[0], beta[1:], 0, X, y, glm_mn.Tau, glm_mn.eta)
     assert_true(grad_beta0[0] != grad_beta0[1])
     glm_mn.fit(X, y)
     y_pred_proba = glm_mn.predict_proba(X)
@@ -291,3 +293,21 @@ def test_cdfast():
         beta_ret, z_ret = glm._cdfast(X, y, z, ActiveSet, beta_, rl)
         assert_equal(beta_ret.shape, beta_.shape)
         assert_equal(z_ret.shape, z.shape)
+
+
+# def test_gradients():
+#     from pyglmnet import _loss, _grad_L2loss
+#     from scipy.optimize import check_grad
+#     from functools import partial
+
+#     distr = 'softplus'
+#     reg_lambda = 0.1
+#     X = 
+#     y = 
+#     eta = 
+#     group = 
+#     beta = 
+#     func = partial(distr=distr, beta, reg_lambda, X, y, eta, group)
+#     grad = partial()
+#     diff = check_grad(func, grad, beta0)
+#     assert_true(diff < 1e-8)

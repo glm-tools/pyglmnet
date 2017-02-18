@@ -38,6 +38,170 @@ def set_log_level(verbose):
     logger.setLevel(verbose)
 
 
+def _lmb(distr, beta0, beta, X, eta):
+    """Conditional intensity function."""
+    z = beta0 + np.dot(X, beta)
+    return _qu(distr, z, eta)
+
+
+def _qu(distr, z, eta):
+    """The non-linearity."""
+    if distr == 'softplus':
+        qu = np.log1p(np.exp(z))
+    elif distr == 'poisson':
+        qu = deepcopy(z)
+        slope = np.exp(eta)
+        intercept = (1 - eta) * slope
+        qu[z > eta] = z[z > eta] * slope + intercept
+        qu[z <= eta] = np.exp(z[z <= eta])
+    elif distr == 'gaussian':
+        qu = z
+    elif distr == 'binomial':
+        qu = expit(z)
+    elif distr == 'multinomial':
+        qu = utils.softmax(z)
+    return qu
+
+
+def _logL(distr, beta0, beta, X, y, eta):
+    """The log likelihood."""
+    n_samples = np.float(X.shape[0])
+    z = beta0 + np.dot(X, beta)
+    l = _qu(distr, z, eta)
+    if distr == 'softplus':
+        logL = 1. / n_samples * np.sum(y * np.log(l) - l)
+    elif distr == 'poisson':
+        logL = 1. / n_samples * np.sum(y * np.log(l) - l)
+    elif distr == 'gaussian':
+        logL = -0.5 * 1. / n_samples * np.sum((y - l)**2)
+    elif distr == 'binomial':
+        # analytical formula
+        # logL = np.sum(y*np.log(l) + (1-y)*np.log(1-l))
+
+        # but this prevents underflow
+        z = beta0 + np.dot(X, beta)
+        logL = 1. / n_samples * np.sum(y * z - np.log(1 + np.exp(z)))
+    elif distr == 'multinomial':
+        logL = 1. / n_samples * np.sum(y * np.log(l))
+    return logL
+
+
+def _penalty(alpha, beta, Tau, group):
+    """The penalty."""
+    # Combine L1 and L2 penalty terms
+    P = 0.5 * (1 - alpha) * _L2penalty(beta, Tau) + \
+        alpha * _L1penalty(beta, group)
+    return P
+
+
+def _L2penalty(beta, Tau):
+    """The L2 penalty"""
+    # Compute the L2 penalty
+    if Tau is None:
+        # Ridge=like penalty
+        L2penalty = np.linalg.norm(beta, 2) ** 2
+    else:
+        # Tikhonov penalty
+        if (Tau.shape[0] != beta.shape[0] or
+           Tau.shape[1] != beta.shape[0]):
+            raise ValueError('Tau should be (n_features x n_features)')
+        else:
+            L2penalty = np.linalg.norm(np.dot(Tau, beta), 2) ** 2
+    return L2penalty
+
+
+def _L1penalty(beta, group=None):
+    """The L1 penalty"""
+    # Compute the L1 penalty
+    if group is None:
+        # Lasso-like penalty
+        L1penalty = np.linalg.norm(beta, 1)
+    else:
+        # Group sparsity case: apply group sparsity operator
+        group_ids = np.unique(group)
+        L1penalty = 0.0
+        for group_id in group_ids:
+            if group_id != 0:
+                L1penalty += \
+                    np.linalg.norm(beta[group == group_id], 2)
+        L1penalty += np.linalg.norm(beta[group == 0], 1)
+    return L1penalty
+
+
+def _loss(distr, alpha, beta0, beta, Tau, reg_lambda, X, y, eta, group):
+    """Define the objective function for elastic net."""
+    L = _logL(distr, beta0, beta, X, y, eta)
+    P = _penalty(alpha, beta, Tau, group)
+    J = -L + reg_lambda * P
+    return J
+
+
+def _grad_L2loss(distr, alpha, beta0, beta, reg_lambda, X, y, Tau, eta):
+    """The gradient."""
+
+    n_samples = np.float(X.shape[0])
+
+    if Tau is None:
+        Tau = np.eye(beta.shape[0])
+    InvCov = np.dot(Tau.T, Tau)
+
+    z = beta0 + np.dot(X, beta)
+    s = expit(z)
+
+    if distr == 'softplus':
+        q = _qu(distr, z, eta)
+        grad_beta0 = 1. / n_samples * (np.sum(s) - np.sum(y * s / q))
+        grad_beta = 1. / n_samples * \
+            (np.transpose(np.dot(np.transpose(s), X) -
+                          np.dot(np.transpose(y * s / q), X))) + \
+            reg_lambda * (1 - alpha) * \
+            np.dot(InvCov, beta)
+
+    elif distr == 'poisson':
+        q = _qu(distr, z, eta)
+        grad_beta0 = np.sum(q[z <= eta] - y[z <= eta]) + \
+            np.sum(1 - y[z > eta] / q[z > eta]) * \
+            np.exp(eta)
+        grad_beta0 *= 1. / n_samples
+
+        grad_beta = np.zeros([X.shape[1], 1])
+        selector = np.where(z.ravel() <= eta)[0]
+        grad_beta += np.transpose(np.dot((q[selector] - y[selector]).T,
+                                         X[selector, :]))
+        selector = np.where(z.ravel() > eta)[0]
+        grad_beta += np.exp(eta) * \
+            np.transpose(np.dot((1 - y[selector] / q[selector]).T,
+                                X[selector, :]))
+        grad_beta *= 1. / n_samples
+        grad_beta += reg_lambda * (1 - alpha) * \
+            np.dot(InvCov, beta)
+
+    elif distr == 'gaussian':
+        grad_beta0 = 1. / n_samples * np.sum(z - y)
+        grad_beta = 1. / n_samples * \
+            np.transpose(np.dot(np.transpose(z - y), X)) \
+            + reg_lambda * (1 - alpha) * \
+            np.dot(InvCov, beta)
+
+    elif distr == 'binomial':
+        grad_beta0 = 1. / n_samples * np.sum(s - y)
+        grad_beta = 1. / n_samples * \
+            np.transpose(np.dot(np.transpose(s - y), X)) \
+            + reg_lambda * (1 - alpha) * \
+            np.dot(InvCov, beta)
+
+    elif distr == 'multinomial':
+        # this assumes that y is already as a one-hot encoding
+        pred = _qu(distr, z, eta)
+        grad_beta0 = -1. / n_samples * np.sum(y - pred, axis=0)
+        grad_beta = -1. / n_samples * \
+            np.transpose(np.dot(np.transpose(y - pred), X)) \
+            + reg_lambda * (1 - alpha) * \
+            np.dot(InvCov, beta)
+
+    return grad_beta0, grad_beta
+
+
 class GLM(object):
     """Class for estimating regularized generalized linear models (GLM).
     The regularized GLM minimizes the penalized negative log likelihood:
@@ -226,108 +390,6 @@ class GLM(object):
         """
         return deepcopy(self)
 
-    def _qu(self, z):
-        """The non-linearity."""
-        if self.distr == 'softplus':
-            qu = np.log1p(np.exp(z))
-        elif self.distr == 'poisson':
-            qu = deepcopy(z)
-            slope = np.exp(self.eta)
-            intercept = (1 - self.eta) * slope
-            qu[z > self.eta] = z[z > self.eta] * slope + intercept
-            qu[z <= self.eta] = np.exp(z[z <= self.eta])
-        elif self.distr == 'gaussian':
-            qu = z
-        elif self.distr == 'binomial':
-            qu = expit(z)
-        elif self.distr == 'multinomial':
-            qu = utils.softmax(z)
-        return qu
-
-    def _lmb(self, beta0, beta, X):
-        """Conditional intensity function."""
-        z = beta0 + np.dot(X, beta)
-        l = self._qu(z)
-        return l
-
-    def _logL(self, beta0, beta, X, y):
-        """The log likelihood."""
-        n_samples = np.float(X.shape[0])
-        l = self._lmb(beta0, beta, X)
-        if self.distr == 'softplus':
-            logL = 1. / n_samples * np.sum(y * np.log(l) - l)
-        elif self.distr == 'poisson':
-            logL = 1. / n_samples * np.sum(y * np.log(l) - l)
-        elif self.distr == 'gaussian':
-            logL = -0.5 * 1. / n_samples * np.sum((y - l)**2)
-        elif self.distr == 'binomial':
-            # analytical formula
-            # logL = np.sum(y*np.log(l) + (1-y)*np.log(1-l))
-
-            # but this prevents underflow
-            z = beta0 + np.dot(X, beta)
-            logL = 1. / n_samples * np.sum(y * z - np.log(1 + np.exp(z)))
-        elif self.distr == 'multinomial':
-            logL = 1. / n_samples * np.sum(y * np.log(l))
-        return logL
-
-    def _L2penalty(self, beta):
-        """The L2 penalty"""
-        # Compute the L2 penalty
-        Tau = self.Tau
-        if Tau is None:
-            # Ridge=like penalty
-            L2penalty = np.linalg.norm(beta, 2) ** 2
-        else:
-            # Tikhonov penalty
-            if (Tau.shape[0] != beta.shape[0] or
-               Tau.shape[1] != beta.shape[0]):
-                raise ValueError('Tau should be (n_features x n_features)')
-            else:
-                L2penalty = np.linalg.norm(np.dot(Tau, beta), 2) ** 2
-        return L2penalty
-
-    def _L1penalty(self, beta):
-        """The L1 penalty"""
-        # Compute the L1 penalty
-        group = self.group
-        if group is None:
-            # Lasso-like penalty
-            L1penalty = np.linalg.norm(beta, 1)
-        else:
-            # Group sparsity case: apply group sparsity operator
-            group_ids = np.unique(self.group)
-            L1penalty = 0.0
-            for group_id in group_ids:
-                if group_id != 0:
-                    L1penalty += \
-                        np.linalg.norm(beta[self.group == group_id], 2)
-            L1penalty += np.linalg.norm(beta[self.group == 0], 1)
-        return L1penalty
-
-    def _penalty(self, beta):
-        """The penalty."""
-        alpha = self.alpha
-        # Combine L1 and L2 penalty terms
-        P = 0.5 * (1 - alpha) * self._L2penalty(beta) + \
-            alpha * self._L1penalty(beta)
-        return P
-
-    def _loss(self, beta0, beta, reg_lambda, X, y):
-        """Define the objective function for elastic net."""
-        L = self._logL(beta0, beta, X, y)
-        P = self._penalty(beta)
-        J = -L + reg_lambda * P
-        return J
-
-    def _L2loss(self, beta0, beta, reg_lambda, X, y):
-        """Quadratic loss."""
-        alpha = self.alpha
-        L = self._logL(beta0, beta, X, y)
-        P = 0.5 * (1 - alpha) * self._L2penalty(beta)
-        J = -L + reg_lambda * P
-        return J
-
     def _prox(self, beta, thresh):
         """Proximal operator."""
         if self.group is None:
@@ -355,72 +417,6 @@ class GLM(object):
 
             return result
 
-    def _grad_L2loss(self, beta0, beta, reg_lambda, X, y):
-        """The gradient."""
-        n_samples = np.float(X.shape[0])
-        alpha = self.alpha
-
-        Tau = self.Tau
-        if Tau is None:
-            Tau = np.eye(beta.shape[0])
-        InvCov = np.dot(Tau.T, Tau)
-
-        z = beta0 + np.dot(X, beta)
-        s = expit(z)
-
-        if self.distr == 'softplus':
-            q = self._qu(z)
-            grad_beta0 = 1. / n_samples * (np.sum(s) - np.sum(y * s / q))
-            grad_beta = 1. / n_samples * \
-                (np.transpose(np.dot(np.transpose(s), X) -
-                              np.dot(np.transpose(y * s / q), X))) + \
-                reg_lambda * (1 - alpha) * \
-                np.dot(InvCov, beta)
-
-        elif self.distr == 'poisson':
-            q = self._qu(z)
-            grad_beta0 = np.sum(q[z <= self.eta] - y[z <= self.eta]) + \
-                np.sum(1 - y[z > self.eta] / q[z > self.eta]) * \
-                np.exp(self.eta)
-            grad_beta0 *= 1. / n_samples
-
-            grad_beta = np.zeros([X.shape[1], 1])
-            selector = np.where(z.ravel() <= self.eta)[0]
-            grad_beta += np.transpose(np.dot((q[selector] - y[selector]).T,
-                                             X[selector, :]))
-            selector = np.where(z.ravel() > self.eta)[0]
-            grad_beta += np.exp(self.eta) * \
-                np.transpose(np.dot((1 - y[selector] / q[selector]).T,
-                                    X[selector, :]))
-            grad_beta *= 1. / n_samples
-            grad_beta += reg_lambda * (1 - alpha) * \
-                np.dot(InvCov, beta)
-
-        elif self.distr == 'gaussian':
-            grad_beta0 = 1. / n_samples * np.sum(z - y)
-            grad_beta = 1. / n_samples * \
-                np.transpose(np.dot(np.transpose(z - y), X)) \
-                + reg_lambda * (1 - alpha) * \
-                np.dot(InvCov, beta)
-
-        elif self.distr == 'binomial':
-            grad_beta0 = 1. / n_samples * np.sum(s - y)
-            grad_beta = 1. / n_samples * \
-                np.transpose(np.dot(np.transpose(s - y), X)) \
-                + reg_lambda * (1 - alpha) * \
-                np.dot(InvCov, beta)
-
-        elif self.distr == 'multinomial':
-            # this assumes that y is already as a one-hot encoding
-            pred = self._qu(z)
-            grad_beta0 = -1. / n_samples * np.sum(y - pred, axis=0)
-            grad_beta = -1. / n_samples * \
-                np.transpose(np.dot(np.transpose(y - pred), X)) \
-                + reg_lambda * (1 - alpha) * \
-                np.dot(InvCov, beta)
-
-        return grad_beta0, grad_beta
-
     def _gradhess_logloss_1d(self, xk, y, z):
         """
         Computes gradient (1st derivative)
@@ -446,7 +442,7 @@ class GLM(object):
         n_samples = np.float(xk.shape[0])
 
         if self.distr == 'softplus':
-            mu = self._qu(z)
+            mu = _qu(self.distr, z, self.eta)
             s = expit(z)
             gk = np.sum(s * xk) - np.sum(y * s / mu * xk)
 
@@ -455,7 +451,7 @@ class GLM(object):
             hk = np.sum(grad_s * xk ** 2) - np.sum(y * grad_s_by_mu * xk ** 2)
 
         elif self.distr == 'poisson':
-            mu = self._qu(z)
+            mu = _qu(self.distr, z, self.eta)
             s = expit(z)
             gk = np.sum((mu[z <= self.eta] - y[z <= self.eta]) *
                         xk[z <= self.eta]) + \
@@ -472,12 +468,12 @@ class GLM(object):
             hk = np.sum(xk * xk)
 
         elif self.distr == 'binomial':
-            mu = self._qu(z)
+            mu = _qu(self.distr, z, self.eta)
             gk = np.sum((mu - y) * xk)
             hk = np.sum(mu * (1.0 - mu) * xk ** 2)
 
         elif self.distr == 'multinomial':
-            mu = self._qu(z)
+            mu = _qu(self.distr, z, self.eta)
             gk = np.ravel(np.dot(np.transpose(mu - y), xk))
             hk = np.ravel(np.dot(np.transpose(mu * (1.0 - mu)), (xk ** 2)))
 
@@ -632,8 +628,8 @@ class GLM(object):
             L, DL = list(), list()
             for t in range(0, self.max_iter):
                 if self.solver == 'batch-gradient':
-                    grad_beta0, grad_beta = self._grad_L2loss(
-                        beta[0], beta[1:], rl, X, y)
+                    grad_beta0, grad_beta = _grad_L2loss(self.distr,
+                        self.alpha, beta[0], beta[1:], rl, X, y, self.Tau, self.eta)
                     g[0] = grad_beta0
                     g[1:] = grad_beta
                     beta = beta - self.learning_rate * g
@@ -648,7 +644,7 @@ class GLM(object):
                     ActiveSet[np.where(beta[1:] == 0)[0] + 1] = 0
 
                 # Compute and save loss
-                L.append(self._loss(beta[0], beta[1:], rl, X, y))
+                L.append(_loss(self.distr, self.alpha, beta[0], beta[1:], self.Tau, rl, X, y, self.eta, self.group))
 
                 if t > 1:
                     DL.append(L[-1] - L[-2])
@@ -694,9 +690,9 @@ class GLM(object):
         if isinstance(self.fit_, list):
             yhat = list()
             for fit in self.fit_:
-                yhat.append(self._lmb(fit['beta0'], fit['beta'], X))
+                yhat.append(_lmb(self.distr, fit['beta0'], fit['beta'], X, self.eta))
         else:
-            yhat = self._lmb(self.fit_['beta0'], self.fit_['beta'], X)
+            yhat = _lmb(self.distr, self.fit_['beta0'], self.fit_['beta'], X, self.eta)
         yhat = np.asarray(yhat)
         yhat = yhat[..., 0] if self.distr != 'multinomial' else yhat
 
@@ -743,9 +739,9 @@ class GLM(object):
         if isinstance(self.fit_, list):
             yhat = list()
             for fit in self.fit_:
-                yhat.append(self._lmb(fit['beta0'], fit['beta'], X))
+                yhat.append(_lmb(self.distr, fit['beta0'], fit['beta'], X, self.eta))
         else:
-            yhat = self._lmb(self.fit_['beta0'], self.fit_['beta'], X)
+            yhat = _lmb(self.distr, self.fit_['beta0'], self.fit_['beta'], X, self.eta)
         yhat = np.asarray(yhat)
 
         return yhat
@@ -871,13 +867,13 @@ class GLM(object):
         """
         np.random.RandomState(self.random_state)
         if self.distr == 'softplus' or self.distr == 'poisson':
-            y = np.random.poisson(self._lmb(beta0, beta, X))
+            y = np.random.poisson(_lmb(self.distr, beta0, beta, X, self.eta))
         if self.distr == 'gaussian':
-            y = np.random.normal(self._lmb(beta0, beta, X))
+            y = np.random.normal(_lmb(self.distr, beta0, beta, X, self.eta))
         if self.distr == 'binomial':
-            y = np.random.binomial(1, self._lmb(beta0, beta, X))
+            y = np.random.binomial(1, _lmb(self.distr, beta0, beta, X, self.eta))
         if self.distr == 'multinomial':
             y = np.array([np.random.multinomial(1, pvals)
                           for pvals in
-                          self._lmb(beta0, beta, X)]).argmax(0)
+                          _lmb(self.distr, beta0, beta, X, self.eta)]).argmax(0)
         return y
