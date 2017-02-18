@@ -320,14 +320,6 @@ class GLM(object):
         J = -L + reg_lambda * P
         return J
 
-    def _L2loss(self, beta0, beta, reg_lambda, X, y):
-        """Quadratic loss."""
-        alpha = self.alpha
-        L = self._logL(beta0, beta, X, y)
-        P = 0.5 * (1 - alpha) * self._L2penalty(beta)
-        J = -L + reg_lambda * P
-        return J
-
     def _prox(self, beta, thresh):
         """Proximal operator."""
         if self.group is None:
