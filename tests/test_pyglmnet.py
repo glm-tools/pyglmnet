@@ -9,6 +9,7 @@ from numpy.testing import assert_allclose
 
 from pyglmnet import GLM
 
+
 def test_tikhonov():
     """Tikhonov regularization test"""
     n_samples, n_features = 1000, 100
@@ -18,12 +19,12 @@ def test_tikhonov():
     PriorCov = np.zeros([n_features, n_features])
     for i in np.arange(0, n_features):
         for j in np.arange(i, n_features):
-            PriorCov[i, j] = np.exp(-Gam * 1./ (np.float(n_features) ** 2) * \
-                (np.float(i) - np.float(j)) ** 2)
+            PriorCov[i, j] = np.exp(-Gam * 1. / (np.float(n_features) ** 2) *
+                                    (np.float(i) - np.float(j)) ** 2)
             PriorCov[j, i] = PriorCov[i, j]
             if i == j:
                 PriorCov[i, j] += 0.01
-    PriorCov = 1./ np.max(PriorCov) * PriorCov
+    PriorCov = 1. / np.max(PriorCov) * PriorCov
 
     # sample parameters as multivariate normal
     beta0 = np.random.randn()
@@ -50,10 +51,7 @@ def test_tikhonov():
                        solver='batch-gradient',
                        tol=1e-5,
                        score_metric='pseudo_R2')
-    glm_tikhonov.fit(Xtrain, ytrain);
-
-    ytrain_hat = glm_tikhonov[-1].predict(Xtrain)
-    ytest_hat = glm_tikhonov[-1].predict(Xtest)
+    glm_tikhonov.fit(Xtrain, ytrain)
 
     R2_train = dict()
     R2_test = dict()
@@ -68,9 +66,6 @@ def test_tikhonov():
                        tol=1e-5,
                        score_metric='pseudo_R2')
     glm_tikhonov.fit(Xtrain, ytrain)
-
-    ytrain_hat = glm_tikhonov[-1].predict(Xtrain)
-    ytest_hat = glm_tikhonov[-1].predict(Xtest)
 
     R2_train = dict()
     R2_test = dict()
@@ -100,19 +95,15 @@ def test_group_lasso():
     Xr = np.random.normal(0.0, 1.0, [n_samples, n_features])
     yr = glm_group.simulate(beta0, beta, Xr)
 
-    # simulate testing data
-    Xt = np.random.normal(0.0, 1.0, [n_samples, n_features])
-    yt = glm_group.simulate(beta0, beta, Xt)
-
     # scale and fit
     scaler = StandardScaler().fit(Xr)
     glm_group.fit(scaler.transform(Xr), yr)
+
 
 def test_glmnet():
     """Test glmnet."""
     scaler = StandardScaler()
     n_samples, n_features = 1000, 100
-    density = 0.1
     n_lambda = 10
 
     # coefficients
@@ -165,13 +156,15 @@ def test_glmnet():
 
     # test fit_predict
     glm_poisson.fit_predict(X_train, y_train)
-    assert_raises(ValueError, glm_poisson.fit_predict, X_train[None, ...], y_train)
+    assert_raises(ValueError, glm_poisson.fit_predict,
+                  X_train[None, ...], y_train)
 
 
 def simple_cv_scorer(obj, X, y):
     """Simple scorer takes average pseudo-R2 from regularization path"""
     yhats = obj.predict(X)
     return np.mean([obj.score(X, y) for yhat in yhats])
+
 
 def test_cv():
     """Simple CV check"""
@@ -188,10 +181,11 @@ def test_cv():
     assert_equal(len(cross_val_score(glm_normal, X, y, cv=cv,
                  scoring=simple_cv_scorer)), 5)
 
+
 def test_multinomial():
     """Test all multinomial functionality"""
     glm_mn = GLM(distr='multinomial', reg_lambda=np.array([0.0, 0.1, 0.2]),
-                 learning_rate = 2e-1, tol=1e-10)
+                 learning_rate=2e-1, tol=1e-10)
     X = np.array([[-1, -2, -3], [4, 5, 6]])
     y = np.array([1, 0])
 
@@ -201,20 +195,13 @@ def test_multinomial():
     assert_true(grad_beta0[0] != grad_beta0[1])
     glm_mn.fit(X, y)
     y_pred_proba = glm_mn.predict_proba(X)
-    assert_equal(y_pred_proba.shape, (3, X.shape[0], 2))  # n_lambdas x n_samples x n_classes
-
-    # pick one as yhat
-    yhat = y_pred_proba[0]
-
-    # uniform prediction
-    ynull = np.ones(yhat.shape) / yhat.shape[1]
+    assert_equal(y_pred_proba.shape,
+                 (3, X.shape[0], 2))  # n_lambdas x n_samples x n_classes
 
     # pseudo_R2 should be greater than 0
     assert_true(glm_mn[-1].score(X, y) > 0.)
     assert_equal(len(glm_mn.simulate(glm_mn.fit_[0]['beta0'],
-                                  glm_mn.fit_[0]['beta'],
-                                  X)),
-                 X.shape[0])
+                 glm_mn.fit_[0]['beta'], X)), X.shape[0])
 
     # check that score is computed for sliced estimator
     scorelist = glm_mn[-1].score(X, y)
@@ -223,6 +210,7 @@ def test_multinomial():
     # check that score is computed for all lambdas
     scorelist = glm_mn.score(X, y)
     assert_equal(scorelist.shape[0], y_pred_proba.shape[0])
+
 
 def test_cdfast():
     """Test all functionality related to fast coordinate descent"""
@@ -257,13 +245,14 @@ def test_cdfast():
                                        n_features=n_features,
                                        n_redundant=0,
                                        n_informative=n_features,
-                           random_state=1, n_classes=n_classes)
+                                       random_state=1,
+                                       n_classes=n_classes)
             y_bk = y.ravel()
             y = np.zeros([X.shape[0], y.max() + 1])
             y[np.arange(X.shape[0]), y_bk] = 1
 
         # compute grad and hess
-        beta_ = np.zeros([n_features+1, beta.shape[1]])
+        beta_ = np.zeros([n_features + 1, beta.shape[1]])
         beta_[0] = beta0
         beta_[1:] = beta
         z = beta_[0] + np.dot(X, beta_[1:])
