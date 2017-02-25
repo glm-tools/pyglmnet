@@ -92,9 +92,9 @@ class GLM(EstimatorMixin):
         If you do not want to specify a group for a specific parameter,
         set it to zero. \n
         default: None, in which case it defaults to L1 regularization
-    reg_lambda : array | list | None \n
+    reg_lambda : array | list
         array of regularized parameters :math:`\\lambda` of penalty term. \n
-        default: None, a list of 10 floats spaced logarithmically (base e)
+        default: A list of 10 floats spaced logarithmically (base e)
         between 0.5 and 0.01. \n
     solver : str \n
         optimization method, can be one of the following
@@ -146,14 +146,6 @@ class GLM(EstimatorMixin):
                  tol=1e-3, eta=2.0, score_metric='deviance',
                  random_state=0, verbose=False):
 
-        if reg_lambda is None:
-            reg_lambda = np.logspace(np.log(0.5), np.log(0.01), 10,
-                                     base=np.exp(1))
-        if not isinstance(reg_lambda, (list, np.ndarray)):
-            reg_lambda = [reg_lambda]
-        if not isinstance(max_iter, int):
-            max_iter = int(max_iter)
-
         self.distr = distr
         self.alpha = alpha
         self.reg_lambda = reg_lambda
@@ -172,22 +164,21 @@ class GLM(EstimatorMixin):
         set_log_level(verbose)
 
     def get_params(self, deep=False):
-        return dict(
-            (
-                ('distr', self.distr),
-                ('alpha', self.alpha),
-                ('Tau', self.Tau),
-                ('group', self.group),
-                ('reg_lambda', self.reg_lambda),
-                ('learning_rate', self.learning_rate),
-                ('max_iter', self.max_iter),
-                ('tol', self.tol),
-                ('eta', self.eta),
-                ('score_metric', self.score_metric),
-                ('random_state', self.random_state),
-                ('verbose', self.verbose)
-            )
-        )
+        return {
+            'distr': self.distr,
+            'alpha': self.alpha,
+            'Tau': self.Tau,
+            'group': self.group,
+            'reg_lambda': self.reg_lambda,
+            'solver': self.solver,
+            'learning_rate': self.learning_rate,
+            'max_iter': self.max_iter,
+            'tol': self.tol,
+            'eta': self.eta,
+            'score_metric': self.score_metric,
+            'random_state': self.random_state,
+            'verbose': self.verbose
+        }
 
     def __repr__(self):
         """Description of the object."""
@@ -195,11 +186,12 @@ class GLM(EstimatorMixin):
         s = '<\nDistribution | %s' % self.distr
         s += '\nalpha | %0.2f' % self.alpha
         s += '\nmax_iter | %0.2f' % self.max_iter
-        if len(reg_lambda) > 1:
-            s += ('\nlambda: %0.2f to %0.2f\n>'
-                  % (reg_lambda[0], reg_lambda[-1]))
-        else:
-            s += '\nlambda: %0.2f\n>' % reg_lambda[0]
+        if isinstance(reg_lambda, list):
+            if len(reg_lambda) > 1:
+                s += ('\nlambda: %0.2f to %0.2f\n>'
+                      % (reg_lambda[0], reg_lambda[-1]))
+            else:
+                s += '\nlambda: %0.2f\n>' % reg_lambda[0]
         return s
 
     def __getitem__(self, key):
@@ -567,6 +559,13 @@ class GLM(EstimatorMixin):
         """
 
         np.random.RandomState(self.random_state)
+
+        if self.reg_lambda is None:
+            self.reg_lambda = np.logspace(np.log(0.5), np.log(0.01), 10,
+                                          base=np.exp(1))
+
+        if not isinstance(self.max_iter, int):
+            self.max_iter = int(self.max_iter)
 
         # checks for group
         if self.group is not None:
