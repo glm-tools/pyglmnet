@@ -5,7 +5,9 @@ from copy import deepcopy
 
 import numpy as np
 from scipy.special import expit
+
 from . import utils
+from .mixin import EstimatorMixin
 
 logger = logging.getLogger('pyglmnet')
 logger.addHandler(logging.StreamHandler())
@@ -38,7 +40,7 @@ def set_log_level(verbose):
     logger.setLevel(verbose)
 
 
-class GLM(object):
+class GLM(EstimatorMixin):
     """Class for estimating regularized generalized linear models (GLM).
     The regularized GLM minimizes the penalized negative log likelihood:
 
