@@ -1,8 +1,10 @@
 import numpy as np
 import scipy.sparse as sps
+
 from sklearn.cross_validation import KFold, cross_val_score
 from sklearn.datasets import make_regression, make_classification
 from sklearn.preprocessing import StandardScaler
+from sklearn.utils.estimator_checks import check_estimator
 
 from nose.tools import assert_true, assert_equal, assert_raises
 from numpy.testing import assert_allclose
@@ -102,6 +104,9 @@ def test_group_lasso():
 
 def test_glmnet():
     """Test glmnet."""
+
+    check_estimator(GLM)
+
     scaler = StandardScaler()
     n_samples, n_features = 1000, 100
     n_lambda = 10
