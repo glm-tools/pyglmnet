@@ -4,8 +4,10 @@ import logging
 from copy import deepcopy
 
 import numpy as np
-from scipy.special import expit
+
 from . import utils
+from .utils import _assert_all_finite
+from .mixin import EstimatorMixin
 
 logger = logging.getLogger('pyglmnet')
 logger.addHandler(logging.StreamHandler())
@@ -38,7 +40,25 @@ def set_log_level(verbose):
     logger.setLevel(verbose)
 
 
-class GLM(object):
+def expit(x, out=None):
+    """Logistic sigmoid function, ``1 / (1 + exp(-x))``.
+    See sklearn.utils.extmath.log_logistic for the log of this function.
+    """
+    if out is None:
+        out = np.empty(np.atleast_1d(x).shape, dtype=np.float64)
+    out[:] = x
+
+    # 1 / (1 + exp(-x)) = (1 + tanh(x / 2)) / 2
+    # This way of computing the logistic is both fast and stable.
+    out *= .5
+    np.tanh(out, out)
+    out += 1
+    out *= .5
+
+    return out.reshape(np.shape(x))
+
+
+class GLM(EstimatorMixin):
     """Class for estimating regularized generalized linear models (GLM).
     The regularized GLM minimizes the penalized negative log likelihood:
 
@@ -90,9 +110,9 @@ class GLM(object):
         If you do not want to specify a group for a specific parameter,
         set it to zero. \n
         default: None, in which case it defaults to L1 regularization
-    reg_lambda : array | list | None \n
+    reg_lambda : array | list
         array of regularized parameters :math:`\\lambda` of penalty term. \n
-        default: None, a list of 10 floats spaced logarithmically (base e)
+        default: A list of 10 floats spaced logarithmically (base e)
         between 0.5 and 0.01. \n
     solver : str \n
         optimization method, can be one of the following
@@ -144,14 +164,6 @@ class GLM(object):
                  tol=1e-3, eta=2.0, score_metric='deviance',
                  random_state=0, verbose=False):
 
-        if reg_lambda is None:
-            reg_lambda = np.logspace(np.log(0.5), np.log(0.01), 10,
-                                     base=np.exp(1))
-        if not isinstance(reg_lambda, (list, np.ndarray)):
-            reg_lambda = [reg_lambda]
-        if not isinstance(max_iter, int):
-            max_iter = int(max_iter)
-
         self.distr = distr
         self.alpha = alpha
         self.reg_lambda = reg_lambda
@@ -170,22 +182,21 @@ class GLM(object):
         set_log_level(verbose)
 
     def get_params(self, deep=False):
-        return dict(
-            (
-                ('distr', self.distr),
-                ('alpha', self.alpha),
-                ('Tau', self.Tau),
-                ('group', self.group),
-                ('reg_lambda', self.reg_lambda),
-                ('learning_rate', self.learning_rate),
-                ('max_iter', self.max_iter),
-                ('tol', self.tol),
-                ('eta', self.eta),
-                ('score_metric', self.score_metric),
-                ('random_state', self.random_state),
-                ('verbose', self.verbose)
-            )
-        )
+        return {
+            'distr': self.distr,
+            'alpha': self.alpha,
+            'Tau': self.Tau,
+            'group': self.group,
+            'reg_lambda': self.reg_lambda,
+            'solver': self.solver,
+            'learning_rate': self.learning_rate,
+            'max_iter': self.max_iter,
+            'tol': self.tol,
+            'eta': self.eta,
+            'score_metric': self.score_metric,
+            'random_state': self.random_state,
+            'verbose': self.verbose
+        }
 
     def __repr__(self):
         """Description of the object."""
@@ -193,11 +204,16 @@ class GLM(object):
         s = '<\nDistribution | %s' % self.distr
         s += '\nalpha | %0.2f' % self.alpha
         s += '\nmax_iter | %0.2f' % self.max_iter
-        if len(reg_lambda) > 1:
-            s += ('\nlambda: %0.2f to %0.2f\n>'
-                  % (reg_lambda[0], reg_lambda[-1]))
-        else:
-            s += '\nlambda: %0.2f\n>' % reg_lambda[0]
+
+        if reg_lambda is None:
+            reg_lambda = np.logspace(np.log(0.5), np.log(0.01), 10,
+                                     base=np.exp(1.))
+        if isinstance(reg_lambda, list):
+            if len(reg_lambda) > 1:
+                s += ('\nlambda: %0.2f to %0.2f\n>'
+                      % (reg_lambda[0], reg_lambda[-1]))
+            else:
+                s += '\nlambda: %0.2f\n>' % reg_lambda[0]
         return s
 
     def __getitem__(self, key):
@@ -209,7 +225,13 @@ class GLM(object):
         if not isinstance(key, (slice, int)):
             raise IndexError('Invalid slice for GLM object')
         glm.fit_ = glm.fit_[key]
-        glm.reg_lambda = glm.reg_lambda[key]
+
+        reg_lambda = glm.reg_lambda
+        if reg_lambda is None:
+            reg_lambda = np.logspace(np.log(0.5), np.log(0.01), 10,
+                                     base=np.exp(1.))
+
+        glm.reg_lambda = reg_lambda[key]
         return glm
 
     def copy(self):
@@ -228,6 +250,7 @@ class GLM(object):
 
     def _qu(self, z):
         """The non-linearity."""
+        z = z.astype(float)
         if self.distr == 'softplus':
             qu = np.log1p(np.exp(z))
         elif self.distr == 'poisson':
@@ -563,8 +586,26 @@ class GLM(object):
         self : instance of GLM \n
             The fitted model.
         """
+        X = np.atleast_2d(utils.as_float_array(X))
+        y = utils.as_float_array(y)
+
+        _assert_all_finite(X)
+        _assert_all_finite(y)
+
+        if X.shape[0] == 0:
+            raise ValueError('X cannot be empty')
+        if X.shape[1] == 0:
+            raise ValueError('0 feature(s) (shape=(%d, %d)) while a minimum of'
+                             ' 1 is required.' % (X.shape[0], X.shape[1]))
 
         np.random.RandomState(self.random_state)
+
+        if self.reg_lambda is None:
+            reg_lambda = np.logspace(np.log(0.5), np.log(0.01), 10,
+                                     base=np.exp(1.))
+
+        if not isinstance(self.max_iter, int):
+            self.max_iter = int(self.max_iter)
 
         # checks for group
         if self.group is not None:
@@ -602,7 +643,7 @@ class GLM(object):
         fit_params = list()
 
         logger.info('Looping through the regularization path')
-        for l, rl in enumerate(self.reg_lambda):
+        for l, rl in enumerate(reg_lambda):
             fit_params.append({'beta0': beta0_hat, 'beta': beta_hat})
             logger.info('Lambda: %6.4f' % rl)
 
@@ -687,6 +728,8 @@ class GLM(object):
             one reg_lambda (compatible with scikit-learn API). \n
             Otherwise, returns a 2D array.
         """
+        _assert_all_finite(X)
+
         if not isinstance(X, np.ndarray):
             raise ValueError('Input data should be of type ndarray (got %s).'
                              % type(X))
@@ -709,7 +752,7 @@ class GLM(object):
 
         return yhat
 
-    def predict_proba(self, X):
+    def predict_probability(self, X):
         """Predict class probability for multinomial
 
         Parameters
@@ -730,6 +773,10 @@ class GLM(object):
         ------
         Works only for the multinomial distribution.
         Raises error otherwise.
+
+        Note
+        ----
+        This does not conform to scikit-learn conventions.
 
         """
         if self.distr != 'multinomial':
