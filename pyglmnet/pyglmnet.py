@@ -6,6 +6,7 @@ from copy import deepcopy
 import numpy as np
 
 from . import utils
+from .utils import _assert_all_finite
 from .mixin import EstimatorMixin
 
 logger = logging.getLogger('pyglmnet')
@@ -578,6 +579,9 @@ class GLM(EstimatorMixin):
         X = np.atleast_2d(utils.as_float_array(X))
         y = utils.as_float_array(y)
 
+        _assert_all_finite(X)
+        _assert_all_finite(y)
+
         if X.shape[0] == 0:
             raise ValueError('X cannot be empty')
         if X.shape[1] == 0:
@@ -714,6 +718,8 @@ class GLM(EstimatorMixin):
             one reg_lambda (compatible with scikit-learn API). \n
             Otherwise, returns a 2D array.
         """
+        _assert_all_finite(X)
+
         if not isinstance(X, np.ndarray):
             raise ValueError('Input data should be of type ndarray (got %s).'
                              % type(X))
