@@ -105,3 +105,31 @@ def tikhonov_from_prior(prior_cov, n_samples, threshold=0.0001):
     n_features = Tau.shape[0]
     Tau = 1. / n_features * Tau
     return Tau
+
+
+def as_float_array(X, copy=True):
+    """Converts an array-like to an array of floats
+
+    The new dtype will be np.float32 or np.float64, depending on the original
+    type. The function can create a copy or modify the argument depending
+    on the argument copy.
+
+    Parameters
+    ----------
+    X : {array-like, sparse matrix}
+
+    copy : bool, optional
+        If True, a copy of X will be created. If False, a copy may still be
+        returned if X's dtype is not a floating point type.
+
+    Returns
+    -------
+    XT : {array, sparse matrix}
+        An array of type np.float
+    """
+    if isinstance(X, list):
+        return np.array(X)
+    if X.dtype in [np.float32, np.float64]:  # is numpy array
+        return X.copy('F' if X.flags['F_CONTIGUOUS'] else 'C') if copy else X
+    else:
+        return X.astype(np.float32 if X.dtype == np.int32 else np.float64)

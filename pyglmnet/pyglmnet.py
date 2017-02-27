@@ -239,6 +239,7 @@ class GLM(EstimatorMixin):
 
     def _qu(self, z):
         """The non-linearity."""
+        z = z.astype(float)
         if self.distr == 'softplus':
             qu = np.log1p(np.exp(z))
         elif self.distr == 'poisson':
@@ -574,12 +575,20 @@ class GLM(EstimatorMixin):
         self : instance of GLM \n
             The fitted model.
         """
+        X = np.atleast_2d(utils.as_float_array(X))
+        y = utils.as_float_array(y)
+
+        if X.shape[0] == 0:
+            raise ValueError('X cannot be empty')
+        if X.shape[1] == 0:
+            raise ValueError('0 feature(s) (shape=(%d, %d)) while a minimum of'
+                             ' 1 is required.' % (X.shape[0], X.shape[1]))
 
         np.random.RandomState(self.random_state)
 
         if self.reg_lambda is None:
             self.reg_lambda = np.logspace(np.log(0.5), np.log(0.01), 10,
-                                          base=np.exp(1))
+                                          base=np.exp(1.))
 
         if not isinstance(self.max_iter, int):
             self.max_iter = int(self.max_iter)
