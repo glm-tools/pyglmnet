@@ -204,6 +204,10 @@ class GLM(EstimatorMixin):
         s = '<\nDistribution | %s' % self.distr
         s += '\nalpha | %0.2f' % self.alpha
         s += '\nmax_iter | %0.2f' % self.max_iter
+
+        if reg_lambda is None:
+            reg_lambda = np.logspace(np.log(0.5), np.log(0.01), 10,
+                                     base=np.exp(1.))
         if isinstance(reg_lambda, list):
             if len(reg_lambda) > 1:
                 s += ('\nlambda: %0.2f to %0.2f\n>'
@@ -221,7 +225,13 @@ class GLM(EstimatorMixin):
         if not isinstance(key, (slice, int)):
             raise IndexError('Invalid slice for GLM object')
         glm.fit_ = glm.fit_[key]
-        glm.reg_lambda = glm.reg_lambda[key]
+
+        reg_lambda = glm.reg_lambda
+        if reg_lambda is None:
+            reg_lambda = np.logspace(np.log(0.5), np.log(0.01), 10,
+                                     base=np.exp(1.))
+
+        glm.reg_lambda = reg_lambda[key]
         return glm
 
     def copy(self):
@@ -591,8 +601,8 @@ class GLM(EstimatorMixin):
         np.random.RandomState(self.random_state)
 
         if self.reg_lambda is None:
-            self.reg_lambda = np.logspace(np.log(0.5), np.log(0.01), 10,
-                                          base=np.exp(1.))
+            reg_lambda = np.logspace(np.log(0.5), np.log(0.01), 10,
+                                     base=np.exp(1.))
 
         if not isinstance(self.max_iter, int):
             self.max_iter = int(self.max_iter)
@@ -633,7 +643,7 @@ class GLM(EstimatorMixin):
         fit_params = list()
 
         logger.info('Looping through the regularization path')
-        for l, rl in enumerate(self.reg_lambda):
+        for l, rl in enumerate(reg_lambda):
             fit_params.append({'beta0': beta0_hat, 'beta': beta_hat})
             logger.info('Lambda: %6.4f' % rl)
 
