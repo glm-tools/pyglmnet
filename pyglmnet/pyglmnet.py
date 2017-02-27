@@ -4,7 +4,6 @@ import logging
 from copy import deepcopy
 
 import numpy as np
-from scipy.special import expit
 
 from . import utils
 from .mixin import EstimatorMixin
@@ -38,6 +37,24 @@ def set_log_level(verbose):
             raise ValueError('verbose must be of a valid type')
         verbose = logging_types[verbose]
     logger.setLevel(verbose)
+
+
+def expit(x, out=None):
+    """Logistic sigmoid function, ``1 / (1 + exp(-x))``.
+    See sklearn.utils.extmath.log_logistic for the log of this function.
+    """
+    if out is None:
+        out = np.empty(np.atleast_1d(x).shape, dtype=np.float64)
+    out[:] = x
+
+    # 1 / (1 + exp(-x)) = (1 + tanh(x / 2)) / 2
+    # This way of computing the logistic is both fast and stable.
+    out *= .5
+    np.tanh(out, out)
+    out += 1
+    out *= .5
+
+    return out.reshape(np.shape(x))
 
 
 class GLM(EstimatorMixin):
@@ -710,7 +727,7 @@ class GLM(EstimatorMixin):
 
         return yhat
 
-    def predict_proba(self, X):
+    def predict_probability(self, X):
         """Predict class probability for multinomial
 
         Parameters
@@ -731,6 +748,10 @@ class GLM(EstimatorMixin):
         ------
         Works only for the multinomial distribution.
         Raises error otherwise.
+
+        Note
+        ----
+        This does not conform to scikit-learn conventions.
 
         """
         if self.distr != 'multinomial':
