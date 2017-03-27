@@ -7,7 +7,7 @@ from sklearn.preprocessing import StandardScaler
 from nose.tools import assert_true, assert_equal, assert_raises
 from numpy.testing import assert_allclose
 
-from pyglmnet import GLM, _grad_L2loss
+from pyglmnet import GLM, _grad_L2loss, _loss
 
 
 def test_tikhonov():
@@ -189,17 +189,19 @@ def test_cv():
     assert_equal(len(cross_val_score(glm_normal, X, y, cv=cv,
                  scoring=simple_cv_scorer)), 5)
 
+
 def test_multinomial():
-    """Test all multinomial functionality"""
+    """Test all multinomial functionality."""
     glm_mn = GLM(distr='multinomial', reg_lambda=np.array([0.0, 0.1, 0.2]),
-                 learning_rate = 2e-1, tol=1e-10)
+                 learning_rate=2e-1, tol=1e-10)
     X = np.array([[-1, -2, -3], [4, 5, 6]])
     y = np.array([1, 0])
 
     # test gradient
     beta = np.zeros([4, 2])
     grad_beta0, grad_beta = _grad_L2loss(glm_mn.distr, glm_mn.alpha,
-                                         beta[0], beta[1:], 0, X, y, glm_mn.Tau, glm_mn.eta)
+                                         beta[0], beta[1:], 0, X, y,
+                                         glm_mn.Tau, glm_mn.eta)
     assert_true(grad_beta0[0] != grad_beta0[1])
     glm_mn.fit(X, y)
     y_pred_proba = glm_mn.predict_proba(X)
@@ -214,8 +216,8 @@ def test_multinomial():
     # pseudo_R2 should be greater than 0
     assert_true(glm_mn[-1].score(X, y) > 0.)
     assert_equal(len(glm_mn.simulate(glm_mn.fit_[0]['beta0'],
-                                  glm_mn.fit_[0]['beta'],
-                                  X)),
+                                     glm_mn.fit_[0]['beta'],
+                                     X)),
                  X.shape[0])
 
     # check that score is computed for sliced estimator
@@ -259,13 +261,13 @@ def test_cdfast():
                                        n_features=n_features,
                                        n_redundant=0,
                                        n_informative=n_features,
-                           random_state=1, n_classes=n_classes)
+                                       random_state=1, n_classes=n_classes)
             y_bk = y.ravel()
             y = np.zeros([X.shape[0], y.max() + 1])
             y[np.arange(X.shape[0]), y_bk] = 1
 
         # compute grad and hess
-        beta_ = np.zeros([n_features+1, beta.shape[1]])
+        beta_ = np.zeros([n_features + 1, beta.shape[1]])
         beta_[0] = beta0
         beta_[1:] = beta
         z = beta_[0] + np.dot(X, beta_[1:])
@@ -295,19 +297,32 @@ def test_cdfast():
         assert_equal(z_ret.shape, z.shape)
 
 
-# def test_gradients():
-#     from pyglmnet import _loss, _grad_L2loss
-#     from scipy.optimize import check_grad
-#     from functools import partial
+def test_gradients():
+    """Test gradient accuracy."""
+    from scipy.optimize import check_grad
+    from functools import partial
 
-#     distr = 'softplus'
-#     reg_lambda = 0.1
-#     X = 
-#     y = 
-#     eta = 
-#     group = 
-#     beta = 
-#     func = partial(distr=distr, beta, reg_lambda, X, y, eta, group)
-#     grad = partial()
-#     diff = check_grad(func, grad, beta0)
-#     assert_true(diff < 1e-8)
+    reg_lambda = 0.1
+    distr = 'gaussian'
+    glm = GLM(distr=distr, reg_lambda=[reg_lambda])
+
+    # data
+    scaler = StandardScaler()
+    n_samples, n_features = 1000, 100
+    X = np.random.normal(0.0, 1.0, [n_samples, n_features])
+    X = scaler.fit_transform(X)
+
+    beta_ = np.zeros(n_features + 1)
+    beta_[0] = np.random.rand()
+    density = 0.1
+    beta_[1:] = sps.rand(n_features, 1, density=density).toarray()[:, 0]
+
+    y = glm.simulate(beta_[0], beta_[1:], X)
+
+    func = partial(_loss, distr, glm.alpha, beta_[0], beta_[1:],
+                   glm.Tau, glm.reg_lambda, X, y, glm.eta, glm.group)
+    grad = partial(_grad_L2loss, distr, glm.alpha, beta_[0], beta_[1:],
+                   glm.reg_lambda, X, y, glm.Tau, glm.eta)
+    print type(grad)
+    diff = check_grad(func, grad, beta_)
+    assert_true(diff < 1e-8)

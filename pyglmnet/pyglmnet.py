@@ -199,7 +199,7 @@ def _grad_L2loss(distr, alpha, beta0, beta, reg_lambda, X, y, Tau, eta):
             + reg_lambda * (1 - alpha) * \
             np.dot(InvCov, beta)
 
-    return grad_beta0, grad_beta
+    return np.vstack((np.array([grad_beta0])[None, :], grad_beta))
 
 
 class GLM(object):
@@ -628,11 +628,12 @@ class GLM(object):
             L, DL = list(), list()
             for t in range(0, self.max_iter):
                 if self.solver == 'batch-gradient':
-                    grad_beta0, grad_beta = _grad_L2loss(self.distr,
-                        self.alpha, beta[0], beta[1:], rl, X, y, self.Tau, self.eta)
-                    g[0] = grad_beta0
-                    g[1:] = grad_beta
-                    beta = beta - self.learning_rate * g
+                    grad = _grad_L2loss(self.distr,
+                                        self.alpha,
+                                        beta[0], beta[1:],
+                                        rl, X, y, self.Tau, self.eta)
+
+                    beta = beta - self.learning_rate * grad
                 elif self.solver == 'cdfast':
                     beta, z = self._cdfast(X, y, z, ActiveSet, beta, rl)
 
