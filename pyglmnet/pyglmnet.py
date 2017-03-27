@@ -750,7 +750,7 @@ class GLM(object):
             >>> grid = cross_val_score(glm[0], X, y, cv=10)
         """
 
-        if self.score_metric not in ['deviance', 'pseudo_R2']:
+        if self.score_metric not in ['deviance', 'pseudo_R2', 'accuracy']:
             raise ValueError('score_metric has to be one of' +
                              ' deviance or pseudo_R2')
 
@@ -758,6 +758,11 @@ class GLM(object):
         if self.ynull_ is None:
             raise ValueError('Model must be fit before ' +
                              'prediction can be scored')
+
+        # For f1 as well
+        if self.score_metric in ['accuracy']:
+            if self.distr not in ['binomial', 'multinomial']:
+                raise ValueError(self.score_metric + "is only defined for binomial or multinomial distributions")
 
         y = y.ravel()
 
@@ -774,6 +779,8 @@ class GLM(object):
             return metrics.deviance(y, yhat, self.ynull_, self.distr)
         elif self.score_metric == "pseudo_R2":
             return metrics.pseudo_R2(X, y, yhat, self.ynull_, self.distr)
+        if self.score_metric == "accuracy":
+            return metrics.accuracy(y, yhat)
 
     def simulate(self, beta0, beta, X):
         """Simulate target data under a generative model.

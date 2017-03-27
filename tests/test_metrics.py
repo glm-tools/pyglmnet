@@ -15,7 +15,7 @@ def test_deviance():
 
 	glm_sim.fit(X, y)
 	score = glm_sim[-1].score(X, y)
-	print score
+	
 	assert_equal(score.shape[0], 1)
 
 def test_pseudoR2():
@@ -31,5 +31,22 @@ def test_pseudoR2():
 
 	glm_sim.fit(X, y)
 	score = glm_sim[-1].score(X, y)
-	print score
+	
+	assert_equal(score.shape[0], 1)
+
+def test_accuracy():
+
+	n_samples, n_features, n_classes = 1000, 100, 2
+
+	beta0 = np.random.normal(0.0, 1.0, 1)
+	beta = np.random.normal(0.0, 1.0, (n_features, n_classes))
+
+    # sample train and test data
+	glm_sim = GLM(distr='multinomial', score_metric='accuracy')
+	X = np.random.randn(n_samples, n_features)
+	y = glm_sim.simulate(beta0, beta, X)
+
+	glm_sim.fit(X, y)
+	score = glm_sim[-1].score(X, y)
+	
 	assert_equal(score.shape[0], 1)
