@@ -10,6 +10,37 @@ from numpy.testing import assert_allclose
 from pyglmnet import GLM, _grad_L2loss, _loss
 
 
+def test_gradients():
+    """Test gradient accuracy."""
+    from scipy.optimize import check_grad
+    from functools import partial
+
+    reg_lambda = 0.1
+    distr = 'gaussian'
+    glm = GLM(distr=distr, reg_lambda=[reg_lambda])
+
+    # data
+    scaler = StandardScaler()
+    n_samples, n_features = 1000, 100
+    X = np.random.normal(0.0, 1.0, [n_samples, n_features])
+    X = scaler.fit_transform(X)
+
+    density = 0.1
+    beta_ = np.zeros(n_features + 1)
+    beta_[0] = np.random.rand()
+    beta_[1:] = sps.rand(n_features, 1, density=density).toarray()[:, 0]
+
+    y = glm.simulate(beta_[0], beta_[1:], X)
+
+    func = partial(_loss, distr, glm.alpha,
+                   glm.Tau, reg_lambda, X, y, glm.eta, glm.group)
+    grad = partial(_grad_L2loss, distr, glm.alpha,
+                   reg_lambda, X, y, glm.Tau,
+                   glm.eta)
+    diff = check_grad(func, grad, beta_)
+    assert_true(diff < 1e-8)
+
+
 def test_tikhonov():
     """Tikhonov regularization test"""
     n_samples, n_features = 1000, 100
@@ -108,6 +139,7 @@ def test_group_lasso():
     # scale and fit
     scaler = StandardScaler().fit(Xr)
     glm_group.fit(scaler.transform(Xr), yr)
+
 
 def test_glmnet():
     """Test glmnet."""
@@ -228,6 +260,7 @@ def test_multinomial():
     scorelist = glm_mn.score(X, y)
     assert_equal(scorelist.shape[0], y_pred_proba.shape[0])
 
+
 def test_cdfast():
     """Test all functionality related to fast coordinate descent"""
     scaler = StandardScaler()
@@ -296,33 +329,3 @@ def test_cdfast():
         assert_equal(beta_ret.shape, beta_.shape)
         assert_equal(z_ret.shape, z.shape)
 
-
-def test_gradients():
-    """Test gradient accuracy."""
-    from scipy.optimize import check_grad
-    from functools import partial
-
-    reg_lambda = 0.1
-    distr = 'gaussian'
-    glm = GLM(distr=distr, reg_lambda=[reg_lambda])
-
-    # data
-    scaler = StandardScaler()
-    n_samples, n_features = 1000, 100
-    X = np.random.normal(0.0, 1.0, [n_samples, n_features])
-    X = scaler.fit_transform(X)
-
-    beta_ = np.zeros(n_features + 1)
-    beta_[0] = np.random.rand()
-    density = 0.1
-    beta_[1:] = sps.rand(n_features, 1, density=density).toarray()[:, 0]
-
-    y = glm.simulate(beta_[0], beta_[1:], X)
-
-    func = partial(_loss, distr, glm.alpha, beta_[0], beta_[1:],
-                   glm.Tau, glm.reg_lambda, X, y, glm.eta, glm.group)
-    grad = partial(_grad_L2loss, distr, glm.alpha, beta_[0], beta_[1:],
-                   glm.reg_lambda, X, y, glm.Tau, glm.eta)
-    print type(grad)
-    diff = check_grad(func, grad, beta_)
-    assert_true(diff < 1e-8)

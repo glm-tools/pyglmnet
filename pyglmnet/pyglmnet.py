@@ -128,24 +128,24 @@ def _L1penalty(beta, group=None):
     return L1penalty
 
 
-def _loss(distr, alpha, beta0, beta, Tau, reg_lambda, X, y, eta, group):
+def _loss(distr, alpha, Tau, reg_lambda, X, y, eta, group, beta):
     """Define the objective function for elastic net."""
-    L = _logL(distr, beta0, beta, X, y, eta)
-    P = _penalty(alpha, beta, Tau, group)
+    L = _logL(distr, beta[0], beta[1:], X, y, eta)
+    P = _penalty(alpha, beta[1:], Tau, group)
     J = -L + reg_lambda * P
     return J
 
 
-def _grad_L2loss(distr, alpha, beta0, beta, reg_lambda, X, y, Tau, eta):
+def _grad_L2loss(distr, alpha, reg_lambda, X, y, Tau, eta, beta):
     """The gradient."""
 
     n_samples = np.float(X.shape[0])
 
     if Tau is None:
-        Tau = np.eye(beta.shape[0])
+        Tau = np.eye(beta[1:].shape[0])
     InvCov = np.dot(Tau.T, Tau)
 
-    z = beta0 + np.dot(X, beta)
+    z = beta[0] + np.dot(X, beta[1:])
     s = expit(z)
 
     if distr == 'softplus':
@@ -155,7 +155,7 @@ def _grad_L2loss(distr, alpha, beta0, beta, reg_lambda, X, y, Tau, eta):
             (np.transpose(np.dot(np.transpose(s), X) -
                           np.dot(np.transpose(y * s / q), X))) + \
             reg_lambda * (1 - alpha) * \
-            np.dot(InvCov, beta)
+            np.dot(InvCov, beta[1:])
 
     elif distr == 'poisson':
         q = _qu(distr, z, eta)
@@ -174,21 +174,21 @@ def _grad_L2loss(distr, alpha, beta0, beta, reg_lambda, X, y, Tau, eta):
                                 X[selector, :]))
         grad_beta *= 1. / n_samples
         grad_beta += reg_lambda * (1 - alpha) * \
-            np.dot(InvCov, beta)
+            np.dot(InvCov, beta[1:])
 
     elif distr == 'gaussian':
         grad_beta0 = 1. / n_samples * np.sum(z - y)
         grad_beta = 1. / n_samples * \
             np.transpose(np.dot(np.transpose(z - y), X)) \
             + reg_lambda * (1 - alpha) * \
-            np.dot(InvCov, beta)
+            np.dot(InvCov, beta[1:])
 
     elif distr == 'binomial':
         grad_beta0 = 1. / n_samples * np.sum(s - y)
         grad_beta = 1. / n_samples * \
             np.transpose(np.dot(np.transpose(s - y), X)) \
             + reg_lambda * (1 - alpha) * \
-            np.dot(InvCov, beta)
+            np.dot(InvCov, beta[1:])
 
     elif distr == 'multinomial':
         # this assumes that y is already as a one-hot encoding
@@ -197,9 +197,14 @@ def _grad_L2loss(distr, alpha, beta0, beta, reg_lambda, X, y, Tau, eta):
         grad_beta = -1. / n_samples * \
             np.transpose(np.dot(np.transpose(y - pred), X)) \
             + reg_lambda * (1 - alpha) * \
-            np.dot(InvCov, beta)
+            np.dot(InvCov, beta[1:])
 
-    return np.vstack((np.array([grad_beta0])[None, :], grad_beta))
+    n_classes = y.shape[1] if distr == 'multinomial' else 1
+    n_features = X.shape[1]
+    g = np.zeros((n_features + 1, ))
+    g[0] = grad_beta0
+    g[1:] = grad_beta
+    return g
 
 
 class GLM(object):
@@ -630,10 +635,10 @@ class GLM(object):
                 if self.solver == 'batch-gradient':
                     grad = _grad_L2loss(self.distr,
                                         self.alpha,
-                                        beta[0], beta[1:],
-                                        rl, X, y, self.Tau, self.eta)
+                                        rl, X, y, self.Tau, self.eta,
+                                        beta[:, 0])
 
-                    beta = beta - self.learning_rate * grad
+                    beta = beta - self.learning_rate * grad[:, None]
                 elif self.solver == 'cdfast':
                     beta, z = self._cdfast(X, y, z, ActiveSet, beta, rl)
 
@@ -645,7 +650,7 @@ class GLM(object):
                     ActiveSet[np.where(beta[1:] == 0)[0] + 1] = 0
 
                 # Compute and save loss
-                L.append(_loss(self.distr, self.alpha, beta[0], beta[1:], self.Tau, rl, X, y, self.eta, self.group))
+                L.append(_loss(self.distr, self.alpha, self.Tau, rl, X, y, self.eta, self.group, beta))
 
                 if t > 1:
                     DL.append(L[-1] - L[-2])
