@@ -95,7 +95,7 @@ def _penalty(alpha, beta, Tau, group):
 
 
 def _L2penalty(beta, Tau):
-    """The L2 penalty"""
+    """The L2 penalty."""
     # Compute the L2 penalty
     if Tau is None:
         # Ridge=like penalty
@@ -111,7 +111,7 @@ def _L2penalty(beta, Tau):
 
 
 def _L1penalty(beta, group=None):
-    """The L1 penalty"""
+    """The L1 penalty."""
     # Compute the L1 penalty
     if group is None:
         # Lasso-like penalty
@@ -132,6 +132,14 @@ def _loss(distr, alpha, Tau, reg_lambda, X, y, eta, group, beta):
     """Define the objective function for elastic net."""
     L = _logL(distr, beta[0], beta[1:], X, y, eta)
     P = _penalty(alpha, beta[1:], Tau, group)
+    J = -L + reg_lambda * P
+    return J
+
+
+def _L2loss(distr, alpha, Tau, reg_lambda, X, y, eta, group, beta):
+    """Define the objective function for elastic net."""
+    L = _logL(distr, beta[0], beta[1:], X, y, eta)
+    P = 0.5 * (1 - alpha) * _L2penalty(beta[1:], Tau)
     J = -L + reg_lambda * P
     return J
 
@@ -164,7 +172,7 @@ def _grad_L2loss(distr, alpha, reg_lambda, X, y, Tau, eta, beta):
             np.exp(eta)
         grad_beta0 *= 1. / n_samples
 
-        grad_beta = np.zeros([X.shape[1], 1])
+        grad_beta = np.zeros([X.shape[1], ])
         selector = np.where(z.ravel() <= eta)[0]
         grad_beta += np.transpose(np.dot((q[selector] - y[selector]).T,
                                          X[selector, :]))
