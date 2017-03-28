@@ -7,23 +7,56 @@ from sklearn.preprocessing import StandardScaler
 from nose.tools import assert_true, assert_equal, assert_raises
 from numpy.testing import assert_allclose
 
-from pyglmnet import GLM
+from pyglmnet import GLM, _grad_L2loss, _L2loss
+from scipy.optimize import approx_fprime
+
+def test_gradients():
+    """Test gradient accuracy."""
+    from scipy.optimize import check_grad
+    from functools import partial
+
+    # data
+    scaler = StandardScaler()
+    n_samples, n_features = 1000, 100
+    X = np.random.normal(0.0, 1.0, [n_samples, n_features])
+    X = scaler.fit_transform(X)
+
+    density = 0.1
+    beta_ = np.zeros(n_features + 1)
+    beta_[0] = np.random.rand()
+    beta_[1:] = sps.rand(n_features, 1, density=density).toarray()[:, 0]
+
+    reg_lambda = 0.1
+    distrs = ['gaussian', 'binomial', 'softplus', 'poisson']
+    for distr in distrs:
+        glm = GLM(distr=distr, reg_lambda=[reg_lambda])
+        y = glm.simulate(beta_[0], beta_[1:], X)
+
+        func = partial(_L2loss, distr, glm.alpha,
+                       glm.Tau, reg_lambda, X, y, glm.eta, glm.group)
+        grad = partial(_grad_L2loss, distr, glm.alpha,
+                       reg_lambda, X, y, glm.Tau,
+                       glm.eta)
+        approx_grad = approx_fprime(beta_, func, 1.5e-8)
+        analytical_grad = grad(beta_)
+        assert_allclose(approx_grad, analytical_grad, rtol=1e-5, atol=1e-3)
+
 
 def test_tikhonov():
     """Tikhonov regularization test"""
-    n_samples, n_features = 1000, 100
+    n_samples, n_features = 100, 10
 
     # design covariance matrix of parameters
     Gam = 15.
     PriorCov = np.zeros([n_features, n_features])
     for i in np.arange(0, n_features):
         for j in np.arange(i, n_features):
-            PriorCov[i, j] = np.exp(-Gam * 1./ (np.float(n_features) ** 2) * \
+            PriorCov[i, j] = np.exp(-Gam * 1. / (np.float(n_features) ** 2) * \
                 (np.float(i) - np.float(j)) ** 2)
             PriorCov[j, i] = PriorCov[i, j]
             if i == j:
                 PriorCov[i, j] += 0.01
-    PriorCov = 1./ np.max(PriorCov) * PriorCov
+    PriorCov = 1. / np.max(PriorCov) * PriorCov
 
     # sample parameters as multivariate normal
     beta0 = np.random.randn()
@@ -50,7 +83,7 @@ def test_tikhonov():
                        solver='batch-gradient',
                        tol=1e-5,
                        score_metric='pseudo_R2')
-    glm_tikhonov.fit(Xtrain, ytrain);
+    glm_tikhonov.fit(Xtrain, ytrain)
 
     ytrain_hat = glm_tikhonov[-1].predict(Xtrain)
     ytest_hat = glm_tikhonov[-1].predict(Xtest)
@@ -68,7 +101,6 @@ def test_tikhonov():
                        tol=1e-5,
                        score_metric='pseudo_R2')
     glm_tikhonov.fit(Xtrain, ytrain)
-
     ytrain_hat = glm_tikhonov[-1].predict(Xtrain)
     ytest_hat = glm_tikhonov[-1].predict(Xtest)
 
@@ -108,10 +140,11 @@ def test_group_lasso():
     scaler = StandardScaler().fit(Xr)
     glm_group.fit(scaler.transform(Xr), yr)
 
+
 def test_glmnet():
     """Test glmnet."""
     scaler = StandardScaler()
-    n_samples, n_features = 1000, 100
+    n_samples, n_features = 100, 10
     density = 0.1
     n_lambda = 10
 
@@ -119,7 +152,7 @@ def test_glmnet():
     beta0 = 1. / (np.float(n_features) + 1.) * \
         np.random.normal(0.0, 1.0)
     beta = 1. / (np.float(n_features) + 1.) * \
-        np.random.normal(0.0, 1.0, [n_features, 1])
+        np.random.normal(0.0, 1.0, (n_features,))
 
     distrs = ['softplus', 'poisson', 'gaussian', 'binomial']
     solvers = ['batch-gradient', 'cdfast']
@@ -141,8 +174,8 @@ def test_glmnet():
             X_train = scaler.fit_transform(X_train)
             glm.fit(X_train, y_train)
 
-            beta_ = glm.fit_[-1]['beta'][:]
-            assert_allclose(beta[:], beta_, atol=0.5)  # check fit
+            beta_ = glm.fit_[-1]['beta'][:, 0]
+            assert_allclose(beta, beta_, atol=0.5)  # check fit
 
             y_pred = glm.predict(scaler.transform(X_train))
             assert_equal(y_pred.shape, (n_lambda, X_train.shape[0]))
@@ -188,16 +221,19 @@ def test_cv():
     assert_equal(len(cross_val_score(glm_normal, X, y, cv=cv,
                  scoring=simple_cv_scorer)), 5)
 
+
 def test_multinomial():
-    """Test all multinomial functionality"""
+    """Test all multinomial functionality."""
     glm_mn = GLM(distr='multinomial', reg_lambda=np.array([0.0, 0.1, 0.2]),
-                 learning_rate = 2e-1, tol=1e-10)
+                 learning_rate=2e-1, tol=1e-10)
     X = np.array([[-1, -2, -3], [4, 5, 6]])
     y = np.array([1, 0])
 
     # test gradient
     beta = np.zeros([4, 2])
-    grad_beta0, grad_beta = glm_mn._grad_L2loss(beta[0], beta[1:], 0, X, y)
+    grad_beta0, grad_beta = _grad_L2loss(glm_mn.distr, glm_mn.alpha,
+                                         beta[0], beta[1:], 0, X, y,
+                                         glm_mn.Tau, glm_mn.eta)
     assert_true(grad_beta0[0] != grad_beta0[1])
     glm_mn.fit(X, y)
     y_pred_proba = glm_mn.predict_proba(X)
@@ -212,8 +248,8 @@ def test_multinomial():
     # pseudo_R2 should be greater than 0
     assert_true(glm_mn[-1].score(X, y) > 0.)
     assert_equal(len(glm_mn.simulate(glm_mn.fit_[0]['beta0'],
-                                  glm_mn.fit_[0]['beta'],
-                                  X)),
+                                     glm_mn.fit_[0]['beta'],
+                                     X)),
                  X.shape[0])
 
     # check that score is computed for sliced estimator
@@ -223,6 +259,7 @@ def test_multinomial():
     # check that score is computed for all lambdas
     scorelist = glm_mn.score(X, y)
     assert_equal(scorelist.shape[0], y_pred_proba.shape[0])
+
 
 def test_cdfast():
     """Test all functionality related to fast coordinate descent"""
@@ -257,13 +294,13 @@ def test_cdfast():
                                        n_features=n_features,
                                        n_redundant=0,
                                        n_informative=n_features,
-                           random_state=1, n_classes=n_classes)
+                                       random_state=1, n_classes=n_classes)
             y_bk = y.ravel()
             y = np.zeros([X.shape[0], y.max() + 1])
             y[np.arange(X.shape[0]), y_bk] = 1
 
         # compute grad and hess
-        beta_ = np.zeros([n_features+1, beta.shape[1]])
+        beta_ = np.zeros([n_features + 1, beta.shape[1]])
         beta_[0] = beta0
         beta_[1:] = beta
         z = beta_[0] + np.dot(X, beta_[1:])
