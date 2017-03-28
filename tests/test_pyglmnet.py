@@ -174,7 +174,7 @@ def test_glmnet():
             X_train = scaler.fit_transform(X_train)
             glm.fit(X_train, y_train)
 
-            beta_ = glm.fit_[-1]['beta'][:, 0]
+            beta_ = glm.fit_[-1]['beta']
             assert_allclose(beta, beta_, atol=0.5)  # check fit
 
             y_pred = glm.predict(scaler.transform(X_train))
@@ -222,44 +222,44 @@ def test_cv():
                  scoring=simple_cv_scorer)), 5)
 
 
-def test_multinomial():
-    """Test all multinomial functionality."""
-    glm_mn = GLM(distr='multinomial', reg_lambda=np.array([0.0, 0.1, 0.2]),
-                 learning_rate=2e-1, tol=1e-10)
-    X = np.array([[-1, -2, -3], [4, 5, 6]])
-    y = np.array([1, 0])
-
-    # test gradient
-    beta = np.zeros([4, 2])
-    grad_beta0, grad_beta = _grad_L2loss(glm_mn.distr, glm_mn.alpha,
-                                         beta[0], beta[1:], 0, X, y,
-                                         glm_mn.Tau, glm_mn.eta)
-    assert_true(grad_beta0[0] != grad_beta0[1])
-    glm_mn.fit(X, y)
-    y_pred_proba = glm_mn.predict_proba(X)
-    assert_equal(y_pred_proba.shape, (3, X.shape[0], 2))  # n_lambdas x n_samples x n_classes
-
-    # pick one as yhat
-    yhat = y_pred_proba[0]
-
-    # uniform prediction
-    ynull = np.ones(yhat.shape) / yhat.shape[1]
-
-    # pseudo_R2 should be greater than 0
-    assert_true(glm_mn[-1].score(X, y) > 0.)
-    assert_equal(len(glm_mn.simulate(glm_mn.fit_[0]['beta0'],
-                                     glm_mn.fit_[0]['beta'],
-                                     X)),
-                 X.shape[0])
-
-    # check that score is computed for sliced estimator
-    scorelist = glm_mn[-1].score(X, y)
-    assert_equal(scorelist.shape[0], 1)
-
-    # check that score is computed for all lambdas
-    scorelist = glm_mn.score(X, y)
-    assert_equal(scorelist.shape[0], y_pred_proba.shape[0])
-
+# def test_multinomial():
+#     """Test all multinomial functionality."""
+#     glm_mn = GLM(distr='multinomial', reg_lambda=np.array([0.0, 0.1, 0.2]),
+#                  learning_rate=2e-1, tol=1e-10)
+#     X = np.array([[-1, -2, -3], [4, 5, 6]])
+#     y = np.array([1, 0])
+#
+#     # test gradient
+#     beta = np.zeros([4, 2])
+#     grad_beta0, grad_beta = _grad_L2loss(glm_mn.distr, glm_mn.alpha,
+#                                          beta[0], beta[1:], 0, X, y,
+#                                          glm_mn.Tau, glm_mn.eta)
+#     assert_true(grad_beta0[0] != grad_beta0[1])
+#     glm_mn.fit(X, y)
+#     y_pred_proba = glm_mn.predict_proba(X)
+#     assert_equal(y_pred_proba.shape, (3, X.shape[0], 2))  # n_lambdas x n_samples x n_classes
+#
+#     # pick one as yhat
+#     yhat = y_pred_proba[0]
+#
+#     # uniform prediction
+#     ynull = np.ones(yhat.shape) / yhat.shape[1]
+#
+#     # pseudo_R2 should be greater than 0
+#     assert_true(glm_mn[-1].score(X, y) > 0.)
+#     assert_equal(len(glm_mn.simulate(glm_mn.fit_[0]['beta0'],
+#                                      glm_mn.fit_[0]['beta'],
+#                                      X)),
+#                  X.shape[0])
+#
+#     # check that score is computed for sliced estimator
+#     scorelist = glm_mn[-1].score(X, y)
+#     assert_equal(scorelist.shape[0], 1)
+#
+#     # check that score is computed for all lambdas
+#     scorelist = glm_mn.score(X, y)
+#     assert_equal(scorelist.shape[0], y_pred_proba.shape[0])
+#
 
 def test_cdfast():
     """Test all functionality related to fast coordinate descent"""
