@@ -160,10 +160,8 @@ def _grad_L2loss(distr, alpha, reg_lambda, X, y, Tau, eta, beta):
         q = _qu(distr, z, eta)
         grad_beta0 = 1. / n_samples * (np.sum(s) - np.sum(y * s / q))
         grad_beta = 1. / n_samples * \
-            (np.transpose(np.dot(np.transpose(s), X) -
-                          np.dot(np.transpose(y * s / q), X))) + \
-            reg_lambda * (1 - alpha) * \
-            np.dot(InvCov, beta[1:])
+            ((np.dot(s.T, X) - np.dot((y * s / q).T, X)).T) + \
+            reg_lambda * (1 - alpha) * np.dot(InvCov, beta[1:])
 
     elif distr == 'poisson':
         q = _qu(distr, z, eta)
@@ -596,9 +594,6 @@ class GLM(object):
 
         if self.distr == 'multinomial':
             y = utils.label_binarizer(y)
-        else:
-            if y.ndim == 1:
-                y = y[:, np.newaxis]
 
         n_classes = y.shape[1] if self.distr == 'multinomial' else 1
         n_classes = np.int64(n_classes)
@@ -648,7 +643,7 @@ class GLM(object):
 
                     beta = beta - self.learning_rate * grad[:, None]
                 elif self.solver == 'cdfast':
-                    beta, z = self._cdfast(X, y, z, ActiveSet, beta, rl)
+                    beta, z = self._cdfast(X, y[:, None], z, ActiveSet, beta, rl)
 
                 # Apply proximal operator
                 beta[1:] = self._prox(beta[1:], rl * alpha)

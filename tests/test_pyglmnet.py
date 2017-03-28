@@ -44,19 +44,19 @@ def test_gradients():
 
 def test_tikhonov():
     """Tikhonov regularization test"""
-    n_samples, n_features = 1000, 100
+    n_samples, n_features = 100, 10
 
     # design covariance matrix of parameters
     Gam = 15.
     PriorCov = np.zeros([n_features, n_features])
     for i in np.arange(0, n_features):
         for j in np.arange(i, n_features):
-            PriorCov[i, j] = np.exp(-Gam * 1./ (np.float(n_features) ** 2) * \
+            PriorCov[i, j] = np.exp(-Gam * 1. / (np.float(n_features) ** 2) * \
                 (np.float(i) - np.float(j)) ** 2)
             PriorCov[j, i] = PriorCov[i, j]
             if i == j:
                 PriorCov[i, j] += 0.01
-    PriorCov = 1./ np.max(PriorCov) * PriorCov
+    PriorCov = 1. / np.max(PriorCov) * PriorCov
 
     # sample parameters as multivariate normal
     beta0 = np.random.randn()
@@ -83,7 +83,7 @@ def test_tikhonov():
                        solver='batch-gradient',
                        tol=1e-5,
                        score_metric='pseudo_R2')
-    glm_tikhonov.fit(Xtrain, ytrain);
+    glm_tikhonov.fit(Xtrain, ytrain)
 
     ytrain_hat = glm_tikhonov[-1].predict(Xtrain)
     ytest_hat = glm_tikhonov[-1].predict(Xtest)
@@ -101,7 +101,6 @@ def test_tikhonov():
                        tol=1e-5,
                        score_metric='pseudo_R2')
     glm_tikhonov.fit(Xtrain, ytrain)
-
     ytrain_hat = glm_tikhonov[-1].predict(Xtrain)
     ytest_hat = glm_tikhonov[-1].predict(Xtest)
 
@@ -145,7 +144,7 @@ def test_group_lasso():
 def test_glmnet():
     """Test glmnet."""
     scaler = StandardScaler()
-    n_samples, n_features = 1000, 100
+    n_samples, n_features = 100, 10
     density = 0.1
     n_lambda = 10
 
@@ -153,7 +152,7 @@ def test_glmnet():
     beta0 = 1. / (np.float(n_features) + 1.) * \
         np.random.normal(0.0, 1.0)
     beta = 1. / (np.float(n_features) + 1.) * \
-        np.random.normal(0.0, 1.0, [n_features, 1])
+        np.random.normal(0.0, 1.0, (n_features,))
 
     distrs = ['softplus', 'poisson', 'gaussian', 'binomial']
     solvers = ['batch-gradient', 'cdfast']
@@ -175,8 +174,8 @@ def test_glmnet():
             X_train = scaler.fit_transform(X_train)
             glm.fit(X_train, y_train)
 
-            beta_ = glm.fit_[-1]['beta'][:]
-            assert_allclose(beta[:], beta_, atol=0.5)  # check fit
+            beta_ = glm.fit_[-1]['beta'][:, 0]
+            assert_allclose(beta, beta_, atol=0.5)  # check fit
 
             y_pred = glm.predict(scaler.transform(X_train))
             assert_equal(y_pred.shape, (n_lambda, X_train.shape[0]))
