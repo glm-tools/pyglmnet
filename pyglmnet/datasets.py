@@ -2,7 +2,6 @@
 A set of convenience functions to download datasets for illustrative examples
 """
 import urllib
-import pandas as pd
 import os
 import shutil
 import tempfile
@@ -22,34 +21,22 @@ def fetch_tikhonov_data(dpath='/tmp/glm-tools'):
 
     Returns
     -------
-    fixations_df: DataFrame
-        data frame with fixation event data
-    probes_df: DataFrame
-        data frame with stimulus probe event data
-    spikes_df: DataFrame
-        data frame with spike count data
+    dpath : str
+        The data path
     """
     if os.path.exists(dpath):
         shutil.rmtree(dpath)
     os.mkdir(dpath)
 
     base_url = "https://raw.githubusercontent.com/glm-tools/datasets/master"
-    url = os.path.join(base_url, "tikhonov/fixations.csv")
-    fname = os.path.join(dpath, 'fixations.csv')
-    urllib.urlretrieve(url, fname)
-    fixations_df = pd.read_csv(fname)
+    fnames = ['fixations.csv', 'probes.csv', 'spiketimes.csv']
 
-    url = os.path.join(base_url, "tikhonov/probes.csv")
-    fname = os.path.join(dpath, 'probes.csv')
-    urllib.urlretrieve(url, fname)
-    probes_df = pd.read_csv(fname)
+    for fname in fnames:
+        url = os.path.join(base_url, "tikhonov/%s" % fname)
+        fname = os.path.join(dpath, fname)
+        urllib.urlretrieve(url, fname)
 
-    url = os.path.join(base_url, "tikhonov/spiketimes.csv")
-    fname = os.path.join(dpath, 'spiketimes.csv')
-    urllib.urlretrieve(url, fname)
-    spikes_df = pd.read_csv(fname, header=None)
-
-    return fixations_df, probes_df, spikes_df
+    return dpath
 
 
 def fetch_community_crime_data(dpath='/tmp/glm-tools'):
