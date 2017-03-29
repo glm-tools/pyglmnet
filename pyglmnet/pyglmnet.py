@@ -300,6 +300,7 @@ class GLM(object):
         set_log_level(verbose)
 
     def get_params(self, deep=False):
+        """Return class attributes in a dictionary."""
         return dict(
             (
                 ('distr', self.distr),
@@ -316,6 +317,11 @@ class GLM(object):
                 ('verbose', self.verbose)
             )
         )
+
+    def set_params(self, params):
+        """Assign class attributes from a dictionary."""
+        for key, value in params.iteritems():
+            setattr(self, key, value)
 
     def __repr__(self):
         """Description of the object."""
