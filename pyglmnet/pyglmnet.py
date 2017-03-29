@@ -362,8 +362,8 @@ class GLM(object):
             # The default case: soft thresholding
             return np.sign(beta) * (np.abs(beta) - thresh) * \
                 (np.abs(beta) > thresh)
-        else: 
-           # Group sparsity case: apply group sparsity operator
+        else:
+            # Group sparsity case: apply group sparsity operator
             group_ids = np.unique(self.group)
             group_norms = np.abs(beta)
 
