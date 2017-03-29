@@ -1,20 +1,22 @@
+from functools import partial
+
 import numpy as np
+from numpy.testing import assert_allclose
+
 import scipy.sparse as sps
+from scipy.optimize import approx_fprime
+
 from sklearn.cross_validation import KFold, cross_val_score
-from sklearn.datasets import make_regression, make_classification
+from sklearn.datasets import make_regression
 from sklearn.preprocessing import StandardScaler
 
 from nose.tools import assert_true, assert_equal, assert_raises
-from numpy.testing import assert_allclose
 
 from pyglmnet import GLM, _grad_L2loss, _L2loss
-from scipy.optimize import approx_fprime
+
 
 def test_gradients():
     """Test gradient accuracy."""
-    from scipy.optimize import check_grad
-    from functools import partial
-
     # data
     scaler = StandardScaler()
     n_samples, n_features = 1000, 100
@@ -34,8 +36,8 @@ def test_gradients():
 
         func = partial(_L2loss, distr, glm.alpha,
                        glm.Tau, reg_lambda, X, y, glm.eta, glm.group)
-        grad = partial(_grad_L2loss, distr, glm.alpha,
-                       reg_lambda, X, y, glm.Tau,
+        grad = partial(_grad_L2loss, distr, glm.alpha, glm.Tau,
+                       reg_lambda, X, y,
                        glm.eta)
         approx_grad = approx_fprime(beta_, func, 1.5e-8)
         analytical_grad = grad(beta_)
@@ -51,8 +53,8 @@ def test_tikhonov():
     PriorCov = np.zeros([n_features, n_features])
     for i in np.arange(0, n_features):
         for j in np.arange(i, n_features):
-            PriorCov[i, j] = np.exp(-Gam * 1. / (np.float(n_features) ** 2) * \
-                (np.float(i) - np.float(j)) ** 2)
+            PriorCov[i, j] = np.exp(-Gam * 1. / (np.float(n_features) ** 2) *
+                                    (np.float(i) - np.float(j)) ** 2)
             PriorCov[j, i] = PriorCov[i, j]
             if i == j:
                 PriorCov[i, j] += 0.01
@@ -85,11 +87,7 @@ def test_tikhonov():
                        score_metric='pseudo_R2')
     glm_tikhonov.fit(Xtrain, ytrain)
 
-    ytrain_hat = glm_tikhonov[-1].predict(Xtrain)
-    ytest_hat = glm_tikhonov[-1].predict(Xtest)
-
-    R2_train = dict()
-    R2_test = dict()
+    R2_train, R2_test = dict(), dict()
     R2_train['tikhonov'] = glm_tikhonov[-1].score(Xtrain, ytrain)
     R2_test['tikhonov'] = glm_tikhonov[-1].score(Xtest, ytest)
 
@@ -101,11 +99,8 @@ def test_tikhonov():
                        tol=1e-5,
                        score_metric='pseudo_R2')
     glm_tikhonov.fit(Xtrain, ytrain)
-    ytrain_hat = glm_tikhonov[-1].predict(Xtrain)
-    ytest_hat = glm_tikhonov[-1].predict(Xtest)
 
-    R2_train = dict()
-    R2_test = dict()
+    R2_train, R2_test = dict(), dict()
     R2_train['tikhonov'] = glm_tikhonov[-1].score(Xtrain, ytrain)
     R2_test['tikhonov'] = glm_tikhonov[-1].score(Xtest, ytest)
 
@@ -132,10 +127,6 @@ def test_group_lasso():
     Xr = np.random.normal(0.0, 1.0, [n_samples, n_features])
     yr = glm_group.simulate(beta0, beta, Xr)
 
-    # simulate testing data
-    Xt = np.random.normal(0.0, 1.0, [n_samples, n_features])
-    yt = glm_group.simulate(beta0, beta, Xt)
-
     # scale and fit
     scaler = StandardScaler().fit(Xr)
     glm_group.fit(scaler.transform(Xr), yr)
@@ -145,7 +136,6 @@ def test_glmnet():
     """Test glmnet."""
     scaler = StandardScaler()
     n_samples, n_features = 100, 10
-    density = 0.1
     n_lambda = 10
 
     # coefficients
@@ -198,13 +188,15 @@ def test_glmnet():
 
     # test fit_predict
     glm_poisson.fit_predict(X_train, y_train)
-    assert_raises(ValueError, glm_poisson.fit_predict, X_train[None, ...], y_train)
+    assert_raises(ValueError, glm_poisson.fit_predict,
+                  X_train[None, ...], y_train)
 
 
 def simple_cv_scorer(obj, X, y):
     """Simple scorer takes average pseudo-R2 from regularization path"""
     yhats = obj.predict(X)
     return np.mean([obj.score(X, y) for yhat in yhats])
+
 
 def test_cv():
     """Simple CV check"""

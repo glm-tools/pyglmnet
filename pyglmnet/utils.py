@@ -5,6 +5,12 @@ A few miscellaneous helper functions for pyglmnet.py
 import numpy as np
 from copy import copy
 
+import logging
+
+
+logger = logging.getLogger('pyglmnet')
+logger.addHandler(logging.StreamHandler())
+
 
 def softmax(w):
     """Softmax function of given array of number w
@@ -105,3 +111,30 @@ def tikhonov_from_prior(prior_cov, n_samples, threshold=0.0001):
     n_features = Tau.shape[0]
     Tau = 1. / n_features * Tau
     return Tau
+
+
+def set_log_level(verbose):
+    """Convenience function for setting the log level.
+
+    Parameters
+    ----------
+    verbose : bool, str, int, or None
+        The verbosity of messages to print. If a str, it can be either DEBUG,
+        INFO, WARNING, ERROR, or CRITICAL. Note that these are for
+        convenience and are equivalent to passing in logging.DEBUG, etc.
+        For bool, True is the same as 'INFO', False is the same as 'WARNING'.
+    """
+    if isinstance(verbose, bool):
+        if verbose is True:
+            verbose = 'INFO'
+        else:
+            verbose = 'WARNING'
+    if isinstance(verbose, str):
+        verbose = verbose.upper()
+        logging_types = dict(DEBUG=logging.DEBUG, INFO=logging.INFO,
+                             WARNING=logging.WARNING, ERROR=logging.ERROR,
+                             CRITICAL=logging.CRITICAL)
+        if verbose not in logging_types:
+            raise ValueError('verbose must be of a valid type')
+        verbose = logging_types[verbose]
+    logger.setLevel(verbose)
