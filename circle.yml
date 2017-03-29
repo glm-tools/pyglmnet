@@ -7,8 +7,8 @@ dependencies:
     - pip install sphinx-gallery
     - pip install scipy
     - pip install scikit-learn
-    - pip install -e .
     - pip install pandas
+    - pip install -e .
     - pip install sphinx_bootstrap_theme numpydoc
     - pip install -e git+http://github.com/KordingLab/spykes.git#egg=spykes
     # we need to do this here so the datasets will be cached
