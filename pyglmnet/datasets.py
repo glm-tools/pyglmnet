@@ -8,6 +8,7 @@ import tempfile
 import itertools
 import numpy as np
 from scipy.misc import comb
+import pandas as pd
 
 
 def fetch_tikhonov_data(dpath='/tmp/glm-tools'):
