@@ -1,41 +1,10 @@
 """Python implementation of elastic-net regularized GLMs."""
 
-import logging
 from copy import deepcopy
 
 import numpy as np
 from scipy.special import expit
-from . import utils
-
-logger = logging.getLogger('pyglmnet')
-logger.addHandler(logging.StreamHandler())
-
-
-def set_log_level(verbose):
-    """Convenience function for setting the log level.
-
-    Parameters
-    ----------
-    verbose : bool, str, int, or None
-        The verbosity of messages to print. If a str, it can be either DEBUG,
-        INFO, WARNING, ERROR, or CRITICAL. Note that these are for
-        convenience and are equivalent to passing in logging.DEBUG, etc.
-        For bool, True is the same as 'INFO', False is the same as 'WARNING'.
-    """
-    if isinstance(verbose, bool):
-        if verbose is True:
-            verbose = 'INFO'
-        else:
-            verbose = 'WARNING'
-    if isinstance(verbose, str):
-        verbose = verbose.upper()
-        logging_types = dict(DEBUG=logging.DEBUG, INFO=logging.INFO,
-                             WARNING=logging.WARNING, ERROR=logging.ERROR,
-                             CRITICAL=logging.CRITICAL)
-        if verbose not in logging_types:
-            raise ValueError('verbose must be of a valid type')
-        verbose = logging_types[verbose]
-    logger.setLevel(verbose)
+from .utils import logger, set_log_level, log_likelihood
 
 
 def _lmb(distr, beta0, beta, X, eta):
@@ -140,7 +109,7 @@ def _L2loss(distr, alpha, Tau, reg_lambda, X, y, eta, group, beta):
     return J
 
 
-def _grad_L2loss(distr, alpha, reg_lambda, X, y, Tau, eta, beta):
+def _grad_L2loss(distr, alpha, Tau, reg_lambda, X, y, eta, beta):
     """The gradient."""
 
     n_samples = np.float(X.shape[0])
@@ -200,7 +169,7 @@ def _grad_L2loss(distr, alpha, reg_lambda, X, y, Tau, eta, beta):
 
 
 class GLM(object):
-    r"""Class for estimating regularized generalized linear models (GLM).
+    """Class for estimating regularized generalized linear models (GLM).
     The regularized GLM minimizes the penalized negative log likelihood:
 
     .. math::
@@ -230,57 +199,57 @@ class GLM(object):
 
     Parameters
     ----------
-    distr : str \n
+    distr : str
         distribution family can be one of the following
-        'gaussian' | 'binomial' | 'poisson' | 'softplus' \n
+        'gaussian' | 'binomial' | 'poisson' | 'softplus'
         default: 'poisson'.
-    alpha : float \n
+    alpha : float
         the weighting between L1 penalty and L2 penalty term
-        of the loss function. \n
+        of the loss function.
         default: 0.5
-    Tau : array | None \n
-        the (n_features, n_features) Tikhonov matrix. \n
+    Tau : array | None
+        the (n_features, n_features) Tikhonov matrix.
         default: None, in which case Tau is identity
         and the L2 penalty is ridge-like
-    group : array | list | None \n
+    group : array | list | None
         the (n_features, )
-        list or array of group identities for each parameter :math:`\\beta`. \n
+        list or array of group identities for each parameter :math:`\\beta`.
         Each entry of the list/ array should contain an int from 1 to n_groups
         that specify group membership for each parameter
-        (except :math:`\\beta_0`). \n
+        (except :math:`\\beta_0`).
         If you do not want to specify a group for a specific parameter,
-        set it to zero. \n
+        set it to zero.
         default: None, in which case it defaults to L1 regularization
-    reg_lambda : array | list | None \n
-        array of regularized parameters :math:`\\lambda` of penalty term. \n
+    reg_lambda : array | list | None
+        array of regularized parameters :math:`\\lambda` of penalty term.
         default: None, a list of 10 floats spaced logarithmically (base e)
-        between 0.5 and 0.01. \n
-    solver : str \n
+        between 0.5 and 0.01.
+    solver : str
         optimization method, can be one of the following
         'batch-gradient' (vanilla batch gradient descent)
-        'cdfast' (Newton coordinate gradient descent). \n
+        'cdfast' (Newton coordinate gradient descent).
         default: 'batch-gradient'
-    learning_rate : float \n
-        learning rate for gradient descent. \n
+    learning_rate : float
+        learning rate for gradient descent.
         default: 2e-1
-    max_iter : int \n
-        maximum iterations for the model. \n
+    max_iter : int
+        maximum iterations for the model.
         default: 1000
-    tol : float \n
+    tol : float
         convergence threshold or stopping criteria.
-        Optimization loop will stop below setting threshold. \n
+        Optimization loop will stop below setting threshold.
         default: 1e-3
-    eta : float \n
-        a threshold parameter that linearizes the exp() function above eta. \n
+    eta : float
+        a threshold parameter that linearizes the exp() function above eta.
         default: 2.0
-    score_metric : str \n
+    score_metric : str
         specifies the scoring metric.
-        one of either 'deviance' or 'pseudo_R2'. \n
+        one of either 'deviance' or 'pseudo_R2'.
         default: 'deviance'
-    random_state : int \n
-        seed of the random number generator used to initialize the solution. \n
+    random_state : int
+        seed of the random number generator used to initialize the solution.
         default: 0
-    verbose : boolean or int \n
+    verbose : boolean or int
         default: False
 
     Reference
@@ -382,7 +351,7 @@ class GLM(object):
 
         Returns
         -------
-        self: instance of GLM \n
+        self: instance of GLM
             A copy of the GLM instance.
         """
         return deepcopy(self)
@@ -393,8 +362,8 @@ class GLM(object):
             # The default case: soft thresholding
             return np.sign(beta) * (np.abs(beta) - thresh) * \
                 (np.abs(beta) > thresh)
-        else:
-            # Group sparsity case: apply group sparsity operator
+        else: 
+           # Group sparsity case: apply group sparsity operator
             group_ids = np.unique(self.group)
             group_norms = np.abs(beta)
 
@@ -540,15 +509,15 @@ class GLM(object):
 
         Parameters
         ----------
-        X : array \n
+        X : array
             The input data of shape (n_samples, n_features)
 
-        y : array \n
+        y : array
             The target data
 
         Returns
         -------
-        self : instance of GLM \n
+        self : instance of GLM
             The fitted model.
         """
 
@@ -611,8 +580,8 @@ class GLM(object):
             for t in range(0, self.max_iter):
                 if self.solver == 'batch-gradient':
                     grad = _grad_L2loss(self.distr,
-                                        self.alpha,
-                                        rl, X, y, self.Tau, self.eta,
+                                        self.alpha, self.Tau,
+                                        rl, X, y, self.eta,
                                         beta)
 
                     beta = beta - self.learning_rate * grad
@@ -651,19 +620,19 @@ class GLM(object):
         return self
 
     def predict(self, X):
-        r"""Predict targets.
+        """Predict targets.
 
         Parameters
         ----------
-        X : array \n
+        X : array
             Input data for prediction, of shape (n_samples, n_features)
 
         Returns
         -------
-        yhat : array \n
-            The predicted targets of shape ([n_lambda], n_samples) \n
+        yhat : array
+            The predicted targets of shape ([n_lambda], n_samples)
             A 1D array if predicting on only
-            one reg_lambda (compatible with scikit-learn API). \n
+            one reg_lambda (compatible with scikit-learn API).
             Otherwise, returns a 2D array.
         """
         if not isinstance(X, np.ndarray):
@@ -688,20 +657,20 @@ class GLM(object):
         return yhat
 
     def predict_proba(self, X):
-        r"""Predict class probability for binomial
+        """Predict class probability for binomial
 
         Parameters
         ----------
-        X : array \n
+        X : array
             Input data for prediction, of shape (n_samples, n_features)
 
         Returns
         -------
-        yhat : array \n
+        yhat : array
             The predicted targets of shape
-            ([n_lambda], n_samples). \n
+            ([n_lambda], n_samples).
             A 2D array if predicting on only
-            one lambda (compatible with scikit-learn API). \n
+            one lambda (compatible with scikit-learn API).
             Otherwise, returns a 3D array.
 
         Raises
@@ -734,52 +703,51 @@ class GLM(object):
 
         Parameters
         ----------
-        X : array \n
+        X : array
             The input data to fit and predict,
             of shape (n_samples, n_features)
 
 
         Returns
         -------
-        yhat : array \n
-            The predicted targets of shape ([n_lambda], n_samples). \n
+        yhat : array
+            The predicted targets of shape ([n_lambda], n_samples).
             A 1D array if predicting on only
-            one lambda (compatible with scikit-learn API). \n
+            one lambda (compatible with scikit-learn API).
             Otherwise, returns a 2D array.
         """
         return self.fit(X, y).predict(X)
 
     def score(self, X, y):
-        r"""Score the model.
+        """Score the model.
 
         Parameters
         ----------
-        X : array \n
+        X : array
             The input data whose prediction will be scored,
             of shape (n_samples, n_features).
-        y : array \n
+        y : array
             The true targets against which to score the predicted targets,
-            of shape (n_samples, ).
+            of shape (n_samples,).
 
         Returns
         -------
         score: array
             array when score is called by a list of estimators:
-            :code:`glm.score()`\n
+            :code:`glm.score()`
             singleton array when score is called by a sliced estimator:
-            :code:`glm[0].score()`\n
+            :code:`glm[0].score()`
 
-            Note that if you want compatibility with sciki-learn's
-            :code:`pipeline()`, :code:`cross_val_score()`,
-            or :code:`GridSearchCV()` then you should
-            only pass sliced estimators: \n
+        Examples
+        --------
+        Note that if you want compatibility with scikit-learn's
+        :code:`pipeline()`, :code:`cross_val_score()`,
+        or :code:`GridSearchCV()` then you should only pass sliced estimators:
 
-            .. code:: python
-
-                from sklearn.grid_search import GridSearchCV
-                from sklearn.cross_validation import cross_val_score
-                grid = GridSearchCV(glm[0])
-                grid = cross_val_score(glm[0], X, y, cv=10)
+            >>> from sklearn.grid_search import GridSearchCV
+            >>> from sklearn.cross_validation import cross_val_score
+            >>> grid = GridSearchCV(glm[0])
+            >>> grid = cross_val_score(glm[0], X, y, cv=10)
         """
 
         if self.score_metric not in ['deviance', 'pseudo_R2']:
@@ -804,18 +772,18 @@ class GLM(object):
             yhat = yhat[np.newaxis, ...]
 
         if self.distr in ['softplus', 'poisson']:
-            LS = utils.log_likelihood(y, y, self.distr)
+            LS = log_likelihood(y, y, self.distr)
         else:
             LS = 0
         if(self.score_metric == 'pseudo_R2'):
-            L0 = utils.log_likelihood(y, self.ynull_, self.distr)
+            L0 = log_likelihood(y, self.ynull_, self.distr)
 
         # Compute array of scores for each model fit
         # (corresponding to a reg_lambda)
         for idx in range(yhat.shape[0]):
             yhat_this = (yhat[idx, :]).ravel()
 
-            L1 = utils.log_likelihood(y, yhat_this, self.distr)
+            L1 = log_likelihood(y, yhat_this, self.distr)
 
             if self.score_metric == 'deviance':
                 score.append(-2 * (L1 - LS))
@@ -837,7 +805,7 @@ class GLM(object):
         beta0: float
             intercept coefficient
         beta: array
-            coefficients of shape (n_features, 1)
+            coefficients of shape (n_features,)
 
         Returns
         -------
@@ -850,5 +818,6 @@ class GLM(object):
         if self.distr == 'gaussian':
             y = np.random.normal(_lmb(self.distr, beta0, beta, X, self.eta))
         if self.distr == 'binomial':
-            y = np.random.binomial(1, _lmb(self.distr, beta0, beta, X, self.eta))
+            y = np.random.binomial(1, _lmb(self.distr, beta0,
+                                           beta, X, self.eta))
         return y
