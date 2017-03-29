@@ -58,8 +58,6 @@ def _qu(distr, z, eta):
         qu = z
     elif distr == 'binomial':
         qu = expit(z)
-    elif distr == 'multinomial':
-        qu = utils.softmax(z)
     return qu
 
 
@@ -81,8 +79,6 @@ def _logL(distr, beta0, beta, X, y, eta):
         # but this prevents underflow
         z = beta0 + np.dot(X, beta)
         logL = 1. / n_samples * np.sum(y * z - np.log(1 + np.exp(z)))
-    elif distr == 'multinomial':
-        logL = 1. / n_samples * np.sum(y * np.log(l))
     return logL
 
 
@@ -196,16 +192,6 @@ def _grad_L2loss(distr, alpha, reg_lambda, X, y, Tau, eta, beta):
             + reg_lambda * (1 - alpha) * \
             np.dot(InvCov, beta[1:])
 
-    elif distr == 'multinomial':
-        # this assumes that y is already as a one-hot encoding
-        pred = _qu(distr, z, eta)
-        grad_beta0 = -1. / n_samples * np.sum(y - pred, axis=0)
-        grad_beta = -1. / n_samples * \
-            np.transpose(np.dot(np.transpose(y - pred), X)) \
-            + reg_lambda * (1 - alpha) * \
-            np.dot(InvCov, beta[1:])
-
-    n_classes = y.shape[1] if distr == 'multinomial' else 1
     n_features = X.shape[1]
     g = np.zeros((n_features + 1, ))
     g[0] = grad_beta0
@@ -214,7 +200,7 @@ def _grad_L2loss(distr, alpha, reg_lambda, X, y, Tau, eta, beta):
 
 
 class GLM(object):
-    """Class for estimating regularized generalized linear models (GLM).
+    r"""Class for estimating regularized generalized linear models (GLM).
     The regularized GLM minimizes the penalized negative log likelihood:
 
     .. math::
@@ -246,7 +232,7 @@ class GLM(object):
     ----------
     distr : str \n
         distribution family can be one of the following
-        'gaussian' | 'binomial' | 'poisson' | 'softplus' | 'multinomial' \n
+        'gaussian' | 'binomial' | 'poisson' | 'softplus' \n
         default: 'poisson'.
     alpha : float \n
         the weighting between L1 penalty and L2 penalty term
@@ -430,27 +416,27 @@ class GLM(object):
 
     def _gradhess_logloss_1d(self, xk, y, z):
         """
-        Computes gradient (1st derivative)
+        Compute gradient (1st derivative)
         and Hessian (2nd derivative)
-        of log likelihood for a single coordinate
+        of log likelihood for a single coordinate.
 
         Parameters
         ----------
         xk: float
             n_samples x 1
         y: float
-            n_samples x n_classes
+            n_samples x 1
         z: float
-            n_samples x n_classes
+            n_samples x 1
 
         Returns
         -------
         gk: float:
-            n_classes
+            gradient
         hk: float:
-            n_classes
+            hessian
         """
-        n_samples = np.float(xk.shape[0])
+        n_samples = xk.shape[0]
 
         if self.distr == 'softplus':
             mu = _qu(self.distr, z, self.eta)
@@ -481,12 +467,7 @@ class GLM(object):
         elif self.distr == 'binomial':
             mu = _qu(self.distr, z, self.eta)
             gk = np.sum((mu - y) * xk)
-            hk = np.sum(mu * (1.0 - mu) * xk ** 2)
-
-        elif self.distr == 'multinomial':
-            mu = _qu(self.distr, z, self.eta)
-            gk = np.ravel(np.dot(np.transpose(mu - y), xk))
-            hk = np.ravel(np.dot(np.transpose(mu * (1.0 - mu)), (xk ** 2)))
+            hk = np.sum(mu * (1.0 - mu) * xk * xk)
 
         return 1. / n_samples * gk, 1. / n_samples * hk
 
@@ -527,13 +508,13 @@ class GLM(object):
         n_features = X.shape[1]
         reg_scale = rl * (1 - self.alpha)
 
-        for k in range(0, np.int(n_features) + 1):
+        for k in range(0, n_features + 1):
             # Only update parameters in active set
             if ActiveSet[k] != 0:
                 if k > 0:
-                    xk = np.expand_dims(X[:, k - 1], axis=1)
+                    xk = X[:, k - 1]
                 else:
-                    xk = np.ones((n_samples, 1))
+                    xk = np.ones((n_samples, ))
 
                 # Calculate grad and hess of log likelihood term
                 gk, hk = self._gradhess_logloss_1d(xk, y, z)
@@ -589,20 +570,13 @@ class GLM(object):
             raise ValueError('Input data should be of type ndarray (got %s).'
                              % type(X))
 
-        n_features = np.float(X.shape[1])
-        n_features = np.int64(n_features)
-
-        if self.distr == 'multinomial':
-            y = utils.label_binarizer(y)
-
-        n_classes = y.shape[1] if self.distr == 'multinomial' else 1
-        n_classes = np.int64(n_classes)
+        n_features = X.shape[1]
 
         # Initialize parameters
         beta0_hat = 1 / (n_features + 1) * \
-            np.random.normal(0.0, 1.0, n_classes)
+            np.random.normal(0.0, 1.0, 1)
         beta_hat = 1 / (n_features + 1) * \
-            np.random.normal(0.0, 1.0, [n_features, n_classes])
+            np.random.normal(0.0, 1.0, (n_features, ))
         fit_params = list()
 
         logger.info('Looping through the regularization path')
@@ -622,12 +596,12 @@ class GLM(object):
             alpha = self.alpha
 
             # Temporary parameters to update
-            beta = np.zeros([n_features + 1, n_classes])
+            beta = np.zeros((n_features + 1,))
             beta[0] = fit_params[-1]['beta0']
             beta[1:] = fit_params[-1]['beta']
 
             if self.solver == 'batch-gradient':
-                g = np.zeros([n_features + 1, n_classes])
+                g = np.zeros((n_features + 1, ))
             elif self.solver == 'cdfast':
                 ActiveSet = np.ones(n_features + 1)     # init active set
                 z = beta[0] + np.dot(X, beta[1:])       # cache z
@@ -639,11 +613,11 @@ class GLM(object):
                     grad = _grad_L2loss(self.distr,
                                         self.alpha,
                                         rl, X, y, self.Tau, self.eta,
-                                        beta[:, 0])
+                                        beta)
 
-                    beta = beta - self.learning_rate * grad[:, None]
+                    beta = beta - self.learning_rate * grad
                 elif self.solver == 'cdfast':
-                    beta, z = self._cdfast(X, y[:, None], z, ActiveSet, beta, rl)
+                    beta, z = self._cdfast(X, y, z, ActiveSet, beta, rl)
 
                 # Apply proximal operator
                 beta[1:] = self._prox(beta[1:], rl * alpha)
@@ -653,7 +627,8 @@ class GLM(object):
                     ActiveSet[np.where(beta[1:] == 0)[0] + 1] = 0
 
                 # Compute and save loss
-                L.append(_loss(self.distr, self.alpha, self.Tau, rl, X, y, self.eta, self.group, beta))
+                L.append(_loss(self.distr, self.alpha, self.Tau, rl,
+                               X, y, self.eta, self.group, beta))
 
                 if t > 1:
                     DL.append(L[-1] - L[-2])
@@ -670,14 +645,13 @@ class GLM(object):
 
         # Update the estimated variables
         self.fit_ = fit_params
-        self.ynull_ = np.mean(y) if self.distr != 'multinomial' \
-            else np.mean(y, axis=0)
+        self.ynull_ = np.mean(y)
 
         # Return
         return self
 
     def predict(self, X):
-        """Predict targets.
+        r"""Predict targets.
 
         Parameters
         ----------
@@ -699,23 +673,22 @@ class GLM(object):
         if isinstance(self.fit_, list):
             yhat = list()
             for fit in self.fit_:
-                yhat.append(_lmb(self.distr, fit['beta0'], fit['beta'], X, self.eta))
+                y_pred = _lmb(self.distr, fit['beta0'],
+                              fit['beta'], X, self.eta)
+                if self.distr == 'binomial':
+                    yhat.append((y_pred > 0.5).astype(int))
+                else:
+                    yhat.append(y_pred)
         else:
-            yhat = _lmb(self.distr, self.fit_['beta0'], self.fit_['beta'], X, self.eta)
+            yhat = _lmb(self.distr, self.fit_['beta0'],
+                        self.fit_['beta'], X, self.eta)
+            if self.distr == 'binomial':
+                yhat = (yhat > 0.5).astype(int)
         yhat = np.asarray(yhat)
-        yhat = yhat[..., 0] if self.distr != 'multinomial' else yhat
-
-        # if multinomial get the argmax()
-        if self.distr == 'multinomial':
-            if isinstance(self.fit_, dict):
-                yhat = yhat.argmax(axis=1)
-            else:
-                yhat = yhat.argmax(axis=2)
-
         return yhat
 
     def predict_proba(self, X):
-        """Predict class probability for multinomial
+        r"""Predict class probability for binomial
 
         Parameters
         ----------
@@ -726,20 +699,20 @@ class GLM(object):
         -------
         yhat : array \n
             The predicted targets of shape
-            ([n_lambda], n_samples, n_classes). \n
+            ([n_lambda], n_samples). \n
             A 2D array if predicting on only
             one lambda (compatible with scikit-learn API). \n
             Otherwise, returns a 3D array.
 
         Raises
         ------
-        Works only for the multinomial distribution.
+        Works only for the binomial distribution.
         Raises error otherwise.
 
         """
-        if self.distr != 'multinomial':
+        if self.distr != 'binomial':
             raise ValueError('This is only applicable for \
-                              the multinomial distribution.')
+                              the binomial distribution.')
 
         if not isinstance(X, np.ndarray):
             raise ValueError('Input data should be of type ndarray (got %s).'
@@ -748,11 +721,12 @@ class GLM(object):
         if isinstance(self.fit_, list):
             yhat = list()
             for fit in self.fit_:
-                yhat.append(_lmb(self.distr, fit['beta0'], fit['beta'], X, self.eta))
+                yhat.append(_lmb(self.distr,
+                            fit['beta0'], fit['beta'], X, self.eta))
         else:
-            yhat = _lmb(self.distr, self.fit_['beta0'], self.fit_['beta'], X, self.eta)
+            yhat = _lmb(self.distr,
+                        self.fit_['beta0'], self.fit_['beta'], X, self.eta)
         yhat = np.asarray(yhat)
-
         return yhat
 
     def fit_predict(self, X, y):
@@ -776,7 +750,7 @@ class GLM(object):
         return self.fit(X, y).predict(X)
 
     def score(self, X, y):
-        """Score the model.
+        r"""Score the model.
 
         Parameters
         ----------
@@ -785,7 +759,7 @@ class GLM(object):
             of shape (n_samples, n_features).
         y : array \n
             The true targets against which to score the predicted targets,
-            of shape (n_samples, [n_classes]).
+            of shape (n_samples, ).
 
         Returns
         -------
@@ -819,8 +793,10 @@ class GLM(object):
 
         y = y.ravel()
 
-        yhat = self.predict(X) if self.distr != 'multinomial' \
-            else self.predict_proba(X)
+        if self.distr == 'binomial' and self.score_metric != 'accuracy':
+            yhat = self.predict_proba(X)
+        else:
+            yhat = self.predict(X)
 
         score = list()
         # Check whether we have a list of estimators or a single estimator
@@ -832,19 +808,13 @@ class GLM(object):
         else:
             LS = 0
         if(self.score_metric == 'pseudo_R2'):
-            if self.distr != 'multinomial':
-                L0 = utils.log_likelihood(y, self.ynull_, self.distr)
-            else:
-                expand_ynull_ = np.tile(self.ynull_, (X.shape[0], 1))
-                L0 = utils.log_likelihood(y, expand_ynull_, self.distr)
+            L0 = utils.log_likelihood(y, self.ynull_, self.distr)
 
         # Compute array of scores for each model fit
         # (corresponding to a reg_lambda)
         for idx in range(yhat.shape[0]):
-            if self.distr != 'multinomial':
-                yhat_this = (yhat[idx, :]).ravel()
-            else:
-                yhat_this = yhat[idx, :, :]
+            yhat_this = (yhat[idx, :]).ravel()
+
             L1 = utils.log_likelihood(y, yhat_this, self.distr)
 
             if self.score_metric == 'deviance':
@@ -881,8 +851,4 @@ class GLM(object):
             y = np.random.normal(_lmb(self.distr, beta0, beta, X, self.eta))
         if self.distr == 'binomial':
             y = np.random.binomial(1, _lmb(self.distr, beta0, beta, X, self.eta))
-        if self.distr == 'multinomial':
-            y = np.array([np.random.multinomial(1, pvals)
-                          for pvals in
-                          _lmb(self.distr, beta0, beta, X, self.eta)]).argmax(0)
         return y
