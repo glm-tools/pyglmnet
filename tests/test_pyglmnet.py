@@ -222,45 +222,6 @@ def test_cv():
                  scoring=simple_cv_scorer)), 5)
 
 
-# def test_multinomial():
-#     """Test all multinomial functionality."""
-#     glm_mn = GLM(distr='multinomial', reg_lambda=np.array([0.0, 0.1, 0.2]),
-#                  learning_rate=2e-1, tol=1e-10)
-#     X = np.array([[-1, -2, -3], [4, 5, 6]])
-#     y = np.array([1, 0])
-#
-#     # test gradient
-#     beta = np.zeros([4, 2])
-#     grad_beta0, grad_beta = _grad_L2loss(glm_mn.distr, glm_mn.alpha,
-#                                          beta[0], beta[1:], 0, X, y,
-#                                          glm_mn.Tau, glm_mn.eta)
-#     assert_true(grad_beta0[0] != grad_beta0[1])
-#     glm_mn.fit(X, y)
-#     y_pred_proba = glm_mn.predict_proba(X)
-#     assert_equal(y_pred_proba.shape, (3, X.shape[0], 2))  # n_lambdas x n_samples x n_classes
-#
-#     # pick one as yhat
-#     yhat = y_pred_proba[0]
-#
-#     # uniform prediction
-#     ynull = np.ones(yhat.shape) / yhat.shape[1]
-#
-#     # pseudo_R2 should be greater than 0
-#     assert_true(glm_mn[-1].score(X, y) > 0.)
-#     assert_equal(len(glm_mn.simulate(glm_mn.fit_[0]['beta0'],
-#                                      glm_mn.fit_[0]['beta'],
-#                                      X)),
-#                  X.shape[0])
-#
-#     # check that score is computed for sliced estimator
-#     scorelist = glm_mn[-1].score(X, y)
-#     assert_equal(scorelist.shape[0], 1)
-#
-#     # check that score is computed for all lambdas
-#     scorelist = glm_mn.score(X, y)
-#     assert_equal(scorelist.shape[0], y_pred_proba.shape[0])
-#
-
 def test_cdfast():
     """Test all functionality related to fast coordinate descent"""
     scaler = StandardScaler()
@@ -274,30 +235,14 @@ def test_cdfast():
         glm = GLM(distr, solver='cdfast')
 
         np.random.seed(glm.random_state)
-        if distr != 'multinomial':
-            # coefficients
-            beta0 = np.random.rand()
-            beta = sps.rand(n_features, 1, density=density).toarray()[:, 0]
-            # data
-            X = np.random.normal(0.0, 1.0, [n_samples, n_features])
-            X = scaler.fit_transform(X)
-            y = glm.simulate(beta0, beta, X)
 
-        elif distr == 'multinomial':
-            # coefficients
-            beta0 = 1 / (n_features + 1) * \
-                np.random.normal(0.0, 1.0, n_classes)
-            beta = 1 / (n_features + 1) * \
-                np.random.normal(0.0, 1.0, [n_features, n_classes])
-            # data
-            X, y = make_classification(n_samples=n_samples,
-                                       n_features=n_features,
-                                       n_redundant=0,
-                                       n_informative=n_features,
-                                       random_state=1, n_classes=n_classes)
-            y_bk = y.ravel()
-            y = np.zeros([X.shape[0], y.max() + 1])
-            y[np.arange(X.shape[0]), y_bk] = 1
+        # coefficients
+        beta0 = np.random.rand()
+        beta = sps.rand(n_features, 1, density=density).toarray()[:, 0]
+        # data
+        X = np.random.normal(0.0, 1.0, [n_samples, n_features])
+        X = scaler.fit_transform(X)
+        y = glm.simulate(beta0, beta, X)
 
         # compute grad and hess
         beta_ = np.zeros((n_features + 1,))
