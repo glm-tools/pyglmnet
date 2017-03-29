@@ -42,10 +42,10 @@ def test_accuracy():
 	beta = np.random.normal(0.0, 1.0, (n_features, n_classes))
 
     # sample train and test data
-	glm_sim = GLM(distr='multinomial', score_metric='accuracy')
+	glm_sim = GLM(distr='binomial', score_metric='accuracy')
 	X = np.random.randn(n_samples, n_features)
 	y = glm_sim.simulate(beta0, beta, X)
-
+	y = np.argmax(y, axis=1)
 	glm_sim.fit(X, y)
 	score = glm_sim[-1].score(X, y)
 	

@@ -5,6 +5,7 @@ from copy import deepcopy
 import numpy as np
 from scipy.special import expit
 from .utils import logger, set_log_level, log_likelihood
+from . import metrics
 
 
 def _lmb(distr, beta0, beta, X, eta):
