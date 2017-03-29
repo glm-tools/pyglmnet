@@ -177,23 +177,6 @@ We welcome pull requests. Please see our `developer documentation
 page <http://glm-tools.github.io/pyglmnet/developers.html>`__ for more
 details.
 
-Author
-~~~~~~
-
--  `Pavan Ramkumar <http:/github.com/pavanramkumar>`__
-
-Contributors
-~~~~~~~~~~~~
-
--  `Mainak Jas <http:/github.com/jasmainak>`__
--  `Titipat Achakulvisut <http:/github.com/titipata>`__
--  `Aid Idrizović <http:/github.com/the872>`__
--  `Vinicius Marques <http:/github.com/marquesVF>`__
--  `Daniel Acuna <http:/github.com/daniel-acuna>`__
--  `Hugo Fernandes <http:/github.com/hugoguh>`__
--  `Eva Dyer <http:/github.com/evadyer>`__
--  `Matt Antalek <https://github.com/themantalope>`__
-
 Acknowledgments
 ~~~~~~~~~~~~~~~
 

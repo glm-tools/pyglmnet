@@ -67,6 +67,7 @@ Contents
    developers
    requests
    resources
+   whats_new
 
 Questions / Errors / Bugs
 =========================
