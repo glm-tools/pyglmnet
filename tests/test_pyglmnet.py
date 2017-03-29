@@ -154,7 +154,7 @@ def test_glmnet():
     beta = 1. / (np.float(n_features) + 1.) * \
         np.random.normal(0.0, 1.0, (n_features,))
 
-    distrs = ['softplus', 'poisson', 'gaussian', 'binomial']
+    distrs = ['softplus', 'gaussian', 'poisson', 'binomial']
     solvers = ['batch-gradient', 'cdfast']
     score_metric = 'pseudo_R2'
     learning_rate = 2e-1
@@ -269,7 +269,7 @@ def test_cdfast():
     n_classes = 5
     density = 0.1
 
-    distrs = ['softplus', 'poisson', 'gaussian', 'binomial', 'multinomial']
+    distrs = ['softplus', 'gaussian', 'binomial', 'poisson']
     for distr in distrs:
         glm = GLM(distr, solver='cdfast')
 
@@ -277,7 +277,7 @@ def test_cdfast():
         if distr != 'multinomial':
             # coefficients
             beta0 = np.random.rand()
-            beta = sps.rand(n_features, 1, density=density).toarray()
+            beta = sps.rand(n_features, 1, density=density).toarray()[:, 0]
             # data
             X = np.random.normal(0.0, 1.0, [n_samples, n_features])
             X = scaler.fit_transform(X)
@@ -300,12 +300,12 @@ def test_cdfast():
             y[np.arange(X.shape[0]), y_bk] = 1
 
         # compute grad and hess
-        beta_ = np.zeros([n_features + 1, beta.shape[1]])
+        beta_ = np.zeros((n_features + 1,))
         beta_[0] = beta0
         beta_[1:] = beta
         z = beta_[0] + np.dot(X, beta_[1:])
         k = 1
-        xk = np.expand_dims(X[:, k - 1], axis=1)
+        xk = X[:, k - 1]
         gk, hk = glm._gradhess_logloss_1d(xk, y, z)
 
         # test grad and hess

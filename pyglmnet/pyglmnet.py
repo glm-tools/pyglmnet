@@ -436,7 +436,7 @@ class GLM(object):
         hk: float:
             hessian
         """
-        n_samples = np.float(xk.shape[0])
+        n_samples = xk.shape[0]
 
         if self.distr == 'softplus':
             mu = _qu(self.distr, z, self.eta)
@@ -467,7 +467,7 @@ class GLM(object):
         elif self.distr == 'binomial':
             mu = _qu(self.distr, z, self.eta)
             gk = np.sum((mu - y) * xk)
-            hk = np.sum(mu * (1.0 - mu) * xk ** 2)
+            hk = np.sum(mu * (1.0 - mu) * xk * xk)
 
         return 1. / n_samples * gk, 1. / n_samples * hk
 
@@ -508,13 +508,13 @@ class GLM(object):
         n_features = X.shape[1]
         reg_scale = rl * (1 - self.alpha)
 
-        for k in range(0, np.int(n_features) + 1):
+        for k in range(0, n_features + 1):
             # Only update parameters in active set
             if ActiveSet[k] != 0:
                 if k > 0:
-                    xk = np.expand_dims(X[:, k - 1], axis=1)
+                    xk = X[:, k - 1]
                 else:
-                    xk = np.ones((n_samples, 1))
+                    xk = np.ones((n_samples, ))
 
                 # Calculate grad and hess of log likelihood term
                 gk, hk = self._gradhess_logloss_1d(xk, y, z)
@@ -617,7 +617,7 @@ class GLM(object):
 
                     beta = beta - self.learning_rate * grad
                 elif self.solver == 'cdfast':
-                    beta, z = self._cdfast(X, y[:, None], z, ActiveSet, beta, rl)
+                    beta, z = self._cdfast(X, y, z, ActiveSet, beta, rl)
 
                 # Apply proximal operator
                 beta[1:] = self._prox(beta[1:], rl * alpha)
