@@ -88,8 +88,8 @@ def test_tikhonov():
     glm_tikhonov.fit(Xtrain, ytrain)
 
     R2_train, R2_test = dict(), dict()
-    R2_train['tikhonov'] = glm_tikhonov[-1].score(Xtrain, ytrain)
-    R2_test['tikhonov'] = glm_tikhonov[-1].score(Xtest, ytest)
+    R2_train['tikhonov'] = glm_tikhonov.score(Xtrain, ytrain)
+    R2_test['tikhonov'] = glm_tikhonov.score(Xtest, ytest)
 
     # fit model with cdfast
     glm_tikhonov = GLM(distr='softplus',
@@ -101,8 +101,8 @@ def test_tikhonov():
     glm_tikhonov.fit(Xtrain, ytrain)
 
     R2_train, R2_test = dict(), dict()
-    R2_train['tikhonov'] = glm_tikhonov[-1].score(Xtrain, ytrain)
-    R2_test['tikhonov'] = glm_tikhonov[-1].score(Xtest, ytest)
+    R2_train['tikhonov'] = glm_tikhonov.score(Xtrain, ytrain)
+    R2_test['tikhonov'] = glm_tikhonov.score(Xtest, ytest)
 
 
 def test_group_lasso():
@@ -151,7 +151,7 @@ def test_glmnet():
 
     for solver in solvers:
         for distr in distrs:
-            
+
             glm = GLM(distr, learning_rate=learning_rate,
                       solver=solver, score_metric=score_metric)
 
@@ -164,47 +164,32 @@ def test_glmnet():
             X_train = scaler.fit_transform(X_train)
             glm.fit(X_train, y_train)
 
-            beta_ = glm.fit_[-1]['beta']
+            beta_ = glm.beta_
             assert_allclose(beta, beta_, atol=0.5)  # check fit
 
             y_pred = glm.predict(scaler.transform(X_train))
-            assert_equal(y_pred.shape, (n_lambda, X_train.shape[0]))
-
-    # checks for slicing.
-    glm = glm[:3]
-    glm_copy = glm.copy()
-    assert_true(glm_copy is not glm)
-    assert_equal(len(glm.reg_lambda), 3)
-    y_pred = glm[:2].predict(scaler.transform(X_train))
-    assert_equal(y_pred.shape, (2, X_train.shape[0]))
-    y_pred = glm[2].predict(scaler.transform(X_train))
-    assert_equal(y_pred.shape, (X_train.shape[0], ))
-    assert_raises(IndexError, glm.__getitem__, [2])
-    glm.score(X_train, y_train)
-
-    # don't allow slicing if model has not been fit yet.
-    glm_poisson = GLM(distr='softplus')
-    assert_raises(ValueError, glm_poisson.__getitem__, 2)
+            assert_equal(y_pred.shape[0], X_train.shape[0])
 
     # test fit_predict
+    glm_poisson = GLM(distr='softplus')
     glm_poisson.fit_predict(X_train, y_train)
     assert_raises(ValueError, glm_poisson.fit_predict,
                   X_train[None, ...], y_train)
 
 
 def simple_cv_scorer(obj, X, y):
-    """Simple scorer takes average pseudo-R2 from regularization path"""
+    """Simple scorer takes average pseudo-R2 from regularization path."""
     yhats = obj.predict(X)
     return np.mean([obj.score(X, y) for yhat in yhats])
 
 
 def test_cv():
-    """Simple CV check"""
+    """Simple CV check."""
     # XXX: don't use scikit-learn for tests.
     X, y = make_regression()
 
     glm_normal = GLM(distr='gaussian', alpha=0.01,
-                     reg_lambda=[0.0, 0.1, 0.2])
+                     reg_lambda=0.1)
     glm_normal.fit(X, y)
 
     cv = KFold(X.shape[0], 5)
@@ -261,7 +246,7 @@ def test_cdfast():
 
         # test cdfast
         ActiveSet = np.ones(n_features + 1)
-        rl = glm.reg_lambda[0]
-        beta_ret, z_ret = glm._cdfast(X, y, z, ActiveSet, beta_, rl)
+        beta_ret, z_ret = glm._cdfast(X, y, z,
+                                      ActiveSet, beta_, glm.reg_lambda)
         assert_equal(beta_ret.shape, beta_.shape)
         assert_equal(z_ret.shape, z.shape)

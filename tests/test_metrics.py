@@ -1,6 +1,8 @@
+"""Tests for metrics."""
+
 import numpy as np
-from pyglmnet import GLM
-from nose.tools import assert_equal
+from pyglmnet import GLM, simulate_glm
+from nose.tools import assert_true
 
 
 def test_deviance():
@@ -13,12 +15,12 @@ def test_deviance():
     # sample train and test data
     glm_sim = GLM(score_metric='deviance')
     X = np.random.randn(n_samples, n_features)
-    y = glm_sim.simulate(beta0, beta, X)
+    y = simulate_glm(glm_sim.distr, beta0, beta, X)
 
     glm_sim.fit(X, y)
-    score = glm_sim[-1].score(X, y)
+    score = glm_sim.score(X, y)
 
-    assert_equal(score.shape[0], 1)
+    assert_true(isinstance(score, float))
 
 
 def test_pseudoR2():
@@ -31,12 +33,12 @@ def test_pseudoR2():
     # sample train and test data
     glm_sim = GLM(score_metric='pseudo_R2')
     X = np.random.randn(n_samples, n_features)
-    y = glm_sim.simulate(beta0, beta, X)
+    y = simulate_glm(glm_sim.distr, beta0, beta, X)
 
     glm_sim.fit(X, y)
-    score = glm_sim[-1].score(X, y)
+    score = glm_sim.score(X, y)
 
-    assert_equal(score.shape[0], 1)
+    assert_true(isinstance(score, float))
 
 
 def test_accuracy():
@@ -49,9 +51,9 @@ def test_accuracy():
     # sample train and test data
     glm_sim = GLM(distr='binomial', score_metric='accuracy')
     X = np.random.randn(n_samples, n_features)
-    y = glm_sim.simulate(beta0, beta, X)
+    y = simulate_glm(glm_sim.distr, beta0, beta, X)
     y = np.argmax(y, axis=1)
     glm_sim.fit(X, y)
-    score = glm_sim[-1].score(X, y)
+    score = glm_sim.score(X, y)
 
-    assert_equal(score.shape[0], 1)
+    assert_true(isinstance(score, float))

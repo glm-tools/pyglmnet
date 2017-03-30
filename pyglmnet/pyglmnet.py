@@ -303,19 +303,14 @@ class GLM(object):
 
     def __init__(self, distr='poisson', alpha=0.5,
                  Tau=None, group=None,
-                 reg_lambda=None,
+                 reg_lambda=0.1,
                  solver='batch-gradient',
                  learning_rate=2e-1, max_iter=1000,
                  tol=1e-3, eta=2.0, score_metric='deviance',
                  random_state=0, verbose=False):
 
-        if reg_lambda is None:
-            reg_lambda = np.logspace(np.log(0.5), np.log(0.01), 10,
-                                     base=np.exp(1))
-        if not isinstance(reg_lambda, (list, np.ndarray)):
-            reg_lambda = [reg_lambda]
         if not isinstance(max_iter, int):
-            max_iter = int(max_iter)
+            raise ValueError('max_iter must be of type int')
 
         self.distr = distr
         self.alpha = alpha
@@ -326,6 +321,8 @@ class GLM(object):
         self.learning_rate = learning_rate
         self.max_iter = max_iter
         self.fit_ = None
+        self.beta0_ = None
+        self.beta_ = None
         self.ynull_ = None
         self.tol = tol
         self.eta = eta
@@ -335,6 +332,7 @@ class GLM(object):
         set_log_level(verbose)
 
     def get_params(self, deep=False):
+        """Return params as dict."""
         return dict(
             (
                 ('distr', self.distr),
@@ -358,24 +356,8 @@ class GLM(object):
         s = '<\nDistribution | %s' % self.distr
         s += '\nalpha | %0.2f' % self.alpha
         s += '\nmax_iter | %0.2f' % self.max_iter
-        if len(reg_lambda) > 1:
-            s += ('\nlambda: %0.2f to %0.2f\n>'
-                  % (reg_lambda[0], reg_lambda[-1]))
-        else:
-            s += '\nlambda: %0.2f\n>' % reg_lambda[0]
+        s += '\nlambda: %0.2f\n>' % reg_lambda
         return s
-
-    def __getitem__(self, key):
-        """Return a GLM object with a subset of fitted lambdas."""
-        glm = deepcopy(self)
-        if self.fit_ is None:
-            raise ValueError('Cannot slice object if the lambdas have'
-                             ' not been fit.')
-        if not isinstance(key, (slice, int)):
-            raise IndexError('Invalid slice for GLM object')
-        glm.fit_ = glm.fit_[key]
-        glm.reg_lambda = glm.reg_lambda[key]
-        return glm
 
     def copy(self):
         """Return a copy of the object.
@@ -577,81 +559,62 @@ class GLM(object):
         n_features = X.shape[1]
 
         # Initialize parameters
-        beta0_hat = 1 / (n_features + 1) * \
-            np.random.normal(0.0, 1.0, 1)
-        beta_hat = 1 / (n_features + 1) * \
+        beta = np.zeros((n_features + 1,))
+        beta[0] = 1 / (n_features + 1) * np.random.normal(0.0, 1.0, 1)
+        beta[1:] = 1 / (n_features + 1) * \
             np.random.normal(0.0, 1.0, (n_features, ))
-        fit_params = list()
 
-        logger.info('Looping through the regularization path')
-        for l, rl in enumerate(self.reg_lambda):
-            fit_params.append({'beta0': beta0_hat, 'beta': beta_hat})
-            logger.info('Lambda: %6.4f' % rl)
+        logger.info('Lambda: %6.4f' % self.reg_lambda)
 
-            # Warm initialize parameters
-            if l == 0:
-                fit_params[-1]['beta0'] = beta0_hat
-                fit_params[-1]['beta'] = beta_hat
-            else:
-                fit_params[-1]['beta0'] = fit_params[-2]['beta0']
-                fit_params[-1]['beta'] = fit_params[-2]['beta']
+        tol = self.tol
+        alpha = self.alpha
+        reg_lambda = self.reg_lambda
 
-            tol = self.tol
-            alpha = self.alpha
+        if self.solver == 'batch-gradient':
+            g = np.zeros((n_features + 1, ))
+        elif self.solver == 'cdfast':
+            ActiveSet = np.ones(n_features + 1)     # init active set
+            z = beta[0] + np.dot(X, beta[1:])       # cache z
 
-            # Temporary parameters to update
-            beta = np.zeros((n_features + 1,))
-            beta[0] = fit_params[-1]['beta0']
-            beta[1:] = fit_params[-1]['beta']
-
+        # Initialize loss accumulators
+        L, DL = list(), list()
+        for t in range(0, self.max_iter):
             if self.solver == 'batch-gradient':
-                g = np.zeros((n_features + 1, ))
+                grad = _grad_L2loss(self.distr,
+                                    alpha, self.Tau,
+                                    reg_lambda, X, y, self.eta,
+                                    beta)
+
+                beta = beta - self.learning_rate * grad
             elif self.solver == 'cdfast':
-                ActiveSet = np.ones(n_features + 1)     # init active set
-                z = beta[0] + np.dot(X, beta[1:])       # cache z
+                beta, z = \
+                    self._cdfast(X, y, z, ActiveSet, beta, reg_lambda)
 
-            # Initialize loss accumulators
-            L, DL = list(), list()
-            for t in range(0, self.max_iter):
-                if self.solver == 'batch-gradient':
-                    grad = _grad_L2loss(self.distr,
-                                        self.alpha, self.Tau,
-                                        rl, X, y, self.eta,
-                                        beta)
+            # Apply proximal operator
+            beta[1:] = self._prox(beta[1:], reg_lambda * alpha)
 
-                    beta = beta - self.learning_rate * grad
-                elif self.solver == 'cdfast':
-                    beta, z = self._cdfast(X, y, z, ActiveSet, beta, rl)
+            # Update active set
+            if self.solver == 'cdfast':
+                ActiveSet[np.where(beta[1:] == 0)[0] + 1] = 0
 
-                # Apply proximal operator
-                beta[1:] = self._prox(beta[1:], rl * alpha)
+            # Compute and save loss
+            L.append(_loss(self.distr, alpha, self.Tau, reg_lambda,
+                           X, y, self.eta, self.group, beta))
 
-                # Update active set
-                if self.solver == 'cdfast':
-                    ActiveSet[np.where(beta[1:] == 0)[0] + 1] = 0
-
-                # Compute and save loss
-                L.append(_loss(self.distr, self.alpha, self.Tau, rl,
-                               X, y, self.eta, self.group, beta))
-
-                if t > 1:
-                    DL.append(L[-1] - L[-2])
-                    if np.abs(DL[-1] / L[-1]) < tol:
-                        msg = ('\tConverged. Loss function:'
-                               ' {0:.2f}').format(L[-1])
-                        logger.info(msg)
-                        msg = ('\tdL/L: {0:.6f}\n'.format(DL[-1] / L[-1]))
-                        logger.info(msg)
-                        break
-
-            fit_params[-1]['beta0'] = beta[0]
-            fit_params[-1]['beta'] = beta[1:]
+            if t > 1:
+                DL.append(L[-1] - L[-2])
+                if np.abs(DL[-1] / L[-1]) < tol:
+                    msg = ('\tConverged. Loss function:'
+                           ' {0:.2f}').format(L[-1])
+                    logger.info(msg)
+                    msg = ('\tdL/L: {0:.6f}\n'.format(DL[-1] / L[-1]))
+                    logger.info(msg)
+                    break
 
         # Update the estimated variables
-        self.fit_ = fit_params
+        self.beta0_ = beta[0]
+        self.beta_ = beta[1:]
         self.ynull_ = np.mean(y)
-
-        # Return
         return self
 
     def predict(self, X):
@@ -671,8 +634,8 @@ class GLM(object):
             raise ValueError('Input data should be of type ndarray (got %s).'
                              % type(X))
 
-        yhat = _lmb(self.distr, self.fit_['beta0'],
-                    self.fit_['beta'], X, self.eta)
+        yhat = _lmb(self.distr, self.beta0_,
+                    self.beta_, X, self.eta)
 
         if self.distr == 'binomial':
             yhat = (yhat > 0.5).astype(int)
@@ -680,7 +643,7 @@ class GLM(object):
         return yhat
 
     def predict_proba(self, X):
-        """Predict class probability for binomial
+        """Predict class probability for binomial.
 
         Parameters
         ----------
@@ -707,7 +670,7 @@ class GLM(object):
                              % type(X))
 
         yhat = _lmb(self.distr,
-                    self.fit_['beta0'], self.fit_['beta'], X, self.eta)
+                    self.beta0_, self.beta_, X, self.eta)
         yhat = np.asarray(yhat)
         return yhat
 
