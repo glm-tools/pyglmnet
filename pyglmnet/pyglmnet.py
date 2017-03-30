@@ -169,6 +169,40 @@ def _grad_L2loss(distr, alpha, Tau, reg_lambda, X, y, eta, beta):
     return g
 
 
+def simulate_glm(distr, beta0, beta, X, eta=2.0, random_state=None):
+    """Simulate target data under a generative model.
+
+    Parameters
+    ----------
+    distr: str
+        distribution
+    X: array
+        design matrix of shape (n_samples, n_features)
+    beta0: float
+        intercept coefficient
+    beta: array
+        coefficients of shape (n_features,)
+    eta: float
+        parameter for poisson non-linearity
+    random_state: float
+        random state
+
+    Returns
+    -------
+    y: array
+        simulated target data of shape (n_samples, 1)
+    """
+    if random_state is not None:
+        np.random.RandomState(random_state)
+    if distr == 'softplus' or distr == 'poisson':
+        y = np.random.poisson(_lmb(distr, beta0, beta, X, eta))
+    if distr == 'gaussian':
+        y = np.random.normal(_lmb(distr, beta0, beta, X, eta))
+    if distr == 'binomial':
+        y = np.random.binomial(1, _lmb(distr, beta0, beta, X, eta))
+    return y
+
+
 class GLM(object):
     """Class for estimating regularized generalized linear models (GLM).
     The regularized GLM minimizes the penalized negative log likelihood:
@@ -784,30 +818,3 @@ class GLM(object):
             return metrics.pseudo_R2(X, y, yhat, self.ynull_, self.distr)
         if self.score_metric == "accuracy":
             return metrics.accuracy(y, yhat)
-
-    def simulate(self, beta0, beta, X):
-        """Simulate target data under a generative model.
-
-        Parameters
-        ----------
-        X: array
-            design matrix of shape (n_samples, n_features)
-        beta0: float
-            intercept coefficient
-        beta: array
-            coefficients of shape (n_features,)
-
-        Returns
-        -------
-        y: array
-            simulated target data of shape (n_samples, 1)
-        """
-        np.random.RandomState(self.random_state)
-        if self.distr == 'softplus' or self.distr == 'poisson':
-            y = np.random.poisson(_lmb(self.distr, beta0, beta, X, self.eta))
-        if self.distr == 'gaussian':
-            y = np.random.normal(_lmb(self.distr, beta0, beta, X, self.eta))
-        if self.distr == 'binomial':
-            y = np.random.binomial(1, _lmb(self.distr, beta0,
-                                           beta, X, self.eta))
-        return y

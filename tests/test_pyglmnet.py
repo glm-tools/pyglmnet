@@ -12,7 +12,7 @@ from sklearn.preprocessing import StandardScaler
 
 from nose.tools import assert_true, assert_equal, assert_raises
 
-from pyglmnet import GLM, _grad_L2loss, _L2loss
+from pyglmnet import GLM, _grad_L2loss, _L2loss, simulate_glm
 
 
 def test_gradients():
@@ -32,7 +32,7 @@ def test_gradients():
     distrs = ['gaussian', 'binomial', 'softplus', 'poisson']
     for distr in distrs:
         glm = GLM(distr=distr, reg_lambda=[reg_lambda])
-        y = glm.simulate(beta_[0], beta_[1:], X)
+        y = simulate_glm(glm.distr, beta_[0], beta_[1:], X)
 
         func = partial(_L2loss, distr, glm.alpha,
                        glm.Tau, reg_lambda, X, y, glm.eta, glm.group)
@@ -67,7 +67,7 @@ def test_tikhonov():
     # sample train and test data
     glm_sim = GLM(distr='softplus', score_metric='pseudo_R2')
     X = np.random.randn(n_samples, n_features)
-    y = glm_sim.simulate(beta0, beta, X)
+    y = simulate_glm(glm_sim.distr, beta0, beta, X)
 
     from sklearn.cross_validation import train_test_split
     Xtrain, Xtest, ytrain, ytest = \
@@ -125,7 +125,7 @@ def test_group_lasso():
 
     # simulate training data
     Xr = np.random.normal(0.0, 1.0, [n_samples, n_features])
-    yr = glm_group.simulate(beta0, beta, Xr)
+    yr = simulate_glm(glm_group.distr, beta0, beta, Xr)
 
     # scale and fit
     scaler = StandardScaler().fit(Xr)
@@ -159,7 +159,7 @@ def test_glmnet():
 
             np.random.seed(glm.random_state)
             X_train = np.random.normal(0.0, 1.0, [n_samples, n_features])
-            y_train = glm.simulate(beta0, beta, X_train)
+            y_train = simulate_glm(glm.distr, beta0, beta, X_train)
 
             X_train = scaler.fit_transform(X_train)
             glm.fit(X_train, y_train)
@@ -234,7 +234,7 @@ def test_cdfast():
         # data
         X = np.random.normal(0.0, 1.0, [n_samples, n_features])
         X = scaler.fit_transform(X)
-        y = glm.simulate(beta0, beta, X)
+        y = simulate_glm(glm.distr, beta0, beta, X)
 
         # compute grad and hess
         beta_ = np.zeros((n_features + 1,))
