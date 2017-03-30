@@ -150,21 +150,6 @@ and a [video](https://www.youtube.com/watch?v=zXec96KD1uA).
 
 We welcome pull requests. Please see our [developer documentation page](http://glm-tools.github.io/pyglmnet/developers.html) for more details.
 
-### Author
-
-* [Pavan Ramkumar](http:/github.com/pavanramkumar)
-
-### Contributors
-
-* [Mainak Jas](http:/github.com/jasmainak)
-* [Titipat Achakulvisut](http:/github.com/titipata)
-* [Aid Idrizović](http:/github.com/the872)
-* [Vinicius Marques](http:/github.com/marquesVF)
-* [Daniel Acuna](http:/github.com/daniel-acuna)
-* [Hugo Fernandes](http:/github.com/hugoguh)
-* [Eva Dyer](http:/github.com/evadyer)
-* [Matt Antalek](https://github.com/themantalope)
-
 ### Acknowledgments
 
 * [Konrad Kording](http://kordinglab.com) for funding and support
