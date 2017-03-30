@@ -1,12 +1,10 @@
-"""
-A set of scoring functions
-"""
+""" A set of scoring functions. """
 from . import utils
 import numpy as np
 
 
 def deviance(y, yhat, ynull_, distr):
-
+    """ Deviance metrics. """
     if distr in ['softplus', 'poisson']:
         LS = utils.log_likelihood(y, y, distr)
     else:
@@ -27,7 +25,7 @@ def deviance(y, yhat, ynull_, distr):
 
 
 def pseudo_R2(X, y, yhat, ynull_, distr):
-
+    """ Pseudo r2. """
     if distr in ['softplus', 'poisson']:
         LS = utils.log_likelihood(y, y, distr)
     else:
@@ -58,7 +56,7 @@ def pseudo_R2(X, y, yhat, ynull_, distr):
 
 
 def accuracy(y, yhat):
-
+    """ Accuracy. """
     scores = list()
     for idx in range(yhat.shape[0]):
         accuracy = float(np.sum(y == yhat[idx])) / len(yhat[idx])

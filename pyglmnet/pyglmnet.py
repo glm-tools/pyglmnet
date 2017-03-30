@@ -4,7 +4,7 @@ from copy import deepcopy
 
 import numpy as np
 from scipy.special import expit
-from .utils import logger, set_log_level, log_likelihood
+from .utils import logger, set_log_level
 from . import metrics
 
 
@@ -363,7 +363,7 @@ class GLM(object):
             # The default case: soft thresholding
             return np.sign(beta) * (np.abs(beta) - thresh) * \
                 (np.abs(beta) > thresh)
-        else: 
+        else:
            # Group sparsity case: apply group sparsity operator
             group_ids = np.unique(self.group)
             group_norms = np.abs(beta)
@@ -763,7 +763,9 @@ class GLM(object):
         # For f1 as well
         if self.score_metric in ['accuracy']:
             if self.distr not in ['binomial', 'multinomial']:
-                raise ValueError(self.score_metric + "is only defined for binomial or multinomial distributions")
+                raise ValueError(self.score_metric +
+                                 ' is only defined for binomial ' +
+                                 'or multinomial distributions')
 
         y = y.ravel()
 
