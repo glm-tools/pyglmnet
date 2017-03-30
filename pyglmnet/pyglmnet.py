@@ -4,7 +4,8 @@ from copy import deepcopy
 
 import numpy as np
 from scipy.special import expit
-from .utils import logger, set_log_level, log_likelihood
+from .utils import logger, set_log_level
+from . import metrics
 
 
 def _lmb(distr, beta0, beta, X, eta):
@@ -750,7 +751,7 @@ class GLM(object):
             >>> grid = cross_val_score(glm[0], X, y, cv=10)
         """
 
-        if self.score_metric not in ['deviance', 'pseudo_R2']:
+        if self.score_metric not in ['deviance', 'pseudo_R2', 'accuracy']:
             raise ValueError('score_metric has to be one of' +
                              ' deviance or pseudo_R2')
 
@@ -759,6 +760,13 @@ class GLM(object):
             raise ValueError('Model must be fit before ' +
                              'prediction can be scored')
 
+        # For f1 as well
+        if self.score_metric in ['accuracy']:
+            if self.distr not in ['binomial', 'multinomial']:
+                raise ValueError(self.score_metric +
+                                 ' is only defined for binomial ' +
+                                 'or multinomial distributions')
+
         y = y.ravel()
 
         if self.distr == 'binomial' and self.score_metric != 'accuracy':
@@ -766,34 +774,16 @@ class GLM(object):
         else:
             yhat = self.predict(X)
 
-        score = list()
         # Check whether we have a list of estimators or a single estimator
         if isinstance(self.fit_, dict):
             yhat = yhat[np.newaxis, ...]
 
-        if self.distr in ['softplus', 'poisson']:
-            LS = log_likelihood(y, y, self.distr)
-        else:
-            LS = 0
-        if(self.score_metric == 'pseudo_R2'):
-            L0 = log_likelihood(y, self.ynull_, self.distr)
-
-        # Compute array of scores for each model fit
-        # (corresponding to a reg_lambda)
-        for idx in range(yhat.shape[0]):
-            yhat_this = (yhat[idx, :]).ravel()
-
-            L1 = log_likelihood(y, yhat_this, self.distr)
-
-            if self.score_metric == 'deviance':
-                score.append(-2 * (L1 - LS))
-            elif self.score_metric == 'pseudo_R2':
-                if self.distr in ['softplus', 'poisson']:
-                    score.append(1 - (LS - L1) / (LS - L0))
-                else:
-                    score.append(1 - L1 / L0)
-
-        return np.array(score)
+        if self.score_metric == "deviance":
+            return metrics.deviance(y, yhat, self.ynull_, self.distr)
+        elif self.score_metric == "pseudo_R2":
+            return metrics.pseudo_R2(X, y, yhat, self.ynull_, self.distr)
+        if self.score_metric == "accuracy":
+            return metrics.accuracy(y, yhat)
 
     def simulate(self, beta0, beta, X):
         """Simulate target data under a generative model.

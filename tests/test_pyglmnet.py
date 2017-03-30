@@ -151,7 +151,7 @@ def test_glmnet():
 
     for solver in solvers:
         for distr in distrs:
-
+            
             glm = GLM(distr, learning_rate=learning_rate,
                       solver=solver, score_metric=score_metric)
 
