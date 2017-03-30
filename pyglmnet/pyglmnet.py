@@ -665,29 +665,17 @@ class GLM(object):
         Returns
         -------
         yhat : array
-            The predicted targets of shape ([n_lambda], n_samples)
-            A 1D array if predicting on only
-            one reg_lambda (compatible with scikit-learn API).
-            Otherwise, returns a 2D array.
+            The predicted targets of shape (n_samples,)
         """
         if not isinstance(X, np.ndarray):
             raise ValueError('Input data should be of type ndarray (got %s).'
                              % type(X))
 
-        if isinstance(self.fit_, list):
-            yhat = list()
-            for fit in self.fit_:
-                y_pred = _lmb(self.distr, fit['beta0'],
-                              fit['beta'], X, self.eta)
-                if self.distr == 'binomial':
-                    yhat.append((y_pred > 0.5).astype(int))
-                else:
-                    yhat.append(y_pred)
-        else:
-            yhat = _lmb(self.distr, self.fit_['beta0'],
-                        self.fit_['beta'], X, self.eta)
-            if self.distr == 'binomial':
-                yhat = (yhat > 0.5).astype(int)
+        yhat = _lmb(self.distr, self.fit_['beta0'],
+                    self.fit_['beta'], X, self.eta)
+
+        if self.distr == 'binomial':
+            yhat = (yhat > 0.5).astype(int)
         yhat = np.asarray(yhat)
         return yhat
 
@@ -702,11 +690,7 @@ class GLM(object):
         Returns
         -------
         yhat : array
-            The predicted targets of shape
-            ([n_lambda], n_samples).
-            A 2D array if predicting on only
-            one lambda (compatible with scikit-learn API).
-            Otherwise, returns a 3D array.
+            The predicted targets of shape (n_samples, ).
 
         Raises
         ------
@@ -722,14 +706,8 @@ class GLM(object):
             raise ValueError('Input data should be of type ndarray (got %s).'
                              % type(X))
 
-        if isinstance(self.fit_, list):
-            yhat = list()
-            for fit in self.fit_:
-                yhat.append(_lmb(self.distr,
-                            fit['beta0'], fit['beta'], X, self.eta))
-        else:
-            yhat = _lmb(self.distr,
-                        self.fit_['beta0'], self.fit_['beta'], X, self.eta)
+        yhat = _lmb(self.distr,
+                    self.fit_['beta0'], self.fit_['beta'], X, self.eta)
         yhat = np.asarray(yhat)
         return yhat
 
@@ -746,10 +724,7 @@ class GLM(object):
         Returns
         -------
         yhat : array
-            The predicted targets of shape ([n_lambda], n_samples).
-            A 1D array if predicting on only
-            one lambda (compatible with scikit-learn API).
-            Otherwise, returns a 2D array.
+            The predicted targets of shape (n_samples, ).
         """
         return self.fit(X, y).predict(X)
 
