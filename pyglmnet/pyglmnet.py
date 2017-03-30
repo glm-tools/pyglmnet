@@ -364,7 +364,7 @@ class GLM(object):
             return np.sign(beta) * (np.abs(beta) - thresh) * \
                 (np.abs(beta) > thresh)
         else:
-           # Group sparsity case: apply group sparsity operator
+            # Group sparsity case: apply group sparsity operator
             group_ids = np.unique(self.group)
             group_norms = np.abs(beta)
 
