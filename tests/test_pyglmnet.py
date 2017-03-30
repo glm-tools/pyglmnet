@@ -12,7 +12,7 @@ from sklearn.preprocessing import StandardScaler
 
 from nose.tools import assert_true, assert_equal, assert_raises
 
-from pyglmnet import GLM, _grad_L2loss, _L2loss, simulate_glm
+from pyglmnet import GLM, GLMCV, _grad_L2loss, _L2loss, simulate_glm
 
 
 def test_gradients():
@@ -136,7 +136,6 @@ def test_glmnet():
     """Test glmnet."""
     scaler = StandardScaler()
     n_samples, n_features = 100, 10
-    n_lambda = 10
 
     # coefficients
     beta0 = 1. / (np.float(n_features) + 1.) * \
@@ -176,6 +175,43 @@ def test_glmnet():
     assert_raises(ValueError, glm_poisson.fit_predict,
                   X_train[None, ...], y_train)
 
+
+def test_glmcv():
+    """Test GLMCV class."""
+    scaler = StandardScaler()
+    n_samples, n_features = 100, 10
+
+    # coefficients
+    beta0 = 1. / (np.float(n_features) + 1.) * \
+        np.random.normal(0.0, 1.0)
+    beta = 1. / (np.float(n_features) + 1.) * \
+        np.random.normal(0.0, 1.0, (n_features,))
+
+    distrs = ['softplus', 'gaussian', 'poisson', 'binomial']
+    solvers = ['batch-gradient', 'cdfast']
+    score_metric = 'pseudo_R2'
+    learning_rate = 2e-1
+
+    for solver in solvers:
+        for distr in distrs:
+
+            glm = GLMCV(distr, learning_rate=learning_rate,
+                        solver=solver, score_metric=score_metric)
+
+            assert_true(repr(glm))
+
+            np.random.seed(glm.random_state)
+            X_train = np.random.normal(0.0, 1.0, [n_samples, n_features])
+            y_train = simulate_glm(glm.distr, beta0, beta, X_train)
+
+            X_train = scaler.fit_transform(X_train)
+            glm.fit(X_train, y_train)
+
+            beta_ = glm.beta_
+            assert_allclose(beta, beta_, atol=0.5)  # check fit
+
+            y_pred = glm.predict(scaler.transform(X_train))
+            assert_equal(y_pred.shape[0], X_train.shape[0])
 
 def simple_cv_scorer(obj, X, y):
     """Simple scorer takes average pseudo-R2 from regularization path."""

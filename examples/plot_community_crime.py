@@ -50,8 +50,8 @@ glm = GLM(distr='gaussian', alpha=0.05, score_metric='pseudo_R2')
 glm.fit(X_train, y_train)
 
 # score the test set prediction
-y_test_hat = glm[-1].predict(X_test)
-print ("test set pseudo $R^2$ = %f" % glm[-1].score(X_test, y_test))
+y_test_hat = glm.predict(X_test)
+print ("test set pseudo $R^2$ = %f" % glm.score(X_test, y_test))
 
 ########################################################
 # Plot the true and predicted test set target values

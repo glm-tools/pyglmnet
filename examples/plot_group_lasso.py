@@ -56,7 +56,7 @@ gl_glm = GLM(distr="binomial",
              group=group_idxs,
              score_metric="pseudo_R2",
              alpha=1.0,
-             reg_lambda=np.logspace(np.log(100), np.log(0.01), 5, base=np.exp(1)))
+             reg_lambda=0.01)
 
 
 #set up the lasso model
@@ -64,7 +64,7 @@ glm = GLM(distr="binomial",
           tol=1e-2,
           score_metric="pseudo_R2",
           alpha=1.0,
-          reg_lambda=np.logspace(np.log(100), np.log(0.01), 5, base=np.exp(1)))
+          reg_lambda=0.01)
 
 print("gl_glm: ", gl_glm)
 print("glm: ", glm)
