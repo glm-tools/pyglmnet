@@ -4,6 +4,7 @@ from nose.tools import assert_equal
 
 
 def test_deviance():
+    """Test deviance."""
     n_samples, n_features = 1000, 100
 
     beta0 = np.random.normal(0.0, 1.0, 1)
@@ -21,6 +22,7 @@ def test_deviance():
 
 
 def test_pseudoR2():
+    """Test pseudo r2."""
     n_samples, n_features = 1000, 100
 
     beta0 = np.random.normal(0.0, 1.0, 1)
@@ -38,7 +40,7 @@ def test_pseudoR2():
 
 
 def test_accuracy():
-
+    """Testing accuracy."""
     n_samples, n_features, n_classes = 1000, 100, 2
 
     beta0 = np.random.normal(0.0, 1.0, 1)
