@@ -135,7 +135,9 @@ Sometimes you may make tiny formatting changes that are not worth retesting
 with our continuous integration systems. For these changes, include a ``[ci skip]``
 prefix in your commit message. However, use this trick sparingly!
 
-After all suggested changes are resolved, the PR can be merged.
+After all suggested changes are resolved, add your name to the `whats_new`
+page in the appropriate section. This should be the last commit in the PR
+before it can be merged.
 
 Once the PR is merged, you can optionally delete the ``feat`` branch both
 locally and on your fork.
