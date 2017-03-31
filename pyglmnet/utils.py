@@ -4,7 +4,7 @@ A few miscellaneous helper functions for pyglmnet.py
 
 import numpy as np
 from copy import copy
-
+from scipy.stats import norm
 import logging
 
 
@@ -12,8 +12,34 @@ logger = logging.getLogger('pyglmnet')
 logger.addHandler(logging.StreamHandler())
 
 
+def probit(z):
+    """Probit inverse link function: normcdf.
+
+    Parameters
+    ----------
+    z: array | list
+
+    Returns:
+    norm.cdf(z)
+    """
+    return norm.cdf(z)
+
+
+def grad_probit(z):
+    """Gradient of probit inverse link function: normcdf.
+
+    Parameters
+    ----------
+    z: array | list
+
+    Returns:
+    norm.pdf(z)
+    """
+    return norm.pdf(z)
+
+
 def softmax(w):
-    """Softmax function of given array of number w
+    """Softmax function of given array of number w.
 
     Parameters
     ----------
@@ -60,7 +86,7 @@ def log_likelihood(y, yhat, distr):
     eps = np.spacing(1)
     if distr in ['softplus', 'poisson']:
         return np.sum(y * np.log(eps + yhat) - yhat)
-    elif distr == 'binomial':
+    elif distr == 'binomial' or distr == 'probit':
         # Log likelihood of model under consideration
         return 2 * len(y) * \
             np.sum(y * np.log((yhat == 0) + yhat) / np.mean(yhat) +

@@ -4,7 +4,7 @@ from copy import deepcopy
 
 import numpy as np
 from scipy.special import expit
-from .utils import logger, set_log_level
+from .utils import logger, set_log_level, probit, grad_probit
 from . import metrics
 
 
@@ -28,6 +28,8 @@ def _qu(distr, z, eta):
         qu = z
     elif distr == 'binomial':
         qu = expit(z)
+    elif distr == 'probit':
+        qu = probit(z)
     return qu
 
 
@@ -49,6 +51,10 @@ def _logL(distr, beta0, beta, X, y, eta):
         # but this prevents underflow
         z = beta0 + np.dot(X, beta)
         logL = 1. / n_samples * np.sum(y * z - np.log(1 + np.exp(z)))
+    elif distr == 'probit':
+        z = beta0 + np.dot(X, beta)
+        logL = 1. / n_samples * \
+            np.sum(y * np.log(probit(z)) + (1 - y) * np.log(1 - probit(z)))
     return logL
 
 
@@ -161,6 +167,17 @@ def _grad_L2loss(distr, alpha, Tau, reg_lambda, X, y, eta, beta):
             + reg_lambda * (1 - alpha) * \
             np.dot(InvCov, beta[1:])
 
+    elif distr == 'probit':
+        prob = probit(z)
+        grad_prob = grad_probit(z)
+        grad_beta0 = -1. / n_samples * \
+            np.sum((y * (grad_prob / prob)) -
+                   ((1 - y) * (grad_prob / (1 - prob))))
+        grad_logl = ((y * (grad_prob / prob)) -
+                     ((1 - y) * (grad_prob / (1 - prob))))
+        grad_beta = -1. / n_samples * np.transpose(np.dot(grad_logl.T, X)) + \
+            reg_lambda * (1 - alpha) * np.dot(InvCov, beta[1:])
+
     n_features = X.shape[1]
     g = np.zeros((n_features + 1, ))
     g[0] = grad_beta0
@@ -197,7 +214,7 @@ def simulate_glm(distr, beta0, beta, X, eta=2.0, random_state=None):
         y = np.random.poisson(_lmb(distr, beta0, beta, X, eta))
     if distr == 'gaussian':
         y = np.random.normal(_lmb(distr, beta0, beta, X, eta))
-    if distr == 'binomial':
+    if distr == 'binomial' or distr == 'probit':
         y = np.random.binomial(1, _lmb(distr, beta0, beta, X, eta))
     return y
 
@@ -445,11 +462,21 @@ class GLM(object):
             gk = np.sum((mu - y) * xk)
             hk = np.sum(mu * (1.0 - mu) * xk * xk)
 
+        elif self.distr == 'probit':
+            prob = probit(z)
+            grad_prob = probit(z)
+            gk = np.sum(y * (grad_prob / prob) -
+                        (1 - y) * (grad_prob / (1 - prob)) * xk)
+
+            mid_l = y * (z * prob + grad_prob) / (prob ** 2)
+            mid_r = (1 - y) * (-z * (1 - prob) + grad_prob) / ((1 - prob) ** 2)
+            hk = np.sum(prob * (mid_l + mid_r) * (xk * xk))
+
         return 1. / n_samples * gk, 1. / n_samples * hk
 
     def _cdfast(self, X, y, z, ActiveSet, beta, rl):
         """
-        Performs one cycle of Newton updates for all coordinates
+        Perform one cycle of Newton updates for all coordinates.
 
         Parameters
         ----------
@@ -527,7 +554,6 @@ class GLM(object):
         self : instance of GLM
             The fitted model.
         """
-
         np.random.RandomState(self.random_state)
 
         # checks for group

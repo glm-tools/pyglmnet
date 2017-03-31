@@ -29,7 +29,7 @@ def test_gradients():
     beta_[1:] = sps.rand(n_features, 1, density=density).toarray()[:, 0]
 
     reg_lambda = 0.1
-    distrs = ['gaussian', 'binomial', 'softplus', 'poisson']
+    distrs = ['gaussian', 'binomial', 'softplus', 'poisson', 'probit']
     for distr in distrs:
         glm = GLM(distr=distr, reg_lambda=[reg_lambda])
         y = simulate_glm(glm.distr, beta_[0], beta_[1:], X)
@@ -45,7 +45,7 @@ def test_gradients():
 
 
 def test_tikhonov():
-    """Tikhonov regularization test"""
+    """Tikhonov regularization test."""
     n_samples, n_features = 100, 10
 
     # design covariance matrix of parameters
@@ -143,7 +143,7 @@ def test_glmnet():
     beta = 1. / (np.float(n_features) + 1.) * \
         np.random.normal(0.0, 1.0, (n_features,))
 
-    distrs = ['softplus', 'gaussian', 'poisson', 'binomial']
+    distrs = ['softplus', 'gaussian', 'poisson', 'binomial', 'probit']
     solvers = ['batch-gradient', 'cdfast']
     score_metric = 'pseudo_R2'
     learning_rate = 2e-1
@@ -187,7 +187,7 @@ def test_glmcv():
     beta = 1. / (np.float(n_features) + 1.) * \
         np.random.normal(0.0, 1.0, (n_features,))
 
-    distrs = ['softplus', 'gaussian', 'poisson', 'binomial']
+    distrs = ['softplus', 'gaussian', 'poisson', 'binomial', 'probit']
     solvers = ['batch-gradient', 'cdfast']
     score_metric = 'pseudo_R2'
     learning_rate = 2e-1
@@ -243,7 +243,7 @@ def test_cdfast():
     n_classes = 5
     density = 0.1
 
-    distrs = ['softplus', 'gaussian', 'binomial', 'poisson']
+    distrs = ['softplus', 'gaussian', 'binomial', 'poisson', 'probit']
     for distr in distrs:
         glm = GLM(distr, solver='cdfast')
 
