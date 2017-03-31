@@ -200,8 +200,11 @@ def test_glmcv():
     score_metric = 'pseudo_R2'
     learning_rate = 2e-1
 
-    for solver in solvers:
-        for distr in distrs:
+    for distr in distrs:
+
+        betas_ = list()
+
+        for solver in solvers:
 
             if distr == 'gamma' and solver == 'cdfast':
                 continue
@@ -218,11 +221,16 @@ def test_glmcv():
             X_train = scaler.fit_transform(X_train)
             glm.fit(X_train, y_train)
 
-            beta_ = glm.beta_
-            assert_allclose(beta, beta_, atol=0.5)  # check fit
+            betas_.append(glm.beta_)
+            assert_allclose(beta, betas_[-1], atol=0.5)  # check fit
 
             y_pred = glm.predict(scaler.transform(X_train))
             assert_equal(y_pred.shape[0], X_train.shape[0])
+
+        # compare all solvers pairwise to make sure they're close
+        for i, first_beta in enumerate(betas_[:-1]):
+            for second_beta in betas_[i+1:]:
+                assert_allclose(first_beta, second_beta, atol=0.5)
 
 
 def test_cv():
