@@ -1,4 +1,7 @@
 language: python
+env:
+    - PYTHON=2.7
+    - PYTHON=3.5
 before_install:
   - wget -q http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh
   - chmod +x miniconda.sh
@@ -6,7 +9,7 @@ before_install:
   - export PATH=/home/travis/miniconda/bin:$PATH
   - conda update --yes --quiet conda
 install:
-    - conda create -n testenv --yes pip python=2.7
+    - conda create -n testenv --yes pip python=$PYTHON
     - source activate testenv
     - conda install --yes --quiet numpy=1.10.4 scipy=0.17 scikit-learn=0.17 nose coverage
     - pip install pandas
