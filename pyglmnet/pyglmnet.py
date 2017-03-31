@@ -1020,7 +1020,7 @@ class GLMCV(object):
             The predicted targets of shape based on the model with optimal
             reg_lambda (n_samples,)
         """
-        self.glm_.fit(X, y)
+        self.fit(X, y)
         return self.glm_.predict(X)
 
     def score(self, X, y):
