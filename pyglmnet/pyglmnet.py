@@ -564,9 +564,7 @@ class GLM(object):
         alpha = self.alpha
         reg_lambda = self.reg_lambda
 
-        if self.solver == 'batch-gradient':
-            g = np.zeros((n_features + 1, ))
-        elif self.solver == 'cdfast':
+        if self.solver == 'cdfast':
             ActiveSet = np.ones(n_features + 1)     # init active set
             z = beta[0] + np.dot(X, beta[1:])       # cache z
 
