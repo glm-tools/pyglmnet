@@ -171,8 +171,8 @@ Logistic: `binomial`
 
 .. math::
 
-    J = -\frac{1}{n}\sum_i \left\{ y_i \log(\beta_0 + \sum_j \beta_j x_{ij}) +
-    (1-y_i) \log(1 - (\beta_0 + \sum_j \beta_j x_{ij})) \right\}
+    J = -\frac{1}{n}\sum_i \left\{ y_i \log(\mu_i) +
+    (1-y_i) \log(1 - \mu_i) \right\}
     + \lambda (1 - \alpha) \frac{1}{2}\sum_j \beta_j^2\\
 
 
@@ -191,4 +191,62 @@ Logistic: `binomial`
 
     \frac{\partial^2 J}{\partial \beta_0^2} &= \frac{1}{n}\sum_i \mu_i (1 - \mu_i) \\
     \frac{\partial^2 J}{\partial \beta_j^2} &=  \frac{1}{n}\sum_i \mu_i (1 - \mu_i) x_{ij}^2
+    + \lambda (1 - \alpha)
+
+Logistic: `probit`
+------------------
+
+**Mean Function**
+
+.. math::
+
+    z_i &= \beta_0 + \sum_j \beta_j x_{ij} \\
+    \mu_i &= \Phi(z_i)
+
+where :math:`\Phi(z_i)` is the standard normal cumulative distribution function.
+
+**Log-likelihood function**
+
+.. math::
+
+    \mathcal{L} = \sum_i \left\{ y_i \log(\mu_i) + (1-y_i) \log(1 - \mu_i) \right\} \\
+
+**L2-penalized loss function**
+
+.. math::
+
+    J = J = -\frac{1}{n}\sum_i \left\{ y_i \log(\mu_i) +
+    (1-y_i) \log(1 - \mu_i) \right\}
+    + \lambda (1 - \alpha) \frac{1}{2}\sum_j \beta_j^2\\
+
+
+**Gradient**
+
+.. math::
+
+    \mu(z_i) &= \Phi(z_i) \\
+    \mu'(z_i) &= \phi(z_i)
+
+
+where :math:`\Phi(z_i)` and :math:`\phi(z_i)` are the standard normal cdf and pdf.
+
+.. math::
+
+    \frac{\partial J}{\partial \beta_0} &=
+      -\frac{1}{n}\sum_i \Bigg\{y_i \frac{\mu'(z_i)}{\mu(z_i)} - (1 - y_i)\frac{\mu'(z_i)}{1 - \mu(z_i)}\Bigg\} \\
+      \frac{\partial J}{\partial \beta_j} &=
+        -\frac{1}{n}\sum_i \Bigg\{y_i \frac{\mu'(z_i)}{\mu(z_i)} - (1 - y_i)\frac{\mu'(z_i)}{1 - \mu(z_i)}\Bigg\} x_{ij}
+    + \lambda (1 - \alpha) \beta_j
+
+
+**Hessian**
+
+.. math::
+
+    \frac{\partial^2 J}{\partial \beta_0^2} &=
+      \frac{1}{n}\sum_i \mu'(z_i) \Bigg\{y_i \frac{z_i\mu(z_i) + \mu'(z_i)}{\mu^2(z_i)} +
+      (1 - y_i)\frac{-z_i(1 - \mu(z_i)) + \mu'(z_i)}{(1 - \mu(z_i))^2} \Bigg\} \\
+      \frac{\partial^2 J}{\partial \beta_j^2} &=
+        \frac{1}{n}\sum_i \mu'(z_i) \Bigg\{y_i \frac{z_i\mu(z_i) + \mu'(z_i)}{\mu^2(z_i)} +
+        (1 - y_i)\frac{-z_i(1 - \mu(z_i)) + \mu'(z_i)}{(1 - \mu(z_i))^2} \Bigg\} x_{ij}^2
     + \lambda (1 - \alpha)
