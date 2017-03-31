@@ -792,6 +792,8 @@ class GLMCV(object):
         array of regularized parameters :math:`\\lambda` of penalty term.
         default: None, a list of 10 floats spaced logarithmically (base e)
         between 0.5 and 0.01.
+    cv : cross validation object (default 10)
+        Iterator for doing cross validation
     solver : str
         optimization method, can be one of the following
         'batch-gradient' (vanilla batch gradient descent)
@@ -836,7 +838,7 @@ class GLMCV(object):
 
     def __init__(self, distr='poisson', alpha=0.5,
                  Tau=None, group=None,
-                 reg_lambda=None,
+                 reg_lambda=None, cv=10,
                  solver='batch-gradient',
                  learning_rate=2e-1, max_iter=1000,
                  tol=1e-3, eta=2.0, score_metric='deviance',
@@ -854,6 +856,7 @@ class GLMCV(object):
         self.distr = distr
         self.alpha = alpha
         self.reg_lambda = reg_lambda
+        self.cv = cv
         self.Tau = Tau
         self.group = group
         self.solver = solver
@@ -863,6 +866,7 @@ class GLMCV(object):
         self.beta_ = None
         self.reg_lambda_opt_ = None
         self.glm_ = None
+        self.scores_ = None
         self.ynull_ = None
         self.tol = tol
         self.eta = eta
@@ -936,28 +940,51 @@ class GLMCV(object):
         glms, scores = list(), list()
         self.ynull_ = np.mean(y)
 
+        if not type(int):
+            raise ValueError('cv must be int. We do not support scikit-learn '
+                             'cv objects at the moment')
+
+        idxs = np.arange(y.shape[0])
+        np.random.shuffle(idxs)
+        cv_splits = np.array_split(idxs, self.cv)
+
+        glm = GLM(distr=self.distr,
+                  alpha=self.alpha,
+                  Tau=self.Tau,
+                  reg_lambda=0.1,
+                  solver=self.solver,
+                  learning_rate=self.learning_rate,
+                  max_iter=self.max_iter,
+                  tol=self.tol,
+                  eta=self.eta,
+                  score_metric=self.score_metric,
+                  random_state=self.random_state,
+                  verbose=self.verbose)
+
         for l, rl in enumerate(self.reg_lambda):
             logger.info('Lambda: %6.4f' % rl)
-            glm = GLM(distr=self.distr,
-                      alpha=self.alpha,
-                      Tau=self.Tau,
-                      reg_lambda=rl,
-                      solver=self.solver,
-                      learning_rate=self.learning_rate,
-                      max_iter=self.max_iter,
-                      tol=self.tol,
-                      eta=self.eta,
-                      score_metric=self.score_metric,
-                      random_state=self.random_state,
-                      verbose=self.verbose)
+
+            glm.reg_lambda = rl
+
+            scores_fold = list()
+            for fold in range(self.cv):
+                val = cv_splits[fold]
+                train = np.setdiff1d(idxs, val)
+                if l == 0:
+                    glm.beta0_, glm.beta_ = self.beta0_, self.beta_
+                else:
+                    glm.beta0_, glm.beta_ = glms[-1].beta0_, glms[-1].beta_
+
+                glm.fit(X[train], y[train])
+                scores_fold.append(glm.score(X[val], y[val]))
+            scores.append(np.mean(scores_fold))
+
             if l == 0:
-                glm.beta0_, glm.beta = self.beta0_, self.beta_
+                glm.beta0_, glm.beta_ = self.beta0_, self.beta_
             else:
                 glm.beta0_, glm.beta_ = glms[-1].beta0_, glms[-1].beta_
-
             glm.fit(X, y)
             glms.append(glm)
-            scores.append(glm.score(X, y))
         # Update the estimated variables
         if self.score_metric == 'deviance':
             opt = np.array(scores).argmin()
@@ -966,6 +993,7 @@ class GLMCV(object):
         self.beta0_, self.beta_ = glms[opt].beta0_, glms[opt].beta_
         self.reg_lambda_opt_ = self.reg_lambda[opt]
         self.glm_ = glms[opt]
+        self.scores_ = scores
         return self
 
     def predict(self, X):
