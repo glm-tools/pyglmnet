@@ -112,7 +112,6 @@ def _L2loss(distr, alpha, Tau, reg_lambda, X, y, eta, group, beta):
 
 def _grad_L2loss(distr, alpha, Tau, reg_lambda, X, y, eta, beta):
     """The gradient."""
-
     n_samples = np.float(X.shape[0])
 
     if Tau is None:
@@ -176,12 +175,12 @@ def simulate_glm(distr, beta0, beta, X, eta=2.0, random_state=None):
     ----------
     distr: str
         distribution
-    X: array
-        design matrix of shape (n_samples, n_features)
     beta0: float
         intercept coefficient
     beta: array
         coefficients of shape (n_features,)
+    X: array
+        design matrix of shape (n_samples, n_features)
     eta: float
         parameter for poisson non-linearity
     random_state: float
@@ -190,7 +189,7 @@ def simulate_glm(distr, beta0, beta, X, eta=2.0, random_state=None):
     Returns
     -------
     y: array
-        simulated target data of shape (n_samples, 1)
+        simulated target data of shape (n_samples,)
     """
     if random_state is not None:
         np.random.RandomState(random_state)
@@ -255,10 +254,9 @@ class GLM(object):
         If you do not want to specify a group for a specific parameter,
         set it to zero.
         default: None, in which case it defaults to L1 regularization
-    reg_lambda : array | list | None
-        array of regularized parameters :math:`\\lambda` of penalty term.
-        default: None, a list of 10 floats spaced logarithmically (base e)
-        between 0.5 and 0.01.
+    reg_lambda : float
+        regularization parameter :math:`\\lambda` of penalty term.
+        default: 0.1
     solver : str
         optimization method, can be one of the following
         'batch-gradient' (vanilla batch gradient descent)
@@ -292,13 +290,6 @@ class GLM(object):
     Friedman, Hastie, Tibshirani (2010). Regularization Paths for Generalized
         Linear Models via Coordinate Descent, J Statistical Software.
         https://core.ac.uk/download/files/153/6287975.pdf
-
-    Notes
-    -----
-    To select subset of fitted glm models, you can simply do:
-
-    >>> glm = glm[1:3]
-    >>> glm[2].predict(X_test)
     """
 
     def __init__(self, distr='poisson', alpha=0.5,
@@ -408,18 +399,18 @@ class GLM(object):
         Parameters
         ----------
         xk: float
-            n_samples x 1
+            (n_samples,)
         y: float
-            n_samples x 1
+            (n_samples,)
         z: float
-            n_samples x 1
+            (n_samples,)
 
         Returns
         -------
-        gk: float:
-            gradient
+        gk: gradient, float:
+            (n_features + 1,)
         hk: float:
-            hessian
+            (n_features + 1,)
         """
         n_samples = xk.shape[0]
 
@@ -656,7 +647,7 @@ class GLM(object):
         Returns
         -------
         yhat : array
-            The predicted targets of shape (n_samples, ).
+            The predicted targets of shape (n_samples,).
 
         Raises
         ------
@@ -690,7 +681,7 @@ class GLM(object):
         Returns
         -------
         yhat : array
-            The predicted targets of shape (n_samples, ).
+            The predicted targets of shape (n_samples,).
         """
         return self.fit(X, y).predict(X)
 
@@ -708,22 +699,8 @@ class GLM(object):
 
         Returns
         -------
-        score: array
-            array when score is called by a list of estimators:
-            :code:`glm.score()`
-            singleton array when score is called by a sliced estimator:
-            :code:`glm[0].score()`
-
-        Examples
-        --------
-        Note that if you want compatibility with scikit-learn's
-        :code:`pipeline()`, :code:`cross_val_score()`,
-        or :code:`GridSearchCV()` then you should only pass sliced estimators:
-
-            >>> from sklearn.grid_search import GridSearchCV
-            >>> from sklearn.cross_validation import cross_val_score
-            >>> grid = GridSearchCV(glm[0])
-            >>> grid = cross_val_score(glm[0], X, y, cv=10)
+        score: float
+            The score metric
         """
         if self.score_metric not in ['deviance', 'pseudo_R2', 'accuracy']:
             raise ValueError('score_metric has to be one of' +
@@ -758,7 +735,9 @@ class GLM(object):
 
 
 class GLMCV(object):
-    """Class for estimating regularized generalized linear models (GLM).
+    """Class for estimating regularized generalized linear models (GLM)
+    along a regularization path with warm restarts.
+
     The regularized GLM minimizes the penalized negative log likelihood:
 
     .. math::
@@ -883,6 +862,7 @@ class GLMCV(object):
         self.beta0_ = None
         self.beta_ = None
         self.reg_lambda_opt_ = None
+        self.glm_ = None
         self.ynull_ = None
         self.tol = tol
         self.eta = eta
@@ -952,14 +932,12 @@ class GLMCV(object):
         self : instance of GLM
             The fitted model.
         """
-
         logger.info('Looping through the regularization path')
         glms, scores = list(), list()
         self.ynull_ = np.mean(y)
 
         for l, rl in enumerate(self.reg_lambda):
             logger.info('Lambda: %6.4f' % rl)
-
             glm = GLM(distr=self.distr,
                       alpha=self.alpha,
                       Tau=self.Tau,
@@ -972,7 +950,6 @@ class GLMCV(object):
                       score_metric=self.score_metric,
                       random_state=self.random_state,
                       verbose=self.verbose)
-
             if l == 0:
                 glm.beta0_, glm.beta = self.beta0_, self.beta_
             else:
@@ -981,14 +958,14 @@ class GLMCV(object):
             glm.fit(X, y)
             glms.append(glm)
             scores.append(glm.score(X, y))
-
         # Update the estimated variables
         if self.score_metric == 'deviance':
             opt = np.array(scores).argmin()
         elif self.score_metric in ['pseudo_R2', 'accuracy']:
             opt = np.array(scores).argmax()
         self.beta0_, self.beta_ = glms[opt].beta0_, glms[opt].beta_
-        self.reg_lambda_opt = self.reg_lambda[opt]
+        self.reg_lambda_opt_ = self.reg_lambda[opt]
+        self.glm_ = glms[opt]
         return self
 
     def predict(self, X):
@@ -1002,22 +979,10 @@ class GLMCV(object):
         Returns
         -------
         yhat : array
-            The predicted targets of shape (n_samples,)
+            The predicted targets of shape based on the model with optimal
+            reg_lambda (n_samples,)
         """
-        glm = GLM(distr=self.distr,
-                  alpha=self.alpha,
-                  Tau=self.Tau,
-                  reg_lambda=self.reg_lambda_opt,
-                  solver=self.solver,
-                  learning_rate=self.learning_rate,
-                  max_iter=self.max_iter,
-                  tol=self.tol,
-                  eta=self.eta,
-                  score_metric=self.score_metric,
-                  random_state=self.random_state,
-                  verbose=self.verbose)
-        glm.beta0_, glm.beta_ = self.beta0_, self.beta_
-        return glm.predict(X)
+        return self.glm_.predict(X)
 
     def predict_proba(self, X):
         """Predict class probability for binomial.
@@ -1038,20 +1003,7 @@ class GLMCV(object):
         Raises error otherwise.
 
         """
-        glm = GLM(distr=self.distr,
-                  alpha=self.alpha,
-                  Tau=self.Tau,
-                  reg_lambda=self.reg_lambda_opt,
-                  solver=self.solver,
-                  learning_rate=self.learning_rate,
-                  max_iter=self.max_iter,
-                  tol=self.tol,
-                  eta=self.eta,
-                  score_metric=self.score_metric,
-                  random_state=self.random_state,
-                  verbose=self.verbose)
-        glm.beta0_, glm.beta_ = self.beta0_, self.beta_
-        return glm.predict_proba(X)
+        return self.glm_.predict_proba(X)
 
     def fit_predict(self, X, y):
         """Fit the model and predict on the same data.
@@ -1062,27 +1014,14 @@ class GLMCV(object):
             The input data to fit and predict,
             of shape (n_samples, n_features)
 
-
         Returns
         -------
         yhat : array
-            The predicted targets of shape (n_samples, ).
+            The predicted targets of shape based on the model with optimal
+            reg_lambda (n_samples,)
         """
-        self.fit(X, y)
-        glm = GLM(distr=self.distr,
-                  alpha=self.alpha,
-                  Tau=self.Tau,
-                  reg_lambda=self.reg_lambda_opt,
-                  solver=self.solver,
-                  learning_rate=self.learning_rate,
-                  max_iter=self.max_iter,
-                  tol=self.tol,
-                  eta=self.eta,
-                  score_metric=self.score_metric,
-                  random_state=self.random_state,
-                  verbose=self.verbose)
-        glm.beta0_, glm.beta_ = self.beta0_, self.beta_
-        glm.predict(X)
+        self.glm_.fit(X, y)
+        return self.glm_.predict(X)
 
     def score(self, X, y):
         """Score the model.
@@ -1098,34 +1037,7 @@ class GLMCV(object):
 
         Returns
         -------
-        score: array
-            array when score is called by a list of estimators:
-            :code:`glm.score()`
-            singleton array when score is called by a sliced estimator:
-            :code:`glm[0].score()`
-
-        Examples
-        --------
-        Note that if you want compatibility with scikit-learn's
-        :code:`pipeline()`, :code:`cross_val_score()`,
-        or :code:`GridSearchCV()` then you should only pass sliced estimators:
-
-            >>> from sklearn.grid_search import GridSearchCV
-            >>> from sklearn.cross_validation import cross_val_score
-            >>> grid = GridSearchCV(glm[0])
-            >>> grid = cross_val_score(glm[0], X, y, cv=10)
+        score: float
+            The score metric for the optimal reg_lambda
         """
-        glm = GLM(distr=self.distr,
-                  alpha=self.alpha,
-                  Tau=self.Tau,
-                  reg_lambda=self.reg_lambda_opt,
-                  solver=self.solver,
-                  learning_rate=self.learning_rate,
-                  max_iter=self.max_iter,
-                  tol=self.tol,
-                  eta=self.eta,
-                  score_metric=self.score_metric,
-                  random_state=self.random_state,
-                  verbose=self.verbose)
-        glm.beta0_, glm.beta_ = self.beta0_, self.beta_
-        return glm.score(X, y)
+        return self.glm_.score(X, y)
