@@ -112,7 +112,6 @@ def _L2loss(distr, alpha, Tau, reg_lambda, X, y, eta, group, beta):
 
 def _grad_L2loss(distr, alpha, Tau, reg_lambda, X, y, eta, beta):
     """The gradient."""
-
     n_samples = np.float(X.shape[0])
 
     if Tau is None:
@@ -169,6 +168,40 @@ def _grad_L2loss(distr, alpha, Tau, reg_lambda, X, y, eta, beta):
     return g
 
 
+def simulate_glm(distr, beta0, beta, X, eta=2.0, random_state=None):
+    """Simulate target data under a generative model.
+
+    Parameters
+    ----------
+    distr: str
+        distribution
+    beta0: float
+        intercept coefficient
+    beta: array
+        coefficients of shape (n_features,)
+    X: array
+        design matrix of shape (n_samples, n_features)
+    eta: float
+        parameter for poisson non-linearity
+    random_state: float
+        random state
+
+    Returns
+    -------
+    y: array
+        simulated target data of shape (n_samples,)
+    """
+    if random_state is not None:
+        np.random.RandomState(random_state)
+    if distr == 'softplus' or distr == 'poisson':
+        y = np.random.poisson(_lmb(distr, beta0, beta, X, eta))
+    if distr == 'gaussian':
+        y = np.random.normal(_lmb(distr, beta0, beta, X, eta))
+    if distr == 'binomial':
+        y = np.random.binomial(1, _lmb(distr, beta0, beta, X, eta))
+    return y
+
+
 class GLM(object):
     """Class for estimating regularized generalized linear models (GLM).
     The regularized GLM minimizes the penalized negative log likelihood:
@@ -221,10 +254,9 @@ class GLM(object):
         If you do not want to specify a group for a specific parameter,
         set it to zero.
         default: None, in which case it defaults to L1 regularization
-    reg_lambda : array | list | None
-        array of regularized parameters :math:`\\lambda` of penalty term.
-        default: None, a list of 10 floats spaced logarithmically (base e)
-        between 0.5 and 0.01.
+    reg_lambda : float
+        regularization parameter :math:`\\lambda` of penalty term.
+        default: 0.1
     solver : str
         optimization method, can be one of the following
         'batch-gradient' (vanilla batch gradient descent)
@@ -258,30 +290,18 @@ class GLM(object):
     Friedman, Hastie, Tibshirani (2010). Regularization Paths for Generalized
         Linear Models via Coordinate Descent, J Statistical Software.
         https://core.ac.uk/download/files/153/6287975.pdf
-
-    Notes
-    -----
-    To select subset of fitted glm models, you can simply do:
-
-    >>> glm = glm[1:3]
-    >>> glm[2].predict(X_test)
     """
 
     def __init__(self, distr='poisson', alpha=0.5,
                  Tau=None, group=None,
-                 reg_lambda=None,
+                 reg_lambda=0.1,
                  solver='batch-gradient',
                  learning_rate=2e-1, max_iter=1000,
                  tol=1e-3, eta=2.0, score_metric='deviance',
                  random_state=0, verbose=False):
 
-        if reg_lambda is None:
-            reg_lambda = np.logspace(np.log(0.5), np.log(0.01), 10,
-                                     base=np.exp(1))
-        if not isinstance(reg_lambda, (list, np.ndarray)):
-            reg_lambda = [reg_lambda]
         if not isinstance(max_iter, int):
-            max_iter = int(max_iter)
+            raise ValueError('max_iter must be of type int')
 
         self.distr = distr
         self.alpha = alpha
@@ -291,7 +311,8 @@ class GLM(object):
         self.solver = solver
         self.learning_rate = learning_rate
         self.max_iter = max_iter
-        self.fit_ = None
+        self.beta0_ = None
+        self.beta_ = None
         self.ynull_ = None
         self.tol = tol
         self.eta = eta
@@ -301,6 +322,7 @@ class GLM(object):
         set_log_level(verbose)
 
     def get_params(self, deep=False):
+        """Return params as dict."""
         return dict(
             (
                 ('distr', self.distr),
@@ -324,24 +346,8 @@ class GLM(object):
         s = '<\nDistribution | %s' % self.distr
         s += '\nalpha | %0.2f' % self.alpha
         s += '\nmax_iter | %0.2f' % self.max_iter
-        if len(reg_lambda) > 1:
-            s += ('\nlambda: %0.2f to %0.2f\n>'
-                  % (reg_lambda[0], reg_lambda[-1]))
-        else:
-            s += '\nlambda: %0.2f\n>' % reg_lambda[0]
+        s += '\nlambda: %0.2f\n>' % reg_lambda
         return s
-
-    def __getitem__(self, key):
-        """Return a GLM object with a subset of fitted lambdas."""
-        glm = deepcopy(self)
-        if self.fit_ is None:
-            raise ValueError('Cannot slice object if the lambdas have'
-                             ' not been fit.')
-        if not isinstance(key, (slice, int)):
-            raise IndexError('Invalid slice for GLM object')
-        glm.fit_ = glm.fit_[key]
-        glm.reg_lambda = glm.reg_lambda[key]
-        return glm
 
     def copy(self):
         """Return a copy of the object.
@@ -393,18 +399,18 @@ class GLM(object):
         Parameters
         ----------
         xk: float
-            n_samples x 1
+            (n_samples,)
         y: float
-            n_samples x 1
+            (n_samples,)
         z: float
-            n_samples x 1
+            (n_samples,)
 
         Returns
         -------
-        gk: float:
-            gradient
+        gk: gradient, float:
+            (n_features + 1,)
         hk: float:
-            hessian
+            (n_features + 1,)
         """
         n_samples = xk.shape[0]
 
@@ -543,81 +549,66 @@ class GLM(object):
         n_features = X.shape[1]
 
         # Initialize parameters
-        beta0_hat = 1 / (n_features + 1) * \
-            np.random.normal(0.0, 1.0, 1)
-        beta_hat = 1 / (n_features + 1) * \
-            np.random.normal(0.0, 1.0, (n_features, ))
-        fit_params = list()
+        beta = np.zeros((n_features + 1,))
+        if self.beta0_ is None and self.beta_ is None:
+            beta[0] = 1 / (n_features + 1) * np.random.normal(0.0, 1.0, 1)
+            beta[1:] = 1 / (n_features + 1) * \
+                np.random.normal(0.0, 1.0, (n_features, ))
+        else:
+            beta[0] = self.beta0_
+            beta[1:] = self.beta_
 
-        logger.info('Looping through the regularization path')
-        for l, rl in enumerate(self.reg_lambda):
-            fit_params.append({'beta0': beta0_hat, 'beta': beta_hat})
-            logger.info('Lambda: %6.4f' % rl)
+        logger.info('Lambda: %6.4f' % self.reg_lambda)
 
-            # Warm initialize parameters
-            if l == 0:
-                fit_params[-1]['beta0'] = beta0_hat
-                fit_params[-1]['beta'] = beta_hat
-            else:
-                fit_params[-1]['beta0'] = fit_params[-2]['beta0']
-                fit_params[-1]['beta'] = fit_params[-2]['beta']
+        tol = self.tol
+        alpha = self.alpha
+        reg_lambda = self.reg_lambda
 
-            tol = self.tol
-            alpha = self.alpha
+        if self.solver == 'batch-gradient':
+            g = np.zeros((n_features + 1, ))
+        elif self.solver == 'cdfast':
+            ActiveSet = np.ones(n_features + 1)     # init active set
+            z = beta[0] + np.dot(X, beta[1:])       # cache z
 
-            # Temporary parameters to update
-            beta = np.zeros((n_features + 1,))
-            beta[0] = fit_params[-1]['beta0']
-            beta[1:] = fit_params[-1]['beta']
-
+        # Initialize loss accumulators
+        L, DL = list(), list()
+        for t in range(0, self.max_iter):
             if self.solver == 'batch-gradient':
-                g = np.zeros((n_features + 1, ))
+                grad = _grad_L2loss(self.distr,
+                                    alpha, self.Tau,
+                                    reg_lambda, X, y, self.eta,
+                                    beta)
+
+                beta = beta - self.learning_rate * grad
             elif self.solver == 'cdfast':
-                ActiveSet = np.ones(n_features + 1)     # init active set
-                z = beta[0] + np.dot(X, beta[1:])       # cache z
+                beta, z = \
+                    self._cdfast(X, y, z, ActiveSet, beta, reg_lambda)
 
-            # Initialize loss accumulators
-            L, DL = list(), list()
-            for t in range(0, self.max_iter):
-                if self.solver == 'batch-gradient':
-                    grad = _grad_L2loss(self.distr,
-                                        self.alpha, self.Tau,
-                                        rl, X, y, self.eta,
-                                        beta)
+            # Apply proximal operator
+            beta[1:] = self._prox(beta[1:], reg_lambda * alpha)
 
-                    beta = beta - self.learning_rate * grad
-                elif self.solver == 'cdfast':
-                    beta, z = self._cdfast(X, y, z, ActiveSet, beta, rl)
+            # Update active set
+            if self.solver == 'cdfast':
+                ActiveSet[np.where(beta[1:] == 0)[0] + 1] = 0
 
-                # Apply proximal operator
-                beta[1:] = self._prox(beta[1:], rl * alpha)
+            # Compute and save loss
+            L.append(_loss(self.distr, alpha, self.Tau, reg_lambda,
+                           X, y, self.eta, self.group, beta))
 
-                # Update active set
-                if self.solver == 'cdfast':
-                    ActiveSet[np.where(beta[1:] == 0)[0] + 1] = 0
-
-                # Compute and save loss
-                L.append(_loss(self.distr, self.alpha, self.Tau, rl,
-                               X, y, self.eta, self.group, beta))
-
-                if t > 1:
-                    DL.append(L[-1] - L[-2])
-                    if np.abs(DL[-1] / L[-1]) < tol:
-                        msg = ('\tConverged. Loss function:'
-                               ' {0:.2f}').format(L[-1])
-                        logger.info(msg)
-                        msg = ('\tdL/L: {0:.6f}\n'.format(DL[-1] / L[-1]))
-                        logger.info(msg)
-                        break
-
-            fit_params[-1]['beta0'] = beta[0]
-            fit_params[-1]['beta'] = beta[1:]
+            if t > 1:
+                DL.append(L[-1] - L[-2])
+                if np.abs(DL[-1] / L[-1]) < tol:
+                    msg = ('\tConverged. Loss function:'
+                           ' {0:.2f}').format(L[-1])
+                    logger.info(msg)
+                    msg = ('\tdL/L: {0:.6f}\n'.format(DL[-1] / L[-1]))
+                    logger.info(msg)
+                    break
 
         # Update the estimated variables
-        self.fit_ = fit_params
+        self.beta0_ = beta[0]
+        self.beta_ = beta[1:]
         self.ynull_ = np.mean(y)
-
-        # Return
         return self
 
     def predict(self, X):
@@ -631,34 +622,22 @@ class GLM(object):
         Returns
         -------
         yhat : array
-            The predicted targets of shape ([n_lambda], n_samples)
-            A 1D array if predicting on only
-            one reg_lambda (compatible with scikit-learn API).
-            Otherwise, returns a 2D array.
+            The predicted targets of shape (n_samples,)
         """
         if not isinstance(X, np.ndarray):
             raise ValueError('Input data should be of type ndarray (got %s).'
                              % type(X))
 
-        if isinstance(self.fit_, list):
-            yhat = list()
-            for fit in self.fit_:
-                y_pred = _lmb(self.distr, fit['beta0'],
-                              fit['beta'], X, self.eta)
-                if self.distr == 'binomial':
-                    yhat.append((y_pred > 0.5).astype(int))
-                else:
-                    yhat.append(y_pred)
-        else:
-            yhat = _lmb(self.distr, self.fit_['beta0'],
-                        self.fit_['beta'], X, self.eta)
-            if self.distr == 'binomial':
-                yhat = (yhat > 0.5).astype(int)
+        yhat = _lmb(self.distr, self.beta0_,
+                    self.beta_, X, self.eta)
+
+        if self.distr == 'binomial':
+            yhat = (yhat > 0.5).astype(int)
         yhat = np.asarray(yhat)
         return yhat
 
     def predict_proba(self, X):
-        """Predict class probability for binomial
+        """Predict class probability for binomial.
 
         Parameters
         ----------
@@ -668,11 +647,7 @@ class GLM(object):
         Returns
         -------
         yhat : array
-            The predicted targets of shape
-            ([n_lambda], n_samples).
-            A 2D array if predicting on only
-            one lambda (compatible with scikit-learn API).
-            Otherwise, returns a 3D array.
+            The predicted targets of shape (n_samples,).
 
         Raises
         ------
@@ -688,14 +663,8 @@ class GLM(object):
             raise ValueError('Input data should be of type ndarray (got %s).'
                              % type(X))
 
-        if isinstance(self.fit_, list):
-            yhat = list()
-            for fit in self.fit_:
-                yhat.append(_lmb(self.distr,
-                            fit['beta0'], fit['beta'], X, self.eta))
-        else:
-            yhat = _lmb(self.distr,
-                        self.fit_['beta0'], self.fit_['beta'], X, self.eta)
+        yhat = _lmb(self.distr,
+                    self.beta0_, self.beta_, X, self.eta)
         yhat = np.asarray(yhat)
         return yhat
 
@@ -712,10 +681,7 @@ class GLM(object):
         Returns
         -------
         yhat : array
-            The predicted targets of shape ([n_lambda], n_samples).
-            A 1D array if predicting on only
-            one lambda (compatible with scikit-learn API).
-            Otherwise, returns a 2D array.
+            The predicted targets of shape (n_samples,).
         """
         return self.fit(X, y).predict(X)
 
@@ -733,24 +699,9 @@ class GLM(object):
 
         Returns
         -------
-        score: array
-            array when score is called by a list of estimators:
-            :code:`glm.score()`
-            singleton array when score is called by a sliced estimator:
-            :code:`glm[0].score()`
-
-        Examples
-        --------
-        Note that if you want compatibility with scikit-learn's
-        :code:`pipeline()`, :code:`cross_val_score()`,
-        or :code:`GridSearchCV()` then you should only pass sliced estimators:
-
-            >>> from sklearn.grid_search import GridSearchCV
-            >>> from sklearn.cross_validation import cross_val_score
-            >>> grid = GridSearchCV(glm[0])
-            >>> grid = cross_val_score(glm[0], X, y, cv=10)
+        score: float
+            The score metric
         """
-
         if self.score_metric not in ['deviance', 'pseudo_R2', 'accuracy']:
             raise ValueError('score_metric has to be one of' +
                              ' deviance or pseudo_R2')
@@ -775,39 +726,346 @@ class GLM(object):
             yhat = self.predict(X)
 
         # Check whether we have a list of estimators or a single estimator
-        if isinstance(self.fit_, dict):
-            yhat = yhat[np.newaxis, ...]
-
-        if self.score_metric == "deviance":
+        if self.score_metric == 'deviance':
             return metrics.deviance(y, yhat, self.ynull_, self.distr)
-        elif self.score_metric == "pseudo_R2":
+        elif self.score_metric == 'pseudo_R2':
             return metrics.pseudo_R2(X, y, yhat, self.ynull_, self.distr)
-        if self.score_metric == "accuracy":
+        if self.score_metric == 'accuracy':
             return metrics.accuracy(y, yhat)
 
-    def simulate(self, beta0, beta, X):
-        """Simulate target data under a generative model.
+
+class GLMCV(object):
+    """Class for estimating regularized generalized linear models (GLM)
+    along a regularization path with warm restarts.
+
+    The regularized GLM minimizes the penalized negative log likelihood:
+
+    .. math::
+
+        \min_{\\beta_0, \\beta} \\frac{1}{N}
+        \sum_{i = 1}^N \mathcal{L} (y_i, \\beta_0 + \\beta^T x_i)
+        + \lambda [ \\frac{1}{2}(1 - \\alpha) \mathcal{P}_2 +
+                    \\alpha \mathcal{P}_1 ]
+
+    where :math:`\mathcal{P}_2` and :math:`\mathcal{P}_1` are the generalized
+    L2 (Tikhonov) and generalized L1 (Group Lasso) penalties, given by:
+
+    .. math::
+
+        \mathcal{P}_2 = \|\Gamma \\beta \|_2^2 \\
+        \mathcal{P}_1 = \sum_g \|\\beta_{j,g}\|_2
+
+    where :math:`\Gamma` is the Tikhonov matrix: a square factorization
+    of the inverse covariance matrix and :math:`\\beta_{j,g}` is the
+    :math:`j` th coefficient of group :math:`g`.
+
+    The generalized L2 penalty defaults to the ridge penalty when
+    :math:`\Gamma` is identity.
+
+    The generalized L1 penalty defaults to the lasso penalty when each
+    :math:`\\beta` belongs to its own group.
+
+    Parameters
+    ----------
+    distr : str
+        distribution family can be one of the following
+        'gaussian' | 'binomial' | 'poisson' | 'softplus'
+        default: 'poisson'.
+    alpha : float
+        the weighting between L1 penalty and L2 penalty term
+        of the loss function.
+        default: 0.5
+    Tau : array | None
+        the (n_features, n_features) Tikhonov matrix.
+        default: None, in which case Tau is identity
+        and the L2 penalty is ridge-like
+    group : array | list | None
+        the (n_features, )
+        list or array of group identities for each parameter :math:`\\beta`.
+        Each entry of the list/ array should contain an int from 1 to n_groups
+        that specify group membership for each parameter
+        (except :math:`\\beta_0`).
+        If you do not want to specify a group for a specific parameter,
+        set it to zero.
+        default: None, in which case it defaults to L1 regularization
+    reg_lambda : array | list | None
+        array of regularized parameters :math:`\\lambda` of penalty term.
+        default: None, a list of 10 floats spaced logarithmically (base e)
+        between 0.5 and 0.01.
+    cv : cross validation object (default 10)
+        Iterator for doing cross validation
+    solver : str
+        optimization method, can be one of the following
+        'batch-gradient' (vanilla batch gradient descent)
+        'cdfast' (Newton coordinate gradient descent).
+        default: 'batch-gradient'
+    learning_rate : float
+        learning rate for gradient descent.
+        default: 2e-1
+    max_iter : int
+        maximum iterations for the model.
+        default: 1000
+    tol : float
+        convergence threshold or stopping criteria.
+        Optimization loop will stop below setting threshold.
+        default: 1e-3
+    eta : float
+        a threshold parameter that linearizes the exp() function above eta.
+        default: 2.0
+    score_metric : str
+        specifies the scoring metric.
+        one of either 'deviance' or 'pseudo_R2'.
+        default: 'deviance'
+    random_state : int
+        seed of the random number generator used to initialize the solution.
+        default: 0
+    verbose : boolean or int
+        default: False
+
+    Reference
+    ---------
+    Friedman, Hastie, Tibshirani (2010). Regularization Paths for Generalized
+        Linear Models via Coordinate Descent, J Statistical Software.
+        https://core.ac.uk/download/files/153/6287975.pdf
+
+    Notes
+    -----
+    To select subset of fitted glm models, you can simply do:
+
+    >>> glm = glm[1:3]
+    >>> glm[2].predict(X_test)
+    """
+
+    def __init__(self, distr='poisson', alpha=0.5,
+                 Tau=None, group=None,
+                 reg_lambda=None, cv=10,
+                 solver='batch-gradient',
+                 learning_rate=2e-1, max_iter=1000,
+                 tol=1e-3, eta=2.0, score_metric='deviance',
+                 random_state=0, verbose=False):
+
+        if reg_lambda is None:
+            reg_lambda = np.logspace(np.log(0.5), np.log(0.01), 10,
+                                     base=np.exp(1))
+        if not isinstance(reg_lambda, (list, np.ndarray)):
+            reg_lambda = [reg_lambda]
+
+        if not isinstance(max_iter, int):
+            raise ValueError('max_iter must be of type int')
+
+        self.distr = distr
+        self.alpha = alpha
+        self.reg_lambda = reg_lambda
+        self.cv = cv
+        self.Tau = Tau
+        self.group = group
+        self.solver = solver
+        self.learning_rate = learning_rate
+        self.max_iter = max_iter
+        self.beta0_ = None
+        self.beta_ = None
+        self.reg_lambda_opt_ = None
+        self.glm_ = None
+        self.scores_ = None
+        self.ynull_ = None
+        self.tol = tol
+        self.eta = eta
+        self.score_metric = score_metric
+        self.random_state = random_state
+        self.verbose = verbose
+        set_log_level(verbose)
+
+    def get_params(self, deep=False):
+        """Return params as dict."""
+        return dict(
+            (
+                ('distr', self.distr),
+                ('alpha', self.alpha),
+                ('Tau', self.Tau),
+                ('group', self.group),
+                ('reg_lambda', self.reg_lambda),
+                ('learning_rate', self.learning_rate),
+                ('max_iter', self.max_iter),
+                ('tol', self.tol),
+                ('eta', self.eta),
+                ('score_metric', self.score_metric),
+                ('random_state', self.random_state),
+                ('verbose', self.verbose)
+            )
+        )
+
+    def __repr__(self):
+        """Description of the object."""
+        reg_lambda = self.reg_lambda
+        s = '<\nDistribution | %s' % self.distr
+        s += '\nalpha | %0.2f' % self.alpha
+        s += '\nmax_iter | %0.2f' % self.max_iter
+        if len(reg_lambda) > 1:
+            s += ('\nlambda: %0.2f to %0.2f\n>'
+                  % (reg_lambda[0], reg_lambda[-1]))
+        else:
+            s += '\nlambda: %0.2f\n>' % reg_lambda[0]
+        return s
+
+    def copy(self):
+        """Return a copy of the object.
 
         Parameters
         ----------
-        X: array
-            design matrix of shape (n_samples, n_features)
-        beta0: float
-            intercept coefficient
-        beta: array
-            coefficients of shape (n_features,)
+        none:
 
         Returns
         -------
-        y: array
-            simulated target data of shape (n_samples, 1)
+        self: instance of GLM
+            A copy of the GLM instance.
         """
-        np.random.RandomState(self.random_state)
-        if self.distr == 'softplus' or self.distr == 'poisson':
-            y = np.random.poisson(_lmb(self.distr, beta0, beta, X, self.eta))
-        if self.distr == 'gaussian':
-            y = np.random.normal(_lmb(self.distr, beta0, beta, X, self.eta))
-        if self.distr == 'binomial':
-            y = np.random.binomial(1, _lmb(self.distr, beta0,
-                                           beta, X, self.eta))
-        return y
+        return deepcopy(self)
+
+    def fit(self, X, y):
+        """The fit function.
+        Parameters
+        ----------
+        X : array
+            The input data of shape (n_samples, n_features)
+
+        y : array
+            The target data
+
+        Returns
+        -------
+        self : instance of GLM
+            The fitted model.
+        """
+        logger.info('Looping through the regularization path')
+        glms, scores = list(), list()
+        self.ynull_ = np.mean(y)
+
+        if not type(int):
+            raise ValueError('cv must be int. We do not support scikit-learn '
+                             'cv objects at the moment')
+
+        idxs = np.arange(y.shape[0])
+        np.random.shuffle(idxs)
+        cv_splits = np.array_split(idxs, self.cv)
+
+        glm = GLM(distr=self.distr,
+                  alpha=self.alpha,
+                  Tau=self.Tau,
+                  reg_lambda=0.1,
+                  solver=self.solver,
+                  learning_rate=self.learning_rate,
+                  max_iter=self.max_iter,
+                  tol=self.tol,
+                  eta=self.eta,
+                  score_metric=self.score_metric,
+                  random_state=self.random_state,
+                  verbose=self.verbose)
+
+        for l, rl in enumerate(self.reg_lambda):
+            logger.info('Lambda: %6.4f' % rl)
+
+            glm.reg_lambda = rl
+
+            scores_fold = list()
+            for fold in range(self.cv):
+                val = cv_splits[fold]
+                train = np.setdiff1d(idxs, val)
+                if l == 0:
+                    glm.beta0_, glm.beta_ = self.beta0_, self.beta_
+                else:
+                    glm.beta0_, glm.beta_ = glms[-1].beta0_, glms[-1].beta_
+
+                glm.fit(X[train], y[train])
+                scores_fold.append(glm.score(X[val], y[val]))
+            scores.append(np.mean(scores_fold))
+
+            if l == 0:
+                glm.beta0_, glm.beta_ = self.beta0_, self.beta_
+            else:
+                glm.beta0_, glm.beta_ = glms[-1].beta0_, glms[-1].beta_
+            glm.fit(X, y)
+            glms.append(glm)
+        # Update the estimated variables
+        if self.score_metric == 'deviance':
+            opt = np.array(scores).argmin()
+        elif self.score_metric in ['pseudo_R2', 'accuracy']:
+            opt = np.array(scores).argmax()
+        self.beta0_, self.beta_ = glms[opt].beta0_, glms[opt].beta_
+        self.reg_lambda_opt_ = self.reg_lambda[opt]
+        self.glm_ = glms[opt]
+        self.scores_ = scores
+        return self
+
+    def predict(self, X):
+        """Predict targets.
+
+        Parameters
+        ----------
+        X : array
+            Input data for prediction, of shape (n_samples, n_features)
+
+        Returns
+        -------
+        yhat : array
+            The predicted targets of shape based on the model with optimal
+            reg_lambda (n_samples,)
+        """
+        return self.glm_.predict(X)
+
+    def predict_proba(self, X):
+        """Predict class probability for binomial.
+
+        Parameters
+        ----------
+        X : array
+            Input data for prediction, of shape (n_samples, n_features)
+
+        Returns
+        -------
+        yhat : array
+            The predicted targets of shape (n_samples, ).
+
+        Raises
+        ------
+        Works only for the binomial distribution.
+        Raises error otherwise.
+
+        """
+        return self.glm_.predict_proba(X)
+
+    def fit_predict(self, X, y):
+        """Fit the model and predict on the same data.
+
+        Parameters
+        ----------
+        X : array
+            The input data to fit and predict,
+            of shape (n_samples, n_features)
+
+        Returns
+        -------
+        yhat : array
+            The predicted targets of shape based on the model with optimal
+            reg_lambda (n_samples,)
+        """
+        self.fit(X, y)
+        return self.glm_.predict(X)
+
+    def score(self, X, y):
+        """Score the model.
+
+        Parameters
+        ----------
+        X : array
+            The input data whose prediction will be scored,
+            of shape (n_samples, n_features).
+        y : array
+            The true targets against which to score the predicted targets,
+            of shape (n_samples,).
+
+        Returns
+        -------
+        score: float
+            The score metric for the optimal reg_lambda
+        """
+        return self.glm_.score(X, y)

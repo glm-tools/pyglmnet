@@ -23,10 +23,9 @@ missing values.
 ########################################################
 # Imports
 
-import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.cross_validation import train_test_split
-from pyglmnet import GLM, datasets
+from pyglmnet import GLMCV, datasets
 
 ########################################################
 # Download and preprocess data files
@@ -44,14 +43,14 @@ X_train, X_test, y_train, y_test = \
 # Fit a gaussian distributed GLM with elastic net regularization
 
 # use the default value for reg_lambda
-glm = GLM(distr='gaussian', alpha=0.05, score_metric='pseudo_R2')
+glm = GLMCV(distr='gaussian', alpha=0.05, score_metric='pseudo_R2')
 
 # fit model
 glm.fit(X_train, y_train)
 
 # score the test set prediction
-y_test_hat = glm[-1].predict(X_test)
-print ("test set pseudo $R^2$ = %f" % glm[-1].score(X_test, y_test))
+y_test_hat = glm.predict(X_test)
+print ("test set pseudo $R^2$ = %f" % glm.score(X_test, y_test))
 
 ########################################################
 # Plot the true and predicted test set target values

@@ -41,7 +41,7 @@ import os.path as op
 import numpy as np
 import pandas as pd
 
-from pyglmnet import GLM
+from pyglmnet import GLMCV
 from spykes.strf import STRF
 
 import matplotlib.pyplot as plt
@@ -210,12 +210,11 @@ from pyglmnet import utils
 n_samples = Xtrain.shape[0]
 Tau = utils.tikhonov_from_prior(prior_cov, n_samples)
 
-glm = GLM(distr='poisson', alpha=0., Tau=Tau, score_metric='pseudo_R2')
+glm = GLMCV(distr='poisson', alpha=0., Tau=Tau, score_metric='pseudo_R2')
 glm.fit(Xtrain, Ytrain)
-cvopt_lambda = glm.score(Xtest, Ytest).argmax()
-print("train score: %f" % glm[cvopt_lambda].score(Xtrain, Ytrain))
-print("test score: %f" % glm[cvopt_lambda].score(Xtest, Ytest))
-weights = glm[cvopt_lambda].fit_['beta']
+print("train score: %f" % glm.score(Xtrain, Ytrain))
+print("test score: %f" % glm.score(Xtest, Ytest))
+weights = glm.beta_
 
 ########################################################
 # Visualize
