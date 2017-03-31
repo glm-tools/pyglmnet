@@ -6,6 +6,7 @@ import numpy as np
 from scipy.special import expit
 from scipy.stats import norm
 from .utils import logger, set_log_level
+from .mixin import EstimatorMixin
 
 
 def _lmb(distr, beta0, beta, X, eta):
@@ -219,7 +220,7 @@ def simulate_glm(distr, beta0, beta, X, eta=2.0, random_state=None):
     return y
 
 
-class GLM(object):
+class GLM(EstimatorMixin):
     """Class for estimating regularized generalized linear models (GLM).
     The regularized GLM minimizes the penalized negative log likelihood:
 
@@ -340,22 +341,10 @@ class GLM(object):
 
     def get_params(self, deep=False):
         """Return params as dict."""
-        return dict(
-            (
-                ('distr', self.distr),
-                ('alpha', self.alpha),
-                ('Tau', self.Tau),
-                ('group', self.group),
-                ('reg_lambda', self.reg_lambda),
-                ('learning_rate', self.learning_rate),
-                ('max_iter', self.max_iter),
-                ('tol', self.tol),
-                ('eta', self.eta),
-                ('score_metric', self.score_metric),
-                ('random_state', self.random_state),
-                ('verbose', self.verbose)
-            )
-        )
+        return {
+            'alpha': self.alpha,
+            'reg_lambda': self.reg_lambda
+        }
 
     def __repr__(self):
         """Description of the object."""
@@ -903,25 +892,6 @@ class GLMCV(object):
         self.random_state = random_state
         self.verbose = verbose
         set_log_level(verbose)
-
-    def get_params(self, deep=False):
-        """Return params as dict."""
-        return dict(
-            (
-                ('distr', self.distr),
-                ('alpha', self.alpha),
-                ('Tau', self.Tau),
-                ('group', self.group),
-                ('reg_lambda', self.reg_lambda),
-                ('learning_rate', self.learning_rate),
-                ('max_iter', self.max_iter),
-                ('tol', self.tol),
-                ('eta', self.eta),
-                ('score_metric', self.score_metric),
-                ('random_state', self.random_state),
-                ('verbose', self.verbose)
-            )
-        )
 
     def __repr__(self):
         """Description of the object."""
