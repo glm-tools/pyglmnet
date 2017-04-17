@@ -57,6 +57,8 @@ install: dependencies
 	@echo "#### Access http://glm-tools.github.io/pyglmnet/index.html for more information and tutorials ####"
 
 .PHONY: all
+all: install doc-dependencies doc-build
+
 all: clean test install doc-dependencies doc
 
 .PHOMY: test
