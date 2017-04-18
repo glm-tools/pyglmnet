@@ -1,0 +1,53 @@
+/* --- Style --- */
+/* copied from
+http://stackoverflow.com/questions/18529274/change-navbar-color-in-twitter-bootstrap-3
+*/
+a {
+	color: #e74c3c;
+}
+.navbar-default {
+    background-color: #e74c3c;
+    border-color: $#c0392b;
+    .navbar-brand {
+        color: $#ecf0f1;
+        &:hover, &:focus {
+            color: $#ffbbbc; }}
+    .navbar-nav {
+        > li {
+            > a {
+                color: $#ecf0f1;
+                &:hover, &:focus {
+                    color: $#ffbbbc;   }}}
+        .active {
+            > a, > a:hover, > a:focus {
+                color: $#ffbbbc;
+                background-color: $#c0392b; }}
+        .open {
+            > a, > a:hover, > a:focus {
+                color: $#ffbbbc;
+                background-color: $#c0392b;
+                .caret {
+                    border-top-color: $#ffbbbc;
+                    border-bottom-color: $#ffbbbc; }}}
+        > .dropdown {
+            > a {
+                .caret {
+                    border-top-color: $#ecf0f1;
+                    border-bottom-color: $#ecf0f1; }
+                &:hover, &:focus {
+                    .caret {
+                        border-top-color: $#ffbbbc;
+                        border-bottom-color: $#ffbbbc; }}}}}
+    .navbar-toggle {
+        border-color: $#c0392b;
+        &:hover, &:focus {
+            background-color: $#c0392b; }
+        .icon-bar {
+            background-color: $#ecf0f1; }}}
+@media (max-width: 767px) {
+    .navbar-default .navbar-nav .open .dropdown-menu > li > a {
+        color: $#ecf0f1;
+        &:hover, &:focus {
+            color: $#ffbbbc;
+            background-color: $#c0392b; }}
+}

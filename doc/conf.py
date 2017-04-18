@@ -17,6 +17,7 @@ import os
 import sphinx
 import pyglmnet
 import sphinx_gallery
+import sphinx_bootstrap_theme
 
 # -- General configuration ------------------------------------------------
 
@@ -117,15 +118,26 @@ todo_include_todos = False
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-html_theme = 'sphinx_rtd_theme'
+html_theme = 'bootstrap'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
-#html_theme_options = {}
+html_theme_options = {
+    'navbar_title': "pyglmnet",
+    'navbar_links': [
+        ('Getting started', 'start'),
+        ('Tutorial', 'tutorial'),
+        ('Examples Gallery', 'auto_examples/index'),
+        ('API', 'api')
+    ],
+    'navbar_sidebarrel': False,
+    'bootswatch_theme': "united",
+    'bootstrap_version': "3",
+}
 
 # Add any paths that contain custom themes here, relative to this directory.
-html_theme_path = ["_themes/", ]
+html_theme_path = sphinx_bootstrap_theme.get_html_theme_path()
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
@@ -296,3 +308,10 @@ sphinx_gallery_conf = {
     'examples_dirs': '../examples',
     'gallery_dirs': 'auto_examples'
 }
+
+# (Optional) Logo. Should be small enough to fit the navbar (ideally 24x24).
+# Path should be relative to the ``_static`` files directory.
+#html_logo = "my_logo.png"
+
+# Theme options are theme-specific and customize the look and feel of a
+# theme further.
