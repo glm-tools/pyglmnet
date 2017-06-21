@@ -138,8 +138,7 @@ def _grad_L2loss(distr, alpha, Tau, reg_lambda, X, y, eta, beta):
         q = _qu(distr, z, eta)
         grad_beta0 = 1. / n_samples * (np.sum(s) - np.sum(y * s / q))
         grad_beta = 1. / n_samples * \
-            ((np.dot(s.T, X) - np.dot((y * s / q).T, X)).T) + \
-            reg_lambda * (1 - alpha) * np.dot(InvCov, beta[1:])
+            ((np.dot(s.T, X) - np.dot((y * s / q).T, X)).T)
 
     elif distr == 'poisson':
         q = _qu(distr, z, eta)
@@ -157,22 +156,16 @@ def _grad_L2loss(distr, alpha, Tau, reg_lambda, X, y, eta, beta):
             np.transpose(np.dot((1 - y[selector] / q[selector]).T,
                                 X[selector, :]))
         grad_beta *= 1. / n_samples
-        grad_beta += reg_lambda * (1 - alpha) * \
-            np.dot(InvCov, beta[1:])
 
     elif distr == 'gaussian':
         grad_beta0 = 1. / n_samples * np.sum(z - y)
         grad_beta = 1. / n_samples * \
-            np.transpose(np.dot(np.transpose(z - y), X)) \
-            + reg_lambda * (1 - alpha) * \
-            np.dot(InvCov, beta[1:])
+            np.transpose(np.dot(np.transpose(z - y), X))
 
     elif distr == 'binomial':
         grad_beta0 = 1. / n_samples * np.sum(s - y)
         grad_beta = 1. / n_samples * \
-            np.transpose(np.dot(np.transpose(s - y), X)) \
-            + reg_lambda * (1 - alpha) * \
-            np.dot(InvCov, beta[1:])
+            np.transpose(np.dot(np.transpose(s - y), X))
 
     elif distr == 'probit':
         prob = probit(z)
@@ -182,15 +175,14 @@ def _grad_L2loss(distr, alpha, Tau, reg_lambda, X, y, eta, beta):
                    ((1 - y) * (grad_prob / (1 - prob))))
         grad_logl = ((y * (grad_prob / prob)) -
                      ((1 - y) * (grad_prob / (1 - prob))))
-        grad_beta = -1. / n_samples * np.transpose(np.dot(grad_logl.T, X)) + \
-            reg_lambda * (1 - alpha) * np.dot(InvCov, beta[1:])
+        grad_beta = -1. / n_samples * np.transpose(np.dot(grad_logl.T, X))
 
     elif distr == 'gamma':
         nu = 1.
         grad_beta0 = 1. / n_samples * nu * np.sum(-y + 1 / z)
-        grad_beta = 1. / n_samples * nu * (-np.dot(y, X) + np.dot(1 / z, X)) + \
-            reg_lambda * (1 - alpha) * np.dot(InvCov, beta[1:])
+        grad_beta = 1. / n_samples * nu * (-np.dot(y, X) + np.dot(1 / z, X))
 
+    grad_beta += reg_lambda * (1 - alpha) * np.dot(InvCov, beta[1:])
     n_features = X.shape[1]
     g = np.zeros((n_features + 1, ))
     g[0] = grad_beta0
