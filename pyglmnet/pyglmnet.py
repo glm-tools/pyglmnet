@@ -30,6 +30,8 @@ def _qu(distr, z, eta):
         qu = expit(z)
     elif distr == 'probit':
         qu = probit(z)
+    elif distr == 'gamma':
+        qu = 1. / z
     return qu
 
 
@@ -55,6 +57,11 @@ def _logL(distr, beta0, beta, X, y, eta):
         z = beta0 + np.dot(X, beta)
         logL = 1. / n_samples * \
             np.sum(y * np.log(probit(z)) + (1 - y) * np.log(1 - probit(z)))
+    elif distr == 'gamma':
+        # see
+        # https://www.statistics.ma.tum.de/fileadmin/w00bdb/www/czado/lec8.pdf
+        nu = 1.  # shape parameter, exponential for now
+        logL = 1. / n_samples * np.sum(nu * (-y / l - np.log(l)))
     return logL
 
 
@@ -178,6 +185,12 @@ def _grad_L2loss(distr, alpha, Tau, reg_lambda, X, y, eta, beta):
         grad_beta = -1. / n_samples * np.transpose(np.dot(grad_logl.T, X)) + \
             reg_lambda * (1 - alpha) * np.dot(InvCov, beta[1:])
 
+    elif distr == 'gamma':
+        nu = 1.
+        grad_beta0 = 1. / n_samples * nu * np.sum(-y + 1 / z)
+        grad_beta = 1. / n_samples * nu * (-np.dot(y, X) + np.dot(1 / z, X)) + \
+            reg_lambda * (1 - alpha) * np.dot(InvCov, beta[1:])
+
     n_features = X.shape[1]
     g = np.zeros((n_features + 1, ))
     g[0] = grad_beta0
@@ -216,6 +229,10 @@ def simulate_glm(distr, beta0, beta, X, eta=2.0, random_state=None):
         y = np.random.normal(_lmb(distr, beta0, beta, X, eta))
     if distr == 'binomial' or distr == 'probit':
         y = np.random.binomial(1, _lmb(distr, beta0, beta, X, eta))
+    if distr == 'gamma':
+        mu = _lmb(distr, beta0, beta, X, eta)
+        mu[mu < 0] = 1e-5
+        y = np.random.gamma(shape=1, scale=mu)
     return y
 
 

@@ -29,9 +29,9 @@ def test_gradients():
     beta_[1:] = sps.rand(n_features, 1, density=density).toarray()[:, 0]
 
     reg_lambda = 0.1
-    distrs = ['gaussian', 'binomial', 'softplus', 'poisson', 'probit']
+    distrs = ['gaussian', 'binomial', 'softplus', 'poisson', 'probit', 'gamma']
     for distr in distrs:
-        glm = GLM(distr=distr, reg_lambda=[reg_lambda])
+        glm = GLM(distr=distr, reg_lambda=reg_lambda)
         y = simulate_glm(glm.distr, beta_[0], beta_[1:], X)
 
         func = partial(_L2loss, distr, glm.alpha,
