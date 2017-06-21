@@ -223,8 +223,9 @@ def simulate_glm(distr, beta0, beta, X, eta=2.0, random_state=None):
         y = np.random.binomial(1, _lmb(distr, beta0, beta, X, eta))
     if distr == 'gamma':
         mu = _lmb(distr, beta0, beta, X, eta)
-        mu[mu < 0] = 1e-5
-        y = np.random.gamma(shape=1, scale=mu)
+        # mu[mu < 0] = 1e-5
+        # y = np.random.gamma(shape=1, scale=mu)
+        y = np.exp(mu)
     return y
 
 
