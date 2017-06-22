@@ -31,7 +31,7 @@ def _qu(distr, z, eta):
     elif distr == 'probit':
         qu = probit(z)
     elif distr == 'gamma':
-        qu = 1. / z
+        qu = np.exp(z)
     return qu
 
 
@@ -179,8 +179,16 @@ def _grad_L2loss(distr, alpha, Tau, reg_lambda, X, y, eta, beta):
 
     elif distr == 'gamma':
         nu = 1.
-        grad_beta0 = 1. / n_samples * nu * np.sum(-y + 1 / z)
-        grad_beta = 1. / n_samples * nu * (-np.dot(y, X) + np.dot(1 / z, X))
+
+        def ilink(z):
+            return np.exp(z)
+
+        def grad_ilink(z):
+            return np.exp(z)
+
+        grad_logl = (y / ilink(z) ** 2 + 1 / ilink(z)) * grad_ilink(z)
+        grad_beta0 = - 1. / n_samples * nu * np.sum(grad_logl)
+        grad_beta = - 1. / n_samples * nu * np.dot(grad_logl.T, X).T
 
     grad_beta += reg_lambda * (1 - alpha) * np.dot(InvCov, beta[1:])
     n_features = X.shape[1]
