@@ -259,7 +259,7 @@ Gamma
 .. math::
 
     z_i = \beta_0 + \sum_j \beta_j x_{ij} \\
-    \mu_i = \exp(z_i)
+    \mu_i = \log(1 + \exp(z_i))
 
 **Log-likelihood function**
 
@@ -282,8 +282,8 @@ and normal for :math:`\nu = \infty`.
 .. math::
 
     \frac{\partial J}{\partial \beta_0} &= \frac{1}{n} \sum_{i} \nu\Bigg\{\frac{y_i}{\mu_i^2}
-    + \frac{1}{\mu_i}\Bigg\}{\mu_i'} \\
+    - \frac{1}{\mu_i}\Bigg\}{\mu_i'} \\
     \frac{\partial J}{\partial \beta_j} &= \frac{1}{n} \sum_{i} \nu\Bigg\{\frac{y_i}{\mu_i^2}
-    + \frac{1}{\mu_i}\Bigg\}{\mu_i'}x_{ij} + \lambda (1 - \alpha) \beta_j
+    - \frac{1}{\mu_i}\Bigg\}{\mu_i'}x_{ij} + \lambda (1 - \alpha) \beta_j
 
-where :math:`\mu_i' = \exp(z_i)`.
+where :math:`\mu_i' = \frac{1}{1 + \exp(-z_i)}`.

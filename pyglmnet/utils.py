@@ -96,7 +96,8 @@ def log_likelihood(y, yhat, distr):
         return np.sum((y - yhat)**2)
     elif distr == 'gamma':
         nu = 1.
-        return np.sum(nu * (-y * np.exp(-yhat) - yhat))
+        return np.sum(nu * (-y / np.log1p(np.exp(yhat)) -
+                      np.log(np.log1p(np.exp(yhat)))))
     elif distr == 'multinomial':
         y = label_binarizer(y)
         # yhat is the probability of each output

@@ -31,7 +31,7 @@ def _qu(distr, z, eta):
     elif distr == 'probit':
         qu = probit(z)
     elif distr == 'gamma':
-        qu = np.exp(z)
+        qu = np.log1p(np.exp(z))
     return qu
 
 
@@ -181,14 +181,14 @@ def _grad_L2loss(distr, alpha, Tau, reg_lambda, X, y, eta, beta):
         nu = 1.
 
         def ilink(z):
-            return np.exp(z)
+            return np.log1p(np.exp(z))
 
         def grad_ilink(z):
-            return np.exp(z)
+            return expit(z)
 
-        grad_logl = (y / ilink(z) ** 2 + 1 / ilink(z)) * grad_ilink(z)
-        grad_beta0 = - 1. / n_samples * nu * np.sum(grad_logl)
-        grad_beta = - 1. / n_samples * nu * np.dot(grad_logl.T, X).T
+        grad_logl = (y / ilink(z) ** 2 - 1 / ilink(z)) * grad_ilink(z)
+        grad_beta0 = -1. / n_samples * nu * np.sum(grad_logl)
+        grad_beta = -1. / n_samples * nu * np.dot(grad_logl.T, X).T
 
     grad_beta += reg_lambda * (1 - alpha) * np.dot(InvCov, beta[1:])
     n_features = X.shape[1]
@@ -231,8 +231,6 @@ def simulate_glm(distr, beta0, beta, X, eta=2.0, random_state=None):
         y = np.random.binomial(1, _lmb(distr, beta0, beta, X, eta))
     if distr == 'gamma':
         mu = _lmb(distr, beta0, beta, X, eta)
-        # mu[mu < 0] = 1e-5
-        # y = np.random.gamma(shape=1, scale=mu)
         y = np.exp(mu)
     return y
 
@@ -489,6 +487,10 @@ class GLM(object):
             mid_l = y * (z * prob + grad_prob) / (prob ** 2)
             mid_r = (1 - y) * (-z * (1 - prob) + grad_prob) / ((1 - prob) ** 2)
             hk = np.sum(prob * (mid_l + mid_r) * (xk * xk))
+
+        elif self.distr == 'gamma':
+            raise NotImplementedError('cdfast is not implemented for Gamma '
+                                      'distribution')
 
         return 1. / n_samples * gk, 1. / n_samples * hk
 

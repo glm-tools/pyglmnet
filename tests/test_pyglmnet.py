@@ -187,13 +187,16 @@ def test_glmcv():
     beta = 1. / (np.float(n_features) + 1.) * \
         np.random.normal(0.0, 1.0, (n_features,))
 
-    distrs = ['softplus', 'gaussian', 'poisson', 'binomial', 'probit']
+    distrs = ['softplus', 'gaussian', 'poisson', 'binomial', 'probit', 'gamma']
     solvers = ['batch-gradient', 'cdfast']
     score_metric = 'pseudo_R2'
     learning_rate = 2e-1
 
     for solver in solvers:
         for distr in distrs:
+
+            if distr == 'gamma' and solver == 'cdfast':
+                continue
 
             glm = GLMCV(distr, learning_rate=learning_rate,
                         solver=solver, score_metric=score_metric)
