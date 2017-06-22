@@ -14,7 +14,7 @@ Current
 Changelog
 ~~~~~~~~~
 
-    - ...
+    - Add `'gamma'` distribution with log link by `Mainak Jas`_.
 
 BUG
 ~~~
