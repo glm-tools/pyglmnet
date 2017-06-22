@@ -37,31 +37,29 @@ def _qu(distr, z, eta):
 
 def _logL(distr, beta0, beta, X, y, eta):
     """The log likelihood."""
-    n_samples = np.float(X.shape[0])
     z = beta0 + np.dot(X, beta)
     l = _qu(distr, z, eta)
     if distr == 'softplus':
-        logL = 1. / n_samples * np.sum(y * np.log(l) - l)
+        logL = np.sum(y * np.log(l) - l)
     elif distr == 'poisson':
-        logL = 1. / n_samples * np.sum(y * np.log(l) - l)
+        logL = np.sum(y * np.log(l) - l)
     elif distr == 'gaussian':
-        logL = -0.5 * 1. / n_samples * np.sum((y - l)**2)
+        logL = -0.5 * np.sum((y - l)**2)
     elif distr == 'binomial':
         # analytical formula
         # logL = np.sum(y*np.log(l) + (1-y)*np.log(1-l))
 
         # but this prevents underflow
         z = beta0 + np.dot(X, beta)
-        logL = 1. / n_samples * np.sum(y * z - np.log(1 + np.exp(z)))
+        logL = np.sum(y * z - np.log(1 + np.exp(z)))
     elif distr == 'probit':
         z = beta0 + np.dot(X, beta)
-        logL = 1. / n_samples * \
-            np.sum(y * np.log(probit(z)) + (1 - y) * np.log(1 - probit(z)))
+        logL = np.sum(y * np.log(probit(z)) + (1 - y) * np.log(1 - probit(z)))
     elif distr == 'gamma':
         # see
         # https://www.statistics.ma.tum.de/fileadmin/w00bdb/www/czado/lec8.pdf
         nu = 1.  # shape parameter, exponential for now
-        logL = 1. / n_samples * np.sum(nu * (-y / l - np.log(l)))
+        logL = np.sum(nu * (-y / l - np.log(l)))
     return logL
 
 
@@ -109,7 +107,8 @@ def _L1penalty(beta, group=None):
 
 def _loss(distr, alpha, Tau, reg_lambda, X, y, eta, group, beta):
     """Define the objective function for elastic net."""
-    L = _logL(distr, beta[0], beta[1:], X, y, eta)
+    n_samples = X.shape[0]
+    L = 1. / n_samples * _logL(distr, beta[0], beta[1:], X, y, eta)
     P = _penalty(alpha, beta[1:], Tau, group)
     J = -L + reg_lambda * P
     return J
@@ -117,7 +116,8 @@ def _loss(distr, alpha, Tau, reg_lambda, X, y, eta, group, beta):
 
 def _L2loss(distr, alpha, Tau, reg_lambda, X, y, eta, group, beta):
     """Define the objective function for elastic net."""
-    L = _logL(distr, beta[0], beta[1:], X, y, eta)
+    n_samples = X.shape[0]
+    L = 1. / n_samples * _logL(distr, beta[0], beta[1:], X, y, eta)
     P = 0.5 * (1 - alpha) * _L2penalty(beta[1:], Tau)
     J = -L + reg_lambda * P
     return J
@@ -136,16 +136,14 @@ def _grad_L2loss(distr, alpha, Tau, reg_lambda, X, y, eta, beta):
 
     if distr == 'softplus':
         q = _qu(distr, z, eta)
-        grad_beta0 = 1. / n_samples * (np.sum(s) - np.sum(y * s / q))
-        grad_beta = 1. / n_samples * \
-            ((np.dot(s.T, X) - np.dot((y * s / q).T, X)).T)
+        grad_beta0 = np.sum(s) - np.sum(y * s / q)
+        grad_beta = ((np.dot(s.T, X) - np.dot((y * s / q).T, X)).T)
 
     elif distr == 'poisson':
         q = _qu(distr, z, eta)
         grad_beta0 = np.sum(q[z <= eta] - y[z <= eta]) + \
             np.sum(1 - y[z > eta] / q[z > eta]) * \
             np.exp(eta)
-        grad_beta0 *= 1. / n_samples
 
         grad_beta = np.zeros([X.shape[1], ])
         selector = np.where(z.ravel() <= eta)[0]
@@ -155,27 +153,23 @@ def _grad_L2loss(distr, alpha, Tau, reg_lambda, X, y, eta, beta):
         grad_beta += np.exp(eta) * \
             np.transpose(np.dot((1 - y[selector] / q[selector]).T,
                                 X[selector, :]))
-        grad_beta *= 1. / n_samples
 
     elif distr == 'gaussian':
-        grad_beta0 = 1. / n_samples * np.sum(z - y)
-        grad_beta = 1. / n_samples * \
-            np.transpose(np.dot(np.transpose(z - y), X))
+        grad_beta0 = np.sum(z - y)
+        grad_beta = np.dot((z - y).T, X).T
 
     elif distr == 'binomial':
-        grad_beta0 = 1. / n_samples * np.sum(s - y)
-        grad_beta = 1. / n_samples * \
-            np.transpose(np.dot(np.transpose(s - y), X))
+        grad_beta0 = np.sum(s - y)
+        grad_beta = np.dot((s - y).T, X).T
 
     elif distr == 'probit':
         prob = probit(z)
         grad_prob = grad_probit(z)
-        grad_beta0 = -1. / n_samples * \
-            np.sum((y * (grad_prob / prob)) -
-                   ((1 - y) * (grad_prob / (1 - prob))))
+        grad_beta0 = -np.sum((y * (grad_prob / prob)) -
+                             ((1 - y) * (grad_prob / (1 - prob))))
         grad_logl = ((y * (grad_prob / prob)) -
                      ((1 - y) * (grad_prob / (1 - prob))))
-        grad_beta = -1. / n_samples * np.transpose(np.dot(grad_logl.T, X))
+        grad_beta = -np.dot(grad_logl.T, X).T
 
     elif distr == 'gamma':
         nu = 1.
@@ -187,9 +181,11 @@ def _grad_L2loss(distr, alpha, Tau, reg_lambda, X, y, eta, beta):
             return expit(z)
 
         grad_logl = (y / ilink(z) ** 2 - 1 / ilink(z)) * grad_ilink(z)
-        grad_beta0 = -1. / n_samples * nu * np.sum(grad_logl)
-        grad_beta = -1. / n_samples * nu * np.dot(grad_logl.T, X).T
+        grad_beta0 = -nu * np.sum(grad_logl)
+        grad_beta = -nu * np.dot(grad_logl.T, X).T
 
+    grad_beta0 *= 1. / n_samples
+    grad_beta *= 1. / n_samples
     grad_beta += reg_lambda * (1 - alpha) * np.dot(InvCov, beta[1:])
     n_features = X.shape[1]
     g = np.zeros((n_features + 1, ))
