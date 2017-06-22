@@ -31,7 +31,7 @@ but only for linear and logistic regression.
 
 - Pyglmnet provides a wide range of noise models
 (and paired canonical link functions):
-`'gaussian'`, `'binomial'`, `'multinomial'`, '`poisson`', and `'softplus'`.
+`'gaussian'`, `'binomial'`, `'gamma'`, '`poisson`', and `'softplus'`.
 
 - It supports a wide range of regularizers:
 ridge, lasso, elastic net,
