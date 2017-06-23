@@ -35,31 +35,26 @@ def _qu(distr, z, eta):
     return qu
 
 
-def _logL(distr, beta0, beta, X, y, eta):
+def _logL(distr, y, y_hat):
     """The log likelihood."""
-    z = beta0 + np.dot(X, beta)
-    l = _qu(distr, z, eta)
-    if distr == 'softplus':
-        logL = np.sum(y * np.log(l) - l)
-    elif distr == 'poisson':
-        logL = np.sum(y * np.log(l) - l)
+    if distr in ['softplus', 'poisson']:
+        logL = np.sum(y * np.log(y_hat) - y_hat)
     elif distr == 'gaussian':
-        logL = -0.5 * np.sum((y - l)**2)
+        logL = -0.5 * np.sum((y - y_hat)**2)
     elif distr == 'binomial':
         # analytical formula
-        # logL = np.sum(y*np.log(l) + (1-y)*np.log(1-l))
+        logL = np.sum(y * np.log(y_hat) + (1 - y) * np.log(1 - y_hat))
 
         # but this prevents underflow
-        z = beta0 + np.dot(X, beta)
-        logL = np.sum(y * z - np.log(1 + np.exp(z)))
+        # z = beta0 + np.dot(X, beta)
+        # logL = np.sum(y * z - np.log(1 + np.exp(z)))
     elif distr == 'probit':
-        z = beta0 + np.dot(X, beta)
-        logL = np.sum(y * np.log(probit(z)) + (1 - y) * np.log(1 - probit(z)))
+        logL = np.sum(y * np.log(y_hat) + (1 - y) * np.log(1 - y_hat))
     elif distr == 'gamma':
         # see
         # https://www.statistics.ma.tum.de/fileadmin/w00bdb/www/czado/lec8.pdf
         nu = 1.  # shape parameter, exponential for now
-        logL = np.sum(nu * (-y / l - np.log(l)))
+        logL = np.sum(nu * (-y / y_hat - np.log(y_hat)))
     return logL
 
 
@@ -108,7 +103,8 @@ def _L1penalty(beta, group=None):
 def _loss(distr, alpha, Tau, reg_lambda, X, y, eta, group, beta):
     """Define the objective function for elastic net."""
     n_samples = X.shape[0]
-    L = 1. / n_samples * _logL(distr, beta[0], beta[1:], X, y, eta)
+    y_hat = _qu(distr, beta[0] + np.dot(X, beta[1:]), eta)
+    L = 1. / n_samples * _logL(distr, y, y_hat)
     P = _penalty(alpha, beta[1:], Tau, group)
     J = -L + reg_lambda * P
     return J
@@ -117,7 +113,8 @@ def _loss(distr, alpha, Tau, reg_lambda, X, y, eta, group, beta):
 def _L2loss(distr, alpha, Tau, reg_lambda, X, y, eta, group, beta):
     """Define the objective function for elastic net."""
     n_samples = X.shape[0]
-    L = 1. / n_samples * _logL(distr, beta[0], beta[1:], X, y, eta)
+    y_hat = _qu(distr, beta[0] + np.dot(X, beta[1:]), eta)
+    L = 1. / n_samples * _logL(distr, y, y_hat)
     P = 0.5 * (1 - alpha) * _L2penalty(beta[1:], Tau)
     J = -L + reg_lambda * P
     return J

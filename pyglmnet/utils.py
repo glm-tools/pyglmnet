@@ -83,28 +83,8 @@ def label_binarizer(y):
 
 def log_likelihood(y, yhat, distr):
     """Helper to compute the log likelihood."""
-    eps = np.spacing(1)
-    if distr in ['softplus', 'poisson']:
-        return np.sum(y * np.log(eps + yhat) - yhat)
-    elif distr == 'binomial' or distr == 'probit':
-        # Log likelihood of model under consideration
-        return 2 * len(y) * \
-            np.sum(y * np.log((yhat == 0) + yhat) / np.mean(yhat) +
-                   (1 - y) * np.log((yhat == 1) +
-                                    1 - yhat) / (1 - np.mean(yhat)))
-    elif distr == 'gaussian':
-        return np.sum((y - yhat)**2)
-    elif distr == 'gamma':
-        nu = 1.
-        return np.sum(nu * (-y / np.log1p(np.exp(yhat)) -
-                      np.log(np.log1p(np.exp(yhat)))))
-    elif distr == 'multinomial':
-        y = label_binarizer(y)
-        # yhat is the probability of each output
-        if yhat.ndim != y.ndim:
-            msg = 'yhat and ynull must be (n_samples, n_class) ndarrays'
-            raise ValueError(msg)
-        return np.sum(y * np.log(yhat))
+    from .pyglmnet import _logL
+    return _logL(distr, y, yhat)
 
 
 def tikhonov_from_prior(prior_cov, n_samples, threshold=0.0001):
