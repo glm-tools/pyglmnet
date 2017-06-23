@@ -4,7 +4,8 @@ from copy import deepcopy
 
 import numpy as np
 from scipy.special import expit
-from .utils import logger, set_log_level, probit, grad_probit
+from scipy.stats import norm
+from .utils import logger, set_log_level
 from . import metrics
 
 
@@ -14,25 +15,33 @@ def _lmb(distr, beta0, beta, X, eta):
     return _qu(distr, z, eta)
 
 
-def _qu(distr, z, eta):
-    """The non-linearity."""
-    if distr == 'softplus':
+def _qu(distr, z, eta, return_grad=False):
+    """The non-linearity (inverse link)."""
+    if distr in ['softplus', 'gamma']:
         qu = np.log1p(np.exp(z))
+        grad_qu = expit(z)
     elif distr == 'poisson':
-        qu = deepcopy(z)
-        slope = np.exp(eta)
-        intercept = (1 - eta) * slope
-        qu[z > eta] = z[z > eta] * slope + intercept
+        qu = z.copy()
+        intercept = (1 - eta) * np.exp(eta)
+        qu[z > eta] = z[z > eta] * np.exp(eta) + intercept
         qu[z <= eta] = np.exp(z[z <= eta])
+
+        grad_qu = qu.copy()
+        grad_qu[z > eta] = np.ones_like(z)[z > eta] * np.exp(eta)
+        grad_qu[z <= eta] = np.exp(z[z <= eta])
     elif distr == 'gaussian':
         qu = z
+        grad_qu = np.ones_like(z)
     elif distr == 'binomial':
         qu = expit(z)
+        grad_qu = expit(z) * (1 - expit(z))
     elif distr == 'probit':
-        qu = probit(z)
-    elif distr == 'gamma':
-        qu = np.log1p(np.exp(z))
-    return qu
+        qu = norm.cdf(z)
+        grad_qu = norm.pdf(z)
+    if return_grad:
+        return qu, grad_qu
+    else:
+        return qu
 
 
 def _logL(distr, y, y_hat):
@@ -129,55 +138,31 @@ def _grad_L2loss(distr, alpha, Tau, reg_lambda, X, y, eta, beta):
     InvCov = np.dot(Tau.T, Tau)
 
     z = beta[0] + np.dot(X, beta[1:])
-    s = expit(z)
+    mu, grad_mu = _qu(distr, z, eta, return_grad=True)
 
-    if distr == 'softplus':
-        q = _qu(distr, z, eta)
-        grad_beta0 = np.sum(s) - np.sum(y * s / q)
-        grad_beta = ((np.dot(s.T, X) - np.dot((y * s / q).T, X)).T)
-
-    elif distr == 'poisson':
-        q = _qu(distr, z, eta)
-        grad_beta0 = np.sum(q[z <= eta] - y[z <= eta]) + \
-            np.sum(1 - y[z > eta] / q[z > eta]) * \
-            np.exp(eta)
-
-        grad_beta = np.zeros([X.shape[1], ])
-        selector = np.where(z.ravel() <= eta)[0]
-        grad_beta += np.transpose(np.dot((q[selector] - y[selector]).T,
-                                         X[selector, :]))
-        selector = np.where(z.ravel() > eta)[0]
-        grad_beta += np.exp(eta) * \
-            np.transpose(np.dot((1 - y[selector] / q[selector]).T,
-                                X[selector, :]))
+    if distr in ['poisson', 'softplus']:
+        grad_beta0 = np.sum(grad_mu) - np.sum(y * grad_mu / mu)
+        grad_beta = ((np.dot(grad_mu.T, X) -
+                     np.dot((y * grad_mu / mu).T, X)).T)
 
     elif distr == 'gaussian':
-        grad_beta0 = np.sum(z - y)
-        grad_beta = np.dot((z - y).T, X).T
+        grad_beta0 = np.sum((mu - y) * grad_mu)
+        grad_beta = np.dot((mu - y).T, X * grad_mu[:, None]).T
 
     elif distr == 'binomial':
-        grad_beta0 = np.sum(s - y)
-        grad_beta = np.dot((s - y).T, X).T
+        grad_beta0 = np.sum(mu - y)
+        grad_beta = np.dot((mu - y).T, X).T
 
     elif distr == 'probit':
-        prob = probit(z)
-        grad_prob = grad_probit(z)
-        grad_beta0 = -np.sum((y * (grad_prob / prob)) -
-                             ((1 - y) * (grad_prob / (1 - prob))))
-        grad_logl = ((y * (grad_prob / prob)) -
-                     ((1 - y) * (grad_prob / (1 - prob))))
+        grad_beta0 = -np.sum((y * (grad_mu / mu)) -
+                             ((1 - y) * (grad_mu / (1 - mu))))
+        grad_logl = ((y * (grad_mu / mu)) -
+                     ((1 - y) * (grad_mu / (1 - mu))))
         grad_beta = -np.dot(grad_logl.T, X).T
 
     elif distr == 'gamma':
         nu = 1.
-
-        def ilink(z):
-            return np.log1p(np.exp(z))
-
-        def grad_ilink(z):
-            return expit(z)
-
-        grad_logl = (y / ilink(z) ** 2 - 1 / ilink(z)) * grad_ilink(z)
+        grad_logl = (y / mu ** 2 - 1 / mu) * grad_mu
         grad_beta0 = -nu * np.sum(grad_logl)
         grad_beta = -nu * np.dot(grad_logl.T, X).T
 
@@ -472,8 +457,8 @@ class GLM(object):
             hk = np.sum(mu * (1.0 - mu) * xk * xk)
 
         elif self.distr == 'probit':
-            prob = probit(z)
-            grad_prob = probit(z)
+            prob = norm.cdf(z)
+            grad_prob = norm.pdf(z)
             gk = np.sum(y * (grad_prob / prob) -
                         (1 - y) * (grad_prob / (1 - prob)) * xk)
 
