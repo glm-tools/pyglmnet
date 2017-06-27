@@ -619,7 +619,7 @@ class GLM(object):
 
             # Update active set
             if self.solver == 'cdfast':
-                ActiveSet[np.where(beta[1:] == 0)[0] + 1] = 0
+                ActiveSet[beta[1:] == 0] = 0
 
             # Compute and save loss
             L.append(_loss(self.distr, alpha, self.Tau, reg_lambda,
