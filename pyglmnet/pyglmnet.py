@@ -15,33 +15,39 @@ def _lmb(distr, beta0, beta, X, eta):
     return _mu(distr, z, eta)
 
 
-def _mu(distr, z, eta, return_grad=False):
+def _mu(distr, z, eta):
     """The non-linearity (inverse link)."""
     if distr in ['softplus', 'gamma']:
         qu = np.log1p(np.exp(z))
-        grad_qu = expit(z)
     elif distr == 'poisson':
         qu = z.copy()
         intercept = (1 - eta) * np.exp(eta)
         qu[z > eta] = z[z > eta] * np.exp(eta) + intercept
         qu[z <= eta] = np.exp(z[z <= eta])
+    elif distr == 'gaussian':
+        qu = z
+    elif distr == 'binomial':
+        qu = expit(z)
+    elif distr == 'probit':
+        qu = norm.cdf(z)
+    return qu
 
-        grad_qu = qu.copy()
+
+def _grad_mu(distr, z, eta):
+    """Derivative of the non-linearity."""
+    if distr in ['softplus', 'gamma']:
+        grad_qu = expit(z)
+    elif distr == 'poisson':
+        grad_qu = z.copy()
         grad_qu[z > eta] = np.ones_like(z)[z > eta] * np.exp(eta)
         grad_qu[z <= eta] = np.exp(z[z <= eta])
     elif distr == 'gaussian':
-        qu = z
         grad_qu = np.ones_like(z)
     elif distr == 'binomial':
-        qu = expit(z)
         grad_qu = expit(z) * (1 - expit(z))
-    elif distr == 'probit':
-        qu = norm.cdf(z)
+    elif distr in 'probit':
         grad_qu = norm.pdf(z)
-    if return_grad:
-        return qu, grad_qu
-    else:
-        return qu
+    return grad_qu
 
 
 def _logL(distr, y, y_hat):
@@ -138,7 +144,8 @@ def _grad_L2loss(distr, alpha, Tau, reg_lambda, X, y, eta, beta):
     InvCov = np.dot(Tau.T, Tau)
 
     z = beta[0] + np.dot(X, beta[1:])
-    mu, grad_mu = _mu(distr, z, eta, return_grad=True)
+    mu = _mu(distr, z, eta)
+    grad_mu = _grad_mu(distr, z, eta)
 
     if distr in ['poisson', 'softplus']:
         grad_beta0 = np.sum(grad_mu) - np.sum(y * grad_mu / mu)
