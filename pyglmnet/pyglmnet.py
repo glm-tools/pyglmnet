@@ -12,10 +12,10 @@ from . import metrics
 def _lmb(distr, beta0, beta, X, eta):
     """Conditional intensity function."""
     z = beta0 + np.dot(X, beta)
-    return _qu(distr, z, eta)
+    return _mu(distr, z, eta)
 
 
-def _qu(distr, z, eta, return_grad=False):
+def _mu(distr, z, eta, return_grad=False):
     """The non-linearity (inverse link)."""
     if distr in ['softplus', 'gamma']:
         qu = np.log1p(np.exp(z))
@@ -112,7 +112,7 @@ def _L1penalty(beta, group=None):
 def _loss(distr, alpha, Tau, reg_lambda, X, y, eta, group, beta):
     """Define the objective function for elastic net."""
     n_samples = X.shape[0]
-    y_hat = _qu(distr, beta[0] + np.dot(X, beta[1:]), eta)
+    y_hat = _mu(distr, beta[0] + np.dot(X, beta[1:]), eta)
     L = 1. / n_samples * _logL(distr, y, y_hat)
     P = _penalty(alpha, beta[1:], Tau, group)
     J = -L + reg_lambda * P
@@ -122,7 +122,7 @@ def _loss(distr, alpha, Tau, reg_lambda, X, y, eta, group, beta):
 def _L2loss(distr, alpha, Tau, reg_lambda, X, y, eta, group, beta):
     """Define the objective function for elastic net."""
     n_samples = X.shape[0]
-    y_hat = _qu(distr, beta[0] + np.dot(X, beta[1:]), eta)
+    y_hat = _mu(distr, beta[0] + np.dot(X, beta[1:]), eta)
     L = 1. / n_samples * _logL(distr, y, y_hat)
     P = 0.5 * (1 - alpha) * _L2penalty(beta[1:], Tau)
     J = -L + reg_lambda * P
@@ -138,7 +138,7 @@ def _grad_L2loss(distr, alpha, Tau, reg_lambda, X, y, eta, beta):
     InvCov = np.dot(Tau.T, Tau)
 
     z = beta[0] + np.dot(X, beta[1:])
-    mu, grad_mu = _qu(distr, z, eta, return_grad=True)
+    mu, grad_mu = _mu(distr, z, eta, return_grad=True)
 
     if distr in ['poisson', 'softplus']:
         grad_beta0 = np.sum(grad_mu) - np.sum(y * grad_mu / mu)
@@ -426,7 +426,7 @@ class GLM(object):
         n_samples = xk.shape[0]
 
         if self.distr == 'softplus':
-            mu = _qu(self.distr, z, self.eta)
+            mu = _mu(self.distr, z, self.eta)
             s = expit(z)
             gk = np.sum(s * xk) - np.sum(y * s / mu * xk)
 
@@ -435,7 +435,7 @@ class GLM(object):
             hk = np.sum(grad_s * xk ** 2) - np.sum(y * grad_s_by_mu * xk ** 2)
 
         elif self.distr == 'poisson':
-            mu = _qu(self.distr, z, self.eta)
+            mu = _mu(self.distr, z, self.eta)
             s = expit(z)
             gk = np.sum((mu[z <= self.eta] - y[z <= self.eta]) *
                         xk[z <= self.eta]) + \
@@ -452,7 +452,7 @@ class GLM(object):
             hk = np.sum(xk * xk)
 
         elif self.distr == 'binomial':
-            mu = _qu(self.distr, z, self.eta)
+            mu = _mu(self.distr, z, self.eta)
             gk = np.sum((mu - y) * xk)
             hk = np.sum(mu * (1.0 - mu) * xk * xk)
 
