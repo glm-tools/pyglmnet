@@ -54,12 +54,6 @@ def label_binarizer(y):
     return yb
 
 
-def log_likelihood(y, yhat, distr):
-    """Helper to compute the log likelihood."""
-    from .pyglmnet import _logL
-    return _logL(distr, y, yhat)
-
-
 def tikhonov_from_prior(prior_cov, n_samples, threshold=0.0001):
     """Given a prior covariance matrix, returns a Tikhonov matrix
 

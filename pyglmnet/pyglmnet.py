@@ -6,7 +6,6 @@ import numpy as np
 from scipy.special import expit
 from scipy.stats import norm
 from .utils import logger, set_log_level
-from . import metrics
 
 
 def _lmb(distr, beta0, beta, X, eta):
@@ -731,6 +730,7 @@ class GLM(object):
         score: float
             The score metric
         """
+        from . import metrics
         if self.score_metric not in ['deviance', 'pseudo_R2', 'accuracy']:
             raise ValueError('score_metric has to be one of' +
                              ' deviance or pseudo_R2')
