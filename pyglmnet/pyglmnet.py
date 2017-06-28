@@ -17,36 +17,36 @@ def _lmb(distr, beta0, beta, X, eta):
 def _mu(distr, z, eta):
     """The non-linearity (inverse link)."""
     if distr in ['softplus', 'gamma']:
-        qu = np.log1p(np.exp(z))
+        mu = np.log1p(np.exp(z))
     elif distr == 'poisson':
-        qu = z.copy()
+        mu = z.copy()
         intercept = (1 - eta) * np.exp(eta)
-        qu[z > eta] = z[z > eta] * np.exp(eta) + intercept
-        qu[z <= eta] = np.exp(z[z <= eta])
+        mu[z > eta] = z[z > eta] * np.exp(eta) + intercept
+        mu[z <= eta] = np.exp(z[z <= eta])
     elif distr == 'gaussian':
-        qu = z
+        mu = z
     elif distr == 'binomial':
-        qu = expit(z)
+        mu = expit(z)
     elif distr == 'probit':
-        qu = norm.cdf(z)
-    return qu
+        mu = norm.cdf(z)
+    return mu
 
 
 def _grad_mu(distr, z, eta):
     """Derivative of the non-linearity."""
     if distr in ['softplus', 'gamma']:
-        grad_qu = expit(z)
+        grad_mu = expit(z)
     elif distr == 'poisson':
-        grad_qu = z.copy()
-        grad_qu[z > eta] = np.ones_like(z)[z > eta] * np.exp(eta)
-        grad_qu[z <= eta] = np.exp(z[z <= eta])
+        grad_mu = z.copy()
+        grad_mu[z > eta] = np.ones_like(z)[z > eta] * np.exp(eta)
+        grad_mu[z <= eta] = np.exp(z[z <= eta])
     elif distr == 'gaussian':
-        grad_qu = np.ones_like(z)
+        grad_mu = np.ones_like(z)
     elif distr == 'binomial':
-        grad_qu = expit(z) * (1 - expit(z))
+        grad_mu = expit(z) * (1 - expit(z))
     elif distr in 'probit':
-        grad_qu = norm.pdf(z)
-    return grad_qu
+        grad_mu = norm.pdf(z)
+    return grad_mu
 
 
 def _logL(distr, y, y_hat):
