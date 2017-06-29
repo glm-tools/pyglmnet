@@ -4,38 +4,11 @@ A few miscellaneous helper functions for pyglmnet.py
 
 import numpy as np
 from copy import copy
-from scipy.stats import norm
 import logging
 
 
 logger = logging.getLogger('pyglmnet')
 logger.addHandler(logging.StreamHandler())
-
-
-def probit(z):
-    """Probit inverse link function: normcdf.
-
-    Parameters
-    ----------
-    z: array | list
-
-    Returns:
-    norm.cdf(z)
-    """
-    return norm.cdf(z)
-
-
-def grad_probit(z):
-    """Gradient of probit inverse link function: normcdf.
-
-    Parameters
-    ----------
-    z: array | list
-
-    Returns:
-    norm.pdf(z)
-    """
-    return norm.pdf(z)
 
 
 def softmax(w):
@@ -79,32 +52,6 @@ def label_binarizer(y):
     yb = np.zeros([len(y), y.max() + 1])
     yb[np.arange(len(y)), y_flat] = 1
     return yb
-
-
-def log_likelihood(y, yhat, distr):
-    """Helper to compute the log likelihood."""
-    eps = np.spacing(1)
-    if distr in ['softplus', 'poisson']:
-        return np.sum(y * np.log(eps + yhat) - yhat)
-    elif distr == 'binomial' or distr == 'probit':
-        # Log likelihood of model under consideration
-        return 2 * len(y) * \
-            np.sum(y * np.log((yhat == 0) + yhat) / np.mean(yhat) +
-                   (1 - y) * np.log((yhat == 1) +
-                                    1 - yhat) / (1 - np.mean(yhat)))
-    elif distr == 'gaussian':
-        return np.sum((y - yhat)**2)
-    elif distr == 'gamma':
-        nu = 1.
-        return np.sum(nu * (-y / np.log1p(np.exp(yhat)) -
-                      np.log(np.log1p(np.exp(yhat)))))
-    elif distr == 'multinomial':
-        y = label_binarizer(y)
-        # yhat is the probability of each output
-        if yhat.ndim != y.ndim:
-            msg = 'yhat and ynull must be (n_samples, n_class) ndarrays'
-            raise ValueError(msg)
-        return np.sum(y * np.log(yhat))
 
 
 def tikhonov_from_prior(prior_cov, n_samples, threshold=0.0001):

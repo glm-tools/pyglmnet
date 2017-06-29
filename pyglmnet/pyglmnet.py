@@ -4,62 +4,71 @@ from copy import deepcopy
 
 import numpy as np
 from scipy.special import expit
-from .utils import logger, set_log_level, probit, grad_probit
-from . import metrics
+from scipy.stats import norm
+from .utils import logger, set_log_level
 
 
 def _lmb(distr, beta0, beta, X, eta):
     """Conditional intensity function."""
     z = beta0 + np.dot(X, beta)
-    return _qu(distr, z, eta)
+    return _mu(distr, z, eta)
 
 
-def _qu(distr, z, eta):
-    """The non-linearity."""
-    if distr == 'softplus':
-        qu = np.log1p(np.exp(z))
+def _mu(distr, z, eta):
+    """The non-linearity (inverse link)."""
+    if distr in ['softplus', 'gamma']:
+        mu = np.log1p(np.exp(z))
     elif distr == 'poisson':
-        qu = deepcopy(z)
-        slope = np.exp(eta)
-        intercept = (1 - eta) * slope
-        qu[z > eta] = z[z > eta] * slope + intercept
-        qu[z <= eta] = np.exp(z[z <= eta])
+        mu = z.copy()
+        intercept = (1 - eta) * np.exp(eta)
+        mu[z > eta] = z[z > eta] * np.exp(eta) + intercept
+        mu[z <= eta] = np.exp(z[z <= eta])
     elif distr == 'gaussian':
-        qu = z
+        mu = z
     elif distr == 'binomial':
-        qu = expit(z)
+        mu = expit(z)
     elif distr == 'probit':
-        qu = probit(z)
-    elif distr == 'gamma':
-        qu = np.log1p(np.exp(z))
-    return qu
+        mu = norm.cdf(z)
+    return mu
 
 
-def _logL(distr, beta0, beta, X, y, eta):
-    """The log likelihood."""
-    z = beta0 + np.dot(X, beta)
-    l = _qu(distr, z, eta)
-    if distr == 'softplus':
-        logL = np.sum(y * np.log(l) - l)
+def _grad_mu(distr, z, eta):
+    """Derivative of the non-linearity."""
+    if distr in ['softplus', 'gamma']:
+        grad_mu = expit(z)
     elif distr == 'poisson':
-        logL = np.sum(y * np.log(l) - l)
+        grad_mu = z.copy()
+        grad_mu[z > eta] = np.ones_like(z)[z > eta] * np.exp(eta)
+        grad_mu[z <= eta] = np.exp(z[z <= eta])
     elif distr == 'gaussian':
-        logL = -0.5 * np.sum((y - l)**2)
+        grad_mu = np.ones_like(z)
+    elif distr == 'binomial':
+        grad_mu = expit(z) * (1 - expit(z))
+    elif distr in 'probit':
+        grad_mu = norm.pdf(z)
+    return grad_mu
+
+
+def _logL(distr, y, y_hat):
+    """The log likelihood."""
+    if distr in ['softplus', 'poisson']:
+        logL = np.sum(y * np.log(y_hat) - y_hat)
+    elif distr == 'gaussian':
+        logL = -0.5 * np.sum((y - y_hat)**2)
     elif distr == 'binomial':
         # analytical formula
-        # logL = np.sum(y*np.log(l) + (1-y)*np.log(1-l))
+        logL = np.sum(y * np.log(y_hat) + (1 - y) * np.log(1 - y_hat))
 
         # but this prevents underflow
-        z = beta0 + np.dot(X, beta)
-        logL = np.sum(y * z - np.log(1 + np.exp(z)))
+        # z = beta0 + np.dot(X, beta)
+        # logL = np.sum(y * z - np.log(1 + np.exp(z)))
     elif distr == 'probit':
-        z = beta0 + np.dot(X, beta)
-        logL = np.sum(y * np.log(probit(z)) + (1 - y) * np.log(1 - probit(z)))
+        logL = np.sum(y * np.log(y_hat) + (1 - y) * np.log(1 - y_hat))
     elif distr == 'gamma':
         # see
         # https://www.statistics.ma.tum.de/fileadmin/w00bdb/www/czado/lec8.pdf
         nu = 1.  # shape parameter, exponential for now
-        logL = np.sum(nu * (-y / l - np.log(l)))
+        logL = np.sum(nu * (-y / y_hat - np.log(y_hat)))
     return logL
 
 
@@ -108,7 +117,8 @@ def _L1penalty(beta, group=None):
 def _loss(distr, alpha, Tau, reg_lambda, X, y, eta, group, beta):
     """Define the objective function for elastic net."""
     n_samples = X.shape[0]
-    L = 1. / n_samples * _logL(distr, beta[0], beta[1:], X, y, eta)
+    y_hat = _mu(distr, beta[0] + np.dot(X, beta[1:]), eta)
+    L = 1. / n_samples * _logL(distr, y, y_hat)
     P = _penalty(alpha, beta[1:], Tau, group)
     J = -L + reg_lambda * P
     return J
@@ -117,7 +127,8 @@ def _loss(distr, alpha, Tau, reg_lambda, X, y, eta, group, beta):
 def _L2loss(distr, alpha, Tau, reg_lambda, X, y, eta, group, beta):
     """Define the objective function for elastic net."""
     n_samples = X.shape[0]
-    L = 1. / n_samples * _logL(distr, beta[0], beta[1:], X, y, eta)
+    y_hat = _mu(distr, beta[0] + np.dot(X, beta[1:]), eta)
+    L = 1. / n_samples * _logL(distr, y, y_hat)
     P = 0.5 * (1 - alpha) * _L2penalty(beta[1:], Tau)
     J = -L + reg_lambda * P
     return J
@@ -132,55 +143,32 @@ def _grad_L2loss(distr, alpha, Tau, reg_lambda, X, y, eta, beta):
     InvCov = np.dot(Tau.T, Tau)
 
     z = beta[0] + np.dot(X, beta[1:])
-    s = expit(z)
+    mu = _mu(distr, z, eta)
+    grad_mu = _grad_mu(distr, z, eta)
 
-    if distr == 'softplus':
-        q = _qu(distr, z, eta)
-        grad_beta0 = np.sum(s) - np.sum(y * s / q)
-        grad_beta = ((np.dot(s.T, X) - np.dot((y * s / q).T, X)).T)
-
-    elif distr == 'poisson':
-        q = _qu(distr, z, eta)
-        grad_beta0 = np.sum(q[z <= eta] - y[z <= eta]) + \
-            np.sum(1 - y[z > eta] / q[z > eta]) * \
-            np.exp(eta)
-
-        grad_beta = np.zeros([X.shape[1], ])
-        selector = np.where(z.ravel() <= eta)[0]
-        grad_beta += np.transpose(np.dot((q[selector] - y[selector]).T,
-                                         X[selector, :]))
-        selector = np.where(z.ravel() > eta)[0]
-        grad_beta += np.exp(eta) * \
-            np.transpose(np.dot((1 - y[selector] / q[selector]).T,
-                                X[selector, :]))
+    if distr in ['poisson', 'softplus']:
+        grad_beta0 = np.sum(grad_mu) - np.sum(y * grad_mu / mu)
+        grad_beta = ((np.dot(grad_mu.T, X) -
+                     np.dot((y * grad_mu / mu).T, X)).T)
 
     elif distr == 'gaussian':
-        grad_beta0 = np.sum(z - y)
-        grad_beta = np.dot((z - y).T, X).T
+        grad_beta0 = np.sum((mu - y) * grad_mu)
+        grad_beta = np.dot((mu - y).T, X * grad_mu[:, None]).T
 
     elif distr == 'binomial':
-        grad_beta0 = np.sum(s - y)
-        grad_beta = np.dot((s - y).T, X).T
+        grad_beta0 = np.sum(mu - y)
+        grad_beta = np.dot((mu - y).T, X).T
 
     elif distr == 'probit':
-        prob = probit(z)
-        grad_prob = grad_probit(z)
-        grad_beta0 = -np.sum((y * (grad_prob / prob)) -
-                             ((1 - y) * (grad_prob / (1 - prob))))
-        grad_logl = ((y * (grad_prob / prob)) -
-                     ((1 - y) * (grad_prob / (1 - prob))))
+        grad_beta0 = -np.sum((y * (grad_mu / mu)) -
+                             ((1 - y) * (grad_mu / (1 - mu))))
+        grad_logl = ((y * (grad_mu / mu)) -
+                     ((1 - y) * (grad_mu / (1 - mu))))
         grad_beta = -np.dot(grad_logl.T, X).T
 
     elif distr == 'gamma':
         nu = 1.
-
-        def ilink(z):
-            return np.log1p(np.exp(z))
-
-        def grad_ilink(z):
-            return expit(z)
-
-        grad_logl = (y / ilink(z) ** 2 - 1 / ilink(z)) * grad_ilink(z)
+        grad_logl = (y / mu ** 2 - 1 / mu) * grad_mu
         grad_beta0 = -nu * np.sum(grad_logl)
         grad_beta = -nu * np.dot(grad_logl.T, X).T
 
@@ -444,7 +432,7 @@ class GLM(object):
         n_samples = xk.shape[0]
 
         if self.distr == 'softplus':
-            mu = _qu(self.distr, z, self.eta)
+            mu = _mu(self.distr, z, self.eta)
             s = expit(z)
             gk = np.sum(s * xk) - np.sum(y * s / mu * xk)
 
@@ -453,7 +441,7 @@ class GLM(object):
             hk = np.sum(grad_s * xk ** 2) - np.sum(y * grad_s_by_mu * xk ** 2)
 
         elif self.distr == 'poisson':
-            mu = _qu(self.distr, z, self.eta)
+            mu = _mu(self.distr, z, self.eta)
             s = expit(z)
             gk = np.sum((mu[z <= self.eta] - y[z <= self.eta]) *
                         xk[z <= self.eta]) + \
@@ -470,13 +458,13 @@ class GLM(object):
             hk = np.sum(xk * xk)
 
         elif self.distr == 'binomial':
-            mu = _qu(self.distr, z, self.eta)
+            mu = _mu(self.distr, z, self.eta)
             gk = np.sum((mu - y) * xk)
             hk = np.sum(mu * (1.0 - mu) * xk * xk)
 
         elif self.distr == 'probit':
-            prob = probit(z)
-            grad_prob = probit(z)
+            prob = norm.cdf(z)
+            grad_prob = norm.pdf(z)
             gk = np.sum(y * (grad_prob / prob) -
                         (1 - y) * (grad_prob / (1 - prob)) * xk)
 
@@ -742,6 +730,7 @@ class GLM(object):
         score: float
             The score metric
         """
+        from . import metrics
         if self.score_metric not in ['deviance', 'pseudo_R2', 'accuracy']:
             raise ValueError('score_metric has to be one of' +
                              ' deviance or pseudo_R2')
