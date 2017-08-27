@@ -6,7 +6,7 @@ import numpy as np
 from scipy.special import expit
 from scipy.stats import norm
 from .utils import logger, set_log_level
-from . import metrics
+from .mixin import EstimatorMixin
 
 
 def _lmb(distr, beta0, beta, X, eta):
@@ -18,36 +18,36 @@ def _lmb(distr, beta0, beta, X, eta):
 def _mu(distr, z, eta):
     """The non-linearity (inverse link)."""
     if distr in ['softplus', 'gamma']:
-        qu = np.log1p(np.exp(z))
+        mu = np.log1p(np.exp(z))
     elif distr == 'poisson':
-        qu = z.copy()
+        mu = z.copy()
         intercept = (1 - eta) * np.exp(eta)
-        qu[z > eta] = z[z > eta] * np.exp(eta) + intercept
-        qu[z <= eta] = np.exp(z[z <= eta])
+        mu[z > eta] = z[z > eta] * np.exp(eta) + intercept
+        mu[z <= eta] = np.exp(z[z <= eta])
     elif distr == 'gaussian':
-        qu = z
+        mu = z
     elif distr == 'binomial':
-        qu = expit(z)
+        mu = expit(z)
     elif distr == 'probit':
-        qu = norm.cdf(z)
-    return qu
+        mu = norm.cdf(z)
+    return mu
 
 
 def _grad_mu(distr, z, eta):
     """Derivative of the non-linearity."""
     if distr in ['softplus', 'gamma']:
-        grad_qu = expit(z)
+        grad_mu = expit(z)
     elif distr == 'poisson':
-        grad_qu = z.copy()
-        grad_qu[z > eta] = np.ones_like(z)[z > eta] * np.exp(eta)
-        grad_qu[z <= eta] = np.exp(z[z <= eta])
+        grad_mu = z.copy()
+        grad_mu[z > eta] = np.ones_like(z)[z > eta] * np.exp(eta)
+        grad_mu[z <= eta] = np.exp(z[z <= eta])
     elif distr == 'gaussian':
-        grad_qu = np.ones_like(z)
+        grad_mu = np.ones_like(z)
     elif distr == 'binomial':
-        grad_qu = expit(z) * (1 - expit(z))
+        grad_mu = expit(z) * (1 - expit(z))
     elif distr in 'probit':
-        grad_qu = norm.pdf(z)
-    return grad_qu
+        grad_mu = norm.pdf(z)
+    return grad_mu
 
 
 def _logL(distr, y, y_hat):
@@ -292,7 +292,7 @@ def simulate_glm(distr, beta0, beta, X, eta=2.0, random_state=None):
     return y
 
 
-class GLM(object):
+class GLM(EstimatorMixin):
     """Class for estimating regularized generalized linear models (GLM).
     The regularized GLM minimizes the penalized negative log likelihood:
 
@@ -413,22 +413,10 @@ class GLM(object):
 
     def get_params(self, deep=False):
         """Return params as dict."""
-        return dict(
-            (
-                ('distr', self.distr),
-                ('alpha', self.alpha),
-                ('Tau', self.Tau),
-                ('group', self.group),
-                ('reg_lambda', self.reg_lambda),
-                ('learning_rate', self.learning_rate),
-                ('max_iter', self.max_iter),
-                ('tol', self.tol),
-                ('eta', self.eta),
-                ('score_metric', self.score_metric),
-                ('random_state', self.random_state),
-                ('verbose', self.verbose)
-            )
-        )
+        return {
+            'alpha': self.alpha,
+            'reg_lambda': self.reg_lambda
+        }
 
     def __repr__(self):
         """Description of the object."""
@@ -732,6 +720,7 @@ class GLM(object):
         score: float
             The score metric
         """
+        from . import metrics
         if self.score_metric not in ['deviance', 'pseudo_R2', 'accuracy']:
             raise ValueError('score_metric has to be one of' +
                              ' deviance or pseudo_R2')
@@ -904,25 +893,6 @@ class GLMCV(object):
         self.random_state = random_state
         self.verbose = verbose
         set_log_level(verbose)
-
-    def get_params(self, deep=False):
-        """Return params as dict."""
-        return dict(
-            (
-                ('distr', self.distr),
-                ('alpha', self.alpha),
-                ('Tau', self.Tau),
-                ('group', self.group),
-                ('reg_lambda', self.reg_lambda),
-                ('learning_rate', self.learning_rate),
-                ('max_iter', self.max_iter),
-                ('tol', self.tol),
-                ('eta', self.eta),
-                ('score_metric', self.score_metric),
-                ('random_state', self.random_state),
-                ('verbose', self.verbose)
-            )
-        )
 
     def __repr__(self):
         """Description of the object."""

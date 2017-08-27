@@ -9,6 +9,8 @@ from scipy.optimize import approx_fprime
 from sklearn.cross_validation import KFold, cross_val_score
 from sklearn.datasets import make_regression
 from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import GridSearchCV
+
 
 from nose.tools import assert_true, assert_equal, assert_raises
 
@@ -238,6 +240,11 @@ def test_cv():
     # check that it returns 5 scores
     assert_equal(len(cross_val_score(glm_normal, X, y, cv=cv,
                  scoring=simple_cv_scorer)), 5)
+
+    param_grid = [{'alpha': np.linspace(0, 1, 2)},
+                  {'reg_lambda': np.linspace(0, 1, 2)}]
+    glmcv = GridSearchCV(glm_normal, param_grid, cv=cv)
+    glmcv.fit(X, y)
 
 
 def test_cdfast():
