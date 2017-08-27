@@ -14,7 +14,8 @@ from sklearn.model_selection import GridSearchCV
 
 from nose.tools import assert_true, assert_equal, assert_raises
 
-from pyglmnet import GLM, GLMCV, _grad_L2loss, _L2loss, simulate_glm
+from pyglmnet import (GLM, GLMCV, _grad_L2loss, _L2loss, simulate_glm,
+                      _gradhess_logloss_1d)
 
 
 def test_gradients():
@@ -275,7 +276,7 @@ def test_cdfast():
         z = beta_[0] + np.dot(X, beta_[1:])
         k = 1
         xk = X[:, k - 1]
-        gk, hk = glm._gradhess_logloss_1d(xk, y, z)
+        gk, hk = _gradhess_logloss_1d(glm.distr, xk, y, z, glm.eta)
 
         # test grad and hess
         if distr != 'multinomial':

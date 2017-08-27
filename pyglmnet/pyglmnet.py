@@ -183,6 +183,78 @@ def _grad_L2loss(distr, alpha, Tau, reg_lambda, X, y, eta, beta):
     return g
 
 
+def _gradhess_logloss_1d(distr, xk, y, z, eta):
+    """
+    Compute gradient (1st derivative)
+    and Hessian (2nd derivative)
+    of log likelihood for a single coordinate.
+
+    Parameters
+    ----------
+    xk: float
+        (n_samples,)
+    y: float
+        (n_samples,)
+    z: float
+        (n_samples,)
+
+    Returns
+    -------
+    gk: gradient, float:
+        (n_features + 1,)
+    hk: float:
+        (n_features + 1,)
+    """
+    n_samples = xk.shape[0]
+
+    if distr == 'softplus':
+        mu = _mu(distr, z, eta)
+        s = expit(z)
+        gk = np.sum(s * xk) - np.sum(y * s / mu * xk)
+
+        grad_s = s * (1 - s)
+        grad_s_by_mu = grad_s / mu - s / (mu ** 2)
+        hk = np.sum(grad_s * xk ** 2) - np.sum(y * grad_s_by_mu * xk ** 2)
+
+    elif distr == 'poisson':
+        mu = _mu(distr, z, eta)
+        s = expit(z)
+        gk = np.sum((mu[z <= eta] - y[z <= eta]) *
+                    xk[z <= eta]) + \
+            np.exp(eta) * \
+            np.sum((1 - y[z > eta] / mu[z > eta]) *
+                   xk[z > eta])
+        hk = np.sum(mu[z <= eta] * xk[z <= eta] ** 2) + \
+            np.exp(eta) ** 2 * \
+            np.sum(y[z > eta] / (mu[z > eta] ** 2) *
+                   (xk[z > eta] ** 2))
+
+    elif distr == 'gaussian':
+        gk = np.sum((z - y) * xk)
+        hk = np.sum(xk * xk)
+
+    elif distr == 'binomial':
+        mu = _mu(distr, z, eta)
+        gk = np.sum((mu - y) * xk)
+        hk = np.sum(mu * (1.0 - mu) * xk * xk)
+
+    elif distr == 'probit':
+        prob = norm.cdf(z)
+        grad_prob = norm.pdf(z)
+        gk = np.sum(y * (grad_prob / prob) -
+                    (1 - y) * (grad_prob / (1 - prob)) * xk)
+
+        mid_l = y * (z * prob + grad_prob) / (prob ** 2)
+        mid_r = (1 - y) * (-z * (1 - prob) + grad_prob) / ((1 - prob) ** 2)
+        hk = np.sum(prob * (mid_l + mid_r) * (xk * xk))
+
+    elif distr == 'gamma':
+        raise NotImplementedError('cdfast is not implemented for Gamma '
+                                  'distribution')
+
+    return 1. / n_samples * gk, 1. / n_samples * hk
+
+
 def simulate_glm(distr, beta0, beta, X, eta=2.0, random_state=None):
     """Simulate target data under a generative model.
 
@@ -396,77 +468,6 @@ class GLM(EstimatorMixin):
 
             return result
 
-    def _gradhess_logloss_1d(self, xk, y, z):
-        """
-        Compute gradient (1st derivative)
-        and Hessian (2nd derivative)
-        of log likelihood for a single coordinate.
-
-        Parameters
-        ----------
-        xk: float
-            (n_samples,)
-        y: float
-            (n_samples,)
-        z: float
-            (n_samples,)
-
-        Returns
-        -------
-        gk: gradient, float:
-            (n_features + 1,)
-        hk: float:
-            (n_features + 1,)
-        """
-        n_samples = xk.shape[0]
-
-        if self.distr == 'softplus':
-            mu = _mu(self.distr, z, self.eta)
-            s = expit(z)
-            gk = np.sum(s * xk) - np.sum(y * s / mu * xk)
-
-            grad_s = s * (1 - s)
-            grad_s_by_mu = grad_s / mu - s / (mu ** 2)
-            hk = np.sum(grad_s * xk ** 2) - np.sum(y * grad_s_by_mu * xk ** 2)
-
-        elif self.distr == 'poisson':
-            mu = _mu(self.distr, z, self.eta)
-            s = expit(z)
-            gk = np.sum((mu[z <= self.eta] - y[z <= self.eta]) *
-                        xk[z <= self.eta]) + \
-                np.exp(self.eta) * \
-                np.sum((1 - y[z > self.eta] / mu[z > self.eta]) *
-                       xk[z > self.eta])
-            hk = np.sum(mu[z <= self.eta] * xk[z <= self.eta] ** 2) + \
-                np.exp(self.eta) ** 2 * \
-                np.sum(y[z > self.eta] / (mu[z > self.eta] ** 2) *
-                       (xk[z > self.eta] ** 2))
-
-        elif self.distr == 'gaussian':
-            gk = np.sum((z - y) * xk)
-            hk = np.sum(xk * xk)
-
-        elif self.distr == 'binomial':
-            mu = _mu(self.distr, z, self.eta)
-            gk = np.sum((mu - y) * xk)
-            hk = np.sum(mu * (1.0 - mu) * xk * xk)
-
-        elif self.distr == 'probit':
-            prob = norm.cdf(z)
-            grad_prob = norm.pdf(z)
-            gk = np.sum(y * (grad_prob / prob) -
-                        (1 - y) * (grad_prob / (1 - prob)) * xk)
-
-            mid_l = y * (z * prob + grad_prob) / (prob ** 2)
-            mid_r = (1 - y) * (-z * (1 - prob) + grad_prob) / ((1 - prob) ** 2)
-            hk = np.sum(prob * (mid_l + mid_r) * (xk * xk))
-
-        elif self.distr == 'gamma':
-            raise NotImplementedError('cdfast is not implemented for Gamma '
-                                      'distribution')
-
-        return 1. / n_samples * gk, 1. / n_samples * hk
-
     def _cdfast(self, X, y, z, ActiveSet, beta, rl):
         """
         Perform one cycle of Newton updates for all coordinates.
@@ -513,7 +514,7 @@ class GLM(EstimatorMixin):
                     xk = np.ones((n_samples, ))
 
                 # Calculate grad and hess of log likelihood term
-                gk, hk = self._gradhess_logloss_1d(xk, y, z)
+                gk, hk = _gradhess_logloss_1d(self.distr, xk, y, z, self.eta)
 
                 # Add grad and hess of regularization term
                 if self.Tau is None:
@@ -606,7 +607,7 @@ class GLM(EstimatorMixin):
 
             # Update active set
             if self.solver == 'cdfast':
-                ActiveSet[np.where(beta[1:] == 0)[0] + 1] = 0
+                ActiveSet[beta[1:] == 0] = 0
 
             # Compute and save loss
             L.append(_loss(self.distr, alpha, self.Tau, reg_lambda,
