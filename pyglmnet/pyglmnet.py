@@ -607,7 +607,8 @@ class GLM(EstimatorMixin):
 
             # Update active set
             if self.solver == 'cdfast':
-                ActiveSet[beta[1:] == 0] = 0
+                ActiveSet[beta == 0] = 0
+                ActiveSet[0] = 1.
 
             # Compute and save loss
             L.append(_loss(self.distr, alpha, self.Tau, reg_lambda,
