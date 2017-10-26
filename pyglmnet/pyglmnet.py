@@ -676,6 +676,9 @@ class GLM(BaseEstimator):
         self.beta0_ = beta[0]
         self.beta_ = beta[1:]
         self.ynull_ = np.mean(y)
+
+        # Update loss
+        self._loss = L
         return self
 
     def predict(self, X):

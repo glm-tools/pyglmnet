@@ -164,6 +164,7 @@ def test_glmnet():
 
             X_train = scaler.fit_transform(X_train)
             glm.fit(X_train, y_train)
+            assert_true(np.all(np.diff(glm._loss) < 0))
 
             beta_ = glm.beta_
             assert_allclose(beta, beta_, atol=0.5)  # check fit
