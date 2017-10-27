@@ -6,11 +6,11 @@ from numpy.testing import assert_allclose
 import scipy.sparse as sps
 from scipy.optimize import approx_fprime
 
-from sklearn.cross_validation import KFold, cross_val_score
 from sklearn.datasets import make_regression
 from sklearn.preprocessing import StandardScaler
-from sklearn.model_selection import GridSearchCV
-
+from sklearn.cross_validation import KFold
+from sklearn.model_selection import GridSearchCV, cross_val_score
+from sklearn.metrics import make_scorer
 
 from nose.tools import assert_true, assert_equal, assert_raises
 
@@ -220,29 +220,20 @@ def test_glmcv():
             assert_equal(y_pred.shape[0], X_train.shape[0])
 
 
-def simple_cv_scorer(obj, X, y):
-    """Simple scorer takes average pseudo-R2 from regularization path."""
-    yhats = obj.predict(X)
-    return np.mean([obj.score(X, y) for yhat in yhats])
-
-
 def test_cv():
     """Simple CV check."""
     # XXX: don't use scikit-learn for tests.
     X, y = make_regression()
-
-    glm_normal = GLM(distr='gaussian', alpha=0.01,
-                     reg_lambda=0.1)
-    glm_normal.fit(X, y)
-
     cv = KFold(X.shape[0], 5)
 
+    glm_normal = GLM(distr='gaussian', alpha=0.01, reg_lambda=0.1)
     # check that it returns 5 scores
-    assert_equal(len(cross_val_score(glm_normal, X, y, cv=cv,
-                 scoring=simple_cv_scorer)), 5)
+    scores = cross_val_score(glm_normal, X, y, cv=cv)
+    assert_equal(len(scores), 5)
 
-    param_grid = [{'alpha': np.linspace(0, 1, 2)},
-                  {'reg_lambda': np.linspace(0, 1, 2)}]
+    param_grid = [{'alpha': np.linspace(0.01, 0.99, 2)},
+                  {'reg_lambda': np.logspace(np.log(0.5), np.log(0.01),
+                                             10, base=np.exp(1))}]
     glmcv = GridSearchCV(glm_normal, param_grid, cv=cv)
     glmcv.fit(X, y)
 
