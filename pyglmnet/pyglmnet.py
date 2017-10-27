@@ -53,7 +53,8 @@ def _grad_mu(distr, z, eta):
 def _logL(distr, y, y_hat):
     """The log likelihood."""
     if distr in ['softplus', 'poisson']:
-        logL = np.sum(y * np.log(y_hat) - y_hat)
+        eps = np.spacing(1)
+        logL = np.sum(y * np.log(y_hat + eps) - y_hat)
     elif distr == 'gaussian':
         logL = -0.5 * np.sum((y - y_hat)**2)
     elif distr == 'binomial':
