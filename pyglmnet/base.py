@@ -1,4 +1,4 @@
-from future.utils import iteritems
+from .six import iteritems
 import warnings
 
 
