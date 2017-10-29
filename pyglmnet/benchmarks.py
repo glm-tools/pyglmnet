@@ -189,7 +189,7 @@ class BenchmarkGLM(object):
                         stop = time.time()
                         tmp.append(stop - start)
                     res[env]['time'] = np.min(tmp) * 1e3
-                except:
+                except Exception:
                     res[env]['score'] = -999.
                     res[env]['time'] = -999.
 

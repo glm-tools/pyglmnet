@@ -6,7 +6,7 @@ import numpy as np
 from scipy.special import expit
 from scipy.stats import norm
 from .utils import logger, set_log_level
-from .base import BaseEstimator
+from .base import BaseEstimator, is_classifier, check_version
 
 
 def _lmb(distr, beta0, beta, X, eta):
@@ -413,7 +413,8 @@ class GLM(BaseEstimator):
         set_log_level(verbose)
 
     def _set_cv(cv, estimator=None, X=None, y=None):
-        """Set the default CV depending on whether clf is classifier/regressor."""
+        """Set the default CV depending on whether clf
+           is classifier/regressor."""
         # Detect whether classification or regression
         if estimator in ['classifier', 'regressor']:
             est_is_classifier = estimator == 'classifier'
@@ -422,7 +423,8 @@ class GLM(BaseEstimator):
         # Setup CV
         if check_version('sklearn', '0.18'):
             from sklearn import model_selection as models
-            from sklearn.model_selection import (check_cv, StratifiedKFold, KFold)
+            from sklearn.model_selection import (check_cv,
+                                                 StratifiedKFold, KFold)
             if isinstance(cv, (int, np.int)):
                 XFold = StratifiedKFold if est_is_classifier else KFold
                 cv = XFold(n_splits=cv)
@@ -434,7 +436,8 @@ class GLM(BaseEstimator):
             cv = check_cv(cv=cv, y=y, classifier=est_is_classifier)
         else:
             from sklearn import cross_validation as models
-            from sklearn.cross_validation import (check_cv, StratifiedKFold, KFold)
+            from sklearn.cross_validation import (check_cv,
+                                                  StratifiedKFold, KFold)
             if isinstance(cv, (int, np.int)):
                 if est_is_classifier:
                     cv = StratifiedKFold(y=y, n_folds=cv)
@@ -445,8 +448,8 @@ class GLM(BaseEstimator):
                     raise ValueError('Unknown cross-validation')
                 cv = getattr(models, cv)
                 if cv.__name__ not in ['KFold', 'LeaveOneOut']:
-                    raise NotImplementedError('CV cannot be defined with str for'
-                                              ' sklearn < .017.')
+                    raise NotImplementedError('CV cannot be defined with str'
+                                              ' for sklearn < .017.')
                 cv = cv(len(y))
             cv = check_cv(cv=cv, X=X, y=y, classifier=est_is_classifier)
 
@@ -1007,7 +1010,7 @@ class GLMCV(object):
                   random_state=self.random_state,
                   verbose=self.verbose)
 
-        for l, rl in enumerate(self.reg_lambda):
+        for idx, rl in enumerate(self.reg_lambda):
             logger.info('Lambda: %6.4f' % rl)
 
             glm.reg_lambda = rl
@@ -1016,7 +1019,7 @@ class GLMCV(object):
             for fold in range(self.cv):
                 val = cv_splits[fold]
                 train = np.setdiff1d(idxs, val)
-                if l == 0:
+                if idx == 0:
                     glm.beta0_, glm.beta_ = self.beta0_, self.beta_
                 else:
                     glm.beta0_, glm.beta_ = glms[-1].beta0_, glms[-1].beta_
@@ -1025,7 +1028,7 @@ class GLMCV(object):
                 scores_fold.append(glm.score(X[val], y[val]))
             scores.append(np.mean(scores_fold))
 
-            if l == 0:
+            if idx == 0:
                 glm.beta0_, glm.beta_ = self.beta0_, self.beta_
             else:
                 glm.beta0_, glm.beta_ = glms[-1].beta0_, glms[-1].beta_
