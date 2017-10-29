@@ -10,7 +10,6 @@ from sklearn.datasets import make_regression
 from sklearn.preprocessing import StandardScaler
 from sklearn.cross_validation import KFold
 from sklearn.model_selection import GridSearchCV, cross_val_score
-from sklearn.metrics import make_scorer
 
 from nose.tools import assert_true, assert_equal, assert_raises
 
