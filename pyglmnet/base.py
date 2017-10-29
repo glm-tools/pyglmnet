@@ -1,7 +1,7 @@
 import warnings
 from distutils.version import LooseVersion
 
-from .six import iteritems
+from .externals.six import iteritems
 
 ##############################################################################
 # adapted from scikit-learn
@@ -64,7 +64,7 @@ class BaseEstimator(object):
         try:
             from inspect import signature
         except ImportError:
-            from .funcsigs import signature
+            from .externals.funcsigs import signature
         # fetch the constructor or the original constructor before
         # deprecation wrapping if any
         init = getattr(cls.__init__, 'deprecated_original', cls.__init__)
