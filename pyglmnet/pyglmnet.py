@@ -6,7 +6,7 @@ import numpy as np
 from scipy.special import expit
 from scipy.stats import norm
 from .utils import logger, set_log_level
-from .mixin import EstimatorMixin
+from .base import BaseEstimator, is_classifier, check_version
 
 
 def _lmb(distr, beta0, beta, X, eta):
@@ -53,7 +53,8 @@ def _grad_mu(distr, z, eta):
 def _logL(distr, y, y_hat):
     """The log likelihood."""
     if distr in ['softplus', 'poisson']:
-        logL = np.sum(y * np.log(y_hat) - y_hat)
+        eps = np.spacing(1)
+        logL = np.sum(y * np.log(y_hat + eps) - y_hat)
     elif distr == 'gaussian':
         logL = -0.5 * np.sum((y - y_hat)**2)
     elif distr == 'binomial':
@@ -292,7 +293,7 @@ def simulate_glm(distr, beta0, beta, X, eta=2.0, random_state=None):
     return y
 
 
-class GLM(EstimatorMixin):
+class GLM(BaseEstimator):
     """Class for estimating regularized generalized linear models (GLM).
     The regularized GLM minimizes the penalized negative log likelihood:
 
@@ -411,12 +412,59 @@ class GLM(EstimatorMixin):
         self.verbose = verbose
         set_log_level(verbose)
 
-    def get_params(self, deep=False):
-        """Return params as dict."""
-        return {
-            'alpha': self.alpha,
-            'reg_lambda': self.reg_lambda
-        }
+    def _set_cv(cv, estimator=None, X=None, y=None):
+        """Set the default CV depending on whether clf
+           is classifier/regressor."""
+        # Detect whether classification or regression
+        if estimator in ['classifier', 'regressor']:
+            est_is_classifier = estimator == 'classifier'
+        else:
+            est_is_classifier = is_classifier(estimator)
+        # Setup CV
+        if check_version('sklearn', '0.18'):
+            from sklearn import model_selection as models
+            from sklearn.model_selection import (check_cv,
+                                                 StratifiedKFold, KFold)
+            if isinstance(cv, (int, np.int)):
+                XFold = StratifiedKFold if est_is_classifier else KFold
+                cv = XFold(n_splits=cv)
+            elif isinstance(cv, str):
+                if not hasattr(models, cv):
+                    raise ValueError('Unknown cross-validation')
+                cv = getattr(models, cv)
+                cv = cv()
+            cv = check_cv(cv=cv, y=y, classifier=est_is_classifier)
+        else:
+            from sklearn import cross_validation as models
+            from sklearn.cross_validation import (check_cv,
+                                                  StratifiedKFold, KFold)
+            if isinstance(cv, (int, np.int)):
+                if est_is_classifier:
+                    cv = StratifiedKFold(y=y, n_folds=cv)
+                else:
+                    cv = KFold(n=len(y), n_folds=cv)
+            elif isinstance(cv, str):
+                if not hasattr(models, cv):
+                    raise ValueError('Unknown cross-validation')
+                cv = getattr(models, cv)
+                if cv.__name__ not in ['KFold', 'LeaveOneOut']:
+                    raise NotImplementedError('CV cannot be defined with str'
+                                              ' for sklearn < .017.')
+                cv = cv(len(y))
+            cv = check_cv(cv=cv, X=X, y=y, classifier=est_is_classifier)
+
+        # Extract train and test set to retrieve them at predict time
+        if hasattr(cv, 'split'):
+            cv_splits = [(train, test) for train, test in
+                         cv.split(X=np.zeros_like(y), y=y)]
+        else:
+            # XXX support sklearn.cross_validation cv
+            cv_splits = [(train, test) for train, test in cv]
+
+        if not np.all([len(train) for train, _ in cv_splits]):
+            raise ValueError('Some folds do not have any train epochs.')
+
+        return cv, cv_splits
 
     def __repr__(self):
         """Description of the object."""
@@ -607,7 +655,8 @@ class GLM(EstimatorMixin):
 
             # Update active set
             if self.solver == 'cdfast':
-                ActiveSet[beta[1:] == 0] = 0
+                ActiveSet[beta == 0] = 0
+                ActiveSet[0] = 1.
 
             # Compute and save loss
             L.append(_loss(self.distr, alpha, self.Tau, reg_lambda,
@@ -961,7 +1010,7 @@ class GLMCV(object):
                   random_state=self.random_state,
                   verbose=self.verbose)
 
-        for l, rl in enumerate(self.reg_lambda):
+        for idx, rl in enumerate(self.reg_lambda):
             logger.info('Lambda: %6.4f' % rl)
 
             glm.reg_lambda = rl
@@ -970,7 +1019,7 @@ class GLMCV(object):
             for fold in range(self.cv):
                 val = cv_splits[fold]
                 train = np.setdiff1d(idxs, val)
-                if l == 0:
+                if idx == 0:
                     glm.beta0_, glm.beta_ = self.beta0_, self.beta_
                 else:
                     glm.beta0_, glm.beta_ = glms[-1].beta0_, glms[-1].beta_
@@ -979,7 +1028,7 @@ class GLMCV(object):
                 scores_fold.append(glm.score(X[val], y[val]))
             scores.append(np.mean(scores_fold))
 
-            if l == 0:
+            if idx == 0:
                 glm.beta0_, glm.beta_ = self.beta0_, self.beta_
             else:
                 glm.beta0_, glm.beta_ = glms[-1].beta0_, glms[-1].beta_

@@ -21,4 +21,3 @@ script:
     - flake8 --count pyglmnet
 after_success:
     - bash <(curl -s https://codecov.io/bash)
-

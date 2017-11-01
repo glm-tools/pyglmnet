@@ -8,7 +8,6 @@ import tempfile
 import itertools
 import numpy as np
 from scipy.misc import comb
-import pandas as pd
 
 
 def fetch_tikhonov_data(dpath='/tmp/glm-tools'):
@@ -58,6 +57,12 @@ def fetch_community_crime_data(dpath='/tmp/glm-tools'):
     y: numpy array
         (n_samples,)
     """
+    try:
+        import pandas as pd
+    except ImportError:
+        raise ImportError('The pandas module is required for reading the '
+                          'community crime dataset')
+
     if os.path.exists(dpath):
         shutil.rmtree(dpath)
     os.mkdir(dpath)
@@ -97,6 +102,11 @@ def fetch_group_lasso_datasets():
         is the group number for the ith regression coefficient
 
     """
+    try:
+        import pandas as pd
+    except ImportError:
+        raise ImportError('The pandas module is required for the '
+                          'group lasso dataset')
 
     # helper functions
 
