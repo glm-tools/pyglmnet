@@ -665,8 +665,8 @@ class GLM(BaseEstimator):
             if t > 1:
                 DL.append(L[-1] - L[-2])
                 if np.abs(DL[-1] / L[-1]) < tol:
-                    msg = ('\tConverged. Loss function:'
-                           ' {0:.2f}').format(L[-1])
+                    msg = ('\tConverged. Iterations: {0:d}. Loss function:'
+                           ' {1:.2f}').format(t, L[-1])
                     logger.info(msg)
                     msg = ('\tdL/L: {0:.6f}\n'.format(DL[-1] / L[-1]))
                     logger.info(msg)
