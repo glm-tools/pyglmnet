@@ -588,6 +588,7 @@ class GLM(BaseEstimator):
             The fitted model.
         """
         np.random.RandomState(self.random_state)
+        lr = self.learning_rate
 
         # checks for group
         if self.group is not None:
@@ -635,7 +636,7 @@ class GLM(BaseEstimator):
                                     reg_lambda, X, y, self.eta,
                                     beta)
                 if t > 1:
-                    if ln.norm(grad) / ln.norm(beta) < tol / self.learning_rate:
+                    if ln.norm(grad) / ln.norm(beta) < tol / lr:
                         msg = ('\tConverged in {0:d} iterations'.format(t))
                         logger.info(msg)
                         break
