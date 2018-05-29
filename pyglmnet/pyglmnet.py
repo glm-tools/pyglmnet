@@ -985,22 +985,22 @@ class GLMCV(object):
         np.random.shuffle(idxs)
         cv_splits = np.array_split(idxs, self.cv)
 
-        glm = GLM(distr=self.distr,
-                  alpha=self.alpha,
-                  Tau=self.Tau,
-                  reg_lambda=0.1,
-                  solver=self.solver,
-                  learning_rate=self.learning_rate,
-                  max_iter=self.max_iter,
-                  tol=self.tol,
-                  eta=self.eta,
-                  score_metric=self.score_metric,
-                  random_state=self.random_state,
-                  verbose=self.verbose)
-
         for idx, rl in enumerate(self.reg_lambda):
-            logger.info('Lambda: %6.4f' % rl)
 
+            glm = GLM(distr=self.distr,
+                      alpha=self.alpha,
+                      Tau=self.Tau,
+                      reg_lambda=0.1,
+                      solver=self.solver,
+                      learning_rate=self.learning_rate,
+                      max_iter=self.max_iter,
+                      tol=self.tol,
+                      eta=self.eta,
+                      score_metric=self.score_metric,
+                      random_state=self.random_state,
+                      verbose=self.verbose)
+
+            logger.info('Lambda: %6.4f' % rl)
             glm.reg_lambda = rl
 
             scores_fold = list()
