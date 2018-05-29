@@ -494,7 +494,7 @@ class GLM(BaseEstimator):
             for group_id in group_ids:
                 if group_id != 0:
                     group_norms[self.group == group_id] = \
-                        norm(beta[self.group == group_id], 2)
+                        ln.norm(beta[self.group == group_id], 2)
 
             nzero_norms = group_norms > 0.0
             over_thresh = group_norms > thresh
