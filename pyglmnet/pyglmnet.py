@@ -5,7 +5,7 @@ from copy import deepcopy
 import numpy as np
 from scipy.special import expit
 from scipy.stats import norm
-from .utils import logger, set_log_level
+from .utils import logger, set_log_level, _check_type
 from .base import BaseEstimator, is_classifier, check_version
 
 
@@ -603,6 +603,8 @@ class GLM(BaseEstimator):
         self : instance of GLM
             The fitted model.
         """
+        _check_type(self.distr, ['boolean', 'probit'], np.bool, y)
+        _check_type(self.distr, ['poisson'], np.int, y)
         np.random.RandomState(self.random_state)
 
         # checks for group
