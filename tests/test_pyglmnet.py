@@ -168,6 +168,7 @@ def test_glmnet():
                            np.concatenate(([beta0], beta)))
 
             glm.fit(X_train, y_train)
+            assert_true(np.all(np.diff(glm._loss) <= 1e-7))
             assert_allclose(glm._loss[-1], l_true, rtol=1e-4, atol=1e-7)
             assert_allclose(beta, glm.beta_, rtol=0.05, atol=1e-2)
 
