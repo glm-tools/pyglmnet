@@ -229,7 +229,7 @@ def test_glmcv():
 
         # compare all solvers pairwise to make sure they're close
         for i, first_beta in enumerate(betas_[:-1]):
-            for second_beta in betas_[i+1:]:
+            for second_beta in betas_[i + 1:]:
                 assert_allclose(first_beta, second_beta, atol=0.5)
 
 
