@@ -28,7 +28,6 @@ jobs:
                 name: Build the documentation
                 command: |
                     cd doc && make html
-                    coverage
             - store_artifacts:
                 path: doc/_build/html/
                 destination: html
