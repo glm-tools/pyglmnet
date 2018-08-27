@@ -1,0 +1,33 @@
+version: 2
+jobs:
+    build:
+        docker:
+            - image: circleci/python:3.7.0-stretch-node-browsers
+        steps:
+            - checkout
+            - run:
+                name: Install miniconda
+                command: |
+                  wget -q http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O ~/miniconda.sh;
+                  chmod +x ~/miniconda.sh;
+                  ~/miniconda.sh -b -p ~/miniconda;
+                  echo "export PATH=~/miniconda/bin:$PATH" >> $BASH_ENV;
+            - run:
+                name: Setup Python environment
+                command: |
+                    pip install --upgrade pip
+                    pip install sphinx matplotlib coverage Pillow
+                    pip install sphinx-gallery
+                    pip install scipy
+                    pip install scikit-learn
+                    pip install pandas
+                    pip install -e .
+                    pip install sphinx_bootstrap_theme numpydoc
+                    pip install -e git+http://github.com/KordingLab/spykes.git#egg=spykes
+            - run:
+                name: Build the documentation
+                command: |
+                    cd doc && make html
+            - store_artifacts:
+                path: doc/_build/html/
+                destination: html

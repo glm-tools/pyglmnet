@@ -42,7 +42,7 @@ import numpy as np
 import pandas as pd
 
 from pyglmnet import GLMCV
-from spykes.strf import STRF
+from spykes.ml.strf import STRF
 
 import matplotlib.pyplot as plt
 
