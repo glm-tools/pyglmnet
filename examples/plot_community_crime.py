@@ -43,7 +43,8 @@ X_train, X_test, y_train, y_test = \
 # Fit a gaussian distributed GLM with elastic net regularization
 
 # use the default value for reg_lambda
-glm = GLMCV(distr='gaussian', alpha=0.05, score_metric='pseudo_R2')
+glm = GLMCV(distr='gaussian', alpha=0.05, score_metric='pseudo_R2',
+			verbose=True)
 
 # fit model
 glm.fit(X_train, y_train)
@@ -54,7 +55,7 @@ print ("test set pseudo $R^2$ = %f" % glm.score(X_test, y_test))
 
 ########################################################
 # Now use plain grid search cv to compare
-
+"""
 import numpy as np # noqa
 from sklearn.model_selection import GridSearchCV # noqa
 from sklearn.cross_validation import StratifiedKFold # noqa
@@ -70,7 +71,7 @@ glmcv = GridSearchCV(glm, param_grid, cv=cv)
 glmcv.fit(X_train, y_train)
 
 print ("test set pseudo $R^2$ = %f" % glmcv.score(X_test, y_test))
-
+"""
 ########################################################
 # Plot the true and predicted test set target values
 
