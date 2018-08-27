@@ -256,7 +256,8 @@ def _gradhess_logloss_1d(distr, xk, y, z, eta):
     return 1. / n_samples * gk, 1. / n_samples * hk
 
 
-def simulate_glm(distr, beta0, beta, X, eta=2.0, random_state=None):
+def simulate_glm(distr, beta0, beta, X, eta=2.0, random_state=None,
+                 sample=False):
     """Simulate target data under a generative model.
 
     Parameters
@@ -273,12 +274,18 @@ def simulate_glm(distr, beta0, beta, X, eta=2.0, random_state=None):
         parameter for poisson non-linearity
     random_state: float
         random state
+    sample : bool
+        If True, sample from distribution. Otherwise, return
+        conditional intensity function
 
     Returns
     -------
     y: array
         simulated target data of shape (n_samples,)
     """
+    if not sample:
+        return _lmb(distr, beta0, beta, X, eta)
+
     if random_state is not None:
         np.random.RandomState(random_state)
     if distr == 'softplus' or distr == 'poisson':
@@ -676,6 +683,7 @@ class GLM(BaseEstimator):
         self.beta0_ = beta[0]
         self.beta_ = beta[1:]
         self.ynull_ = np.mean(y)
+        self._loss = L
         return self
 
     def predict(self, X):
