@@ -32,9 +32,12 @@
   
 
   
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
     <link rel="top" title="pyglmnet 1.0.1 documentation" href="index.html"/>
         <link rel="next" title="Getting Started" href="start.html"/>
-        <link rel="prev" title="Python implementation of elastic-net regularized generalized linear models" href="index.html"/> 
+        <link rel="prev" title="Python implementation of regularized generalized linear models" href="index.html"/> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -85,7 +88,7 @@
             
             
                 <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="">Installation</a><ul>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Installation</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#check-dependencies">Check dependencies</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#get-pyglmnet">Get pyglmnet</a></li>
 </ul>
@@ -98,6 +101,8 @@
 <li class="toctree-l1"><a class="reference internal" href="developers.html">Developer Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="requests.html">Requests for pull requests</a></li>
 <li class="toctree-l1"><a class="reference internal" href="resources.html">Resources</a></li>
+<li class="toctree-l1"><a class="reference internal" href="whats_new.html">Current</a></li>
+<li class="toctree-l1"><a class="reference internal" href="whats_new.html#version-0-1">Version 0.1</a></li>
 </ul>
 
             
@@ -120,7 +125,7 @@
         <div class="rst-content">
           
 
-
+ 
 
 
 
@@ -132,7 +137,7 @@
     <li class="wy-breadcrumbs-aside">
       
         
-          <a href="_sources/install.txt" rel="nofollow"> View page source</a>
+          <a href="_sources/install.rst.txt" rel="nofollow"> View page source</a>
         
       
     </li>
@@ -146,21 +151,21 @@
 <h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="check-dependencies">
 <h2>Check dependencies<a class="headerlink" href="#check-dependencies" title="Permalink to this headline">¶</a></h2>
-<p>You only need <tt class="docutils literal"><span class="pre">NumPy</span></tt>, <tt class="docutils literal"><span class="pre">SciPy</span></tt> for the package and additionally <tt class="docutils literal"><span class="pre">scikit-learn</span></tt>
+<p>You only need <code class="docutils literal"><span class="pre">NumPy</span></code>, <code class="docutils literal"><span class="pre">SciPy</span></code> for the package and additionally <code class="docutils literal"><span class="pre">scikit-learn</span></code>
 if you would like to run the examples. We recommend
-<tt class="docutils literal"><span class="pre">Python</span> <span class="pre">&gt;=</span> <span class="pre">2.6</span></tt>,
-<tt class="docutils literal"><span class="pre">scikit-learn</span> <span class="pre">&gt;=</span> <span class="pre">0.17</span></tt>,
-<tt class="docutils literal"><span class="pre">NumPy</span> <span class="pre">&gt;=</span> <span class="pre">1.6.1</span></tt> and <tt class="docutils literal"><span class="pre">SciPy</span> <span class="pre">&gt;=</span> <span class="pre">0.14</span></tt>.</p>
+<code class="docutils literal"><span class="pre">Python</span> <span class="pre">&gt;=</span> <span class="pre">2.6</span></code>,
+<code class="docutils literal"><span class="pre">scikit-learn</span> <span class="pre">&gt;=</span> <span class="pre">0.17</span></code>,
+<code class="docutils literal"><span class="pre">NumPy</span> <span class="pre">&gt;=</span> <span class="pre">1.6.1</span></code> and <code class="docutils literal"><span class="pre">SciPy</span> <span class="pre">&gt;=</span> <span class="pre">0.14</span></code>.</p>
 <p>Both <a class="reference external" href="https://www.enthought.com/products/canopy/">Canopy</a>
 and <a class="reference external" href="https://www.continuum.io/downloads">Anaconda</a>
 ship with a recent version of all these packages.</p>
 <p>In case you have other distributions of Python, you can install
-<tt class="docutils literal"><span class="pre">NumPy</span></tt> and <tt class="docutils literal"><span class="pre">SciPy</span></tt> using <tt class="docutils literal"><span class="pre">pip</span></tt>.</p>
+<code class="docutils literal"><span class="pre">NumPy</span></code> and <code class="docutils literal"><span class="pre">SciPy</span></code> using <code class="docutils literal"><span class="pre">pip</span></code>.</p>
 <div class="highlight-bash"><div class="highlight"><pre><span></span>pip install numpy
 pip install scipy
 </pre></div>
 </div>
-<p>To install <tt class="docutils literal"><span class="pre">scikit-learn</span></tt> follow these
+<p>To install <code class="docutils literal"><span class="pre">scikit-learn</span></code> follow these
 <a class="reference external" href="http://scikit-learn.org/stable/install.html">installation instructions</a>.</p>
 </div>
 <div class="section" id="get-pyglmnet">
@@ -169,11 +174,11 @@ pip install scipy
 <div class="highlight-bash"><div class="highlight"><pre><span></span>pip install pyglmnet
 </pre></div>
 </div>
-<p>To install the development version of <tt class="docutils literal"><span class="pre">pyglmnet</span></tt>, first clone the repository</p>
+<p>To install the development version of <code class="docutils literal"><span class="pre">pyglmnet</span></code>, first clone the repository</p>
 <div class="highlight-bash"><div class="highlight"><pre><span></span>git clone http://github.com/glm-tools/pyglmnet
 </pre></div>
 </div>
-<p>Then run <tt class="docutils literal"><span class="pre">setup.py</span></tt> to install the library</p>
+<p>Then run <code class="docutils literal"><span class="pre">setup.py</span></code> to install the library</p>
 <div class="highlight-bash"><div class="highlight"><pre><span></span><span class="nb">cd</span> pyglmnet
 python setup.py develop install
 </pre></div>
@@ -191,7 +196,7 @@ python setup.py develop install
         <a href="start.html" class="btn btn-neutral float-right" title="Getting Started" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="index.html" class="btn btn-neutral" title="Python implementation of elastic-net regularized generalized linear models" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="index.html" class="btn btn-neutral" title="Python implementation of regularized generalized linear models" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -231,7 +236,7 @@ python setup.py develop install
       <script type="text/javascript" src="_static/jquery.js"></script>
       <script type="text/javascript" src="_static/underscore.js"></script>
       <script type="text/javascript" src="_static/doctools.js"></script>
-      <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   
 

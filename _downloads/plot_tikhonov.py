@@ -37,10 +37,11 @@ Department of Neurobiology, Northwestern University.
 ########################################################
 # Imports
 
+import os.path as op
 import numpy as np
 import pandas as pd
 
-from pyglmnet import GLM
+from pyglmnet import GLMCV
 from spykes.strf import STRF
 
 import matplotlib.pyplot as plt
@@ -49,7 +50,13 @@ import matplotlib.pyplot as plt
 # Download and fetch data files
 
 from pyglmnet.datasets import fetch_tikhonov_data
-fixations_df, probes_df, spikes_df = fetch_tikhonov_data(dpath='/tmp/glm-tools')
+dpath = fetch_tikhonov_data(dpath='/tmp/glm-tools')
+
+fixations_df = pd.read_csv(op.join(dpath, 'fixations.csv'))
+probes_df = pd.read_csv(op.join(dpath, 'probes.csv'))
+probes_df = pd.read_csv(op.join(dpath, 'probes.csv'))
+spikes_df = pd.read_csv(op.join(dpath, 'spiketimes.csv'))
+
 spiketimes = np.squeeze(spikes_df.values)
 
 ########################################################
@@ -88,7 +95,7 @@ window = [-100, 100]
 binsize = 20
 
 # Zero pad bins
-n_zero_bins = np.floor((window[1] - window[0]) / binsize / 2)
+n_zero_bins = int(np.floor((window[1] - window[0]) / binsize / 2))
 
 ########################################################
 # Build design matrix
@@ -137,8 +144,8 @@ for fx in fixations_df.index[:1000]:
 
             # Define an image based on the relative locations
             img = np.zeros(shape=(n_shape, n_shape))
-            row = -np.round(probe_row - fix_row) + n_shape / 2 - 1
-            col = np.round(probe_col - fix_col) + n_shape / 2 - 1
+            row = int(-np.round(probe_row - fix_row) + n_shape / 2 - 1)
+            col = int(np.round(probe_col - fix_col) + n_shape / 2 - 1)
             img[row, col] = 1
 
             # Compute projection
@@ -203,12 +210,11 @@ from pyglmnet import utils
 n_samples = Xtrain.shape[0]
 Tau = utils.tikhonov_from_prior(prior_cov, n_samples)
 
-glm = GLM(distr='poisson', alpha=0., Tau=Tau, score_metric='pseudo_R2')
+glm = GLMCV(distr='poisson', alpha=0., Tau=Tau, score_metric='pseudo_R2')
 glm.fit(Xtrain, Ytrain)
-cvopt_lambda = glm.score(Xtest, Ytest).argmax()
-print("train score: %f" % glm[cvopt_lambda].score(Xtrain, Ytrain))
-print("test score: %f" % glm[cvopt_lambda].score(Xtest, Ytest))
-weights = glm[cvopt_lambda].fit_['beta']
+print("train score: %f" % glm.score(Xtrain, Ytrain))
+print("test score: %f" % glm.score(Xtest, Ytest))
+weights = glm.beta_
 
 ########################################################
 # Visualize

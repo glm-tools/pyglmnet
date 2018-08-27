@@ -32,6 +32,9 @@
   
 
   
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
     <link rel="top" title="pyglmnet 1.0.1 documentation" href="index.html"/>
         <link rel="next" title="Cheatsheet" href="cheatsheet.html"/>
         <link rel="prev" title="Getting Started" href="start.html"/> 
@@ -87,7 +90,7 @@
                 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="start.html">Getting Started</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="">Tutorial</a><ul>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Tutorial</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#glm-with-elastic-net-penalty">GLM with elastic net penalty</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#poisson-like-glm">Poisson-like GLM</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#poisson-log-likelihood">Poisson Log-likelihood</a></li>
@@ -105,6 +108,8 @@
 <li class="toctree-l1"><a class="reference internal" href="developers.html">Developer Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="requests.html">Requests for pull requests</a></li>
 <li class="toctree-l1"><a class="reference internal" href="resources.html">Resources</a></li>
+<li class="toctree-l1"><a class="reference internal" href="whats_new.html">Current</a></li>
+<li class="toctree-l1"><a class="reference internal" href="whats_new.html#version-0-1">Version 0.1</a></li>
 </ul>
 
             
@@ -127,7 +132,7 @@
         <div class="rst-content">
           
 
-
+ 
 
 
 
@@ -139,7 +144,7 @@
     <li class="wy-breadcrumbs-aside">
       
         
-          <a href="_sources/tutorial.txt" rel="nofollow"> View page source</a>
+          <a href="_sources/tutorial.rst.txt" rel="nofollow"> View page source</a>
         
       
     </li>
@@ -332,9 +337,9 @@ Define <span class="math">\(z_i = \beta_0 + \sum_j \beta_j x_{ij}\)</span>.</p>
 </pre></div>
 </div>
 <p>Note that this is all we need for a classic batch gradient descent implementation.
-(for the <tt class="docutils literal"><span class="pre">'batch-gradient'</span></tt> solver).</p>
+(for the <code class="docutils literal"><span class="pre">'batch-gradient'</span></code> solver).</p>
 <p>However, let&#8217;s also derive the Hessian terms that will be useful for second-order
-optimization methods implemented in the <tt class="docutils literal"><span class="pre">'cdfast'</span></tt> solver.</p>
+optimization methods implemented in the <code class="docutils literal"><span class="pre">'cdfast'</span></code> solver.</p>
 </div>
 <div class="section" id="hessian-terms">
 <h2>Hessian terms<a class="headerlink" href="#hessian-terms" title="Permalink to this headline">¶</a></h2>
@@ -427,10 +432,10 @@ one parameter at a time. Let&#8217;s calculate how to make these updates.</p>
 \[\tilde{g}_{k+1}^t = \sum_i \sigma(z_i^t) - \sum_i y_i \frac{\sigma(z_i^t)}{q(z_i^t)}\]</div>
 <p>If <span class="math">\(k &gt; 0\)</span>,</p>
 <div class="math">
-\[\begin{split}\begin{eqnarray}
+\[\begin{eqnarray}
     \tilde{g}_{k+1}^t &amp; = \sum_i \sigma(z_i^t) x_{i,k+1} - \sum_i y_i \frac{\sigma(z_i^t)}{q(z_i^t)} x_{i,k+1}
       &amp; + \lambda(1-\alpha)\beta_{k+1}^t
-\end{eqnarray}\end{split}\]</div>
+\end{eqnarray}\]</div>
 <div class="highlight-python"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">grad_loss_k</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">beta_k</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">rl</span><span class="p">,</span> <span class="n">xk</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">k</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Gradient update for a single coordinate</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -534,7 +539,7 @@ initializing each model with the previous model&#8217;s solution is known as a w
       <script type="text/javascript" src="_static/jquery.js"></script>
       <script type="text/javascript" src="_static/underscore.js"></script>
       <script type="text/javascript" src="_static/doctools.js"></script>
-      <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   
 

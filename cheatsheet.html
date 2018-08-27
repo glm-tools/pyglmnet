@@ -32,6 +32,9 @@
   
 
   
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
     <link rel="top" title="pyglmnet 1.0.1 documentation" href="index.html"/>
         <link rel="next" title="Examples Gallery" href="auto_examples/index.html"/>
         <link rel="prev" title="Tutorial" href="tutorial.html"/> 
@@ -88,11 +91,13 @@
 <li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="start.html">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="">Cheatsheet</a><ul>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Cheatsheet</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#poisson-softplus">Poisson: <cite>softplus</cite></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#poisson-linearized-poisson">Poisson (linearized): <cite>poisson</cite></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#gaussian-gaussian">Gaussian: <cite>gaussian</cite></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#logistic-binomial">Logistic: <cite>binomial</cite></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#logistic-probit">Logistic: <cite>probit</cite></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#gamma">Gamma</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="auto_examples/index.html">Examples Gallery</a></li>
@@ -100,6 +105,8 @@
 <li class="toctree-l1"><a class="reference internal" href="developers.html">Developer Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="requests.html">Requests for pull requests</a></li>
 <li class="toctree-l1"><a class="reference internal" href="resources.html">Resources</a></li>
+<li class="toctree-l1"><a class="reference internal" href="whats_new.html">Current</a></li>
+<li class="toctree-l1"><a class="reference internal" href="whats_new.html#version-0-1">Version 0.1</a></li>
 </ul>
 
             
@@ -122,7 +129,7 @@
         <div class="rst-content">
           
 
-
+ 
 
 
 
@@ -134,7 +141,7 @@
     <li class="wy-breadcrumbs-aside">
       
         
-          <a href="_sources/cheatsheet.txt" rel="nofollow"> View page source</a>
+          <a href="_sources/cheatsheet.rst.txt" rel="nofollow"> View page source</a>
         
       
     </li>
@@ -260,8 +267,8 @@ Newton coordinate descent algorithm for GLMs.</p>
 \[\begin{split}\mathcal{L} = \sum_i \left\{ y_i \log(\mu_i) + (1-y_i) \log(1 - \mu_i) \right\} \\\end{split}\]</div>
 <p><strong>L2-penalized loss function</strong></p>
 <div class="math">
-\[\begin{split}J = -\frac{1}{n}\sum_i \left\{ y_i \log(\beta_0 + \sum_j \beta_j x_{ij}) +
-(1-y_i) \log(1 - (\beta_0 + \sum_j \beta_j x_{ij})) \right\}
+\[\begin{split}J = -\frac{1}{n}\sum_i \left\{ y_i \log(\mu_i) +
+(1-y_i) \log(1 - \mu_i) \right\}
 + \lambda (1 - \alpha) \frac{1}{2}\sum_j \beta_j^2\\\end{split}\]</div>
 <p><strong>Gradient</strong></p>
 <div class="math">
@@ -274,6 +281,65 @@ Newton coordinate descent algorithm for GLMs.</p>
 \[\begin{split}\frac{\partial^2 J}{\partial \beta_0^2} &amp;= \frac{1}{n}\sum_i \mu_i (1 - \mu_i) \\
 \frac{\partial^2 J}{\partial \beta_j^2} &amp;=  \frac{1}{n}\sum_i \mu_i (1 - \mu_i) x_{ij}^2
 + \lambda (1 - \alpha)\end{split}\]</div>
+</div>
+<div class="section" id="logistic-probit">
+<h2>Logistic: <cite>probit</cite><a class="headerlink" href="#logistic-probit" title="Permalink to this headline">¶</a></h2>
+<p><strong>Mean Function</strong></p>
+<div class="math">
+\[\begin{split}z_i &amp;= \beta_0 + \sum_j \beta_j x_{ij} \\
+\mu_i &amp;= \Phi(z_i)\end{split}\]</div>
+<p>where <span class="math">\(\Phi(z_i)\)</span> is the standard normal cumulative distribution function.</p>
+<p><strong>Log-likelihood function</strong></p>
+<div class="math">
+\[\begin{split}\mathcal{L} = \sum_i \left\{ y_i \log(\mu_i) + (1-y_i) \log(1 - \mu_i) \right\} \\\end{split}\]</div>
+<p><strong>L2-penalized loss function</strong></p>
+<div class="math">
+\[\begin{split}J = J = -\frac{1}{n}\sum_i \left\{ y_i \log(\mu_i) +
+(1-y_i) \log(1 - \mu_i) \right\}
++ \lambda (1 - \alpha) \frac{1}{2}\sum_j \beta_j^2\\\end{split}\]</div>
+<p><strong>Gradient</strong></p>
+<div class="math">
+\[\begin{split}\mu(z_i) &amp;= \Phi(z_i) \\
+\mu'(z_i) &amp;= \phi(z_i)\end{split}\]</div>
+<p>where <span class="math">\(\Phi(z_i)\)</span> and <span class="math">\(\phi(z_i)\)</span> are the standard normal cdf and pdf.</p>
+<div class="math">
+\[\begin{split}\frac{\partial J}{\partial \beta_0} &amp;=
+  -\frac{1}{n}\sum_i \Bigg\{y_i \frac{\mu'(z_i)}{\mu(z_i)} - (1 - y_i)\frac{\mu'(z_i)}{1 - \mu(z_i)}\Bigg\} \\
+  \frac{\partial J}{\partial \beta_j} &amp;=
+    -\frac{1}{n}\sum_i \Bigg\{y_i \frac{\mu'(z_i)}{\mu(z_i)} - (1 - y_i)\frac{\mu'(z_i)}{1 - \mu(z_i)}\Bigg\} x_{ij}
++ \lambda (1 - \alpha) \beta_j\end{split}\]</div>
+<p><strong>Hessian</strong></p>
+<div class="math">
+\[\begin{split}\frac{\partial^2 J}{\partial \beta_0^2} &amp;=
+  \frac{1}{n}\sum_i \mu'(z_i) \Bigg\{y_i \frac{z_i\mu(z_i) + \mu'(z_i)}{\mu^2(z_i)} +
+  (1 - y_i)\frac{-z_i(1 - \mu(z_i)) + \mu'(z_i)}{(1 - \mu(z_i))^2} \Bigg\} \\
+  \frac{\partial^2 J}{\partial \beta_j^2} &amp;=
+    \frac{1}{n}\sum_i \mu'(z_i) \Bigg\{y_i \frac{z_i\mu(z_i) + \mu'(z_i)}{\mu^2(z_i)} +
+    (1 - y_i)\frac{-z_i(1 - \mu(z_i)) + \mu'(z_i)}{(1 - \mu(z_i))^2} \Bigg\} x_{ij}^2
++ \lambda (1 - \alpha)\end{split}\]</div>
+</div>
+<div class="section" id="gamma">
+<h2>Gamma<a class="headerlink" href="#gamma" title="Permalink to this headline">¶</a></h2>
+<p><strong>Mean function</strong></p>
+<div class="math">
+\[\begin{split}z_i = \beta_0 + \sum_j \beta_j x_{ij} \\
+\mu_i = \log(1 + \exp(z_i))\end{split}\]</div>
+<p><strong>Log-likelihood function</strong></p>
+<div class="math">
+\[\mathcal{L} = \sum_{i} \nu\Bigg\{\frac{-y_i}{\mu_i} - log(\mu_i)\Bigg\}\]</div>
+<p>where <span class="math">\(\nu\)</span> is the shape parameter. It is exponential for <span class="math">\(\nu = 1\)</span>
+and normal for <span class="math">\(\nu = \infty\)</span>.</p>
+<p><strong>L2-penalized loss function</strong></p>
+<div class="math">
+\[\begin{split}J = -\frac{1}{n}\sum_{i} \nu\Bigg\{\frac{-y_i}{\mu_i} - log(\mu_i)\Bigg\}
++ \lambda (1 - \alpha) \frac{1}{2}\sum_j \beta_j^2\\\end{split}\]</div>
+<p><strong>Gradient</strong></p>
+<div class="math">
+\[\begin{split}\frac{\partial J}{\partial \beta_0} &amp;= \frac{1}{n} \sum_{i} \nu\Bigg\{\frac{y_i}{\mu_i^2}
+- \frac{1}{\mu_i}\Bigg\}{\mu_i'} \\
+\frac{\partial J}{\partial \beta_j} &amp;= \frac{1}{n} \sum_{i} \nu\Bigg\{\frac{y_i}{\mu_i^2}
+- \frac{1}{\mu_i}\Bigg\}{\mu_i'}x_{ij} + \lambda (1 - \alpha) \beta_j\end{split}\]</div>
+<p>where <span class="math">\(\mu_i' = \frac{1}{1 + \exp(-z_i)}\)</span>.</p>
 </div>
 </div>
 
@@ -327,7 +393,7 @@ Newton coordinate descent algorithm for GLMs.</p>
       <script type="text/javascript" src="_static/jquery.js"></script>
       <script type="text/javascript" src="_static/underscore.js"></script>
       <script type="text/javascript" src="_static/doctools.js"></script>
-      <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   
 

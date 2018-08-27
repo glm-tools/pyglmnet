@@ -32,10 +32,13 @@
   
 
   
+        <link rel="index" title="Index"
+              href="../genindex.html"/>
+        <link rel="search" title="Search" href="../search.html"/>
     <link rel="top" title="pyglmnet 1.0.1 documentation" href="../index.html"/>
         <link rel="up" title="Examples Gallery" href="index.html"/>
-        <link rel="next" title="Group Lasso Regularization" href="plot_group_lasso.html"/>
-        <link rel="prev" title="Multinomial Distribution" href="plot_multinomial.html"/> 
+        <link rel="next" title="Tikhonov Regularization" href="plot_tikhonov.html"/>
+        <link rel="prev" title="Group Lasso Regularization" href="plot_group_lasso.html"/> 
 
   
   <script src="../_static/js/modernizr.min.js"></script>
@@ -91,9 +94,8 @@
 <li class="toctree-l1"><a class="reference internal" href="../tutorial.html">Tutorial</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../cheatsheet.html">Cheatsheet</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Examples Gallery</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="plot_multinomial.html">Multinomial Distribution</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="">Community and Crime</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plot_group_lasso.html">Group Lasso Regularization</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Community and Crime</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plot_tikhonov.html">Tikhonov Regularization</a></li>
 </ul>
 </li>
@@ -101,6 +103,8 @@
 <li class="toctree-l1"><a class="reference internal" href="../developers.html">Developer Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../requests.html">Requests for pull requests</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../resources.html">Resources</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../whats_new.html">Current</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../whats_new.html#version-0-1">Version 0.1</a></li>
 </ul>
 
             
@@ -123,7 +127,7 @@
         <div class="rst-content">
           
 
-
+ 
 
 
 
@@ -137,7 +141,7 @@
     <li class="wy-breadcrumbs-aside">
       
         
-          <a href="../_sources/auto_examples/plot_community_crime.txt" rel="nofollow"> View page source</a>
+          <a href="../_sources/auto_examples/plot_community_crime.rst.txt" rel="nofollow"> View page source</a>
         
       
     </li>
@@ -161,10 +165,9 @@ missing values.</p>
 </pre></div>
 </div>
 <p>Imports</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
 <span class="kn">from</span> <span class="nn">sklearn.cross_validation</span> <span class="kn">import</span> <span class="n">train_test_split</span>
-<span class="kn">from</span> <span class="nn">pyglmnet</span> <span class="kn">import</span> <span class="n">GLM</span><span class="p">,</span> <span class="n">datasets</span>
+<span class="kn">from</span> <span class="nn">pyglmnet</span> <span class="kn">import</span> <span class="n">GLM</span><span class="p">,</span> <span class="n">GLMCV</span><span class="p">,</span> <span class="n">datasets</span>
 </pre></div>
 </div>
 <p>Download and preprocess data files</p>
@@ -179,18 +182,40 @@ missing values.</p>
 </div>
 <p>Fit a gaussian distributed GLM with elastic net regularization</p>
 <div class="highlight-python"><div class="highlight"><pre><span></span><span class="c1"># use the default value for reg_lambda</span>
-<span class="n">glm</span> <span class="o">=</span> <span class="n">GLM</span><span class="p">(</span><span class="n">distr</span><span class="o">=</span><span class="s1">&#39;gaussian&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">score_metric</span><span class="o">=</span><span class="s1">&#39;pseudo_R2&#39;</span><span class="p">)</span>
+<span class="n">glm</span> <span class="o">=</span> <span class="n">GLMCV</span><span class="p">(</span><span class="n">distr</span><span class="o">=</span><span class="s1">&#39;gaussian&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">score_metric</span><span class="o">=</span><span class="s1">&#39;pseudo_R2&#39;</span><span class="p">)</span>
 
 <span class="c1"># fit model</span>
 <span class="n">glm</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
 
 <span class="c1"># score the test set prediction</span>
-<span class="n">y_test_hat</span> <span class="o">=</span> <span class="n">glm</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
-<span class="k">print</span> <span class="p">(</span><span class="s2">&quot;test set pseudo $R^2$ = </span><span class="si">%f</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">glm</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">))</span>
+<span class="n">y_test_hat</span> <span class="o">=</span> <span class="n">glm</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+<span class="k">print</span> <span class="p">(</span><span class="s2">&quot;test set pseudo $R^2$ = </span><span class="si">%f</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">glm</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">))</span>
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-python"><div class="highlight"><pre><span></span>test set pseudo $R^2$ = 0.625327
+<div class="sphx-glr-script-out highlight-default"><div class="highlight"><pre><span></span>test set pseudo $R^2$ = 0.629176
+</pre></div>
+</div>
+<p>Now use plain grid search cv to compare</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span> <span class="c1"># noqa</span>
+<span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">GridSearchCV</span> <span class="c1"># noqa</span>
+<span class="kn">from</span> <span class="nn">sklearn.cross_validation</span> <span class="kn">import</span> <span class="n">StratifiedKFold</span> <span class="c1"># noqa</span>
+
+<span class="n">cv</span> <span class="o">=</span> <span class="n">StratifiedKFold</span><span class="p">(</span><span class="n">y_train</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+
+<span class="n">reg_lambda</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logspace</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mf">0.5</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mf">0.01</span><span class="p">),</span> <span class="mi">10</span><span class="p">,</span>
+                         <span class="n">base</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+<span class="n">param_grid</span> <span class="o">=</span> <span class="p">[{</span><span class="s1">&#39;reg_lambda&#39;</span><span class="p">:</span> <span class="n">reg_lambda</span><span class="p">}]</span>
+
+<span class="n">glm</span> <span class="o">=</span> <span class="n">GLM</span><span class="p">(</span><span class="n">distr</span><span class="o">=</span><span class="s1">&#39;gaussian&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">score_metric</span><span class="o">=</span><span class="s1">&#39;pseudo_R2&#39;</span><span class="p">)</span>
+<span class="n">glmcv</span> <span class="o">=</span> <span class="n">GridSearchCV</span><span class="p">(</span><span class="n">glm</span><span class="p">,</span> <span class="n">param_grid</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="n">cv</span><span class="p">)</span>
+<span class="n">glmcv</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+
+<span class="k">print</span> <span class="p">(</span><span class="s2">&quot;test set pseudo $R^2$ = </span><span class="si">%f</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">glmcv</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">))</span>
+</pre></div>
+</div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-default"><div class="highlight"><pre><span></span>test set pseudo $R^2$ = 0.000456
 </pre></div>
 </div>
 <p>Plot the true and predicted test set target values</p>
@@ -209,12 +234,14 @@ missing values.</p>
 </pre></div>
 </div>
 <img alt="../_images/sphx_glr_plot_community_crime_001.png" class="align-center" src="../_images/sphx_glr_plot_community_crime_001.png" />
-<p><strong>Total running time of the script:</strong>
-(0 minutes 24.451 seconds)</p>
-<div class="sphx-glr-download container">
-<strong>Download Python source code:</strong> <a class="reference download internal" href="../_downloads/plot_community_crime.py"><tt class="xref download docutils literal"><span class="pre">plot_community_crime.py</span></tt></a></div>
-<div class="sphx-glr-download container">
-<strong>Download IPython notebook:</strong> <a class="reference download internal" href="../_downloads/plot_community_crime.ipynb"><tt class="xref download docutils literal"><span class="pre">plot_community_crime.ipynb</span></tt></a></div>
+<p><strong>Total running time of the script:</strong> ( 0 minutes  24.189 seconds)</p>
+<div class="sphx-glr-footer docutils container">
+<div class="sphx-glr-download docutils container">
+<a class="reference download internal" href="../_downloads/plot_community_crime.py" download=""><code class="xref download docutils literal"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_community_crime.py</span></code></a></div>
+<div class="sphx-glr-download docutils container">
+<a class="reference download internal" href="../_downloads/plot_community_crime.ipynb" download=""><code class="xref download docutils literal"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_community_crime.ipynb</span></code></a></div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.readthedocs.io">Generated by Sphinx-Gallery</a></p>
 </div>
 
 
@@ -224,10 +251,10 @@ missing values.</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="plot_group_lasso.html" class="btn btn-neutral float-right" title="Group Lasso Regularization" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="plot_tikhonov.html" class="btn btn-neutral float-right" title="Tikhonov Regularization" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="plot_multinomial.html" class="btn btn-neutral" title="Multinomial Distribution" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="plot_group_lasso.html" class="btn btn-neutral" title="Group Lasso Regularization" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -267,7 +294,7 @@ missing values.</p>
       <script type="text/javascript" src="../_static/jquery.js"></script>
       <script type="text/javascript" src="../_static/underscore.js"></script>
       <script type="text/javascript" src="../_static/doctools.js"></script>
-      <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   
 

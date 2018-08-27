@@ -32,10 +32,13 @@
   
 
   
+        <link rel="index" title="Index"
+              href="../genindex.html"/>
+        <link rel="search" title="Search" href="../search.html"/>
     <link rel="top" title="pyglmnet 1.0.1 documentation" href="../index.html"/>
         <link rel="up" title="Examples Gallery" href="index.html"/>
-        <link rel="next" title="Tikhonov Regularization" href="plot_tikhonov.html"/>
-        <link rel="prev" title="Community and Crime" href="plot_community_crime.html"/> 
+        <link rel="next" title="Community and Crime" href="plot_community_crime.html"/>
+        <link rel="prev" title="Examples Gallery" href="index.html"/> 
 
   
   <script src="../_static/js/modernizr.min.js"></script>
@@ -91,9 +94,8 @@
 <li class="toctree-l1"><a class="reference internal" href="../tutorial.html">Tutorial</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../cheatsheet.html">Cheatsheet</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Examples Gallery</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="plot_multinomial.html">Multinomial Distribution</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Group Lasso Regularization</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plot_community_crime.html">Community and Crime</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="">Group Lasso Regularization</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plot_tikhonov.html">Tikhonov Regularization</a></li>
 </ul>
 </li>
@@ -101,6 +103,8 @@
 <li class="toctree-l1"><a class="reference internal" href="../developers.html">Developer Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../requests.html">Requests for pull requests</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../resources.html">Resources</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../whats_new.html">Current</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../whats_new.html#version-0-1">Version 0.1</a></li>
 </ul>
 
             
@@ -123,7 +127,7 @@
         <div class="rst-content">
           
 
-
+ 
 
 
 
@@ -137,7 +141,7 @@
     <li class="wy-breadcrumbs-aside">
       
         
-          <a href="../_sources/auto_examples/plot_group_lasso.txt" rel="nofollow"> View page source</a>
+          <a href="../_sources/auto_examples/plot_group_lasso.rst.txt" rel="nofollow"> View page source</a>
         
       
     </li>
@@ -156,9 +160,8 @@ to model parameters in a group-wise fashion based on domain knowledge.</p>
 <span class="c1"># License: MIT</span>
 </pre></div>
 </div>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pyglmnet</span> <span class="kn">import</span> <span class="n">GLM</span>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pyglmnet</span> <span class="kn">import</span> <span class="n">GLMCV</span>
 <span class="kn">from</span> <span class="nn">pyglmnet.datasets</span> <span class="kn">import</span> <span class="n">fetch_group_lasso_datasets</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
 </pre></div>
 </div>
@@ -169,71 +172,66 @@ applied to the same dataset found in:
 sequence are predictive of whether the sequence contains a splice
 site or not.</p>
 <p>Read and preprocess data</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">df</span> <span class="p">,</span> <span class="n">group_idxs</span><span class="o">=</span> <span class="n">fetch_group_lasso_datasets</span><span class="p">()</span>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">df</span><span class="p">,</span> <span class="n">group_idxs</span> <span class="o">=</span> <span class="n">fetch_group_lasso_datasets</span><span class="p">()</span>
 <span class="k">print</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">head</span><span class="p">())</span>
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-python"><div class="highlight"><pre><span></span>  0  1  2  3  4  5  6  7  8  9  ...    930  931  932  933  934  935  936  \
-0  1  1  0  1  0  1  0  0  0  0  ...      0    0    0    0    0    0    0
-1  1  0  0  0  1  1  0  0  0  1  ...      0    0    0    0    0    0    0
-2  1  1  0  1  0  1  0  0  0  0  ...      0    0    0    0    0    0    0
-3  1  1  1  0  0  1  1  0  0  0  ...      0    0    0    0    0    0    0
-4  1  0  0  0  1  0  1  1  0  0  ...      0    0    0    0    0    0    0
+<div class="sphx-glr-script-out highlight-default"><div class="highlight"><pre><span></span>  <span class="mi">0</span>    <span class="mi">1</span>    <span class="mi">2</span>    <span class="mi">3</span>    <span class="mi">4</span>    <span class="mi">5</span>    <span class="mi">6</span>    <span class="mi">7</span>    <span class="mi">8</span>    <span class="mi">9</span>  <span class="o">...</span>    <span class="mi">930</span>  <span class="mi">931</span>  <span class="mi">932</span>  \
+<span class="mi">0</span>  <span class="mf">1.0</span>  <span class="mf">1.0</span>  <span class="mf">0.0</span>  <span class="mf">1.0</span>  <span class="mf">0.0</span>  <span class="mf">1.0</span>  <span class="mf">0.0</span>  <span class="mf">0.0</span>  <span class="mf">0.0</span>  <span class="mf">0.0</span>  <span class="o">...</span>    <span class="mf">0.0</span>  <span class="mf">0.0</span>  <span class="mf">0.0</span>
+<span class="mi">1</span>  <span class="mf">1.0</span>  <span class="mf">0.0</span>  <span class="mf">0.0</span>  <span class="mf">0.0</span>  <span class="mf">1.0</span>  <span class="mf">1.0</span>  <span class="mf">0.0</span>  <span class="mf">0.0</span>  <span class="mf">0.0</span>  <span class="mf">1.0</span>  <span class="o">...</span>    <span class="mf">0.0</span>  <span class="mf">0.0</span>  <span class="mf">0.0</span>
+<span class="mi">2</span>  <span class="mf">1.0</span>  <span class="mf">1.0</span>  <span class="mf">0.0</span>  <span class="mf">1.0</span>  <span class="mf">0.0</span>  <span class="mf">1.0</span>  <span class="mf">0.0</span>  <span class="mf">0.0</span>  <span class="mf">0.0</span>  <span class="mf">0.0</span>  <span class="o">...</span>    <span class="mf">0.0</span>  <span class="mf">0.0</span>  <span class="mf">0.0</span>
+<span class="mi">3</span>  <span class="mf">1.0</span>  <span class="mf">1.0</span>  <span class="mf">1.0</span>  <span class="mf">0.0</span>  <span class="mf">0.0</span>  <span class="mf">1.0</span>  <span class="mf">1.0</span>  <span class="mf">0.0</span>  <span class="mf">0.0</span>  <span class="mf">0.0</span>  <span class="o">...</span>    <span class="mf">0.0</span>  <span class="mf">0.0</span>  <span class="mf">0.0</span>
+<span class="mi">4</span>  <span class="mf">1.0</span>  <span class="mf">0.0</span>  <span class="mf">0.0</span>  <span class="mf">0.0</span>  <span class="mf">1.0</span>  <span class="mf">0.0</span>  <span class="mf">1.0</span>  <span class="mf">1.0</span>  <span class="mf">0.0</span>  <span class="mf">0.0</span>  <span class="o">...</span>    <span class="mf">0.0</span>  <span class="mf">0.0</span>  <span class="mf">0.0</span>
 
-   937  938  Label
-0    0    0      1
-1    0    0      1
-2    0    0      1
-3    0    0      1
-4    0    0      1
+   <span class="mi">933</span>  <span class="mi">934</span>  <span class="mi">935</span>  <span class="mi">936</span>  <span class="mi">937</span>  <span class="mi">938</span>  <span class="n">Label</span>
+<span class="mi">0</span>  <span class="mf">0.0</span>  <span class="mf">0.0</span>  <span class="mf">0.0</span>  <span class="mf">0.0</span>  <span class="mf">0.0</span>  <span class="mf">0.0</span>    <span class="mf">1.0</span>
+<span class="mi">1</span>  <span class="mf">0.0</span>  <span class="mf">0.0</span>  <span class="mf">0.0</span>  <span class="mf">0.0</span>  <span class="mf">0.0</span>  <span class="mf">0.0</span>    <span class="mf">1.0</span>
+<span class="mi">2</span>  <span class="mf">0.0</span>  <span class="mf">0.0</span>  <span class="mf">0.0</span>  <span class="mf">0.0</span>  <span class="mf">0.0</span>  <span class="mf">0.0</span>    <span class="mf">1.0</span>
+<span class="mi">3</span>  <span class="mf">0.0</span>  <span class="mf">0.0</span>  <span class="mf">0.0</span>  <span class="mf">0.0</span>  <span class="mf">0.0</span>  <span class="mf">0.0</span>    <span class="mf">1.0</span>
+<span class="mi">4</span>  <span class="mf">0.0</span>  <span class="mf">0.0</span>  <span class="mf">0.0</span>  <span class="mf">0.0</span>  <span class="mf">0.0</span>  <span class="mf">0.0</span>    <span class="mf">1.0</span>
 
-[5 rows x 940 columns]
+<span class="p">[</span><span class="mi">5</span> <span class="n">rows</span> <span class="n">x</span> <span class="mi">940</span> <span class="n">columns</span><span class="p">]</span>
 </pre></div>
 </div>
 <p>Set up the training and testing sets</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">X</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">difference</span><span class="p">([</span><span class="s2">&quot;Label&quot;</span><span class="p">])]</span><span class="o">.</span><span class="n">values</span>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.cross_validation</span> <span class="kn">import</span> <span class="n">train_test_split</span> <span class="c1"># noqa</span>
+
+<span class="n">X</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">difference</span><span class="p">([</span><span class="s2">&quot;Label&quot;</span><span class="p">])]</span><span class="o">.</span><span class="n">values</span>
 <span class="n">y</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">&quot;Label&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
 
-<span class="kn">from</span> <span class="nn">sklearn.cross_validation</span> <span class="kn">import</span> <span class="n">train_test_split</span>
 <span class="n">Xtrain</span><span class="p">,</span> <span class="n">Xtest</span><span class="p">,</span> <span class="n">ytrain</span><span class="p">,</span> <span class="n">ytest</span> <span class="o">=</span> \
     <span class="n">train_test_split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Setup the models</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="c1">#set up the group lasso GLM model</span>
-<span class="n">gl_glm</span> <span class="o">=</span> <span class="n">GLM</span><span class="p">(</span><span class="n">distr</span><span class="o">=</span><span class="s2">&quot;binomial&quot;</span><span class="p">,</span>
-             <span class="n">tol</span><span class="o">=</span><span class="mf">1e-2</span><span class="p">,</span>
-             <span class="n">group</span><span class="o">=</span><span class="n">group_idxs</span><span class="p">,</span>
-             <span class="n">score_metric</span><span class="o">=</span><span class="s2">&quot;pseudo_R2&quot;</span><span class="p">,</span>
-             <span class="n">alpha</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
-             <span class="n">reg_lambda</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">logspace</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">100</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mf">0.01</span><span class="p">),</span> <span class="mi">5</span><span class="p">,</span> <span class="n">base</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="mi">1</span><span class="p">)))</span>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="c1"># set up the group lasso GLM model</span>
+<span class="n">gl_glm</span> <span class="o">=</span> <span class="n">GLMCV</span><span class="p">(</span><span class="n">distr</span><span class="o">=</span><span class="s2">&quot;binomial&quot;</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1e-2</span><span class="p">,</span>
+               <span class="n">group</span><span class="o">=</span><span class="n">group_idxs</span><span class="p">,</span> <span class="n">score_metric</span><span class="o">=</span><span class="s2">&quot;pseudo_R2&quot;</span><span class="p">,</span>
+               <span class="n">alpha</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
 
 
-<span class="c1">#set up the lasso model</span>
-<span class="n">glm</span> <span class="o">=</span> <span class="n">GLM</span><span class="p">(</span><span class="n">distr</span><span class="o">=</span><span class="s2">&quot;binomial&quot;</span><span class="p">,</span>
-          <span class="n">tol</span><span class="o">=</span><span class="mf">1e-2</span><span class="p">,</span>
-          <span class="n">score_metric</span><span class="o">=</span><span class="s2">&quot;pseudo_R2&quot;</span><span class="p">,</span>
-          <span class="n">alpha</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
-          <span class="n">reg_lambda</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">logspace</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">100</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mf">0.01</span><span class="p">),</span> <span class="mi">5</span><span class="p">,</span> <span class="n">base</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="mi">1</span><span class="p">)))</span>
+<span class="c1"># set up the lasso model</span>
+<span class="n">glm</span> <span class="o">=</span> <span class="n">GLMCV</span><span class="p">(</span><span class="n">distr</span><span class="o">=</span><span class="s2">&quot;binomial&quot;</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1e-2</span><span class="p">,</span>
+            <span class="n">score_metric</span><span class="o">=</span><span class="s2">&quot;pseudo_R2&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
 
 <span class="k">print</span><span class="p">(</span><span class="s2">&quot;gl_glm: &quot;</span><span class="p">,</span> <span class="n">gl_glm</span><span class="p">)</span>
 <span class="k">print</span><span class="p">(</span><span class="s2">&quot;glm: &quot;</span><span class="p">,</span> <span class="n">glm</span><span class="p">)</span>
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-python"><div class="highlight"><pre><span></span>  gl_glm:  &lt;
-Distribution | binomial
-alpha | 1.00
-max_iter | 1000.00
-lambda: 100.00 to 0.01
-&gt;
-glm:  &lt;
-Distribution | binomial
-alpha | 1.00
-max_iter | 1000.00
-lambda: 100.00 to 0.01
-&gt;
+<div class="sphx-glr-script-out highlight-default"><div class="highlight"><pre><span></span>  <span class="n">gl_glm</span><span class="p">:</span>  <span class="o">&lt;</span>
+<span class="n">Distribution</span> <span class="o">|</span> <span class="n">binomial</span>
+<span class="n">alpha</span> <span class="o">|</span> <span class="mf">1.00</span>
+<span class="n">max_iter</span> <span class="o">|</span> <span class="mf">1000.00</span>
+<span class="k">lambda</span><span class="p">:</span> <span class="mf">0.50</span> <span class="n">to</span> <span class="mf">0.01</span>
+<span class="o">&gt;</span>
+<span class="n">glm</span><span class="p">:</span>  <span class="o">&lt;</span>
+<span class="n">Distribution</span> <span class="o">|</span> <span class="n">binomial</span>
+<span class="n">alpha</span> <span class="o">|</span> <span class="mf">1.00</span>
+<span class="n">max_iter</span> <span class="o">|</span> <span class="mf">1000.00</span>
+<span class="k">lambda</span><span class="p">:</span> <span class="mf">0.50</span> <span class="n">to</span> <span class="mf">0.01</span>
+<span class="o">&gt;</span>
 </pre></div>
 </div>
 <p>Fit models</p>
@@ -243,17 +241,12 @@ lambda: 100.00 to 0.01
 </div>
 <p>Visualize model scores on test set</p>
 <div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">semilogx</span><span class="p">(</span><span class="n">gl_glm</span><span class="o">.</span><span class="n">reg_lambda</span><span class="p">,</span> <span class="n">gl_glm</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">Xtest</span><span class="p">,</span> <span class="n">ytest</span><span class="p">),</span> <span class="s1">&#39;go-&#39;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">semilogx</span><span class="p">(</span><span class="n">gl_glm</span><span class="o">.</span><span class="n">reg_lambda</span><span class="p">,</span> <span class="n">gl_glm</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">Xtrain</span><span class="p">,</span> <span class="n">ytrain</span><span class="p">),</span> <span class="s1">&#39;go--&#39;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">semilogx</span><span class="p">(</span><span class="n">glm</span><span class="o">.</span><span class="n">reg_lambda</span><span class="p">,</span> <span class="n">glm</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">Xtest</span><span class="p">,</span> <span class="n">ytest</span><span class="p">),</span> <span class="s1">&#39;ro-&#39;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">semilogx</span><span class="p">(</span><span class="n">glm</span><span class="o">.</span><span class="n">reg_lambda</span><span class="p">,</span> <span class="n">glm</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">Xtrain</span><span class="p">,</span> <span class="n">ytrain</span><span class="p">),</span> <span class="s1">&#39;ro--&#39;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">([</span><span class="s1">&#39;Group Lasso: test&#39;</span><span class="p">,</span>
-            <span class="s1">&#39;Group Lasso: train&#39;</span><span class="p">,</span>
-            <span class="s1">&#39;Lasso: test&#39;</span><span class="p">,</span>
-            <span class="s1">&#39;Lasso: train&#39;</span><span class="p">],</span> <span class="n">frameon</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="s1">&#39;best&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">semilogx</span><span class="p">(</span><span class="n">gl_glm</span><span class="o">.</span><span class="n">reg_lambda</span><span class="p">,</span> <span class="n">gl_glm</span><span class="o">.</span><span class="n">scores_</span><span class="p">,</span> <span class="s1">&#39;go-&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">semilogx</span><span class="p">(</span><span class="n">glm</span><span class="o">.</span><span class="n">reg_lambda</span><span class="p">,</span> <span class="n">glm</span><span class="o">.</span><span class="n">scores_</span><span class="p">,</span> <span class="s1">&#39;ro--&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">([</span><span class="s1">&#39;Group Lasso&#39;</span><span class="p">,</span> <span class="s1">&#39;Lasso&#39;</span><span class="p">],</span> <span class="n">frameon</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+           <span class="n">loc</span><span class="o">=</span><span class="s1">&#39;best&#39;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;$\lambda$&#39;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;pseudo-$R^2$&#39;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">([</span><span class="o">-</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.7</span><span class="p">])</span>
 
 <span class="n">plt</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="n">right</span><span class="o">=</span><span class="s1">&#39;off&#39;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">top</span><span class="o">=</span><span class="s1">&#39;off&#39;</span><span class="p">)</span>
@@ -265,11 +258,11 @@ lambda: 100.00 to 0.01
 </div>
 <img alt="../_images/sphx_glr_plot_group_lasso_001.png" class="align-center" src="../_images/sphx_glr_plot_group_lasso_001.png" />
 <p><strong>Total running time of the script:</strong>
-(0 minutes 51.240 seconds)</p>
-<div class="sphx-glr-download container">
-<strong>Download Python source code:</strong> <a class="reference download internal" href="../_downloads/plot_group_lasso.py"><tt class="xref download docutils literal"><span class="pre">plot_group_lasso.py</span></tt></a></div>
-<div class="sphx-glr-download container">
-<strong>Download IPython notebook:</strong> <a class="reference download internal" href="../_downloads/plot_group_lasso.ipynb"><tt class="xref download docutils literal"><span class="pre">plot_group_lasso.ipynb</span></tt></a></div>
+(0 minutes 37.153 seconds)</p>
+<div class="sphx-glr-download docutils container">
+<strong>Download Python source code:</strong> <a class="reference download internal" href="../_downloads/plot_group_lasso.py" download=""><code class="xref download docutils literal"><span class="pre">plot_group_lasso.py</span></code></a></div>
+<div class="sphx-glr-download docutils container">
+<strong>Download IPython notebook:</strong> <a class="reference download internal" href="../_downloads/plot_group_lasso.ipynb" download=""><code class="xref download docutils literal"><span class="pre">plot_group_lasso.ipynb</span></code></a></div>
 </div>
 
 
@@ -279,10 +272,10 @@ lambda: 100.00 to 0.01
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="plot_tikhonov.html" class="btn btn-neutral float-right" title="Tikhonov Regularization" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="plot_community_crime.html" class="btn btn-neutral float-right" title="Community and Crime" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="plot_community_crime.html" class="btn btn-neutral" title="Community and Crime" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="index.html" class="btn btn-neutral" title="Examples Gallery" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -322,7 +315,7 @@ lambda: 100.00 to 0.01
       <script type="text/javascript" src="../_static/jquery.js"></script>
       <script type="text/javascript" src="../_static/underscore.js"></script>
       <script type="text/javascript" src="../_static/doctools.js"></script>
-      <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   
 

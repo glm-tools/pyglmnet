@@ -32,6 +32,9 @@
   
 
   
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
     <link rel="top" title="pyglmnet 1.0.1 documentation" href="index.html"/>
         <link rel="next" title="Requests for pull requests" href="requests.html"/>
         <link rel="prev" title="API Documentation" href="api.html"/> 
@@ -91,7 +94,7 @@
 <li class="toctree-l1"><a class="reference internal" href="cheatsheet.html">Cheatsheet</a></li>
 <li class="toctree-l1"><a class="reference internal" href="auto_examples/index.html">Examples Gallery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api.html">API Documentation</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="">Developer Documentation</a><ul>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Developer Documentation</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#setting-up">Setting up</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#develop">Develop</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#make-pull-request">Make pull request</a></li>
@@ -100,6 +103,8 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="requests.html">Requests for pull requests</a></li>
 <li class="toctree-l1"><a class="reference internal" href="resources.html">Resources</a></li>
+<li class="toctree-l1"><a class="reference internal" href="whats_new.html">Current</a></li>
+<li class="toctree-l1"><a class="reference internal" href="whats_new.html#version-0-1">Version 0.1</a></li>
 </ul>
 
             
@@ -122,7 +127,7 @@
         <div class="rst-content">
           
 
-
+ 
 
 
 
@@ -134,7 +139,7 @@
     <li class="wy-breadcrumbs-aside">
       
         
-          <a href="_sources/developers.txt" rel="nofollow"> View page source</a>
+          <a href="_sources/developers.rst.txt" rel="nofollow"> View page source</a>
         
       
     </li>
@@ -158,33 +163,33 @@ development workflow that we have successfully adopted.</p>
 to your own account (e.g. user).</p>
 <p>Clone or pull your forked repository locally. If you are doing it for the
 first time:</p>
-<div class="code bash highlight-python"><div class="highlight"><pre><span></span>git clone https://github.com/user/pyglmnet
+<div class="code bash highlight-default"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">user</span><span class="o">/</span><span class="n">pyglmnet</span>
 </pre></div>
 </div>
 <p>Or if you have an already existing local clone:</p>
-<div class="code bash highlight-python"><div class="highlight"><pre><span></span>git pull origin master
+<div class="code bash highlight-default"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">pull</span> <span class="n">origin</span> <span class="n">master</span>
 </pre></div>
 </div>
 <p>Setup a remote to point to the main repository.</p>
-<div class="code bash highlight-python"><div class="highlight"><pre><span></span>git remote add main https://github.com/glm-tools/pyglmnet
-git remote -v
+<div class="code bash highlight-default"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">remote</span> <span class="n">add</span> <span class="n">main</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">glm</span><span class="o">-</span><span class="n">tools</span><span class="o">/</span><span class="n">pyglmnet</span>
+<span class="n">git</span> <span class="n">remote</span> <span class="o">-</span><span class="n">v</span>
 </pre></div>
 </div>
 <p>You should see this:</p>
-<div class="code console highlight-python"><div class="highlight"><pre><span></span>main    https://github.com/glm-tools/pyglmnet.git (fetch)
-main    https://github.com/glm-tools/pyglmnet.git (push)
-origin        http://github.com/user/pyglmnet.git (fetch)
-origin        http://github.com/user/pyglmnet.git (push)
+<div class="code console highlight-default"><div class="highlight"><pre><span></span><span class="n">main</span>    <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">glm</span><span class="o">-</span><span class="n">tools</span><span class="o">/</span><span class="n">pyglmnet</span><span class="o">.</span><span class="n">git</span> <span class="p">(</span><span class="n">fetch</span><span class="p">)</span>
+<span class="n">main</span>    <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">glm</span><span class="o">-</span><span class="n">tools</span><span class="o">/</span><span class="n">pyglmnet</span><span class="o">.</span><span class="n">git</span> <span class="p">(</span><span class="n">push</span><span class="p">)</span>
+<span class="n">origin</span>        <span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">user</span><span class="o">/</span><span class="n">pyglmnet</span><span class="o">.</span><span class="n">git</span> <span class="p">(</span><span class="n">fetch</span><span class="p">)</span>
+<span class="n">origin</span>        <span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">user</span><span class="o">/</span><span class="n">pyglmnet</span><span class="o">.</span><span class="n">git</span> <span class="p">(</span><span class="n">push</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Before you start developing a feature, make sure that your local master is
 up to date. This will save you a lot of merge conflicts later.</p>
-<div class="code bash highlight-python"><div class="highlight"><pre><span></span>git checkout master
-git pull main master
+<div class="code bash highlight-default"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">checkout</span> <span class="n">master</span>
+<span class="n">git</span> <span class="n">pull</span> <span class="n">main</span> <span class="n">master</span>
 </pre></div>
 </div>
 <p>In case your own fork is behind the main repo, update your fork:</p>
-<div class="code bash highlight-python"><div class="highlight"><pre><span></span>git push origin master
+<div class="code bash highlight-default"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">push</span> <span class="n">origin</span> <span class="n">master</span>
 </pre></div>
 </div>
 <p>Once you are done with these housekeeping steps, you are ready to start
@@ -193,21 +198,21 @@ developing.</p>
 <div class="section" id="develop">
 <h2>Develop<a class="headerlink" href="#develop" title="Permalink to this headline">¶</a></h2>
 <p>Make sure you develop each feature on a new branch</p>
-<div class="code bash highlight-python"><div class="highlight"><pre><span></span>git checkout -b feat
+<div class="code bash highlight-default"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">checkout</span> <span class="o">-</span><span class="n">b</span> <span class="n">feat</span>
 </pre></div>
 </div>
 <p>Develop your changes, and once you are satisfied we need to do
 a couple of things before adding and committing them.</p>
 <p>First if it is a major feature, consider writing a test. You can do this by
-editing <tt class="docutils literal"><span class="pre">tests/test_pyglmnet.py</span></tt>.</p>
+editing <code class="docutils literal"><span class="pre">tests/test_pyglmnet.py</span></code>.</p>
 <p>Second, once you have written your tests, run them locally.
-We test with <tt class="docutils literal"><span class="pre">nosetests</span></tt>:</p>
-<div class="code bash highlight-python"><div class="highlight"><pre><span></span>nosetests . --with-coverage
+We test with <code class="docutils literal"><span class="pre">nosetests</span></code>:</p>
+<div class="code bash highlight-default"><div class="highlight"><pre><span></span><span class="n">nosetests</span> <span class="o">.</span> <span class="o">--</span><span class="k">with</span><span class="o">-</span><span class="n">coverage</span>
 </pre></div>
 </div>
 <p>If you don&#8217;t see error messages, go ahead and test with a pep8 style checker.
 We use flake8</p>
-<div class="code bash highlight-python"><div class="highlight"><pre><span></span>flake8 --count pyglmnet
+<div class="code bash highlight-default"><div class="highlight"><pre><span></span><span class="n">flake8</span> <span class="o">--</span><span class="n">count</span> <span class="n">pyglmnet</span>
 </pre></div>
 </div>
 <p>If you don&#8217;t see any errors, you are good to add and commit.</p>
@@ -221,16 +226,16 @@ DO NOT add or commit any of these! Only add and commit the files you manually
 changed (typically <cite>.rst</cite> or <cite>.py</cite> files). Once a pull request is made and
 merged, we will build the documentation to be hosted separately (see below).</p>
 <p>Once committed, push your local branch to a branch in your fork.</p>
-<div class="code bash highlight-python"><div class="highlight"><pre><span></span>git push origin feat:feat
+<div class="code bash highlight-default"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">push</span> <span class="n">origin</span> <span class="n">feat</span><span class="p">:</span><span class="n">feat</span>
 </pre></div>
 </div>
 </div>
 <div class="section" id="make-pull-request">
 <h2>Make pull request<a class="headerlink" href="#make-pull-request" title="Permalink to this headline">¶</a></h2>
-<p>From the <tt class="docutils literal"><span class="pre">feat</span></tt> branch of your fork: <a class="reference external" href="https://github.com/user/pyglmnet">https://github.com/user/pyglmnet</a>
+<p>From the <code class="docutils literal"><span class="pre">feat</span></code> branch of your fork: <a class="reference external" href="https://github.com/user/pyglmnet">https://github.com/user/pyglmnet</a>
 you can create a pull request on to the main repo. Give the PR a meaningful
-name. We recommend prefixing it with a <tt class="docutils literal"><span class="pre">[WIP]</span></tt> if the feature is being built.
-If you think it is ready to merge, prefix with <tt class="docutils literal"><span class="pre">[MRG]</span></tt>.</p>
+name. We recommend prefixing it with a <code class="docutils literal"><span class="pre">[WIP]</span></code> if the feature is being built.
+If you think it is ready to merge, prefix with <code class="docutils literal"><span class="pre">[MRG]</span></code>.</p>
 <p>If it&#8217;s a complicated feature that can evolve better with feedback, we highly
 recommend making the PR when it&#8217;s a work in progress (WIP). In the PR message box,
 it&#8217;s typically good to associate it with an issue (.e.g. &#8220;address #253&#8221;)
@@ -239,14 +244,16 @@ in addition to concisely describing the most salient changes made.</p>
 be reported on the PR&#8217;s page.</p>
 <p>Major PRs are followed by a process of peer review by one of the core developers
 commenting on the code and suggesting changes.</p>
-<p>For making changes to the PR, make changes to your local <tt class="docutils literal"><span class="pre">feat</span></tt> branch
-and push to your fork&#8217;s <tt class="docutils literal"><span class="pre">feat</span></tt> branch just as you did before making the PR.
+<p>For making changes to the PR, make changes to your local <code class="docutils literal"><span class="pre">feat</span></code> branch
+and push to your fork&#8217;s <code class="docutils literal"><span class="pre">feat</span></code> branch just as you did before making the PR.
 Your new commits will be automatically associated with the PR and tested.</p>
 <p>Sometimes you may make tiny formatting changes that are not worth retesting
-with our continuous integration systems. For these changes, include a <tt class="docutils literal"><span class="pre">[ci</span> <span class="pre">skip]</span></tt>
+with our continuous integration systems. For these changes, include a <code class="docutils literal"><span class="pre">[ci</span> <span class="pre">skip]</span></code>
 prefix in your commit message. However, use this trick sparingly!</p>
-<p>After all suggested changes are resolved, the PR can be merged.</p>
-<p>Once the PR is merged, you can optionally delete the <tt class="docutils literal"><span class="pre">feat</span></tt> branch both
+<p>After all suggested changes are resolved, add your name to the <cite>whats_new</cite>
+page in the appropriate section. This should be the last commit in the PR
+before it can be merged.</p>
+<p>Once the PR is merged, you can optionally delete the <code class="docutils literal"><span class="pre">feat</span></code> branch both
 locally and on your fork.</p>
 </div>
 <div class="section" id="build-documenation">
@@ -260,23 +267,23 @@ locally and on your fork.</p>
 <li><a class="reference external" href="https://github.com/matplotlib/matplotlib/">matplotlib</a></li>
 </ul>
 <p>Shortcut:</p>
-<div class="code bash highlight-python"><div class="highlight"><pre><span></span>pip install sphinx sphinx-gallery pillow numpydoc matplotlib
+<div class="code bash highlight-default"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">sphinx</span> <span class="n">sphinx</span><span class="o">-</span><span class="n">gallery</span> <span class="n">pillow</span> <span class="n">numpydoc</span> <span class="n">matplotlib</span>
 </pre></div>
 </div>
-<p>We use <tt class="docutils literal"><span class="pre">sphinx</span></tt> to generate documentation page.
+<p>We use <code class="docutils literal"><span class="pre">sphinx</span></code> to generate documentation page.
 To build the documentation pages locally,
 run:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span>make html
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">make</span> <span class="n">html</span>
 </pre></div>
 </div>
-<p>All static files will be built in <tt class="docutils literal"><span class="pre">_build/html/</span></tt>
+<p>All static files will be built in <code class="docutils literal"><span class="pre">_build/html/</span></code>
 where you can open them using the web browser.</p>
 <p>To remove the built files from your local repository, run:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span>make clean
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">make</span> <span class="n">clean</span>
 </pre></div>
 </div>
-<p>To push built documentation page to <tt class="docutils literal"><span class="pre">gh-pages</span></tt>, simply run:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span>make install
+<p>To push built documentation page to <code class="docutils literal"><span class="pre">gh-pages</span></code>, simply run:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">make</span> <span class="n">install</span>
 </pre></div>
 </div>
 </div>
@@ -332,7 +339,7 @@ where you can open them using the web browser.</p>
       <script type="text/javascript" src="_static/jquery.js"></script>
       <script type="text/javascript" src="_static/underscore.js"></script>
       <script type="text/javascript" src="_static/doctools.js"></script>
-      <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   
 

@@ -32,6 +32,9 @@
   
 
   
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
     <link rel="top" title="pyglmnet 1.0.1 documentation" href="index.html"/>
         <link rel="next" title="Resources" href="resources.html"/>
         <link rel="prev" title="Developer Documentation" href="developers.html"/> 
@@ -92,13 +95,15 @@
 <li class="toctree-l1"><a class="reference internal" href="auto_examples/index.html">Examples Gallery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api.html">API Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="developers.html">Developer Documentation</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="">Requests for pull requests</a><ul>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Requests for pull requests</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#exponential-family-distributions">Exponential family distributions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#cython-implementation-of-coordinate-descent">Cython implementation of coordinate descent</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#provide-glmcv-class-for-warm-restarts">Provide <cite>GLMCV</cite> class for warm restarts</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="resources.html">Resources</a></li>
+<li class="toctree-l1"><a class="reference internal" href="whats_new.html">Current</a></li>
+<li class="toctree-l1"><a class="reference internal" href="whats_new.html#version-0-1">Version 0.1</a></li>
 </ul>
 
             
@@ -121,7 +126,7 @@
         <div class="rst-content">
           
 
-
+ 
 
 
 
@@ -133,7 +138,7 @@
     <li class="wy-breadcrumbs-aside">
       
         
-          <a href="_sources/requests.txt" rel="nofollow"> View page source</a>
+          <a href="_sources/requests.rst.txt" rel="nofollow"> View page source</a>
         
       
     </li>
@@ -164,8 +169,8 @@ available. In rough order of importance, we are looking at:</p>
 <ul class="simple">
 <li>computing the gradients and Hessian and updating the
 <a class="reference external" href="glm-tools.github.io/pyglmnet/cheatsheet.html">cheatsheet</a>.</li>
-<li>implementing it by updating <tt class="docutils literal"><span class="pre">_qu()</span></tt>, <tt class="docutils literal"><span class="pre">_logL()</span></tt>, <tt class="docutils literal"><span class="pre">_grad_L2loss()</span></tt>,
-<tt class="docutils literal"><span class="pre">_gradhess_logloss_1d()</span></tt>, <tt class="docutils literal"><span class="pre">score()</span></tt>, and <tt class="docutils literal"><span class="pre">simulate()</span></tt>.</li>
+<li>implementing it by updating <code class="docutils literal"><span class="pre">_qu()</span></code>, <code class="docutils literal"><span class="pre">_logL()</span></code>, <code class="docutils literal"><span class="pre">_grad_L2loss()</span></code>,
+<code class="docutils literal"><span class="pre">_gradhess_logloss_1d()</span></code>, <code class="docutils literal"><span class="pre">score()</span></code>, and <code class="docutils literal"><span class="pre">simulate()</span></code>.</li>
 <li>adding an <a class="reference external" href="glm-tools.github.io/pyglmnet/auto_examples/index.html">example</a>
 to illustrate the distribution, preferably with real data.</li>
 </ul>
@@ -173,7 +178,7 @@ to illustrate the distribution, preferably with real data.</li>
 <div class="section" id="cython-implementation-of-coordinate-descent">
 <h2>Cython implementation of coordinate descent<a class="headerlink" href="#cython-implementation-of-coordinate-descent" title="Permalink to this headline">¶</a></h2>
 <p>Coordinate descent requires nested for loops that can be sped up with cython.
-This would involve translating <tt class="docutils literal"><span class="pre">_gradhess_logloss_1d()</span></tt> and <tt class="docutils literal"><span class="pre">_cdfast()</span></tt>
+This would involve translating <code class="docutils literal"><span class="pre">_gradhess_logloss_1d()</span></code> and <code class="docutils literal"><span class="pre">_cdfast()</span></code>
 into cython code
 (see <a class="reference external" href="https://github.com/glm-tools/pyglmnet/issues/104">issue #104</a>).</p>
 </div>
@@ -181,9 +186,9 @@ into cython code
 <h2>Provide <cite>GLMCV</cite> class for warm restarts<a class="headerlink" href="#provide-glmcv-class-for-warm-restarts" title="Permalink to this headline">¶</a></h2>
 <p>Currently, the <cite>GLM</cite> class returns a list of estimators corresponding to
 each value of <span class="math">\(\lambda\)</span> using a warm restart approach. This not readily
-compatible with some of <tt class="docutils literal"><span class="pre">scikit-learn</span></tt>&#8216;s  cross-validation and grid search
+compatible with some of <code class="docutils literal"><span class="pre">scikit-learn</span></code>&#8216;s  cross-validation and grid search
 features.</p>
-<p>This PR would require an overhaul of the existing <tt class="docutils literal"><span class="pre">GLM</span></tt> class in addition to
+<p>This PR would require an overhaul of the existing <code class="docutils literal"><span class="pre">GLM</span></code> class in addition to
 writing a new class
 (see <a class="reference external" href="https://github.com/glm-tools/pyglmnet/issues/158">issue #158</a>).</p>
 </div>
@@ -239,7 +244,7 @@ writing a new class
       <script type="text/javascript" src="_static/jquery.js"></script>
       <script type="text/javascript" src="_static/underscore.js"></script>
       <script type="text/javascript" src="_static/doctools.js"></script>
-      <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   
 

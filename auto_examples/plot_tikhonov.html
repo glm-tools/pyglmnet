@@ -32,10 +32,13 @@
   
 
   
+        <link rel="index" title="Index"
+              href="../genindex.html"/>
+        <link rel="search" title="Search" href="../search.html"/>
     <link rel="top" title="pyglmnet 1.0.1 documentation" href="../index.html"/>
         <link rel="up" title="Examples Gallery" href="index.html"/>
         <link rel="next" title="API Documentation" href="../api.html"/>
-        <link rel="prev" title="Group Lasso Regularization" href="plot_group_lasso.html"/> 
+        <link rel="prev" title="Community and Crime" href="plot_community_crime.html"/> 
 
   
   <script src="../_static/js/modernizr.min.js"></script>
@@ -91,16 +94,17 @@
 <li class="toctree-l1"><a class="reference internal" href="../tutorial.html">Tutorial</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../cheatsheet.html">Cheatsheet</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Examples Gallery</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="plot_multinomial.html">Multinomial Distribution</a></li>
-<li class="toctree-l2"><a class="reference internal" href="plot_community_crime.html">Community and Crime</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plot_group_lasso.html">Group Lasso Regularization</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="">Tikhonov Regularization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plot_community_crime.html">Community and Crime</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Tikhonov Regularization</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../api.html">API Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../developers.html">Developer Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../requests.html">Requests for pull requests</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../resources.html">Resources</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../whats_new.html">Current</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../whats_new.html#version-0-1">Version 0.1</a></li>
 </ul>
 
             
@@ -123,7 +127,7 @@
         <div class="rst-content">
           
 
-
+ 
 
 
 
@@ -137,7 +141,7 @@
     <li class="wy-breadcrumbs-aside">
       
         
-          <a href="../_sources/auto_examples/plot_tikhonov.txt" rel="nofollow"> View page source</a>
+          <a href="../_sources/auto_examples/plot_tikhonov.rst.txt" rel="nofollow"> View page source</a>
         
       
     </li>
@@ -173,10 +177,11 @@ Department of Neurobiology, Northwestern University.</p>
 </pre></div>
 </div>
 <p>Imports</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os.path</span> <span class="kn">as</span> <span class="nn">op</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="kn">as</span> <span class="nn">pd</span>
 
-<span class="kn">from</span> <span class="nn">pyglmnet</span> <span class="kn">import</span> <span class="n">GLM</span>
+<span class="kn">from</span> <span class="nn">pyglmnet</span> <span class="kn">import</span> <span class="n">GLMCV</span>
 <span class="kn">from</span> <span class="nn">spykes.strf</span> <span class="kn">import</span> <span class="n">STRF</span>
 
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
@@ -184,7 +189,13 @@ Department of Neurobiology, Northwestern University.</p>
 </div>
 <p>Download and fetch data files</p>
 <div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pyglmnet.datasets</span> <span class="kn">import</span> <span class="n">fetch_tikhonov_data</span>
-<span class="n">fixations_df</span><span class="p">,</span> <span class="n">probes_df</span><span class="p">,</span> <span class="n">spikes_df</span> <span class="o">=</span> <span class="n">fetch_tikhonov_data</span><span class="p">(</span><span class="n">dpath</span><span class="o">=</span><span class="s1">&#39;/tmp/glm-tools&#39;</span><span class="p">)</span>
+<span class="n">dpath</span> <span class="o">=</span> <span class="n">fetch_tikhonov_data</span><span class="p">(</span><span class="n">dpath</span><span class="o">=</span><span class="s1">&#39;/tmp/glm-tools&#39;</span><span class="p">)</span>
+
+<span class="n">fixations_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">op</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dpath</span><span class="p">,</span> <span class="s1">&#39;fixations.csv&#39;</span><span class="p">))</span>
+<span class="n">probes_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">op</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dpath</span><span class="p">,</span> <span class="s1">&#39;probes.csv&#39;</span><span class="p">))</span>
+<span class="n">probes_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">op</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dpath</span><span class="p">,</span> <span class="s1">&#39;probes.csv&#39;</span><span class="p">))</span>
+<span class="n">spikes_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">op</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dpath</span><span class="p">,</span> <span class="s1">&#39;spiketimes.csv&#39;</span><span class="p">))</span>
+
 <span class="n">spiketimes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">spikes_df</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -222,7 +233,7 @@ Department of Neurobiology, Northwestern University.</p>
 <span class="n">binsize</span> <span class="o">=</span> <span class="mi">20</span>
 
 <span class="c1"># Zero pad bins</span>
-<span class="n">n_zero_bins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">((</span><span class="n">window</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">window</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="n">binsize</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+<span class="n">n_zero_bins</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">((</span><span class="n">window</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">window</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="n">binsize</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))</span>
 </pre></div>
 </div>
 <p>Build design matrix</p>
@@ -270,8 +281,8 @@ Department of Neurobiology, Northwestern University.</p>
 
             <span class="c1"># Define an image based on the relative locations</span>
             <span class="n">img</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">n_shape</span><span class="p">,</span> <span class="n">n_shape</span><span class="p">))</span>
-            <span class="n">row</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">probe_row</span> <span class="o">-</span> <span class="n">fix_row</span><span class="p">)</span> <span class="o">+</span> <span class="n">n_shape</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">-</span> <span class="mi">1</span>
-            <span class="n">col</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">probe_col</span> <span class="o">-</span> <span class="n">fix_col</span><span class="p">)</span> <span class="o">+</span> <span class="n">n_shape</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">-</span> <span class="mi">1</span>
+            <span class="n">row</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">probe_row</span> <span class="o">-</span> <span class="n">fix_row</span><span class="p">)</span> <span class="o">+</span> <span class="n">n_shape</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">col</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">probe_col</span> <span class="o">-</span> <span class="n">fix_col</span><span class="p">)</span> <span class="o">+</span> <span class="n">n_shape</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
             <span class="n">img</span><span class="p">[</span><span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
 
             <span class="c1"># Compute projection</span>
@@ -334,17 +345,16 @@ Department of Neurobiology, Northwestern University.</p>
 <span class="n">n_samples</span> <span class="o">=</span> <span class="n">Xtrain</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 <span class="n">Tau</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">tikhonov_from_prior</span><span class="p">(</span><span class="n">prior_cov</span><span class="p">,</span> <span class="n">n_samples</span><span class="p">)</span>
 
-<span class="n">glm</span> <span class="o">=</span> <span class="n">GLM</span><span class="p">(</span><span class="n">distr</span><span class="o">=</span><span class="s1">&#39;poisson&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span> <span class="n">Tau</span><span class="o">=</span><span class="n">Tau</span><span class="p">,</span> <span class="n">score_metric</span><span class="o">=</span><span class="s1">&#39;pseudo_R2&#39;</span><span class="p">)</span>
+<span class="n">glm</span> <span class="o">=</span> <span class="n">GLMCV</span><span class="p">(</span><span class="n">distr</span><span class="o">=</span><span class="s1">&#39;poisson&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span> <span class="n">Tau</span><span class="o">=</span><span class="n">Tau</span><span class="p">,</span> <span class="n">score_metric</span><span class="o">=</span><span class="s1">&#39;pseudo_R2&#39;</span><span class="p">)</span>
 <span class="n">glm</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">Xtrain</span><span class="p">,</span> <span class="n">Ytrain</span><span class="p">)</span>
-<span class="n">cvopt_lambda</span> <span class="o">=</span> <span class="n">glm</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">Xtest</span><span class="p">,</span> <span class="n">Ytest</span><span class="p">)</span><span class="o">.</span><span class="n">argmax</span><span class="p">()</span>
-<span class="k">print</span><span class="p">(</span><span class="s2">&quot;train score: </span><span class="si">%f</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">glm</span><span class="p">[</span><span class="n">cvopt_lambda</span><span class="p">]</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">Xtrain</span><span class="p">,</span> <span class="n">Ytrain</span><span class="p">))</span>
-<span class="k">print</span><span class="p">(</span><span class="s2">&quot;test score: </span><span class="si">%f</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">glm</span><span class="p">[</span><span class="n">cvopt_lambda</span><span class="p">]</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">Xtest</span><span class="p">,</span> <span class="n">Ytest</span><span class="p">))</span>
-<span class="n">weights</span> <span class="o">=</span> <span class="n">glm</span><span class="p">[</span><span class="n">cvopt_lambda</span><span class="p">]</span><span class="o">.</span><span class="n">fit_</span><span class="p">[</span><span class="s1">&#39;beta&#39;</span><span class="p">]</span>
+<span class="k">print</span><span class="p">(</span><span class="s2">&quot;train score: </span><span class="si">%f</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">glm</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">Xtrain</span><span class="p">,</span> <span class="n">Ytrain</span><span class="p">))</span>
+<span class="k">print</span><span class="p">(</span><span class="s2">&quot;test score: </span><span class="si">%f</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">glm</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">Xtest</span><span class="p">,</span> <span class="n">Ytest</span><span class="p">))</span>
+<span class="n">weights</span> <span class="o">=</span> <span class="n">glm</span><span class="o">.</span><span class="n">beta_</span>
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-python"><div class="highlight"><pre><span></span>  train score: 0.002045
-test score: 0.001156
+<div class="sphx-glr-script-out highlight-default"><div class="highlight"><pre><span></span>  <span class="n">train</span> <span class="n">score</span><span class="p">:</span> <span class="n">nan</span>
+<span class="n">test</span> <span class="n">score</span><span class="p">:</span> <span class="n">nan</span>
 </pre></div>
 </div>
 <p>Visualize</p>
@@ -364,11 +374,11 @@ test score: 0.001156
 </div>
 <img alt="../_images/sphx_glr_plot_tikhonov_006.png" class="align-center" src="../_images/sphx_glr_plot_tikhonov_006.png" />
 <p><strong>Total running time of the script:</strong>
-(0 minutes 33.799 seconds)</p>
-<div class="sphx-glr-download container">
-<strong>Download Python source code:</strong> <a class="reference download internal" href="../_downloads/plot_tikhonov.py"><tt class="xref download docutils literal"><span class="pre">plot_tikhonov.py</span></tt></a></div>
-<div class="sphx-glr-download container">
-<strong>Download IPython notebook:</strong> <a class="reference download internal" href="../_downloads/plot_tikhonov.ipynb"><tt class="xref download docutils literal"><span class="pre">plot_tikhonov.ipynb</span></tt></a></div>
+(0 minutes 27.918 seconds)</p>
+<div class="sphx-glr-download docutils container">
+<strong>Download Python source code:</strong> <a class="reference download internal" href="../_downloads/plot_tikhonov.py" download=""><code class="xref download docutils literal"><span class="pre">plot_tikhonov.py</span></code></a></div>
+<div class="sphx-glr-download docutils container">
+<strong>Download IPython notebook:</strong> <a class="reference download internal" href="../_downloads/plot_tikhonov.ipynb" download=""><code class="xref download docutils literal"><span class="pre">plot_tikhonov.ipynb</span></code></a></div>
 </div>
 
 
@@ -381,7 +391,7 @@ test score: 0.001156
         <a href="../api.html" class="btn btn-neutral float-right" title="API Documentation" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="plot_group_lasso.html" class="btn btn-neutral" title="Group Lasso Regularization" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="plot_community_crime.html" class="btn btn-neutral" title="Community and Crime" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -421,7 +431,7 @@ test score: 0.001156
       <script type="text/javascript" src="../_static/jquery.js"></script>
       <script type="text/javascript" src="../_static/underscore.js"></script>
       <script type="text/javascript" src="../_static/doctools.js"></script>
-      <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   
 
