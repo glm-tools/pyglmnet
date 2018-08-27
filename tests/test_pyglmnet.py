@@ -14,7 +14,7 @@ from sklearn.model_selection import GridSearchCV, cross_val_score
 from nose.tools import assert_true, assert_equal, assert_raises
 
 from pyglmnet import (GLM, GLMCV, _grad_L2loss, _L2loss, simulate_glm,
-                      _gradhess_logloss_1d)
+                      _gradhess_logloss_1d, _loss)
 
 
 def test_gradients():
@@ -162,14 +162,15 @@ def test_glmnet():
             y_train = simulate_glm(glm.distr, beta0, beta, X_train,
                                    sample=False)
 
-            from pyglmnet.pyglmnet import _loss
+            glm.fit(X_train, y_train)
+            assert_true(np.all(np.diff(glm._loss) <= 1e-7))  # loss decreases
+
+            # verify loss at convergence = loss when beta=beta_
             l_true = _loss(distr, 0., np.eye(beta.shape[0]), 0.,
                            X_train, y_train, 2.0, None,
                            np.concatenate(([beta0], beta)))
-
-            glm.fit(X_train, y_train)
-            assert_true(np.all(np.diff(glm._loss) <= 1e-7))
             assert_allclose(glm._loss[-1], l_true, rtol=1e-4, atol=1e-7)
+            # beta=beta_ when reg_lambda = 0.
             assert_allclose(beta, glm.beta_, rtol=0.05, atol=1e-2)
 
             y_pred = glm.predict(X_train)
