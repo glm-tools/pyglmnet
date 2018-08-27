@@ -149,8 +149,9 @@ def test_glmnet():
     score_metric = 'pseudo_R2'
     learning_rate = 2e-1
 
-    for solver in solvers:
-        for distr in distrs:
+    for distr in distrs:
+        betas_ = list()
+        for solver in solvers:
 
             glm = GLM(distr, learning_rate=learning_rate,
                       reg_lambda=0., tol=1e-7, max_iter=5000,
@@ -172,9 +173,15 @@ def test_glmnet():
             assert_allclose(glm._loss[-1], l_true, rtol=1e-4, atol=1e-7)
             # beta=beta_ when reg_lambda = 0.
             assert_allclose(beta, glm.beta_, rtol=0.05, atol=1e-2)
+            betas_.append(glm.beta_)
 
             y_pred = glm.predict(X_train)
             assert_equal(y_pred.shape[0], X_train.shape[0])
+
+        # compare all solvers pairwise to make sure they're close
+        for i, first_beta in enumerate(betas_[:-1]):
+            for second_beta in betas_[i + 1:]:
+                assert_allclose(first_beta, second_beta, rtol=0.05, atol=1e-2)
 
     # test fit_predict
     glm_poisson = GLM(distr='softplus')
