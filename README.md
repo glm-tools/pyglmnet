@@ -158,3 +158,11 @@ We welcome pull requests. Please see our [developer documentation page](http://g
 ### License
 
 MIT License Copyright (c) 2016 Pavan Ramkumar
+
+### Cite
+
+If you find pyglmnet useful in your work, please cite:
+
+	Pavan Ramkumar, Mainak Jas, Titipat Achakulvisut, Aid Idrizović, Matthew Antalek,
+	Daniel E. Acuna, Vinicius Marques, Hugo L Fernandes, Eva Dyer, 2017.
+	glm-tools/pyglmnet: First stable release. doi:10.5281/zenodo.291992
