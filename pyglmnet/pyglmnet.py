@@ -795,7 +795,7 @@ class GLM(BaseEstimator):
 
         # Check whether we have a list of estimators or a single estimator
         if self.score_metric == 'deviance':
-            return metrics.deviance(y, yhat, self.ynull_, self.distr)
+            return metrics.deviance(y, yhat, self.distr)
         elif self.score_metric == 'pseudo_R2':
             return metrics.pseudo_R2(X, y, yhat, self.ynull_, self.distr)
         if self.score_metric == 'accuracy':
