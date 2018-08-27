@@ -15,6 +15,9 @@ def deviance(y, yhat, distr):
     yhat : array
         Predicted labels of shape (n_samples, )
 
+    distr: str
+        distribution
+
     Returns
     -------
     score : float
@@ -43,6 +46,9 @@ def pseudo_R2(X, y, yhat, ynull_, distr):
 
     ynull_ : float
         Mean of the target labels (null model prediction)
+
+    distr: str
+        distribution
 
     Returns
     -------
