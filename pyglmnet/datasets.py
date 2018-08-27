@@ -1,13 +1,14 @@
 """
 A set of convenience functions to download datasets for illustrative examples
 """
-import urllib
 import os
 import shutil
 import tempfile
 import itertools
 import numpy as np
 from scipy.misc import comb
+
+from .externals.six.moves import urllib
 
 
 def fetch_tikhonov_data(dpath='/tmp/glm-tools'):
@@ -34,7 +35,7 @@ def fetch_tikhonov_data(dpath='/tmp/glm-tools'):
     for fname in fnames:
         url = os.path.join(base_url, "tikhonov/%s" % fname)
         fname = os.path.join(dpath, fname)
-        urllib.urlretrieve(url, fname)
+        urllib.request.urlretrieve(url, fname)
 
     return dpath
 
@@ -70,7 +71,7 @@ def fetch_community_crime_data(dpath='/tmp/glm-tools'):
     fname = os.path.join(dpath, 'communities.csv')
     base_url = ("http://archive.ics.uci.edu/ml/machine-learning-databases")
     url = os.path.join(base_url, "communities/communities.data")
-    urllib.urlretrieve(url, fname)
+    urllib.request.urlretrieve(url, fname)
 
     # Read in the file
     df = pd.read_csv('/tmp/glm-tools/communities.csv', header=None)
@@ -187,8 +188,8 @@ def fetch_group_lasso_datasets():
     pos_file = tempfile.NamedTemporaryFile(bufsize=0)
     neg_file = tempfile.NamedTemporaryFile(bufsize=0)
 
-    urllib.urlretrieve(positive_url, pos_file.name)
-    urllib.urlretrieve(negative_url, neg_file.name)
+    urllib.request.urlretrieve(positive_url, pos_file.name)
+    urllib.request.urlretrieve(negative_url, neg_file.name)
 
     positive_sequences = [str(line.strip().upper()) for idx, line in
                           enumerate(pos_file.readlines())
