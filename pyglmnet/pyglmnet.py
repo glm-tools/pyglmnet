@@ -54,7 +54,7 @@ def _grad_mu(distr, z, eta):
     return grad_mu
 
 
-def _logL(distr, y, y_hat):
+def _logL(distr, y, y_hat, z=None):
     """The log likelihood."""
     if distr in ['softplus', 'poisson']:
         eps = np.spacing(1)
@@ -62,12 +62,13 @@ def _logL(distr, y, y_hat):
     elif distr == 'gaussian':
         logL = -0.5 * np.sum((y - y_hat)**2)
     elif distr == 'binomial':
-        # analytical formula
-        logL = np.sum(y * np.log(y_hat) + (1 - y) * np.log(1 - y_hat))
 
-        # but this prevents underflow
-        # z = beta0 + np.dot(X, beta)
-        # logL = np.sum(y * z - np.log(1 + np.exp(z)))
+        # prevents underflow
+        if z is not None:
+            logL = np.sum(y * z - np.log(1 + np.exp(z)))
+        # for scoring
+        else:
+            logL = np.sum(y * np.log(y_hat) + (1 - y) * np.log(1 - y_hat))
     elif distr == 'probit':
         logL = np.sum(y * np.log(y_hat) + (1 - y) * np.log(1 - y_hat))
     elif distr == 'gamma':
@@ -123,8 +124,9 @@ def _L1penalty(beta, group=None):
 def _loss(distr, alpha, Tau, reg_lambda, X, y, eta, group, beta):
     """Define the objective function for elastic net."""
     n_samples = X.shape[0]
-    y_hat = _mu(distr, beta[0] + np.dot(X, beta[1:]), eta)
-    L = 1. / n_samples * _logL(distr, y, y_hat)
+    z = beta[0] + np.dot(X, beta[1:])
+    y_hat = _mu(distr, z, eta)
+    L = 1. / n_samples * _logL(distr, y, y_hat, z)
     P = _penalty(alpha, beta[1:], Tau, group)
     J = -L + reg_lambda * P
     return J
@@ -133,8 +135,9 @@ def _loss(distr, alpha, Tau, reg_lambda, X, y, eta, group, beta):
 def _L2loss(distr, alpha, Tau, reg_lambda, X, y, eta, group, beta):
     """Define the objective function for elastic net."""
     n_samples = X.shape[0]
-    y_hat = _mu(distr, beta[0] + np.dot(X, beta[1:]), eta)
-    L = 1. / n_samples * _logL(distr, y, y_hat)
+    z = beta[0] + np.dot(X, beta[1:])
+    y_hat = _mu(distr, z, eta)
+    L = 1. / n_samples * _logL(distr, y, y_hat, z)
     P = 0.5 * (1 - alpha) * _L2penalty(beta[1:], Tau)
     J = -L + reg_lambda * P
     return J
