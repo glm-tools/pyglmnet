@@ -3,6 +3,7 @@
 from copy import deepcopy
 
 import numpy as np
+import numpy.linalg as ln
 from scipy.special import expit
 from scipy.stats import norm
 from .utils import logger, set_log_level
@@ -91,14 +92,14 @@ def _L2penalty(beta, Tau):
     # Compute the L2 penalty
     if Tau is None:
         # Ridge=like penalty
-        L2penalty = np.linalg.norm(beta, 2) ** 2
+        L2penalty = ln.norm(beta, 2) ** 2
     else:
         # Tikhonov penalty
         if (Tau.shape[0] != beta.shape[0] or
            Tau.shape[1] != beta.shape[0]):
             raise ValueError('Tau should be (n_features x n_features)')
         else:
-            L2penalty = np.linalg.norm(np.dot(Tau, beta), 2) ** 2
+            L2penalty = ln.norm(np.dot(Tau, beta), 2) ** 2
     return L2penalty
 
 
@@ -107,7 +108,7 @@ def _L1penalty(beta, group=None):
     # Compute the L1 penalty
     if group is None:
         # Lasso-like penalty
-        L1penalty = np.linalg.norm(beta, 1)
+        L1penalty = ln.norm(beta, 1)
     else:
         # Group sparsity case: apply group sparsity operator
         group_ids = np.unique(group)
@@ -115,19 +116,9 @@ def _L1penalty(beta, group=None):
         for group_id in group_ids:
             if group_id != 0:
                 L1penalty += \
-                    np.linalg.norm(beta[group == group_id], 2)
-        L1penalty += np.linalg.norm(beta[group == 0], 1)
+                    ln.norm(beta[group == group_id], 2)
+        L1penalty += ln.norm(beta[group == 0], 1)
     return L1penalty
-
-
-def _loss(distr, alpha, Tau, reg_lambda, X, y, eta, group, beta):
-    """Define the objective function for elastic net."""
-    n_samples = X.shape[0]
-    y_hat = _mu(distr, beta[0] + np.dot(X, beta[1:]), eta)
-    L = 1. / n_samples * _logL(distr, y, y_hat)
-    P = _penalty(alpha, beta[1:], Tau, group)
-    J = -L + reg_lambda * P
-    return J
 
 
 def _L2loss(distr, alpha, Tau, reg_lambda, X, y, eta, group, beta):
@@ -518,7 +509,7 @@ class GLM(BaseEstimator):
             for group_id in group_ids:
                 if group_id != 0:
                     group_norms[self.group == group_id] = \
-                        np.linalg.norm(beta[self.group == group_id], 2)
+                        ln.norm(beta[self.group == group_id], 2)
 
             nzero_norms = group_norms > 0.0
             over_thresh = group_norms > thresh
@@ -612,6 +603,7 @@ class GLM(BaseEstimator):
             The fitted model.
         """
         np.random.RandomState(self.random_state)
+        lr = self.learning_rate
 
         # checks for group
         if self.group is not None:
@@ -651,19 +643,30 @@ class GLM(BaseEstimator):
             ActiveSet = np.ones(n_features + 1)     # init active set
             z = beta[0] + np.dot(X, beta[1:])       # cache z
 
-        # Initialize loss accumulators
-        L, DL = list(), list()
+        # Iterative updates
         for t in range(0, self.max_iter):
             if self.solver == 'batch-gradient':
                 grad = _grad_L2loss(self.distr,
                                     alpha, self.Tau,
                                     reg_lambda, X, y, self.eta,
                                     beta)
-
+                if t > 1:
+                    if ln.norm(grad) / ln.norm(beta) < tol / lr:
+                        msg = ('\tConverged in {0:d} iterations'.format(t))
+                        logger.info(msg)
+                        break
                 beta = beta - self.learning_rate * grad
+
             elif self.solver == 'cdfast':
+                beta_old = deepcopy(beta)
                 beta, z = \
                     self._cdfast(X, y, z, ActiveSet, beta, reg_lambda)
+                if t > 1:
+                    # pdb.set_trace()
+                    if ln.norm(beta - beta_old) / ln.norm(beta_old) < tol:
+                        msg = ('\tConverged in {0:d} iterations'.format(t))
+                        logger.info(msg)
+                        break
 
             # Apply proximal operator
             beta[1:] = self._prox(beta[1:], reg_lambda * alpha)
@@ -672,20 +675,6 @@ class GLM(BaseEstimator):
             if self.solver == 'cdfast':
                 ActiveSet[beta == 0] = 0
                 ActiveSet[0] = 1.
-
-            # Compute and save loss
-            L.append(_loss(self.distr, alpha, self.Tau, reg_lambda,
-                           X, y, self.eta, self.group, beta))
-
-            if t > 1:
-                DL.append(L[-1] - L[-2])
-                if np.abs(DL[-1] / L[-1]) < tol:
-                    msg = ('\tConverged. Loss function:'
-                           ' {0:.2f}').format(L[-1])
-                    logger.info(msg)
-                    msg = ('\tdL/L: {0:.6f}\n'.format(DL[-1] / L[-1]))
-                    logger.info(msg)
-                    break
 
         # Update the estimated variables
         self.beta0_ = beta[0]
@@ -1017,22 +1006,22 @@ class GLMCV(object):
         np.random.shuffle(idxs)
         cv_splits = np.array_split(idxs, self.cv)
 
-        glm = GLM(distr=self.distr,
-                  alpha=self.alpha,
-                  Tau=self.Tau,
-                  reg_lambda=0.1,
-                  solver=self.solver,
-                  learning_rate=self.learning_rate,
-                  max_iter=self.max_iter,
-                  tol=self.tol,
-                  eta=self.eta,
-                  score_metric=self.score_metric,
-                  random_state=self.random_state,
-                  verbose=self.verbose)
-
         for idx, rl in enumerate(self.reg_lambda):
-            logger.info('Lambda: %6.4f' % rl)
 
+            glm = GLM(distr=self.distr,
+                      alpha=self.alpha,
+                      Tau=self.Tau,
+                      reg_lambda=0.1,
+                      solver=self.solver,
+                      learning_rate=self.learning_rate,
+                      max_iter=self.max_iter,
+                      tol=self.tol,
+                      eta=self.eta,
+                      score_metric=self.score_metric,
+                      random_state=self.random_state,
+                      verbose=self.verbose)
+
+            logger.info('Lambda: %6.4f' % rl)
             glm.reg_lambda = rl
 
             scores_fold = list()
