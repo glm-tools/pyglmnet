@@ -9,6 +9,10 @@ from .utils import logger, set_log_level
 from .base import BaseEstimator, is_classifier, check_version
 
 
+ALLOWED_DISTRS = ['gaussian', 'binomial', 'softplus', 'poisson',
+                  'probit', 'gamma']
+
+
 def _lmb(distr, beta0, beta, X, eta):
     """Conditional intensity function."""
     z = beta0 + np.dot(X, beta)
@@ -333,7 +337,7 @@ class GLM(BaseEstimator):
     ----------
     distr : str
         distribution family can be one of the following
-        'gaussian' | 'binomial' | 'poisson' | 'softplus'
+        'gaussian' | 'binomial' | 'poisson' | 'softplus' | 'probit' | 'gamma'
         default: 'poisson'.
     alpha : float
         the weighting between L1 penalty and L2 penalty term
@@ -400,6 +404,10 @@ class GLM(BaseEstimator):
 
         if not isinstance(max_iter, int):
             raise ValueError('max_iter must be of type int')
+
+        if distr not in ALLOWED_DISTRS:
+            raise ValueError('distr must be one of %s, Got '
+                             '%s' % (', '.join(ALLOWED_DISTRS), distr))
 
         self.distr = distr
         self.alpha = alpha
@@ -845,7 +853,7 @@ class GLMCV(object):
     ----------
     distr : str
         distribution family can be one of the following
-        'gaussian' | 'binomial' | 'poisson' | 'softplus'
+        'gaussian' | 'binomial' | 'poisson' | 'softplus' | 'probit' | 'gamma'
         default: 'poisson'.
     alpha : float
         the weighting between L1 penalty and L2 penalty term
@@ -925,6 +933,10 @@ class GLMCV(object):
                                      base=np.exp(1))
         if not isinstance(reg_lambda, (list, np.ndarray)):
             reg_lambda = [reg_lambda]
+
+        if distr not in ALLOWED_DISTRS:
+            raise ValueError('distr must be one of %s, Got '
+                             '%s' % (', '.join(ALLOWED_DISTRS), distr))
 
         if not isinstance(max_iter, int):
             raise ValueError('max_iter must be of type int')

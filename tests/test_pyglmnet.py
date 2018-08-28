@@ -136,6 +136,9 @@ def test_group_lasso():
 
 def test_glmnet():
     """Test glmnet."""
+    assert_raises(ValueError, GLM, distr='blah')
+    assert_raises(ValueError, GLM, distr='gaussian', max_iter=1.8)
+
     n_samples, n_features = 100, 10
 
     # coefficients
@@ -192,6 +195,9 @@ def test_glmnet():
 
 def test_glmcv():
     """Test GLMCV class."""
+    assert_raises(ValueError, GLM, distr='blah')
+    assert_raises(ValueError, GLM, distr='gaussian', max_iter=1.8)
+
     scaler = StandardScaler()
     n_samples, n_features = 100, 10
 
