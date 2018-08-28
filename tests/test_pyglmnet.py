@@ -298,4 +298,4 @@ def test_cdfast():
 
 def test_fetch_datasets():
     """Test fetching datasets."""
-    datasets.fetch_tikhonov_data('/tmp/glm-tools')
+    datasets.fetch_community_crime_data('/tmp/glm-tools')

@@ -2,6 +2,7 @@
 A set of convenience functions to download datasets for illustrative examples
 """
 import os
+import sys
 import shutil
 import tempfile
 import itertools
@@ -9,6 +10,20 @@ import numpy as np
 from scipy.misc import comb
 
 from .externals.six.moves import urllib
+
+pbar = None
+
+
+def _reporthook(count, block_size, total_size):
+    """Report download percentage."""
+    # https://blog.shichao.io/2012/10/04/progress_speed_indicator_for_urlretrieve_in_python.html  # noqa
+
+    if count == 0 or count * block_size >= total_size:
+        print('')
+    progress_size = int(count * block_size)
+    percent = min(int(count * block_size * 100 / total_size), 100)
+    sys.stdout.write("\r...%d%%, %d MB"
+                     % (percent, progress_size / (1024 * 1024)))
 
 
 def fetch_tikhonov_data(dpath='/tmp/glm-tools'):
@@ -35,7 +50,7 @@ def fetch_tikhonov_data(dpath='/tmp/glm-tools'):
     for fname in fnames:
         url = os.path.join(base_url, "tikhonov/%s" % fname)
         fname = os.path.join(dpath, fname)
-        urllib.request.urlretrieve(url, fname)
+        urllib.request.urlretrieve(url, fname, _reporthook)
 
     return dpath
 
@@ -71,7 +86,7 @@ def fetch_community_crime_data(dpath='/tmp/glm-tools'):
     fname = os.path.join(dpath, 'communities.csv')
     base_url = ("http://archive.ics.uci.edu/ml/machine-learning-databases")
     url = os.path.join(base_url, "communities/communities.data")
-    urllib.request.urlretrieve(url, fname)
+    urllib.request.urlretrieve(url, fname, _reporthook)
 
     # Read in the file
     df = pd.read_csv('/tmp/glm-tools/communities.csv', header=None)
@@ -188,8 +203,8 @@ def fetch_group_lasso_datasets():
     pos_file = tempfile.NamedTemporaryFile(bufsize=0)
     neg_file = tempfile.NamedTemporaryFile(bufsize=0)
 
-    urllib.request.urlretrieve(positive_url, pos_file.name)
-    urllib.request.urlretrieve(negative_url, neg_file.name)
+    urllib.request.urlretrieve(positive_url, pos_file.name, _reporthook)
+    urllib.request.urlretrieve(negative_url, neg_file.name, _reporthook)
 
     positive_sequences = [str(line.strip().upper()) for idx, line in
                           enumerate(pos_file.readlines())
