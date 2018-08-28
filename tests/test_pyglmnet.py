@@ -14,7 +14,7 @@ from sklearn.model_selection import GridSearchCV, cross_val_score
 from nose.tools import assert_true, assert_equal, assert_raises
 
 from pyglmnet import (GLM, GLMCV, _grad_L2loss, _L2loss, simulate_glm,
-                      _gradhess_logloss_1d, _loss)
+                      _gradhess_logloss_1d, _loss, datasets)
 
 
 def test_gradients():
@@ -301,3 +301,8 @@ def test_cdfast():
                                       ActiveSet, beta_, glm.reg_lambda)
         assert_equal(beta_ret.shape, beta_.shape)
         assert_equal(z_ret.shape, z.shape)
+
+
+def test_fetch_datasets():
+    """Test fetching datasets."""
+    datasets.fetch_community_crime_data('/tmp/glm-tools')
