@@ -531,6 +531,7 @@ class GLM(BaseEstimator):
             result[idxs_to_update] = (beta[idxs_to_update] -
                                       thresh * beta[idxs_to_update] /
                                       group_norms[idxs_to_update])
+            result[~idxs_to_update] = 0.0
 
             return result
 
