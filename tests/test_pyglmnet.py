@@ -122,40 +122,36 @@ def test_group_lasso():
     beta = np.random.normal(0.0, 1.0, n_features)
     beta[groups == 2] = 0.
 
-    lams = [0.5, 0.3237394, 0.2096144, 0.13572088, 0.08787639,
-            0.0568981, 0.03684031, 0.02385332, 0.01544452, 0.01]
     alpha = 1.0
+    reg_lambda = 0.2
+    # create an instance of the GLM class
+    glm_group = GLM(distr='softplus', alpha=alpha, reg_lambda=reg_lambda, group=groups)
 
-    for lam in lams:
-        # create an instance of the GLM class
-        glm_group = GLM(distr='softplus', alpha=alpha, reg_lambda=lam, group=groups)
+    # simulate training data
+    Xr = np.random.normal(0.0, 1.0, [n_samples, n_features])
+    yr = simulate_glm(glm_group.distr, beta0, beta, Xr)
 
-        # simulate training data
-        np.random.seed(0)
-        Xr = np.random.normal(0.0, 1.0, [n_samples, n_features])
-        yr = simulate_glm(glm_group.distr, beta0, beta, Xr)
+    # scale and fit
+    scaler = StandardScaler().fit(Xr)
+    glm_group.fit(scaler.transform(Xr), yr)
 
-        # scale and fit
-        scaler = StandardScaler().fit(Xr)
-        glm_group.fit(scaler.transform(Xr), yr)
+    # count number of nonzero coefs for each group.
+    # in each group, coef must be [all nonzero] or [all zero].
+    unique_group_idxs = np.unique(groups)
+    beta = glm_group.beta_
+    group_norms = np.zeros_like(beta)
+    for target_group_idx in unique_group_idxs:
+        if target_group_idx == 0:
+            group_norms[groups == target_group_idx] =  np.abs(beta)[groups == target_group_idx]
 
-        # count number of nonzero coefs for each group.
-        # in each group, coef must be [all nonzero] or [all zero].
-        unique_group_idxs = np.unique(groups)
-        beta = glm_group.beta_
-        group_norms = np.abs(beta)
-        for target_group_idx in unique_group_idxs:
-            if target_group_idx == 0:
-                continue
+        target_beta = beta[groups == target_group_idx]
+        n_nonzero = (target_beta != 0.0).sum()
+        assert n_nonzero in (len(target_beta), 0)
+        group_norms[groups == target_group_idx] = np.linalg.norm(target_beta, 2)
 
-            target_beta = beta[groups == target_group_idx]
-            n_nonzero = (target_beta != 0.0).sum()
-            assert n_nonzero in (len(target_beta), 0)
-            group_norms[groups == target_group_idx] = np.linalg.norm(beta[groups == target_group_idx], 2)
-
-        # beta where those absolute values are smaller than the threshold must be 0.
-        thresh = lam * alpha
-        assert (beta[group_norms <= thresh] == 0.0).all()
+    # beta where those absolute values are smaller than the threshold must be 0.
+    thresh = reg_lambda * alpha
+    assert (beta[group_norms <= thresh] == 0.0).all()
 
 
 def test_glmnet():
