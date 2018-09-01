@@ -137,21 +137,14 @@ def test_group_lasso():
 
     # count number of nonzero coefs for each group.
     # in each group, coef must be [all nonzero] or [all zero].
-    unique_group_idxs = np.unique(groups)
-    beta = glm_group.beta_
-    group_norms = np.zeros_like(beta)
-    for target_group_idx in unique_group_idxs:
-        if target_group_idx == 0:
-            group_norms[groups == target_group_idx] =  np.abs(beta)[groups == target_group_idx]
+    group_ids = np.unique(groups)
+    for group_id in group_ids:
+        if group_id == 0:
+            continue
 
-        target_beta = beta[groups == target_group_idx]
+        target_beta = beta[groups == group_id]
         n_nonzero = (target_beta != 0.0).sum()
         assert n_nonzero in (len(target_beta), 0)
-        group_norms[groups == target_group_idx] = np.linalg.norm(target_beta, 2)
-
-    # beta where those absolute values are smaller than the threshold must be 0.
-    thresh = reg_lambda * alpha
-    assert (beta[group_norms <= thresh] == 0.0).all()
 
 
 def test_glmnet():
