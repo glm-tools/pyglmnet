@@ -147,7 +147,9 @@ def test_group_lasso():
         assert n_nonzero in (len(target_beta), 0)
 
     # one of the groups must be [all zero]
-    assert (beta[groups != 0] == 0.0).any()
+    assert np.any([beta[groups == group_id].sum() == 0 \
+                   for group_id in group_ids if group_id != 0])
+
 
 def test_glmnet():
     """Test glmnet."""
