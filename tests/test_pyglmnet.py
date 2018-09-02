@@ -122,10 +122,8 @@ def test_group_lasso():
     beta = np.random.normal(0.0, 1.0, n_features)
     beta[groups == 2] = 0.
 
-    alpha = 1.0
-    reg_lambda = 0.2
     # create an instance of the GLM class
-    glm_group = GLM(distr='softplus', alpha=alpha, reg_lambda=reg_lambda, group=groups)
+    glm_group = GLM(distr='softplus', alpha=1., reg_lambda=0.2, group=groups)
 
     # simulate training data
     Xr = np.random.normal(0.0, 1.0, [n_samples, n_features])
