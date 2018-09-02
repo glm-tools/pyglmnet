@@ -126,6 +126,7 @@ def test_group_lasso():
     glm_group = GLM(distr='softplus', alpha=1., reg_lambda=0.2, group=groups)
 
     # simulate training data
+    np.random.seed(glm_group.random_state)
     Xr = np.random.normal(0.0, 1.0, [n_samples, n_features])
     yr = simulate_glm(glm_group.distr, beta0, beta, Xr)
 
@@ -135,6 +136,7 @@ def test_group_lasso():
 
     # count number of nonzero coefs for each group.
     # in each group, coef must be [all nonzero] or [all zero].
+    beta = glm_group.beta_
     group_ids = np.unique(groups)
     for group_id in group_ids:
         if group_id == 0:
@@ -144,6 +146,8 @@ def test_group_lasso():
         n_nonzero = (target_beta != 0.0).sum()
         assert n_nonzero in (len(target_beta), 0)
 
+    # one of the groups must be [all zero]
+    assert (beta[groups != 0] == 0.0).any()
 
 def test_glmnet():
     """Test glmnet."""
