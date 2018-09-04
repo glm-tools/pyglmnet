@@ -13,6 +13,36 @@ ALLOWED_DISTRS = ['gaussian', 'binomial', 'softplus', 'poisson',
                   'probit', 'gamma']
 
 
+def _probit_g3(z, pdfz, cdfz, thresh=5):
+    res = -z * (z < -thresh).astype(float) + \
+        pdfz / cdfz * (np.abs(z) <= thresh).astype(float) + \
+        pdfz * (z > thresh).astype(float)
+    return res
+
+
+def _probit_g4(z, pdfz, cdfz, thresh=5):
+    res = pdfz * (z < -thresh).astype(float) + \
+        pdfz / (1 - cdfz) * (np.abs(z) <= thresh).astype(float) + \
+        z * (z > thresh).astype(float)
+    return res
+
+
+def _probit_g5(z, pdfz, cdfz, thresh=5):
+    res = 0 * (z < -thresh).astype(float) + \
+        (z * pdfz / cdfz + (pdfz / cdfz) ** 2) * \
+        (np.abs(z) <= thresh).astype(float) + \
+        (z * pdfz + pdfz ** 2) * (z > thresh).astype(float)
+    return res
+
+
+def _probit_g6(z, pdfz, cdfz, thresh=5):
+    res = (pdfz ** 2 - z * pdfz) * (z < -thresh).astype(float) + \
+        ((pdfz / (1 - cdfz)) ** 2 - z * pdfz / (1 - cdfz)) * \
+        (np.abs(z) <= thresh).astype(float) + \
+        0 * (z > thresh).astype(float)
+    return res
+
+
 def _lmb(distr, beta0, beta, X, eta):
     """Conditional intensity function."""
     z = beta0 + np.dot(X, beta)
@@ -61,7 +91,7 @@ def _logL(distr, y, y_hat, z=None):
         logL = np.sum(y * np.log(y_hat + eps) - y_hat)
     elif distr == 'gaussian':
         logL = -0.5 * np.sum((y - y_hat)**2)
-    elif distr == 'binomial':
+    elif distr in ['binomial', 'probit']:
 
         # prevents underflow
         if z is not None:
@@ -69,8 +99,6 @@ def _logL(distr, y, y_hat, z=None):
         # for scoring
         else:
             logL = np.sum(y * np.log(y_hat) + (1 - y) * np.log(1 - y_hat))
-    elif distr == 'probit':
-        logL = np.sum(y * np.log(y_hat) + (1 - y) * np.log(1 - y_hat))
     elif distr == 'gamma':
         # see
         # https://www.statistics.ma.tum.de/fileadmin/w00bdb/www/czado/lec8.pdf
@@ -247,14 +275,12 @@ def _gradhess_logloss_1d(distr, xk, y, z, eta):
         hk = np.sum(mu * (1.0 - mu) * xk * xk)
 
     elif distr == 'probit':
-        prob = norm.cdf(z)
-        grad_prob = norm.pdf(z)
-        gk = np.sum(y * (grad_prob / prob) -
-                    (1 - y) * (grad_prob / (1 - prob)) * xk)
-
-        mid_l = y * (z * prob + grad_prob) / (prob ** 2)
-        mid_r = (1 - y) * (-z * (1 - prob) + grad_prob) / ((1 - prob) ** 2)
-        hk = np.sum(prob * (mid_l + mid_r) * (xk * xk))
+        pdfz = norm.pdf(z)
+        cdfz = norm.cdf(z)
+        gk = -np.sum((y * _probit_g3(z, pdfz, cdfz) -
+                      (1 - y) * _probit_g4(z, pdfz, cdfz)) * xk)
+        hk = np.sum((y * _probit_g5(z, pdfz, cdfz) +
+                     (1 - y) * _probit_g6(z, pdfz, cdfz)) * (xk * xk))
 
     elif distr == 'gamma':
         raise NotImplementedError('cdfast is not implemented for Gamma '
