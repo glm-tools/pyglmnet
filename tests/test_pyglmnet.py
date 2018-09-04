@@ -123,15 +123,32 @@ def test_group_lasso():
     beta[groups == 2] = 0.
 
     # create an instance of the GLM class
-    glm_group = GLM(distr='softplus', alpha=1.)
+    glm_group = GLM(distr='softplus', alpha=1., reg_lambda=0.2, group=groups)
 
     # simulate training data
+    np.random.seed(glm_group.random_state)
     Xr = np.random.normal(0.0, 1.0, [n_samples, n_features])
     yr = simulate_glm(glm_group.distr, beta0, beta, Xr)
 
     # scale and fit
     scaler = StandardScaler().fit(Xr)
     glm_group.fit(scaler.transform(Xr), yr)
+
+    # count number of nonzero coefs for each group.
+    # in each group, coef must be [all nonzero] or [all zero].
+    beta = glm_group.beta_
+    group_ids = np.unique(groups)
+    for group_id in group_ids:
+        if group_id == 0:
+            continue
+
+        target_beta = beta[groups == group_id]
+        n_nonzero = (target_beta != 0.0).sum()
+        assert n_nonzero in (len(target_beta), 0)
+
+    # one of the groups must be [all zero]
+    assert np.any([beta[groups == group_id].sum() == 0 \
+                   for group_id in group_ids if group_id != 0])
 
 
 def test_glmnet():
