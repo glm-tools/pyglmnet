@@ -164,8 +164,9 @@ def test_glmnet():
     beta = 1. / (np.float(n_features) + 1.) * \
         np.random.normal(0.0, 1.0, (n_features,))
 
-    distrs = ['softplus', 'gaussian', 'poisson', 'binomial']  # , 'probit']
+    distrs = ['softplus', 'gaussian', 'poisson', 'binomial', 'probit']
     solvers = ['batch-gradient', 'cdfast']
+
     score_metric = 'pseudo_R2'
     learning_rate = 2e-1
 
@@ -184,7 +185,9 @@ def test_glmnet():
                                    sample=False)
 
             glm.fit(X_train, y_train)
-            assert_true(np.all(np.diff(glm._loss) <= 1e-7))  # loss decreases
+
+            # verify loss decreases
+            assert_true(np.all(np.diff(glm._loss) <= 1e-7))
 
             # verify loss at convergence = loss when beta=beta_
             l_true = _loss(distr, 0., np.eye(beta.shape[0]), 0.,
