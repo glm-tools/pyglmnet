@@ -13,33 +13,60 @@ ALLOWED_DISTRS = ['gaussian', 'binomial', 'softplus', 'poisson',
                   'probit', 'gamma']
 
 
+def _probit_g1(z, pdfz, cdfz, thresh=5):
+    res = np.zeros_like(z)
+    res[z < -thresh] = np.log(-pdfz[z < -thresh] / z[z < -thresh])
+    res[np.abs(z) <= thresh] = np.log(cdfz[np.abs(z) <= thresh])
+    res[z > thresh] = -pdfz[z > thresh] / z[z > thresh]
+    return res
+
+
+def _probit_g2(z, pdfz, cdfz, thresh=5):
+    res = np.zeros_like(z)
+    res[z < -thresh] = pdfz[z < -thresh] / z[z < -thresh]
+    res[np.abs(z) <= thresh] = np.log(1 - cdfz[np.abs(z) <= thresh])
+    res[z > thresh] = np.log(pdfz[z > thresh] / z[z > thresh])
+    return res
+
+
 def _probit_g3(z, pdfz, cdfz, thresh=5):
-    res = -z * (z < -thresh).astype(float) + \
-        pdfz / cdfz * (np.abs(z) <= thresh).astype(float) + \
-        pdfz * (z > thresh).astype(float)
+    res = np.zeros_like(z)
+    res[z < -thresh] = -z[z < -thresh]
+    res[np.abs(z) <= thresh] = \
+        pdfz[np.abs(z) <= thresh] / cdfz[np.abs(z) <= thresh]
+    res[z > thresh] = pdfz[z > thresh]
     return res
 
 
 def _probit_g4(z, pdfz, cdfz, thresh=5):
-    res = pdfz * (z < -thresh).astype(float) + \
-        pdfz / (1 - cdfz) * (np.abs(z) <= thresh).astype(float) + \
-        z * (z > thresh).astype(float)
+    res = np.zeros_like(z)
+    res[z < -thresh] = pdfz[z < -thresh]
+    res[np.abs(z) <= thresh] = \
+        pdfz[np.abs(z) <= thresh] / (1 - cdfz[np.abs(z) <= thresh])
+    res[z > thresh] = z[z > thresh]
     return res
 
 
 def _probit_g5(z, pdfz, cdfz, thresh=5):
-    res = 0 * (z < -thresh).astype(float) + \
-        (z * pdfz / cdfz + (pdfz / cdfz) ** 2) * \
-        (np.abs(z) <= thresh).astype(float) + \
-        (z * pdfz + pdfz ** 2) * (z > thresh).astype(float)
+    res = np.zeros_like(z)
+    res[z < -thresh] = 0 * z[z < -thresh]
+    res[np.abs(z) <= thresh] = \
+        z[np.abs(z) <= thresh] * pdfz[np.abs(z) <= thresh] / \
+        cdfz[np.abs(z) <= thresh] + (pdfz[np.abs(z) <= thresh] /
+                                     cdfz[np.abs(z) <= thresh]) ** 2
+    res[z > thresh] = z[z > thresh] * pdfz[z > thresh] + pdfz[z > thresh] ** 2
     return res
 
 
 def _probit_g6(z, pdfz, cdfz, thresh=5):
-    res = (pdfz ** 2 - z * pdfz) * (z < -thresh).astype(float) + \
-        ((pdfz / (1 - cdfz)) ** 2 - z * pdfz / (1 - cdfz)) * \
-        (np.abs(z) <= thresh).astype(float) + \
-        0 * (z > thresh).astype(float)
+    res = np.zeros_like(z)
+    res[z < -thresh] = \
+        pdfz[z < -thresh] ** 2 - z[z < -thresh] * pdfz[z < -thresh]
+    res[np.abs(z) <= thresh] = \
+        (pdfz[np.abs(z) <= thresh] / (1 - cdfz[np.abs(z) <= thresh])) ** 2 - \
+        z[np.abs(z) <= thresh] * pdfz[np.abs(z) <= thresh] / \
+        (1 - cdfz[np.abs(z) <= thresh])
+    res[z > thresh] = 0 * z[z > thresh]
     return res
 
 
@@ -91,12 +118,19 @@ def _logL(distr, y, y_hat, z=None):
         logL = np.sum(y * np.log(y_hat + eps) - y_hat)
     elif distr == 'gaussian':
         logL = -0.5 * np.sum((y - y_hat)**2)
-    elif distr in ['binomial', 'probit']:
+    elif distr == 'binomial':
 
         # prevents underflow
         if z is not None:
             logL = np.sum(y * z - np.log(1 + np.exp(z)))
         # for scoring
+        else:
+            logL = np.sum(y * np.log(y_hat) + (1 - y) * np.log(1 - y_hat))
+    elif distr == 'probit':
+        if z is not None:
+            pdfz, cdfz = norm.pdf(z), norm.cdf(z)
+            logL = np.sum(y * _probit_g1(z, pdfz, cdfz) +
+                          (1 - y) * _probit_g2(z, pdfz, cdfz))
         else:
             logL = np.sum(y * np.log(y_hat) + (1 - y) * np.log(1 - y_hat))
     elif distr == 'gamma':
@@ -197,10 +231,9 @@ def _grad_L2loss(distr, alpha, Tau, reg_lambda, X, y, eta, beta):
         grad_beta = np.dot((mu - y).T, X).T
 
     elif distr == 'probit':
-        grad_beta0 = -np.sum((y * (grad_mu / mu)) -
-                             ((1 - y) * (grad_mu / (1 - mu))))
-        grad_logl = ((y * (grad_mu / mu)) -
-                     ((1 - y) * (grad_mu / (1 - mu))))
+        grad_logl = (y * _probit_g3(z, grad_mu, mu) -
+                     (1 - y) * _probit_g4(z, grad_mu, mu))
+        grad_beta0 = -np.sum(grad_logl)
         grad_beta = -np.dot(grad_logl.T, X).T
 
     elif distr == 'gamma':

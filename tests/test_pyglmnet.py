@@ -187,9 +187,7 @@ def test_glmnet():
             glm.fit(X_train, y_train)
 
             # verify loss decreases
-            # (threshold to strict for probit with approx grad / hess)
-            if not(distr == 'probit' and solver == 'cdfast'):
-                assert_true(np.all(np.diff(glm._loss) <= 1e-7))
+            assert_true(np.all(np.diff(glm._loss) <= 1e-7))
 
             # verify loss at convergence = loss when beta=beta_
             l_true = _loss(distr, 0., np.eye(beta.shape[0]), 0.,
