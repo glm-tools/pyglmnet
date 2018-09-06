@@ -93,7 +93,7 @@ $ git clone http://github.com/glm-tools/pyglmnet
 Install `pyglmnet` using `setup.py` as follows
 
 ```bash
-$ python setup.py develop install
+$ python setup.py develop
 ```
 
 ### Getting Started
