@@ -446,6 +446,8 @@ class GLM(BaseEstimator):
     random_state : int
         seed of the random number generator used to initialize the solution.
         default: 0
+    callbacks: boolean
+        if True, computes and assigns loss trace to self.loss_trace
     verbose : boolean or int
         default: False
 
@@ -462,7 +464,7 @@ class GLM(BaseEstimator):
                  solver='batch-gradient',
                  learning_rate=2e-1, max_iter=1000,
                  tol=1e-3, eta=2.0, score_metric='deviance',
-                 random_state=0, verbose=False):
+                 random_state=0, callbacks=False, verbose=False):
 
         if not isinstance(max_iter, int):
             raise ValueError('max_iter must be of type int')
@@ -486,6 +488,7 @@ class GLM(BaseEstimator):
         self.eta = eta
         self.score_metric = score_metric
         self.random_state = random_state
+        self.callbacks = callbacks
         self.verbose = verbose
         set_log_level(verbose)
 
@@ -675,6 +678,7 @@ class GLM(BaseEstimator):
             The fitted model.
         """
         np.random.RandomState(self.random_state)
+        lr = self.learning_rate
 
         # checks for group
         if self.group is not None:
@@ -715,19 +719,33 @@ class GLM(BaseEstimator):
             z = beta[0] + np.dot(X, beta[1:])       # cache z
 
         # Initialize loss accumulators
-        L, DL = list(), list()
+        if self.callbacks:
+            self.loss_trace = list()
+
+        # Iterative updates
         for t in range(0, self.max_iter):
             if self.solver == 'batch-gradient':
                 grad = _grad_L2loss(self.distr,
                                     alpha, self.Tau,
                                     reg_lambda, X, y, self.eta,
                                     beta)
-
+                if t > 1:
+                    if np.linalg.norm(grad) / np.linalg.norm(beta) < tol / lr:
+                        msg = ('\tConverged in {0:d} iterations'.format(t))
+                        logger.info(msg)
+                        break
                 beta = beta - self.learning_rate * grad
+
             elif self.solver == 'cdfast':
+                beta_old = deepcopy(beta)
                 beta, z = \
                     self._cdfast(X, y, z, ActiveSet, beta, reg_lambda)
-
+                if t > 1:
+                    if np.linalg.norm(beta - beta_old) / \
+                        np.linalg.norm(beta_old) < tol / lr:
+                        msg = ('\tConverged in {0:d} iterations'.format(t))
+                        logger.info(msg)
+                        break
             # Apply proximal operator
             beta[1:] = self._prox(beta[1:], reg_lambda * alpha)
 
@@ -736,25 +754,16 @@ class GLM(BaseEstimator):
                 ActiveSet[beta == 0] = 0
                 ActiveSet[0] = 1.
 
-            # Compute and save loss
-            L.append(_loss(self.distr, alpha, self.Tau, reg_lambda,
-                           X, y, self.eta, self.group, beta))
-
-            if t > 1:
-                DL.append(L[-1] - L[-2])
-                if np.abs(DL[-1] / L[-1]) < tol:
-                    msg = ('\tConverged. Loss function:'
-                           ' {0:.2f}').format(L[-1])
-                    logger.info(msg)
-                    msg = ('\tdL/L: {0:.6f}\n'.format(DL[-1] / L[-1]))
-                    logger.info(msg)
-                    break
+            # Compute and save loss if callbacks are requested
+            if self.callbacks:
+                self.loss_trace.append(_loss(self.distr, alpha, self.Tau,
+                                             reg_lambda, X, y, self.eta,
+                                             self.group, beta))
 
         # Update the estimated variables
         self.beta0_ = beta[0]
         self.beta_ = beta[1:]
         self.ynull_ = np.mean(y)
-        self._loss = L
         return self
 
     def predict(self, X):
@@ -1080,22 +1089,20 @@ class GLMCV(object):
         np.random.shuffle(idxs)
         cv_splits = np.array_split(idxs, self.cv)
 
-        glm = GLM(distr=self.distr,
-                  alpha=self.alpha,
-                  Tau=self.Tau,
-                  reg_lambda=0.1,
-                  solver=self.solver,
-                  learning_rate=self.learning_rate,
-                  max_iter=self.max_iter,
-                  tol=self.tol,
-                  eta=self.eta,
-                  score_metric=self.score_metric,
-                  random_state=self.random_state,
-                  verbose=self.verbose)
-
         for idx, rl in enumerate(self.reg_lambda):
+            glm = GLM(distr=self.distr,
+                      alpha=self.alpha,
+                      Tau=self.Tau,
+                      reg_lambda=0.1,
+                      solver=self.solver,
+                      learning_rate=self.learning_rate,
+                      max_iter=self.max_iter,
+                      tol=self.tol,
+                      eta=self.eta,
+                      score_metric=self.score_metric,
+                      random_state=self.random_state,
+                      verbose=self.verbose)
             logger.info('Lambda: %6.4f' % rl)
-
             glm.reg_lambda = rl
 
             scores_fold = list()
