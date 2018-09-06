@@ -84,7 +84,7 @@ def test_tikhonov():
                        alpha=0.0,
                        Tau=Tau,
                        solver='batch-gradient',
-                       tol=1e-5,
+                       tol=1e-3,
                        score_metric='pseudo_R2')
     glm_tikhonov.fit(Xtrain, ytrain)
 
@@ -97,7 +97,7 @@ def test_tikhonov():
                        alpha=0.0,
                        Tau=Tau,
                        solver='cdfast',
-                       tol=1e-5,
+                       tol=1e-3,
                        score_metric='pseudo_R2')
     glm_tikhonov.fit(Xtrain, ytrain)
 
@@ -174,8 +174,9 @@ def test_glmnet():
         for solver in solvers:
 
             glm = GLM(distr, learning_rate=learning_rate,
-                      reg_lambda=0., tol=1e-7, max_iter=5000,
-                      alpha=0., solver=solver, score_metric=score_metric)
+                      reg_lambda=0., tol=1e-3, max_iter=5000,
+                      alpha=0., solver=solver, score_metric=score_metric,
+                      callbacks=True)
             assert(repr(glm))
 
             np.random.seed(glm.random_state)
@@ -192,7 +193,7 @@ def test_glmnet():
             l_true = _loss(distr, 0., np.eye(beta.shape[0]), 0.,
                            X_train, y_train, 2.0, None,
                            np.concatenate(([beta0], beta)))
-            assert_allclose(glm._loss[-1], l_true, rtol=1e-4, atol=1e-7)
+            assert_allclose(glm.loss_trace[-1], l_true, rtol=1e-4, atol=1e-5)
             # beta=beta_ when reg_lambda = 0.
             assert_allclose(beta, glm.beta_, rtol=0.05, atol=1e-2)
             betas_.append(glm.beta_)
@@ -208,8 +209,7 @@ def test_glmnet():
     # test fit_predict
     glm_poisson = GLM(distr='softplus')
     glm_poisson.fit_predict(X_train, y_train)
-    raises(ValueError, glm_poisson.fit_predict,
-                  X_train[None, ...], y_train)
+    raises(ValueError, glm_poisson.fit_predict, X_train[None, ...], y_train)
 
 
 def test_glmcv():
@@ -226,8 +226,7 @@ def test_glmcv():
     beta = 1. / (np.float(n_features) + 1.) * \
         np.random.normal(0.0, 1.0, (n_features,))
 
-    distrs = ['softplus', 'gaussian', 'poisson', 'binomial', 'gamma']
-    # XXX: 'probit'
+    distrs = ['softplus', 'gaussian', 'poisson', 'binomial', 'probit', 'gamma']
     solvers = ['batch-gradient', 'cdfast']
     score_metric = 'pseudo_R2'
     learning_rate = 2e-1
@@ -276,7 +275,7 @@ def test_cv():
 
 
 def test_cdfast():
-    """Test all functionality related to fast coordinate descent"""
+    """Test all functionality related to fast coordinate descent."""
     scaler = StandardScaler()
     n_samples = 1000
     n_features = 100
