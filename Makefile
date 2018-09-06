@@ -52,7 +52,7 @@ doc-publish:
 .PHONY: install
 install: dependencies
 	@echo "#### Installing pyglmnet ####"
-	python setup.py develop install
+	python setup.py install
 	@echo "#### Pyglmnet installed successfully ####"
 	@echo "#### Access http://glm-tools.github.io/pyglmnet/index.html for more information and tutorials ####"
 
