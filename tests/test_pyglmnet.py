@@ -176,7 +176,7 @@ def test_glmnet():
             glm = GLM(distr, learning_rate=learning_rate,
                       reg_lambda=0., tol=1e-3, max_iter=5000,
                       alpha=0., solver=solver, score_metric=score_metric,
-                      callbacks=True)
+                      callback=_loss)
             assert(repr(glm))
 
             np.random.seed(glm.random_state)

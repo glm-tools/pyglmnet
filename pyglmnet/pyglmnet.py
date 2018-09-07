@@ -464,7 +464,7 @@ class GLM(BaseEstimator):
                  solver='batch-gradient',
                  learning_rate=2e-1, max_iter=1000,
                  tol=1e-3, eta=2.0, score_metric='deviance',
-                 random_state=0, callbacks=False, verbose=False):
+                 random_state=0, callback=None, verbose=False):
 
         if not isinstance(max_iter, int):
             raise ValueError('max_iter must be of type int')
@@ -488,7 +488,7 @@ class GLM(BaseEstimator):
         self.eta = eta
         self.score_metric = score_metric
         self.random_state = random_state
-        self.callbacks = callbacks
+        self.callback = callback
         self.verbose = verbose
         set_log_level(verbose)
 
@@ -719,7 +719,7 @@ class GLM(BaseEstimator):
             z = beta[0] + np.dot(X, beta[1:])       # cache z
 
         # Initialize loss accumulators
-        if self.callbacks:
+        if callable(self.callback):
             self.loss_trace = list()
 
         # Iterative updates
@@ -755,10 +755,11 @@ class GLM(BaseEstimator):
                 ActiveSet[0] = 1.
 
             # Compute and save loss if callbacks are requested
-            if self.callbacks:
-                self.loss_trace.append(_loss(self.distr, alpha, self.Tau,
-                                             reg_lambda, X, y, self.eta,
-                                             self.group, beta))
+            if callable(self.callback):
+                self.loss_trace.append(self.callback(self.distr, alpha,
+                                                     self.Tau, reg_lambda,
+                                                     X, y, self.eta,
+                                                     self.group, beta))
 
         # Update the estimated variables
         self.beta0_ = beta[0]
