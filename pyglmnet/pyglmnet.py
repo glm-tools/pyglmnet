@@ -741,8 +741,8 @@ class GLM(BaseEstimator):
                 beta, z = \
                     self._cdfast(X, y, z, ActiveSet, beta, reg_lambda)
                 if t > 1:
-                    if np.linalg.norm(beta - beta_old) / \
-                        np.linalg.norm(beta_old) < tol / lr:
+                    if ((np.linalg.norm(beta - beta_old) /
+                         np.linalg.norm(beta_old) < tol / lr)):
                         msg = ('\tConverged in {0:d} iterations'.format(t))
                         logger.info(msg)
                         break
