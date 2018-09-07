@@ -169,32 +169,46 @@ def test_glmnet():
 
     score_metric = 'pseudo_R2'
     learning_rate = 2e-1
+    random_state = 0
 
     for distr in distrs:
         betas_ = list()
         for solver in solvers:
 
-            glm = GLM(distr, learning_rate=learning_rate,
-                      reg_lambda=0., tol=1e-3, max_iter=5000,
-                      alpha=0., solver=solver, score_metric=score_metric,
-                      callback=_loss)
-            assert_true(repr(glm))
-
-            np.random.seed(glm.random_state)
+            np.random.seed(random_state)
             X_train = np.random.normal(0.0, 1.0, [n_samples, n_features])
-            y_train = simulate_glm(glm.distr, beta0, beta, X_train,
+            y_train = simulate_glm(distr, beta0, beta, X_train,
                                    sample=False)
+
+            alpha = 0.
+            reg_lambda = 0.
+            loss_trace = list()
+
+            def callback(beta):
+                Tau = None
+                eta = 2.0
+                group = None
+
+                loss_trace.append(
+                    _loss(distr, alpha, Tau, reg_lambda,
+                          X_train, y_train, eta, group, beta))
+
+            glm = GLM(distr, learning_rate=learning_rate,
+                      reg_lambda=reg_lambda, tol=1e-3, max_iter=5000,
+                      alpha=alpha, solver=solver, score_metric=score_metric,
+                      random_state=random_state, callback=callback)
+            assert_true(repr(glm))
 
             glm.fit(X_train, y_train)
 
             # verify loss decreases
-            assert_true(np.all(np.diff(glm.loss_trace) <= 1e-7))
+            assert_true(np.all(np.diff(loss_trace) <= 1e-7))
 
             # verify loss at convergence = loss when beta=beta_
             l_true = _loss(distr, 0., np.eye(beta.shape[0]), 0.,
                            X_train, y_train, 2.0, None,
                            np.concatenate(([beta0], beta)))
-            assert_allclose(glm.loss_trace[-1], l_true, rtol=1e-4, atol=1e-5)
+            assert_allclose(loss_trace[-1], l_true, rtol=1e-4, atol=1e-5)
             # beta=beta_ when reg_lambda = 0.
             assert_allclose(beta, glm.beta_, rtol=0.05, atol=1e-2)
             betas_.append(glm.beta_)

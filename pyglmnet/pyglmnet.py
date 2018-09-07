@@ -446,8 +446,6 @@ class GLM(BaseEstimator):
     random_state : int
         seed of the random number generator used to initialize the solution.
         default: 0
-    callbacks: boolean
-        if True, computes and assigns loss trace to self.loss_trace
     verbose : boolean or int
         default: False
 
@@ -718,10 +716,6 @@ class GLM(BaseEstimator):
             ActiveSet = np.ones(n_features + 1)     # init active set
             z = beta[0] + np.dot(X, beta[1:])       # cache z
 
-        # Initialize loss accumulators
-        if callable(self.callback):
-            self.loss_trace = list()
-
         # Iterative updates
         for t in range(0, self.max_iter):
             if self.solver == 'batch-gradient':
@@ -756,10 +750,7 @@ class GLM(BaseEstimator):
 
             # Compute and save loss if callbacks are requested
             if callable(self.callback):
-                self.loss_trace.append(self.callback(self.distr, alpha,
-                                                     self.Tau, reg_lambda,
-                                                     X, y, self.eta,
-                                                     self.group, beta))
+                self.callback(beta)
 
         # Update the estimated variables
         self.beta0_ = beta[0]
