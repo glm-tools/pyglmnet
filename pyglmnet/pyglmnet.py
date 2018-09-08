@@ -676,7 +676,6 @@ class GLM(BaseEstimator):
             The fitted model.
         """
         np.random.RandomState(self.random_state)
-        lr = self.learning_rate
 
         # checks for group
         if self.group is not None:
