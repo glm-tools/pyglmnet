@@ -434,7 +434,7 @@ class GLM(BaseEstimator):
         default: 1000
     tol : float
         convergence threshold or stopping criteria.
-        Optimization loop will stop below setting threshold.
+        Optimization loop will stop when norm(gradient) is below the threshold.
         default: 1e-3
     eta : float
         a threshold parameter that linearizes the exp() function above eta.
@@ -723,8 +723,8 @@ class GLM(BaseEstimator):
                                     alpha, self.Tau,
                                     reg_lambda, X, y, self.eta,
                                     beta)
-                if t > 1:
-                    if np.linalg.norm(grad) / np.linalg.norm(beta) < tol / lr:
+                # Converged if the norm(gradient) < tol
+                if (t > 1) and (np.linalg.norm(grad) < tol):
                         msg = ('\tConverged in {0:d} iterations'.format(t))
                         logger.info(msg)
                         break
@@ -734,9 +734,8 @@ class GLM(BaseEstimator):
                 beta_old = deepcopy(beta)
                 beta, z = \
                     self._cdfast(X, y, z, ActiveSet, beta, reg_lambda)
-                if t > 1:
-                    if ((np.linalg.norm(beta - beta_old) /
-                         np.linalg.norm(beta_old) < tol / lr)):
+                # Converged if the norm(update) < tol
+                if (t > 1) and (np.linalg.norm(beta - beta_old) < tol):
                         msg = ('\tConverged in {0:d} iterations'.format(t))
                         logger.info(msg)
                         break
@@ -955,7 +954,7 @@ class GLMCV(object):
         default: 1000
     tol : float
         convergence threshold or stopping criteria.
-        Optimization loop will stop below setting threshold.
+        Optimization loop will stop when norm(gradient) is below the threshold.
         default: 1e-3
     eta : float
         a threshold parameter that linearizes the exp() function above eta.
