@@ -90,6 +90,13 @@ def tikhonov_from_prior(prior_cov, n_samples, threshold=0.0001):
     return Tau
 
 
+def _check_type(this_distr, distr, allowed_type, y):
+    if this_distr in distr:
+        if not isinstance(y, allowed_type):
+            raise ValueError('Expected y to be of type %s. Got %s'
+                             % (allowed_type, type(y)))
+
+
 def set_log_level(verbose):
     """Convenience function for setting the log level.
 
