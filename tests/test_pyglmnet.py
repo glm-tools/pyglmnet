@@ -178,6 +178,7 @@ def test_glmnet():
                       reg_lambda=0., tol=1e-3, max_iter=5000,
                       alpha=0., solver=solver, score_metric=score_metric,
                       callback=_loss)
+
             assert(repr(glm))
 
             X_train = np.random.normal(0.0, 1.0, [n_samples, n_features])
