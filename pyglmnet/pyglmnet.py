@@ -434,7 +434,7 @@ class GLM(BaseEstimator):
         default: 1000
     tol : float
         convergence threshold or stopping criteria.
-        Optimization loop will stop below setting threshold.
+        Optimization loop will stop when norm(gradient) is below the threshold.
         default: 1e-3
     eta : float
         a threshold parameter that linearizes the exp() function above eta.
@@ -462,7 +462,7 @@ class GLM(BaseEstimator):
                  solver='batch-gradient',
                  learning_rate=2e-1, max_iter=1000,
                  tol=1e-3, eta=2.0, score_metric='deviance',
-                 random_state=0, verbose=False):
+                 random_state=0, callback=None, verbose=False):
 
         if not isinstance(max_iter, int):
             raise ValueError('max_iter must be of type int')
@@ -486,6 +486,7 @@ class GLM(BaseEstimator):
         self.eta = eta
         self.score_metric = score_metric
         self.random_state = random_state
+        self.callback = callback
         self.verbose = verbose
         set_log_level(verbose)
 
@@ -714,20 +715,29 @@ class GLM(BaseEstimator):
             ActiveSet = np.ones(n_features + 1)     # init active set
             z = beta[0] + np.dot(X, beta[1:])       # cache z
 
-        # Initialize loss accumulators
-        L, DL = list(), list()
+        # Iterative updates
         for t in range(0, self.max_iter):
             if self.solver == 'batch-gradient':
                 grad = _grad_L2loss(self.distr,
                                     alpha, self.Tau,
                                     reg_lambda, X, y, self.eta,
                                     beta)
-
+                # Converged if the norm(gradient) < tol
+                if (t > 1) and (np.linalg.norm(grad) < tol):
+                        msg = ('\tConverged in {0:d} iterations'.format(t))
+                        logger.info(msg)
+                        break
                 beta = beta - self.learning_rate * grad
+
             elif self.solver == 'cdfast':
+                beta_old = deepcopy(beta)
                 beta, z = \
                     self._cdfast(X, y, z, ActiveSet, beta, reg_lambda)
-
+                # Converged if the norm(update) < tol
+                if (t > 1) and (np.linalg.norm(beta - beta_old) < tol):
+                        msg = ('\tConverged in {0:d} iterations'.format(t))
+                        logger.info(msg)
+                        break
             # Apply proximal operator
             beta[1:] = self._prox(beta[1:], reg_lambda * alpha)
 
@@ -736,25 +746,14 @@ class GLM(BaseEstimator):
                 ActiveSet[beta == 0] = 0
                 ActiveSet[0] = 1.
 
-            # Compute and save loss
-            L.append(_loss(self.distr, alpha, self.Tau, reg_lambda,
-                           X, y, self.eta, self.group, beta))
-
-            if t > 1:
-                DL.append(L[-1] - L[-2])
-                if np.abs(DL[-1] / L[-1]) < tol:
-                    msg = ('\tConverged. Loss function:'
-                           ' {0:.2f}').format(L[-1])
-                    logger.info(msg)
-                    msg = ('\tdL/L: {0:.6f}\n'.format(DL[-1] / L[-1]))
-                    logger.info(msg)
-                    break
+            # Compute and save loss if callbacks are requested
+            if callable(self.callback):
+                self.callback(beta)
 
         # Update the estimated variables
         self.beta0_ = beta[0]
         self.beta_ = beta[1:]
         self.ynull_ = np.mean(y)
-        self._loss = L
         return self
 
     def predict(self, X):
@@ -954,7 +953,7 @@ class GLMCV(object):
         default: 1000
     tol : float
         convergence threshold or stopping criteria.
-        Optimization loop will stop below setting threshold.
+        Optimization loop will stop when norm(gradient) is below the threshold.
         default: 1e-3
     eta : float
         a threshold parameter that linearizes the exp() function above eta.
@@ -1080,22 +1079,20 @@ class GLMCV(object):
         np.random.shuffle(idxs)
         cv_splits = np.array_split(idxs, self.cv)
 
-        glm = GLM(distr=self.distr,
-                  alpha=self.alpha,
-                  Tau=self.Tau,
-                  reg_lambda=0.1,
-                  solver=self.solver,
-                  learning_rate=self.learning_rate,
-                  max_iter=self.max_iter,
-                  tol=self.tol,
-                  eta=self.eta,
-                  score_metric=self.score_metric,
-                  random_state=self.random_state,
-                  verbose=self.verbose)
-
         for idx, rl in enumerate(self.reg_lambda):
+            glm = GLM(distr=self.distr,
+                      alpha=self.alpha,
+                      Tau=self.Tau,
+                      reg_lambda=0.1,
+                      solver=self.solver,
+                      learning_rate=self.learning_rate,
+                      max_iter=self.max_iter,
+                      tol=self.tol,
+                      eta=self.eta,
+                      score_metric=self.score_metric,
+                      random_state=self.random_state,
+                      verbose=self.verbose)
             logger.info('Lambda: %6.4f' % rl)
-
             glm.reg_lambda = rl
 
             scores_fold = list()
