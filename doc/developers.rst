@@ -29,19 +29,19 @@ Or if you have an already existing local clone:
 
   git pull origin master
 
-Setup a remote to point to the main repository.
+Setup a remote to point to the main upstream repository.
 
 .. code:: bash
 
-  git remote add main https://github.com/glm-tools/pyglmnet
+  git remote add upstream https://github.com/glm-tools/pyglmnet
   git remote -v
 
 You should see this:
 
 .. code:: console
 
-  main	  https://github.com/glm-tools/pyglmnet.git (fetch)
-  main	  https://github.com/glm-tools/pyglmnet.git (push)
+  upstream	  https://github.com/glm-tools/pyglmnet.git (fetch)
+  upstream	  https://github.com/glm-tools/pyglmnet.git (push)
   origin	http://github.com/user/pyglmnet.git (fetch)
   origin	http://github.com/user/pyglmnet.git (push)
 
@@ -51,7 +51,7 @@ up to date. This will save you a lot of merge conflicts later.
 .. code:: bash
 
   git checkout master
-  git pull main master
+  git pull upstream master
 
 In case your own fork is behind the main repo, update your fork:
 
@@ -77,11 +77,16 @@ First if it is a major feature, consider writing a test. You can do this by
 editing ``tests/test_pyglmnet.py``.
 
 Second, once you have written your tests, run them locally.
-We test with ``nosetests``:
+Install ``pytest`` and ``pytest-cov``:
 
 .. code:: bash
 
-  nosetests . --with-coverage
+  pip install pytest pytest-cov
+
+
+.. code:: bash
+
+  py.test --cov=pyglmnet tests/
 
 If you don't see error messages, go ahead and test with a pep8 style checker.
 We use flake8
@@ -92,7 +97,7 @@ We use flake8
 
 If you don't see any errors, you are good to add and commit.
 
-Add all the files changed and commit them with short and meaningful message.
+Add all the files changed and commit them with a short and meaningful message.
 We recommend one commit per conceptual change since it helps us keep track
 of what happened more easily.
 
@@ -124,7 +129,7 @@ in addition to concisely describing the most salient changes made.
 Once your PR is made, the tests will run. If there are errors, they will
 be reported on the PR's page.
 
-Major PRs are followed by a process of peer review by one of the core developers
+Major PRs are followed by a process of peer review by one of the maintainers
 commenting on the code and suggesting changes.
 
 For making changes to the PR, make changes to your local ``feat`` branch
