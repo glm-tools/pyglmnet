@@ -1,7 +1,8 @@
 from functools import partial
 
 import numpy as np
-from numpy.testing import assert_allclose, assert_raises
+from numpy.testing import assert_allclose
+from pytest import raises
 
 import scipy.sparse as sps
 from scipy.optimize import approx_fprime
@@ -151,8 +152,8 @@ def test_group_lasso():
 
 def test_glmnet():
     """Test glmnet."""
-    assert_raises(ValueError, GLM, distr='blah')
-    assert_raises(ValueError, GLM, distr='gaussian', max_iter=1.8)
+    raises(ValueError, GLM, distr='blah')
+    raises(ValueError, GLM, distr='gaussian', max_iter=1.8)
 
     n_samples, n_features = 100, 10
 
@@ -207,14 +208,14 @@ def test_glmnet():
     # test fit_predict
     glm_poisson = GLM(distr='softplus')
     glm_poisson.fit_predict(X_train, y_train)
-    assert_raises(ValueError, glm_poisson.fit_predict,
+    raises(ValueError, glm_poisson.fit_predict,
                   X_train[None, ...], y_train)
 
 
 def test_glmcv():
     """Test GLMCV class."""
-    assert_raises(ValueError, GLM, distr='blah')
-    assert_raises(ValueError, GLM, distr='gaussian', max_iter=1.8)
+    raises(ValueError, GLM, distr='blah')
+    raises(ValueError, GLM, distr='gaussian', max_iter=1.8)
 
     scaler = StandardScaler()
     n_samples, n_features = 100, 10
