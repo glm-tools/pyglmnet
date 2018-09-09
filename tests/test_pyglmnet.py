@@ -174,13 +174,6 @@ def test_glmnet():
         betas_ = list()
         for solver in solvers:
 
-            glm = GLM(distr, learning_rate=learning_rate,
-                      reg_lambda=0., tol=1e-3, max_iter=5000,
-                      alpha=0., solver=solver, score_metric=score_metric,
-                      callback=_loss)
-
-            assert(repr(glm))
-
             X_train = np.random.normal(0.0, 1.0, [n_samples, n_features])
             y_train = simulate_glm(distr, beta0, beta, X_train,
                                    sample=False)
