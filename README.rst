@@ -4,7 +4,11 @@ pyglmnet
 A python implementation of elastic-net regularized generalized linear models
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-|License| |Travis| |Codecov| |Circle| |Gitter|
+|License| |Travis| |Codecov| |Circle| |Gitter| |DOI|
+
+.. raw:: html
+
+    <img src="pyglmnet-logo.png" height="400px">
 
 `Generalized linear
 models <https://en.wikipedia.org/wiki/Generalized_linear_model>`__ are
@@ -200,3 +204,5 @@ MIT License Copyright (c) 2016 Pavan Ramkumar
    :target: https://circleci.com/gh/glm-tools/pyglmnet
 .. |Gitter| image:: https://badges.gitter.im/glm-tools/pyglmnet.svg
    :target: https://gitter.im/pavanramkumar/pyglmnet?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge
+.. |DOI| image:: https://zenodo.org/badge/55302570.svg
+   :target: https://zenodo.org/badge/latestdoi/55302570
