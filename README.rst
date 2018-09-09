@@ -110,7 +110,7 @@ Install ``pyglmnet`` using ``setup.py`` as follows
 
 .. code:: bash
 
-    $ python setup.py develop install
+    $ python setup.py develop
 
 Getting Started
 ~~~~~~~~~~~~~~~

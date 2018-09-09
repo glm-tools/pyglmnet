@@ -2,7 +2,6 @@
 
 import numpy as np
 from pyglmnet import GLM, simulate_glm
-from nose.tools import assert_true
 
 
 def test_deviance():
@@ -20,7 +19,7 @@ def test_deviance():
     glm_sim.fit(X, y)
     score = glm_sim.score(X, y)
 
-    assert_true(isinstance(score, float))
+    assert(isinstance(score, float))
 
 
 def test_pseudoR2():
@@ -38,7 +37,7 @@ def test_pseudoR2():
     glm_sim.fit(X, y)
     score = glm_sim.score(X, y)
 
-    assert_true(isinstance(score, float))
+    assert(isinstance(score, float))
 
 
 def test_accuracy():
@@ -56,4 +55,4 @@ def test_accuracy():
     glm_sim.fit(X, y)
     score = glm_sim.score(X, y)
 
-    assert_true(isinstance(score, float))
+    assert(isinstance(score, float))

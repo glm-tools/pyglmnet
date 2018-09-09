@@ -6,3 +6,4 @@ omit =
     */setup.py
     */pyglmnet/benchmarks.py
     */pyglmnet/datasets.py
+    */pyglmnet/externals/*.py

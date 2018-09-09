@@ -2,6 +2,7 @@ from functools import partial
 
 import numpy as np
 from numpy.testing import assert_allclose
+from pytest import raises
 
 import scipy.sparse as sps
 from scipy.optimize import approx_fprime
@@ -10,8 +11,6 @@ from sklearn.datasets import make_regression
 from sklearn.preprocessing import StandardScaler
 from sklearn.cross_validation import KFold
 from sklearn.model_selection import GridSearchCV, cross_val_score
-
-from nose.tools import assert_true, assert_equal, assert_raises
 
 from pyglmnet import (GLM, GLMCV, _grad_L2loss, _L2loss, simulate_glm,
                       _gradhess_logloss_1d, _loss, datasets)
@@ -147,14 +146,14 @@ def test_group_lasso():
         assert n_nonzero in (len(target_beta), 0)
 
     # one of the groups must be [all zero]
-    assert np.any([beta[groups == group_id].sum() == 0 \
+    assert np.any([beta[groups == group_id].sum() == 0
                    for group_id in group_ids if group_id != 0])
 
 
 def test_glmnet():
     """Test glmnet."""
-    assert_raises(ValueError, GLM, distr='blah')
-    assert_raises(ValueError, GLM, distr='gaussian', max_iter=1.8)
+    raises(ValueError, GLM, distr='blah')
+    raises(ValueError, GLM, distr='gaussian', max_iter=1.8)
 
     n_samples, n_features = 100, 10
 
@@ -176,6 +175,7 @@ def test_glmnet():
         for solver in solvers:
 
             np.random.seed(random_state)
+
             X_train = np.random.normal(0.0, 1.0, [n_samples, n_features])
             y_train = simulate_glm(distr, beta0, beta, X_train,
                                    sample=False)
@@ -197,12 +197,12 @@ def test_glmnet():
                       reg_lambda=reg_lambda, tol=1e-3, max_iter=5000,
                       alpha=alpha, solver=solver, score_metric=score_metric,
                       random_state=random_state, callback=callback)
-            assert_true(repr(glm))
+            assert(repr(glm))
 
             glm.fit(X_train, y_train)
 
             # verify loss decreases
-            assert_true(np.all(np.diff(loss_trace) <= 1e-7))
+            assert(np.all(np.diff(loss_trace) <= 1e-7))
 
             # verify loss at convergence = loss when beta=beta_
             l_true = _loss(distr, 0., np.eye(beta.shape[0]), 0.,
@@ -214,7 +214,7 @@ def test_glmnet():
             betas_.append(glm.beta_)
 
             y_pred = glm.predict(X_train)
-            assert_equal(y_pred.shape[0], X_train.shape[0])
+            assert(y_pred.shape[0] == X_train.shape[0])
 
         # compare all solvers pairwise to make sure they're close
         for i, first_beta in enumerate(betas_[:-1]):
@@ -224,14 +224,13 @@ def test_glmnet():
     # test fit_predict
     glm_poisson = GLM(distr='softplus')
     glm_poisson.fit_predict(X_train, y_train)
-    assert_raises(ValueError, glm_poisson.fit_predict,
-                  X_train[None, ...], y_train)
+    raises(ValueError, glm_poisson.fit_predict, X_train[None, ...], y_train)
 
 
 def test_glmcv():
     """Test GLMCV class."""
-    assert_raises(ValueError, GLM, distr='blah')
-    assert_raises(ValueError, GLM, distr='gaussian', max_iter=1.8)
+    raises(ValueError, GLM, distr='blah')
+    raises(ValueError, GLM, distr='gaussian', max_iter=1.8)
 
     scaler = StandardScaler()
     n_samples, n_features = 100, 10
@@ -256,7 +255,7 @@ def test_glmcv():
             glm = GLMCV(distr, learning_rate=learning_rate,
                         solver=solver, score_metric=score_metric)
 
-            assert_true(repr(glm))
+            assert(repr(glm))
 
             np.random.seed(glm.random_state)
             X_train = np.random.normal(0.0, 1.0, [n_samples, n_features])
@@ -269,7 +268,7 @@ def test_glmcv():
             assert_allclose(beta, beta_, atol=0.5)  # check fit
 
             y_pred = glm.predict(scaler.transform(X_train))
-            assert_equal(y_pred.shape[0], X_train.shape[0])
+            assert(y_pred.shape[0] == X_train.shape[0])
 
 
 def test_cv():
@@ -281,7 +280,7 @@ def test_cv():
     glm_normal = GLM(distr='gaussian', alpha=0.01, reg_lambda=0.1)
     # check that it returns 5 scores
     scores = cross_val_score(glm_normal, X, y, cv=cv)
-    assert_equal(len(scores), 5)
+    assert(len(scores) == 5)
 
     param_grid = [{'alpha': np.linspace(0.01, 0.99, 2)},
                   {'reg_lambda': np.logspace(np.log(0.5), np.log(0.01),
@@ -323,24 +322,24 @@ def test_cdfast():
 
         # test grad and hess
         if distr != 'multinomial':
-            assert_equal(np.size(gk), 1)
-            assert_equal(np.size(hk), 1)
-            assert_true(isinstance(gk, float))
-            assert_true(isinstance(hk, float))
+            assert(np.size(gk) == 1)
+            assert(np.size(hk) == 1)
+            assert(isinstance(gk, float))
+            assert(isinstance(hk, float))
         else:
-            assert_equal(gk.shape[0], n_classes)
-            assert_equal(hk.shape[0], n_classes)
-            assert_true(isinstance(gk, np.ndarray))
-            assert_true(isinstance(hk, np.ndarray))
-            assert_equal(gk.ndim, 1)
-            assert_equal(hk.ndim, 1)
+            assert(gk.shape[0] == n_classes)
+            assert(hk.shape[0] == n_classes)
+            assert(isinstance(gk, np.ndarray))
+            assert(isinstance(hk, np.ndarray))
+            assert(gk.ndim == 1)
+            assert(hk.ndim == 1)
 
         # test cdfast
         ActiveSet = np.ones(n_features + 1)
         beta_ret, z_ret = glm._cdfast(X, y, z,
                                       ActiveSet, beta_, glm.reg_lambda)
-        assert_equal(beta_ret.shape, beta_.shape)
-        assert_equal(z_ret.shape, z.shape)
+        assert(beta_ret.shape == beta_.shape)
+        assert(z_ret.shape == z.shape)
 
 
 def test_fetch_datasets():
