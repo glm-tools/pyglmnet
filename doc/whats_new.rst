@@ -30,7 +30,7 @@ API
 
     - Refactored `GLM` class into two classes: `GLM` for fitting a single regularization parameter.
       and `GLMCV` for fitting along a regularization path with cross-validation and selection of best
-      regularization parameter by `Pavan Ramkuamr`_ and `Mainak Jas`_.
+      regularization parameter by `Pavan Ramkumar`_ and `Mainak Jas`_.
     - Removed support for fitting `'multinomial'` distribution by `Pavan Ramkumar`_. This option will
       be restored in a future release.
 
@@ -51,12 +51,12 @@ Changelog
 	- Add benchmarks by `Vincinius Marques`_
 
 .. _Aid Idrizović: https://github.com/the872
-.. _Daniel Acuna: https://klab.smpp.northwestern.edu/wiki/index.php5/Daniel_Acuna
-.. _Eva Dyer: http:/github.com/evadyer
-.. _Hugo Fernandes: <http:/github.com/hugoguh
+.. _Daniel Acuna: https://acuna.io/
+.. _Eva Dyer: http://evadyer.github.io/
+.. _Hugo Fernandes: https://github.com/hugoguh
 .. _Mainak Jas: https://perso.telecom-paristech.fr/mjas/
 .. _Matt Antalek: https://github.com/themantalope
-.. _Pavan Ramkumar: https://klab.smpp.northwestern.edu/wiki/index.php5/Pavan_Ramkumar
+.. _Pavan Ramkumar: https://github.com/pavanramkumar
 .. _Titipat Achakulvisut: https://github.com/titipata
 .. _Vinicius Marques: https://github.com/marquesVF
 .. _Ravi Garg: https://github.com/ravigarg27
