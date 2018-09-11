@@ -24,7 +24,7 @@ missing values.
 # Imports
 
 import matplotlib.pyplot as plt
-from sklearn.cross_validation import train_test_split
+from sklearn.model_selection import train_test_split
 from pyglmnet import GLM, GLMCV, datasets
 
 ########################################################
@@ -57,9 +57,9 @@ print ("test set pseudo $R^2$ = %f" % glm.score(X_test, y_test))
 
 import numpy as np # noqa
 from sklearn.model_selection import GridSearchCV # noqa
-from sklearn.cross_validation import StratifiedKFold # noqa
+from sklearn.model_selection import StratifiedKFold # noqa
 
-cv = StratifiedKFold(y_train, 3)
+cv = StratifiedKFold(3)
 
 reg_lambda = np.logspace(np.log(0.5), np.log(0.01), 10,
                          base=np.exp(1))

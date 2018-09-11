@@ -39,7 +39,7 @@ print(df.head())
 ##########################################################
 # Set up the training and testing sets
 
-from sklearn.cross_validation import train_test_split # noqa
+from sklearn.model_selection import train_test_split # noqa
 
 X = df[df.columns.difference(["Label"])].values
 y = df.loc[:, "Label"].values

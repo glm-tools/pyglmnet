@@ -201,7 +201,7 @@ np.shape(prior_cov)
 ########################################################
 # Fit models
 
-from sklearn.cross_validation import train_test_split
+from sklearn.model_selection import train_test_split
 Xtrain, Xtest, Ytrain, Ytest = train_test_split(features, spike_counts, test_size=0.2, random_state=42)
 
 ########################################################
