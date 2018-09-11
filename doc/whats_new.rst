@@ -14,9 +14,11 @@ Current
 Changelog
 ~~~~~~~~~
 
-	- Add option for fitting `'probit'` distribution by `Ravi Garg`_.
+    - Add option for fitting `'probit'` distribution by `Ravi Garg`_.
     - Add option for fitting `'gamma'` distribution with log link by `Mainak Jas`_.
-    - Add support for running `sklearn.model_selection.GridSearchCV` on `GLM` objects by `Mainak Jas`_.
+    - Add support for running :class:`sklearn.model_selection.GridSearchCV` on :class:`pyglmnet.GLM` objects by `Mainak Jas`_.
+    - Improved testing of gradients for optimization by `Mainak Jas`_ and `Pavan Ramkumar`_.
+    - Improved testing of estimated coefficients at convergence by `Mainak Jas`_ and `Pavan Ramkumar`_
 
 BUG
 ~~~
@@ -28,8 +30,8 @@ BUG
 API
 ~~~
 
-    - Refactored `GLM` class into two classes: `GLM` for fitting a single regularization parameter.
-      and `GLMCV` for fitting along a regularization path with cross-validation and selection of best
+    - Refactored `GLM` class into two classes: :class:`pyglmnet.GLM` for fitting a single regularization parameter,
+      and :class:`pyglmnet.GLMCV` for fitting along a regularization path with cross-validation and selection of best
       regularization parameter by `Pavan Ramkumar`_ and `Mainak Jas`_.
     - Removed support for fitting `'multinomial'` distribution by `Pavan Ramkumar`_. This option will
       be restored in a future release.
@@ -43,12 +45,12 @@ Version 0.1
 Changelog
 ~~~~~~~~~
 
-	- Add GLM class by `Pavan Ramkumar`_
-	- Add Tikhonov regularization by `Pavan Ramkumar`_
-	- Add group lasso by `Eva Dyer`_
-	- Add group lass example by `Matt Antalek`_
-	- Add multinomial link function by `Daniel Acuna`_
-	- Add benchmarks by `Vincinius Marques`_
+    - Add GLM class by `Pavan Ramkumar`_
+    - Add Tikhonov regularization by `Pavan Ramkumar`_
+    - Add group lasso by `Eva Dyer`_
+    - Add group lass example by `Matt Antalek`_
+    - Add multinomial link function by `Daniel Acuna`_
+    - Add benchmarks by `Vincinius Marques`_
 
 .. _Aid Idrizović: https://github.com/the872
 .. _Daniel Acuna: https://acuna.io/
