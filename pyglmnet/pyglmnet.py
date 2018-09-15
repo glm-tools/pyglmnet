@@ -352,14 +352,13 @@ def simulate_glm(distr, beta0, beta, X, eta=2.0, random_state=None,
     if not sample:
         return _lmb(distr, beta0, beta, X, eta)
 
-    if random_state is not None:
-        np.random.RandomState(random_state)
+    _random_state = np.random.RandomState(random_state)
     if distr == 'softplus' or distr == 'poisson':
-        y = np.random.poisson(_lmb(distr, beta0, beta, X, eta))
+        y = _random_state.poisson(_lmb(distr, beta0, beta, X, eta))
     if distr == 'gaussian':
-        y = np.random.normal(_lmb(distr, beta0, beta, X, eta))
+        y = _random_state.normal(_lmb(distr, beta0, beta, X, eta))
     if distr == 'binomial' or distr == 'probit':
-        y = np.random.binomial(1, _lmb(distr, beta0, beta, X, eta))
+        y = _random_state.binomial(1, _lmb(distr, beta0, beta, X, eta))
     if distr == 'gamma':
         mu = _lmb(distr, beta0, beta, X, eta)
         y = np.exp(mu)
@@ -486,6 +485,7 @@ class GLM(BaseEstimator):
         self.eta = eta
         self.score_metric = score_metric
         self.random_state = random_state
+        self.rng = np.random.RandomState(self.random_state)
         self.callback = callback
         self.verbose = verbose
         set_log_level(verbose)
@@ -675,7 +675,6 @@ class GLM(BaseEstimator):
         self : instance of GLM
             The fitted model.
         """
-        np.random.RandomState(self.random_state)
 
         # checks for group
         if self.group is not None:
@@ -698,9 +697,10 @@ class GLM(BaseEstimator):
         # Initialize parameters
         beta = np.zeros((n_features + 1,))
         if self.beta0_ is None and self.beta_ is None:
-            beta[0] = 1 / (n_features + 1) * np.random.normal(0.0, 1.0, 1)
+            beta[0] = 1 / (n_features + 1) * \
+                self.rng.normal(0.0, 1.0, 1)
             beta[1:] = 1 / (n_features + 1) * \
-                np.random.normal(0.0, 1.0, (n_features, ))
+                self.rng.normal(0.0, 1.0, (n_features, ))
         else:
             beta[0] = self.beta0_
             beta[1:] = self.beta_

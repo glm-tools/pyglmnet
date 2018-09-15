@@ -1,7 +1,7 @@
 from functools import partial
 
 import numpy as np
-from numpy.testing import assert_allclose
+from numpy.testing import assert_allclose, assert_array_equal
 from pytest import raises
 
 import scipy.sparse as sps
@@ -345,3 +345,40 @@ def test_cdfast():
 def test_fetch_datasets():
     """Test fetching datasets."""
     datasets.fetch_community_crime_data('/tmp/glm-tools')
+
+
+def test_random_state_consistency():
+    """ Test model's random_state """
+
+    # Generate the dataset
+    n_samples, n_features = 1000, 10
+
+    beta0 = 1. / (np.float(n_features) + 1.) * np.random.normal(0.0, 1.0)
+    beta = 1. / (np.float(n_features) + 1.) * \
+        np.random.normal(0.0, 1.0, (n_features,))
+    Xtrain = np.random.normal(0.0, 1.0, [n_samples, n_features])
+
+    ytrain = simulate_glm("gaussian", beta0, beta, Xtrain,
+                          sample=False, random_state=42)
+
+    # Test simple glm
+    glm_a = GLM(distr="gaussian", random_state=1)
+    ypred_a = glm_a.fit_predict(Xtrain, ytrain)
+    glm_b = GLM(distr="gaussian", random_state=1)
+    ypred_b = glm_b.fit_predict(Xtrain, ytrain)
+    ypred_c = glm_b.fit_predict(Xtrain, ytrain)
+
+    # Consistency between two different models
+    assert_array_equal(ypred_a, ypred_b)
+    # Consistency between different run of the same model
+    assert_array_equal(ypred_b, ypred_c)
+
+    # Test also cross-validation
+    glm_cv_a = GLMCV(distr="gaussian", cv=3, random_state=1)
+    ypred_a = glm_cv_a.fit_predict(Xtrain, ytrain)
+    glm_cv_b = GLMCV(distr="gaussian", cv=3, random_state=1)
+    ypred_b = glm_cv_b.fit_predict(Xtrain, ytrain)
+    ypred_c = glm_cv_b.fit_predict(Xtrain, ytrain)
+
+    assert_array_equal(ypred_a, ypred_b)
+    assert_array_equal(ypred_b, ypred_c)

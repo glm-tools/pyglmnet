@@ -23,6 +23,7 @@ Changelog
 BUG
 ~~~
 
+    - Fixed incorrect usage of the random_state parameter by `Giovanni De Toni`_.
     - Fixed incorrect proximal operator for group lasso by `Yu Umegaki`_.
     - Changed stopping criteria for convergence (a threshold on the change in objective value) which
       stopped too learly. The new criteria is a threshold on the norm of the gradient, by `Pavan Ramkumar`_. 
@@ -63,3 +64,4 @@ Changelog
 .. _Vinicius Marques: https://github.com/marquesVF
 .. _Ravi Garg: https://github.com/ravigarg27
 .. _Yu Umegaki: https://github.com/AnchorBlues
+.. _Giovanni De Toni: https://github.com/geektoni
