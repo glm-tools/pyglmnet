@@ -200,8 +200,12 @@ def fetch_group_lasso_datasets():
     negative_url = \
         "http://genes.mit.edu/burgelab/maxent/ssdata/MEMset/train0_5_hs"
 
-    pos_file = tempfile.NamedTemporaryFile(bufsize=0)
-    neg_file = tempfile.NamedTemporaryFile(bufsize=0)
+    if sys.version_info[0] == 3:
+        pos_file = tempfile.NamedTemporaryFile('w+', buffering=1)
+        neg_file = tempfile.NamedTemporaryFile('w+', buffering=1)
+    elif sys.version_info[0] == 2:
+        pos_file = tempfile.NamedTemporaryFile(bufsize=0)
+        neg_file = tempfile.NamedTemporaryFile(bufsize=0)
 
     urllib.request.urlretrieve(positive_url, pos_file.name, _reporthook)
     urllib.request.urlretrieve(negative_url, neg_file.name, _reporthook)
