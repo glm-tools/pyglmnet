@@ -43,7 +43,7 @@ X_train, X_test, y_train, y_test = \
 # Fit a gaussian distributed GLM with elastic net regularization
 
 # use the default value for reg_lambda
-glm = GLMCV(distr='gaussian', alpha=0.05, score_metric='pseudo_R2')
+glm = GLMCV(distr='gaussian', alpha=0.05, score_metric='pseudo_R2', cv=3)
 
 # fit model
 glm.fit(X_train, y_train)

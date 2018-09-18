@@ -210,7 +210,7 @@ from pyglmnet import utils
 n_samples = Xtrain.shape[0]
 Tau = utils.tikhonov_from_prior(prior_cov, n_samples)
 
-glm = GLMCV(distr='poisson', alpha=0., Tau=Tau, score_metric='pseudo_R2')
+glm = GLMCV(distr='poisson', alpha=0., Tau=Tau, score_metric='pseudo_R2', cv=3)
 glm.fit(Xtrain, Ytrain)
 print("train score: %f" % glm.score(Xtrain, Ytrain))
 print("test score: %f" % glm.score(Xtest, Ytest))
