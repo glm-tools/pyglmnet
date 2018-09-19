@@ -5,10 +5,10 @@ Installation
 Check dependencies
 ------------------
 You only need ``NumPy``, ``SciPy`` for the package and additionally ``scikit-learn``
-if you would like to run the examples. We recommend
-``Python >= 2.6``,
-``scikit-learn >= 0.17``,
-``NumPy >= 1.6.1`` and ``SciPy >= 0.14``.
+if you would like to run the examples. We currently support
+``Python 2.7``, ``Python 3.5``
+``scikit-learn >= 0.18``,
+``NumPy >= 1.11`` and ``SciPy >= 0.17``.
 
 Both `Canopy <https://www.enthought.com/products/canopy/>`__
 and `Anaconda <https://www.continuum.io/downloads>`__

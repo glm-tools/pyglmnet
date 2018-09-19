@@ -39,7 +39,7 @@ print(df.head())
 ##########################################################
 # Set up the training and testing sets
 
-from sklearn.cross_validation import train_test_split # noqa
+from sklearn.model_selection import train_test_split # noqa
 
 X = df[df.columns.difference(["Label"])].values
 y = df.loc[:, "Label"].values
@@ -51,14 +51,14 @@ Xtrain, Xtest, ytrain, ytest = \
 # Setup the models
 
 # set up the group lasso GLM model
-gl_glm = GLMCV(distr="binomial", tol=1e-2,
+gl_glm = GLMCV(distr="binomial", tol=1e-3,
                group=group_idxs, score_metric="pseudo_R2",
-               alpha=1.0)
+               alpha=1.0, cv=3)
 
 
 # set up the lasso model
-glm = GLMCV(distr="binomial", tol=1e-2,
-            score_metric="pseudo_R2", alpha=1.0)
+glm = GLMCV(distr="binomial", tol=1e-3,
+            score_metric="pseudo_R2", alpha=1.0, cv=3)
 
 print("gl_glm: ", gl_glm)
 print("glm: ", glm)

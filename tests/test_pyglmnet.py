@@ -9,8 +9,7 @@ from scipy.optimize import approx_fprime
 
 from sklearn.datasets import make_regression
 from sklearn.preprocessing import StandardScaler
-from sklearn.cross_validation import KFold
-from sklearn.model_selection import GridSearchCV, cross_val_score
+from sklearn.model_selection import GridSearchCV, cross_val_score, KFold
 
 from pyglmnet import (GLM, GLMCV, _grad_L2loss, _L2loss, simulate_glm,
                       _gradhess_logloss_1d, _loss, datasets)
@@ -70,7 +69,7 @@ def test_tikhonov():
     X = np.random.randn(n_samples, n_features)
     y = simulate_glm(glm_sim.distr, beta0, beta, X)
 
-    from sklearn.cross_validation import train_test_split
+    from sklearn.model_selection import train_test_split
     Xtrain, Xtest, ytrain, ytest = \
         train_test_split(X, y, test_size=0.5, random_state=42)
 
@@ -253,7 +252,7 @@ def test_glmcv():
                 continue
 
             glm = GLMCV(distr, learning_rate=learning_rate,
-                        solver=solver, score_metric=score_metric)
+                        solver=solver, score_metric=score_metric, cv=2)
 
             assert(repr(glm))
 
@@ -275,7 +274,7 @@ def test_cv():
     """Simple CV check."""
     # XXX: don't use scikit-learn for tests.
     X, y = make_regression()
-    cv = KFold(X.shape[0], 5)
+    cv = KFold(n_splits=5)
 
     glm_normal = GLM(distr='gaussian', alpha=0.01, reg_lambda=0.1)
     # check that it returns 5 scores
