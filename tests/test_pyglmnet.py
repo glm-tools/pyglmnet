@@ -44,6 +44,7 @@ def test_gradients():
     n_samples, n_features = 1000, 100
     X = np.random.normal(0.0, 1.0, [n_samples, n_features])
     X = scaler.fit_transform(X)
+    w = np.ones(n_samples)
 
     density = 0.1
     beta_ = np.zeros(n_features + 1)
@@ -57,9 +58,9 @@ def test_gradients():
         y = simulate_glm(glm.distr, beta_[0], beta_[1:], X)
 
         func = partial(_L2loss, distr, glm.alpha,
-                       glm.Tau, reg_lambda, X, y, glm.eta, glm.group)
+                       glm.Tau, reg_lambda, X, y, w, glm.eta, glm.group)
         grad = partial(_grad_L2loss, distr, glm.alpha, glm.Tau,
-                       reg_lambda, X, y,
+                       reg_lambda, X, y, w, 
                        glm.eta)
         approx_grad = approx_fprime(beta_, func, 1.5e-8)
         analytical_grad = grad(beta_)
@@ -200,6 +201,7 @@ def test_glmnet():
             X_train = np.random.normal(0.0, 1.0, [n_samples, n_features])
             y_train = simulate_glm(distr, beta0, beta, X_train,
                                    sample=False)
+            w_train = np.ones_like(y_train)
 
             alpha = 0.
             reg_lambda = 0.
@@ -212,7 +214,7 @@ def test_glmnet():
 
                 loss_trace.append(
                     _loss(distr, alpha, Tau, reg_lambda,
-                          X_train, y_train, eta, group, beta))
+                          X_train, y_train, w_train, eta, group, beta))
 
             glm = GLM(distr, learning_rate=learning_rate,
                       reg_lambda=reg_lambda, tol=1e-3, max_iter=5000,
@@ -227,7 +229,7 @@ def test_glmnet():
 
             # verify loss at convergence = loss when beta=beta_
             l_true = _loss(distr, 0., np.eye(beta.shape[0]), 0.,
-                           X_train, y_train, 2.0, None,
+                           X_train, y_train, w_train, 2.0, None,
                            np.concatenate(([beta0], beta)))
             assert_allclose(loss_trace[-1], l_true, rtol=1e-4, atol=1e-5)
             # beta=beta_ when reg_lambda = 0.

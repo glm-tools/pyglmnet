@@ -112,33 +112,33 @@ def _grad_mu(distr, z, eta):
     return grad_mu
 
 
-def _logL(distr, y, y_hat, z=None):
+def _logL(distr, y, y_hat, w, z=None):
     """The log likelihood."""
     if distr in ['softplus', 'poisson']:
         eps = np.spacing(1)
-        logL = np.sum(y * np.log(y_hat + eps) - y_hat)
+        logL = np.dot(w, y * np.log(y_hat + eps) - y_hat)
     elif distr == 'gaussian':
-        logL = -0.5 * np.sum((y - y_hat)**2)
+        logL = -0.5 * np.dot(w, (y - y_hat)**2)
     elif distr == 'binomial':
 
         # prevents underflow
         if z is not None:
-            logL = np.sum(y * z - np.log(1 + np.exp(z)))
+            logL = np.dot(w, y * z - np.log(1 + np.exp(z)))
         # for scoring
         else:
-            logL = np.sum(y * np.log(y_hat) + (1 - y) * np.log(1 - y_hat))
+            logL = np.dot(w, y * np.log(y_hat) + (1 - y) * np.log(1 - y_hat))
     elif distr == 'probit':
         if z is not None:
             pdfz, cdfz = norm.pdf(z), norm.cdf(z)
-            logL = np.sum(y * _probit_g1(z, pdfz, cdfz) +
+            logL = np.dot(w, y * _probit_g1(z, pdfz, cdfz) +
                           (1 - y) * _probit_g2(z, pdfz, cdfz))
         else:
-            logL = np.sum(y * np.log(y_hat) + (1 - y) * np.log(1 - y_hat))
+            logL = np.dot(w, y * np.log(y_hat) + (1 - y) * np.log(1 - y_hat))
     elif distr == 'gamma':
         # see
         # https://www.statistics.ma.tum.de/fileadmin/w00bdb/www/czado/lec8.pdf
         nu = 1.  # shape parameter, exponential for now
-        logL = np.sum(nu * (-y / y_hat - np.log(y_hat)))
+        logL = np.dot(w, nu * (-y / y_hat - np.log(y_hat)))
     return logL
 
 
@@ -183,30 +183,28 @@ def _L1penalty(beta, group=None):
         L1penalty += np.linalg.norm(beta[group == 0], 1)
     return L1penalty
 
-
-def _loss(distr, alpha, Tau, reg_lambda, X, y, eta, group, beta):
+def _loss(distr, alpha, Tau, reg_lambda, X, y, w, eta, group, beta):
     """Define the objective function for elastic net."""
     n_samples = X.shape[0]
     z = beta[0] + np.dot(X, beta[1:])
     y_hat = _mu(distr, z, eta)
-    L = 1. / n_samples * _logL(distr, y, y_hat, z)
+    L = 1. / n_samples * _logL(distr, y, y_hat, w=w, z=z)
     P = _penalty(alpha, beta[1:], Tau, group)
     J = -L + reg_lambda * P
     return J
 
-
-def _L2loss(distr, alpha, Tau, reg_lambda, X, y, eta, group, beta):
+def _L2loss(distr, alpha, Tau, reg_lambda, X, y, w, eta, group, beta):
     """Define the objective function for elastic net."""
     n_samples = X.shape[0]
     z = beta[0] + np.dot(X, beta[1:])
     y_hat = _mu(distr, z, eta)
-    L = 1. / n_samples * _logL(distr, y, y_hat, z)
+    L = 1. / n_samples * _logL(distr, y, y_hat, w=w, z=z)
     P = 0.5 * (1 - alpha) * _L2penalty(beta[1:], Tau)
     J = -L + reg_lambda * P
     return J
 
 
-def _grad_L2loss(distr, alpha, Tau, reg_lambda, X, y, eta, beta):
+def _grad_L2loss(distr, alpha, Tau, reg_lambda, X, y, w, eta, beta):
     """The gradient."""
     n_samples = np.float(X.shape[0])
 
@@ -219,29 +217,29 @@ def _grad_L2loss(distr, alpha, Tau, reg_lambda, X, y, eta, beta):
     grad_mu = _grad_mu(distr, z, eta)
 
     if distr in ['poisson', 'softplus']:
-        grad_beta0 = np.sum(grad_mu) - np.sum(y * grad_mu / mu)
-        grad_beta = ((np.dot(grad_mu.T, X) -
-                     np.dot((y * grad_mu / mu).T, X)).T)
+        grad_beta0 = np.sum(w * grad_mu) - np.sum(w * y * grad_mu / mu)
+        grad_beta = ((np.dot(w * grad_mu.T, X) -
+                     np.dot((w * y * grad_mu / mu).T, X)).T)
 
     elif distr == 'gaussian':
-        grad_beta0 = np.sum((mu - y) * grad_mu)
-        grad_beta = np.dot((mu - y).T, X * grad_mu[:, None]).T
+        grad_beta0 = np.sum(w * (mu - y) * grad_mu)
+        grad_beta = np.dot((w * (mu - y)).T, X * grad_mu[:, None]).T
 
     elif distr == 'binomial':
-        grad_beta0 = np.sum(mu - y)
-        grad_beta = np.dot((mu - y).T, X).T
+        grad_beta0 = np.sum(w * (mu - y))
+        grad_beta = np.dot((w * (mu - y)).T, X).T
 
     elif distr == 'probit':
         grad_logl = (y * _probit_g3(z, grad_mu, mu) -
                      (1 - y) * _probit_g4(z, grad_mu, mu))
-        grad_beta0 = -np.sum(grad_logl)
-        grad_beta = -np.dot(grad_logl.T, X).T
+        grad_beta0 = -np.sum(w * grad_logl)
+        grad_beta = -np.dot((w * grad_logl).T, X).T
 
     elif distr == 'gamma':
         nu = 1.
         grad_logl = (y / mu ** 2 - 1 / mu) * grad_mu
-        grad_beta0 = -nu * np.sum(grad_logl)
-        grad_beta = -nu * np.dot(grad_logl.T, X).T
+        grad_beta0 = -nu * np.sum(w * grad_logl)
+        grad_beta = -nu * np.dot((w * grad_logl).T, X).T
 
     grad_beta0 *= 1. / n_samples
     grad_beta *= 1. / n_samples
@@ -252,8 +250,7 @@ def _grad_L2loss(distr, alpha, Tau, reg_lambda, X, y, eta, beta):
     g[1:] = grad_beta
     return g
 
-
-def _gradhess_logloss_1d(distr, xk, y, z, eta):
+def _gradhess_logloss_1d(distr, xk, y, w, z, eta):
     """
     Compute gradient (1st derivative)
     and Hessian (2nd derivative)
@@ -280,41 +277,41 @@ def _gradhess_logloss_1d(distr, xk, y, z, eta):
     if distr == 'softplus':
         mu = _mu(distr, z, eta)
         s = expit(z)
-        gk = np.sum(s * xk) - np.sum(y * s / mu * xk)
+        gk = np.sum(w * s * xk) - np.sum(w * y * s / mu * xk)
 
         grad_s = s * (1 - s)
         grad_s_by_mu = grad_s / mu - s / (mu ** 2)
-        hk = np.sum(grad_s * xk ** 2) - np.sum(y * grad_s_by_mu * xk ** 2)
+        hk = np.sum(w * grad_s * xk ** 2) - np.sum(w * y * grad_s_by_mu * xk ** 2)
 
     elif distr == 'poisson':
         mu = _mu(distr, z, eta)
         s = expit(z)
-        gk = np.sum((mu[z <= eta] - y[z <= eta]) *
+        gk = np.sum(w[z <= eta] * (mu[z <= eta] - y[z <= eta]) *
                     xk[z <= eta]) + \
             np.exp(eta) * \
-            np.sum((1 - y[z > eta] / mu[z > eta]) *
+            np.sum(w[z > eta] * (1 - y[z > eta] / mu[z > eta]) *
                    xk[z > eta])
-        hk = np.sum(mu[z <= eta] * xk[z <= eta] ** 2) + \
+        hk = np.sum(w[z <= eta] * mu[z <= eta] * xk[z <= eta] ** 2) + \
             np.exp(eta) ** 2 * \
-            np.sum(y[z > eta] / (mu[z > eta] ** 2) *
+            np.sum(w[z > eta] * y[z > eta] / (mu[z > eta] ** 2) *
                    (xk[z > eta] ** 2))
 
     elif distr == 'gaussian':
-        gk = np.sum((z - y) * xk)
-        hk = np.sum(xk * xk)
+        gk = np.sum(w * (z - y) * xk)
+        hk = np.sum(w * xk * xk)
 
     elif distr == 'binomial':
         mu = _mu(distr, z, eta)
-        gk = np.sum((mu - y) * xk)
-        hk = np.sum(mu * (1.0 - mu) * xk * xk)
+        gk = np.sum(w * (mu - y) * xk)
+        hk = np.sum(w * mu * (1.0 - mu) * xk * xk)
 
     elif distr == 'probit':
         pdfz = norm.pdf(z)
         cdfz = norm.cdf(z)
-        gk = -np.sum((y * _probit_g3(z, pdfz, cdfz) -
-                      (1 - y) * _probit_g4(z, pdfz, cdfz)) * xk)
-        hk = np.sum((y * _probit_g5(z, pdfz, cdfz) +
-                     (1 - y) * _probit_g6(z, pdfz, cdfz)) * (xk * xk))
+        gk = -np.sum(w * (y * _probit_g3(z, pdfz, cdfz) -
+                          (1 - y) * _probit_g4(z, pdfz, cdfz)) * xk)
+        hk = np.sum(w * (y * _probit_g5(z, pdfz, cdfz) +
+                         (1 - y) * _probit_g6(z, pdfz, cdfz)) * (xk * xk))
 
     elif distr == 'gamma':
         raise NotImplementedError('cdfast is not implemented for Gamma '
@@ -598,7 +595,7 @@ class GLM(BaseEstimator):
 
             return result
 
-    def _cdfast(self, X, y, z, ActiveSet, beta, rl):
+    def _cdfast(self, X, y, w, z, ActiveSet, beta, rl):
         """
         Perform one cycle of Newton updates for all coordinates.
 
@@ -609,6 +606,9 @@ class GLM(BaseEstimator):
             The input data
         y : array
             Labels to the data
+            n_samples x 1
+        w : array
+            Weights to the data
             n_samples x 1
         z:  array
             n_samples x 1
@@ -644,7 +644,7 @@ class GLM(BaseEstimator):
                     xk = np.ones((n_samples, ))
 
                 # Calculate grad and hess of log likelihood term
-                gk, hk = _gradhess_logloss_1d(self.distr, xk, y, z, self.eta)
+                gk, hk = _gradhess_logloss_1d(self.distr, xk, y, w, z, self.eta)
 
                 # Add grad and hess of regularization term
                 if self.Tau is None:
@@ -662,7 +662,7 @@ class GLM(BaseEstimator):
                 beta[k], z = beta[k] - update, z - update * xk
         return beta, z
 
-    def fit(self, X, y):
+    def fit(self, X, y, sample_weight = None):
         """The fit function.
 
         Parameters
@@ -697,6 +697,13 @@ class GLM(BaseEstimator):
 
         n_features = X.shape[1]
 
+        # normalize weights so that X.shape[0] = sum(sample_weight)
+        # as assumed by weighted sum calculations in loss functions
+        if sample_weight is None:
+            sample_weight = np.ones_like(y)
+        else:
+            sample_weight /= np.mean(sample_weight)
+
         # Initialize parameters
         beta = np.zeros((n_features + 1,))
         if self.beta0_ is None and self.beta_ is None:
@@ -725,7 +732,7 @@ class GLM(BaseEstimator):
             if self.solver == 'batch-gradient':
                 grad = _grad_L2loss(self.distr,
                                     alpha, self.Tau,
-                                    reg_lambda, X, y, self.eta,
+                                    reg_lambda, X, y, sample_weight, self.eta,
                                     beta)
                 # Converged if the norm(gradient) < tol
                 convergence_metric = np.linalg.norm(grad)
@@ -742,7 +749,7 @@ class GLM(BaseEstimator):
             elif self.solver == 'cdfast':
                 beta_old = deepcopy(beta)
                 beta, z = \
-                    self._cdfast(X, y, z, ActiveSet, beta, reg_lambda)
+                    self._cdfast(X, y, sample_weight, z, ActiveSet, beta, reg_lambda)
                 # Converged if the norm(update) < tol
                 convergence_metric = np.linalg.norm(beta - beta_old)
                 logger.info("convergence_metric: %f" % convergence_metric)
@@ -778,7 +785,7 @@ class GLM(BaseEstimator):
         # Update the estimated variables
         self.beta0_ = beta[0]
         self.beta_ = beta[1:]
-        self.ynull_ = np.mean(y)
+        self.ynull_ = np.sum(sample_weight * y)/np.sum(sample_weight)
         return self
 
     def predict(self, X):
@@ -838,7 +845,7 @@ class GLM(BaseEstimator):
         yhat = np.asarray(yhat)
         return yhat
 
-    def fit_predict(self, X, y):
+    def fit_predict(self, X, y, sample_weight):
         """Fit the model and predict on the same data.
 
         Parameters
@@ -853,9 +860,9 @@ class GLM(BaseEstimator):
         yhat : array
             The predicted targets of shape (n_samples,).
         """
-        return self.fit(X, y).predict(X)
+        return self.fit(X, y, sample_weight).predict(X)
 
-    def score(self, X, y):
+    def score(self, X, y, sample_weight = None):
         """Score the model.
 
         Parameters
@@ -890,6 +897,10 @@ class GLM(BaseEstimator):
                                  'or multinomial distributions')
 
         y = y.ravel()
+        if sample_weight is None:
+            sample_weight = np.ones_like(y)
+        else:
+            sample_weight /= np.mean(sample_weight)
 
         if self.distr == 'binomial' and self.score_metric != 'accuracy':
             yhat = self.predict_proba(X)
@@ -898,11 +909,11 @@ class GLM(BaseEstimator):
 
         # Check whether we have a list of estimators or a single estimator
         if self.score_metric == 'deviance':
-            return metrics.deviance(y, yhat, self.distr)
+            return metrics.deviance(y, yhat, sample_weight, self.distr)
         elif self.score_metric == 'pseudo_R2':
-            return metrics.pseudo_R2(X, y, yhat, self.ynull_, self.distr)
+            return metrics.pseudo_R2(X, y, yhat, self.ynull_, sample_weight, self.distr)
         if self.score_metric == 'accuracy':
-            return metrics.accuracy(y, yhat)
+            return metrics.accuracy(y, yhat, sample_weight)
 
 
 class GLMCV(object):
@@ -1077,7 +1088,7 @@ class GLMCV(object):
         """
         return deepcopy(self)
 
-    def fit(self, X, y):
+    def fit(self, X, y, sample_weight = None):
         """The fit function.
         Parameters
         ----------
@@ -1094,7 +1105,11 @@ class GLMCV(object):
         """
         logger.info('Looping through the regularization path')
         glms, scores = list(), list()
-        self.ynull_ = np.mean(y)
+        if sample_weight is None:
+            sample_weight = np.ones_like(y)
+        else:
+            sample_weight /= np.mean(sample_weight)
+        self.ynull_ = np.sum(sample_weight * y)/np.sum(sample_weight)
 
         if not type(int):
             raise ValueError('cv must be int. We do not support scikit-learn '
@@ -1129,15 +1144,15 @@ class GLMCV(object):
                 else:
                     glm.beta0_, glm.beta_ = glms[-1].beta0_, glms[-1].beta_
 
-                glm.fit(X[train], y[train])
-                scores_fold.append(glm.score(X[val], y[val]))
+                glm.fit(X[train], y[train], sample_weight[train])
+                scores_fold.append(glm.score(X[val], y[val], sample_weight[val]))
             scores.append(np.mean(scores_fold))
 
             if idx == 0:
                 glm.beta0_, glm.beta_ = self.beta0_, self.beta_
             else:
                 glm.beta0_, glm.beta_ = glms[-1].beta0_, glms[-1].beta_
-            glm.fit(X, y)
+            glm.fit(X, y, sample_weight)
             glms.append(glm)
         # Update the estimated variables
         if self.score_metric == 'deviance':
@@ -1187,7 +1202,7 @@ class GLMCV(object):
         """
         return self.glm_.predict_proba(X)
 
-    def fit_predict(self, X, y):
+    def fit_predict(self, X, y, sample_weight = None):
         """Fit the model and predict on the same data.
 
         Parameters
@@ -1202,10 +1217,10 @@ class GLMCV(object):
             The predicted targets of shape based on the model with optimal
             reg_lambda (n_samples,)
         """
-        self.fit(X, y)
+        self.fit(X, y, sample_weight)
         return self.glm_.predict(X)
 
-    def score(self, X, y):
+    def score(self, X, y, sample_weight = None):
         """Score the model.
 
         Parameters
@@ -1222,4 +1237,4 @@ class GLMCV(object):
         score: float
             The score metric for the optimal reg_lambda
         """
-        return self.glm_.score(X, y)
+        return self.glm_.score(X, y, sample_weight)

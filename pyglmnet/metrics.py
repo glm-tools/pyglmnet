@@ -3,8 +3,7 @@
 import numpy as np
 from .pyglmnet import _logL
 
-
-def deviance(y, yhat, distr):
+def deviance(y, yhat, sample_weight, distr):
     """Deviance metrics.
 
     Parameters
@@ -15,6 +14,9 @@ def deviance(y, yhat, distr):
     yhat : array
         Predicted labels of shape (n_samples, )
 
+    sample_weight : array
+        Sample weights of shape (n_samples, )
+
     distr: str
         distribution
 
@@ -24,16 +26,15 @@ def deviance(y, yhat, distr):
         Deviance of the predicted labels.
     """
     if distr in ['softplus', 'poisson']:
-        LS = _logL(distr, y, y)
+        LS = _logL(distr, y, y, w=sample_weight)
     else:
         LS = 0
 
-    L1 = _logL(distr, y, yhat)
+    L1 = _logL(distr, y, yhat, w=sample_weight)
     score = -2 * (L1 - LS)
     return score
 
-
-def pseudo_R2(X, y, yhat, ynull_, distr):
+def pseudo_R2(X, y, yhat, ynull_, sample_weight, distr):
     """Pseudo-R2 metric.
 
     Parameters
@@ -47,6 +48,9 @@ def pseudo_R2(X, y, yhat, ynull_, distr):
     ynull_ : float
         Mean of the target labels (null model prediction)
 
+    sample_weight : array
+        Sample weights of shape (n_samples, )
+
     distr: str
         distribution
 
@@ -56,12 +60,12 @@ def pseudo_R2(X, y, yhat, ynull_, distr):
         Pseudo-R2 score.
     """
     if distr in ['softplus', 'poisson']:
-        LS = _logL(distr, y, y)
+        LS = _logL(distr, y, y, w=sample_weight)
     else:
         LS = 0
 
-    L0 = _logL(distr, y, ynull_)
-    L1 = _logL(distr, y, yhat)
+    L0 = _logL(distr, y, ynull_, w=sample_weight)
+    L1 = _logL(distr, y, yhat, w=sample_weight)
 
     if distr in ['softplus', 'poisson']:
         score = (1 - (LS - L1) / (LS - L0))
@@ -69,8 +73,7 @@ def pseudo_R2(X, y, yhat, ynull_, distr):
         score = (1 - L1 / L0)
     return score
 
-
-def accuracy(y, yhat):
+def accuracy(y, yhat, sample_weight):
     """Accuracy as ratio of correct predictions.
 
     Parameters
@@ -81,9 +84,12 @@ def accuracy(y, yhat):
     yhat : array
         Predicted labels of shape (n_samples, )
 
+    sample_weight : array
+        Sample weights of shape (n_samples, )
+
     Returns
     -------
     accuracy : float
         Accuracy score.
     """
-    return float(np.sum(y == yhat)) / yhat.shape[0]
+    return float(np.dot(sample_weight, (y == yhat))) / np.sum(sample_weight)
