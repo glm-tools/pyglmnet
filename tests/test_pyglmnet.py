@@ -14,6 +14,28 @@ from sklearn.model_selection import GridSearchCV, cross_val_score, KFold
 from pyglmnet import (GLM, GLMCV, _grad_L2loss, _L2loss, simulate_glm,
                       _gradhess_logloss_1d, _loss, datasets)
 
+#TODO move this into a better place in line after branch testing is done
+def test_sample_weight_cv():
+    """Simple sample weight check."""
+    # XXX: don't use scikit-learn for tests.
+    n_samples = 100
+    X, y = make_regression(n_samples=n_samples)
+    w = np.random.lognormal(0.0, 1.0, n_samples)
+    w /= w.sum()
+    cv = KFold(n_splits=5)
+
+    glm_normal = GLM(distr='gaussian', alpha=0.01, reg_lambda=0.1)
+    # check that cv and rest of sklearn interface works
+    cv_scores = cross_val_score(glm_normal, X, y, fit_params={'sample_weight': w}, cv=cv)
+    assert(len(scores) == 5)
+
+    param_grid = [{'alpha': np.linspace(0.01, 0.99, 2)},
+                  {'reg_lambda': np.logspace(np.log(0.5), np.log(0.01),
+                                             10, base=np.exp(1))}]
+    glmcv = GridSearchCV(glm_normal, param_grid, cv=cv)
+    glmcv.fit(X, y)
+
+
 
 def test_gradients():
     """Test gradient accuracy."""
