@@ -6,6 +6,7 @@ This is a simple cheatsheet with the gradients and Hessians
 of the penalized log likelihood loss to use as updates in the
 Newton coordinate descent algorithm for GLMs.
 
+
 Poisson: `softplus`
 -------------------
 
@@ -20,14 +21,15 @@ Poisson: `softplus`
 
 .. math::
 
-    \mathcal{L} = \sum_i y_i \log(\mu_i) - \sum_i \mu_i
+    \mathcal{L} = \sum_i w_i \left[ y_i \log(\mu_i) - \mu_i \right]
 
 **L2-penalized loss function**
 
 .. math::
 
-    J = \frac{1}{n}\sum_i \left\{ \log( 1 + \exp( \beta_0 + \sum_j \beta_j x_{ij} ) ) \right\} \\
-    - \frac{1}{n}\sum_i \left\{ y_i \log( \log( 1 + \exp(\beta_0 + \sum_j \beta_j x_{ij} ) ) ) \right\} \\
+    J = \frac{1}{n}\sum_i w_i \\
+        \left\{ \log( 1 + \exp( \beta_0 + \sum_j \beta_j x_{ij} ) ) \\
+                      - y_i \log( \log( 1 + \exp(\beta_0 + \sum_j \beta_j x_{ij} ) ) ) \right\} \\
     + \lambda (1-\alpha) \frac{1}{2} \sum_j \beta_j^2
 
 **Gradient**
@@ -36,8 +38,8 @@ Poisson: `softplus`
 
     \mu(z_i) &= \log(1 + \exp(z_i)) \\
     \sigma(z_i) &= \frac{1}{1 + \exp(-z_i)} \\
-    \frac{\partial J}{\partial \beta_0} &= \frac{1}{n}\sum_i \sigma(z_i) - \frac{1}{n}\sum_i y_i \frac{\sigma(z_i)}{\mu(z_i)} \\
-    \frac{\partial J}{\partial \beta_j} &= \frac{1}{n}\sum_i \sigma(z_i) x_{ij} - \frac{1}{n}\sum_i \sigma(z_i) y_i \frac{\sigma(z_i)}{\mu(z_i)}x_{ij} + \lambda (1 - \alpha) \beta_j
+    \frac{\partial J}{\partial \beta_0} &= \frac{1}{n}\sum_i w_i \sigma(z_i) - \frac{1}{n}\sum_i w_i y_i \frac{\sigma(z_i)}{\mu(z_i)} \\
+    \frac{\partial J}{\partial \beta_j} &= \frac{1}{n}\sum_i w_i \sigma(z_i) x_{ij} - \frac{1}{n}\sum_i w_i y_i \frac{\sigma(z_i)}{\mu(z_i)}x_{ij} + \lambda (1 - \alpha) \beta_j
 
 **Hessian**
 
@@ -45,10 +47,10 @@ Poisson: `softplus`
 
     \mu(z_i) &= \log(1 + \exp(z_i)) \\
     \sigma(z_i) &= \frac{1}{1 + \exp(-z_i)} \\
-    \frac{\partial^2 J}{\partial \beta_0^2} &= \frac{1}{n}\sum_i \sigma(z_i) (1 - \sigma(z_i))
-    - \frac{1}{n}\sum_i y_i \left\{ \frac{\sigma(z_i) (1 - \sigma(z_i))}{\mu(z_i)} - \frac{\sigma(z_i)}{\mu(z_i)^2} \right\} \\
-    \frac{\partial^2 J}{\partial \beta_j^2} &=  \frac{1}{n}\sum_i \sigma(z_i) (1 - \sigma(z_i)) x_{ij}^2
-    - \frac{1}{n}\sum_i y_i \left\{ \frac{\sigma(z_i) (1 - \sigma(z_i))}{\mu(z_i)} - \frac{\sigma(z_i)}{\mu(z_i)^2} \right\} x_{ij}^2
+    \frac{\partial^2 J}{\partial \beta_0^2} &= \frac{1}{n}\sum_i w_i \sigma(z_i) (1 - \sigma(z_i))
+    - \frac{1}{n}\sum_i w_i y_i \left\{ \frac{\sigma(z_i) (1 - \sigma(z_i))}{\mu(z_i)} - \frac{\sigma(z_i)}{\mu(z_i)^2} \right\} \\
+    \frac{\partial^2 J}{\partial \beta_j^2} &=  \frac{1}{n}\sum_i w_i \sigma(z_i) (1 - \sigma(z_i)) x_{ij}^2
+    - \frac{1}{n}\sum_i w_i y_i \left\{ \frac{\sigma(z_i) (1 - \sigma(z_i))}{\mu(z_i)} - \frac{\sigma(z_i)}{\mu(z_i)^2} \right\} x_{ij}^2
     + \lambda (1 - \alpha)
 
 Poisson (linearized): `poisson`
@@ -70,7 +72,7 @@ Poisson (linearized): `poisson`
 
 .. math::
 
-  \mathcal{L} = \sum_i y_i \log(\mu_i) - \sum_i \mu_i
+  \mathcal{L} = \sum_i w_i \left[ y_i \log(\mu_i) - \mu_i \right]
 
 **L2-penalized loss function**
 
@@ -89,10 +91,10 @@ Poisson (linearized): `poisson`
     \exp(\eta)z_i + (1-\eta)\exp(\eta),  & z_i > \eta
     \end{cases}
     \\
-    \frac{\partial J}{\partial \beta_0} &= \frac{1}{n}\sum_{i; z_i \leq \eta} (\mu_i - y_i)
-    + \frac{1}{n}\sum_{i; z_i > \eta} \exp(\eta) (1 - y_i/\mu_i) \\
-    \frac{\partial J}{\partial \beta_j} &= \frac{1}{n}\sum_{i; z_i \leq \eta} (\mu_i - y_i) x_{ij}
-    + \frac{1}{n}\sum_{i; z_i > \eta} \exp(\eta) (1 - y_i/\mu_i) x_{ij}
+    \frac{\partial J}{\partial \beta_0} &= \frac{1}{n}\sum_{i; z_i \leq \eta} w_i (\mu_i - y_i)
+    + \frac{1}{n}\sum_{i; z_i > \eta} w_i \exp(\eta) (1 - y_i/\mu_i) \\
+    \frac{\partial J}{\partial \beta_j} &= \frac{1}{n}\sum_{i; z_i \leq \eta} w_i (\mu_i - y_i) x_{ij}
+    + \frac{1}{n}\sum_{i; z_i > \eta} w_i \exp(\eta) (1 - y_i/\mu_i) x_{ij}
 
 **Hessian**
 
@@ -105,10 +107,10 @@ Poisson (linearized): `poisson`
     \exp(\eta)z_i + (1-\eta)\exp(\eta),  & z_i > \eta
     \end{cases}
     \\
-    \frac{\partial^2 J}{\partial \beta_0^2} &= \frac{1}{n}\sum_{i; z_i \leq \eta} \mu_i
-    + \frac{1}{n}\sum_{i; z_i > \eta} \exp(\eta)^2 \frac{y_i}{\mu_i^2}  \\
-    \frac{\partial^2 J}{\partial \beta_j^2} &=  \frac{1}{n}\sum_{i; z_i \leq \eta} \mu_i x_{ij}^2
-    + \frac{1}{n}\sum_{i; z_i > \eta} \exp(\eta)^2 \frac{y_i}{\mu_i^2} x_{ij}^2
+    \frac{\partial^2 J}{\partial \beta_0^2} &= \frac{1}{n}\sum_{i; z_i \leq \eta} w_i \mu_i
+    + \frac{1}{n}\sum_{i; z_i > \eta} w_i \exp(\eta)^2 \frac{y_i}{\mu_i^2}  \\
+    \frac{\partial^2 J}{\partial \beta_j^2} &=  \frac{1}{n}\sum_{i; z_i \leq \eta} w_i \mu_i x_{ij}^2
+    + \frac{1}{n}\sum_{i; z_i > \eta} w_i \exp(\eta)^2 \frac{y_i}{\mu_i^2} x_{ij}^2
     + \lambda (1 - \alpha)
 
 Gaussian: `gaussian`
@@ -125,13 +127,13 @@ Gaussian: `gaussian`
 
 .. math::
 
-    \mathcal{L} = -\frac{1}{2} \sum_i (y_i - \mu_i)^2 \\
+    \mathcal{L} = -\frac{1}{2} \sum_i w_i (y_i - \mu_i)^2 \\
 
 **L2-penalized loss function**
 
 .. math::
 
-    J = \frac{1}{2n}\sum_i (y_i - (\beta_0 + \sum_j \beta_j x_{ij}))^2 +
+    J = \frac{1}{2n}\sum_i w_i (y_i - \mu_i)^2 +
     \lambda (1 - \alpha) \frac{1}{2}\sum_j \beta_j^2\\
 
 **Gradient**
@@ -139,8 +141,8 @@ Gaussian: `gaussian`
 .. math::
 
     \mu(z_i) &= z_i \\
-    \frac{\partial J}{\partial \beta_0} &= -\frac{1}{n}\sum_i (y_i - \mu_i) \\
-    \frac{\partial J}{\partial \beta_j} &= -\frac{1}{n}\sum_i (y_i - \mu_i) x_{ij}
+    \frac{\partial J}{\partial \beta_0} &= -\frac{1}{n}\sum_i w_i (y_i - \mu_i) \\
+    \frac{\partial J}{\partial \beta_j} &= -\frac{1}{n}\sum_i w_i (y_i - \mu_i) x_{ij}
     + \lambda (1 - \alpha) \beta_j
 
 **Hessian**
@@ -148,7 +150,7 @@ Gaussian: `gaussian`
 .. math::
 
     \frac{\partial^2 J}{\partial \beta_0^2} &= 1 \\
-    \frac{\partial^2 J}{\partial \beta_j^2} &=  \frac{1}{n}\sum_i x_{ij}^2
+    \frac{\partial^2 J}{\partial \beta_j^2} &=  \frac{1}{n}\sum_i w_i x_{ij}^2
     + \lambda (1 - \alpha)
 
 Logistic: `binomial`
@@ -165,13 +167,13 @@ Logistic: `binomial`
 
 .. math::
 
-    \mathcal{L} = \sum_i \left\{ y_i \log(\mu_i) + (1-y_i) \log(1 - \mu_i) \right\} \\
+    \mathcal{L} = \sum_i w_i \left\{ y_i \log(\mu_i) + (1-y_i) \log(1 - \mu_i) \right\} \\
 
 **L2-penalized loss function**
 
 .. math::
 
-    J = -\frac{1}{n}\sum_i \left\{ y_i \log(\mu_i) +
+    J = -\frac{1}{n}\sum_i w_i \left\{ y_i \log(\mu_i) +
     (1-y_i) \log(1 - \mu_i) \right\}
     + \lambda (1 - \alpha) \frac{1}{2}\sum_j \beta_j^2\\
 
@@ -181,16 +183,16 @@ Logistic: `binomial`
 .. math::
 
     \mu(z_i) &= \frac{1}{1 + \exp(-z_i)} \\
-    \frac{\partial J}{\partial \beta_0} &= -\frac{1}{n}\sum_i (y_i - \mu_i) \\
-    \frac{\partial J}{\partial \beta_j} &= -\frac{1}{n}\sum_i (y_i - \mu_i) x_{ij}
+    \frac{\partial J}{\partial \beta_0} &= -\frac{1}{n}\sum_i w_i (y_i - \mu_i) \\
+    \frac{\partial J}{\partial \beta_j} &= -\frac{1}{n}\sum_i w_i (y_i - \mu_i) x_{ij}
     + \lambda (1 - \alpha) \beta_j
 
 **Hessian**
 
 .. math::
 
-    \frac{\partial^2 J}{\partial \beta_0^2} &= \frac{1}{n}\sum_i \mu_i (1 - \mu_i) \\
-    \frac{\partial^2 J}{\partial \beta_j^2} &=  \frac{1}{n}\sum_i \mu_i (1 - \mu_i) x_{ij}^2
+    \frac{\partial^2 J}{\partial \beta_0^2} &= \frac{1}{n}\sum_i w_i \mu_i (1 - \mu_i) \\
+    \frac{\partial^2 J}{\partial \beta_j^2} &=  \frac{1}{n}\sum_i w_i \mu_i (1 - \mu_i) x_{ij}^2
     + \lambda (1 - \alpha)
 
 Logistic: `probit`
@@ -209,13 +211,13 @@ where :math:`\Phi(z_i)` is the standard normal cumulative distribution function.
 
 .. math::
 
-    \mathcal{L} = \sum_i \left\{ y_i \log(\mu_i) + (1-y_i) \log(1 - \mu_i) \right\} \\
+    \mathcal{L} = \sum_i w_i \left\{ y_i \log(\mu_i) + (1-y_i) \log(1 - \mu_i) \right\} \\
 
 **L2-penalized loss function**
 
 .. math::
 
-    J = J = -\frac{1}{n}\sum_i \left\{ y_i \log(\mu_i) +
+    J = J = -\frac{1}{n}\sum_i w_i \left\{ y_i \log(\mu_i) +
     (1-y_i) \log(1 - \mu_i) \right\}
     + \lambda (1 - \alpha) \frac{1}{2}\sum_j \beta_j^2\\
 
@@ -233,9 +235,9 @@ where :math:`\Phi(z_i)` and :math:`\phi(z_i)` are the standard normal cdf and pd
 .. math::
 
     \frac{\partial J}{\partial \beta_0} &=
-      -\frac{1}{n}\sum_i \Bigg\{y_i \frac{\mu'(z_i)}{\mu(z_i)} - (1 - y_i)\frac{\mu'(z_i)}{1 - \mu(z_i)}\Bigg\} \\
+      -\frac{1}{n}\sum_i w_i \Bigg\{y_i \frac{\mu'(z_i)}{\mu(z_i)} - (1 - y_i)\frac{\mu'(z_i)}{1 - \mu(z_i)}\Bigg\} \\
       \frac{\partial J}{\partial \beta_j} &=
-        -\frac{1}{n}\sum_i \Bigg\{y_i \frac{\mu'(z_i)}{\mu(z_i)} - (1 - y_i)\frac{\mu'(z_i)}{1 - \mu(z_i)}\Bigg\} x_{ij}
+        -\frac{1}{n}\sum_i w_i \Bigg\{y_i \frac{\mu'(z_i)}{\mu(z_i)} - (1 - y_i)\frac{\mu'(z_i)}{1 - \mu(z_i)}\Bigg\} x_{ij}
     + \lambda (1 - \alpha) \beta_j
 
 
@@ -244,10 +246,10 @@ where :math:`\Phi(z_i)` and :math:`\phi(z_i)` are the standard normal cdf and pd
 .. math::
 
     \frac{\partial^2 J}{\partial \beta_0^2} &=
-      \frac{1}{n}\sum_i \mu'(z_i) \Bigg\{y_i \frac{z_i\mu(z_i) + \mu'(z_i)}{\mu^2(z_i)} +
+      \frac{1}{n}\sum_i w_i \mu'(z_i) \Bigg\{y_i \frac{z_i\mu(z_i) + \mu'(z_i)}{\mu^2(z_i)} +
       (1 - y_i)\frac{-z_i(1 - \mu(z_i)) + \mu'(z_i)}{(1 - \mu(z_i))^2} \Bigg\} \\
       \frac{\partial^2 J}{\partial \beta_j^2} &=
-        \frac{1}{n}\sum_i \mu'(z_i) \Bigg\{y_i \frac{z_i\mu(z_i) + \mu'(z_i)}{\mu^2(z_i)} +
+        \frac{1}{n}\sum_i w_i \mu'(z_i) \Bigg\{y_i \frac{z_i\mu(z_i) + \mu'(z_i)}{\mu^2(z_i)} +
         (1 - y_i)\frac{-z_i(1 - \mu(z_i)) + \mu'(z_i)}{(1 - \mu(z_i))^2} \Bigg\} x_{ij}^2
     + \lambda (1 - \alpha)
 
@@ -265,7 +267,7 @@ Gamma
 
 .. math::
 
-    \mathcal{L} = \sum_{i} \nu\Bigg\{\frac{-y_i}{\mu_i} - log(\mu_i)\Bigg\}
+    \mathcal{L} = \sum_{i} \nu w_i \Bigg\{\frac{-y_i}{\mu_i} - log(\mu_i)\Bigg\}
 
 where :math:`\nu` is the shape parameter. It is exponential for :math:`\nu = 1`
 and normal for :math:`\nu = \infty`.
@@ -274,16 +276,16 @@ and normal for :math:`\nu = \infty`.
 
 .. math::
 
-    J = -\frac{1}{n}\sum_{i} \nu\Bigg\{\frac{-y_i}{\mu_i} - log(\mu_i)\Bigg\}
+    J = -\frac{1}{n}\sum_{i} \nu w_i \Bigg\{\frac{-y_i}{\mu_i} - log(\mu_i)\Bigg\}
     + \lambda (1 - \alpha) \frac{1}{2}\sum_j \beta_j^2\\
 
 **Gradient**
 
 .. math::
 
-    \frac{\partial J}{\partial \beta_0} &= \frac{1}{n} \sum_{i} \nu\Bigg\{\frac{y_i}{\mu_i^2}
+    \frac{\partial J}{\partial \beta_0} &= \frac{1}{n} \sum_{i} w_i \nu\Bigg\{\frac{y_i}{\mu_i^2}
     - \frac{1}{\mu_i}\Bigg\}{\mu_i'} \\
-    \frac{\partial J}{\partial \beta_j} &= \frac{1}{n} \sum_{i} \nu\Bigg\{\frac{y_i}{\mu_i^2}
+    \frac{\partial J}{\partial \beta_j} &= \frac{1}{n} \sum_{i} w_i \nu\Bigg\{\frac{y_i}{\mu_i^2}
     - \frac{1}{\mu_i}\Bigg\}{\mu_i'}x_{ij} + \lambda (1 - \alpha) \beta_j
 
 where :math:`\mu_i' = \frac{1}{1 + \exp(-z_i)}`.
