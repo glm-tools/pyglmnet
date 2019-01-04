@@ -116,29 +116,31 @@ def _logL(distr, y, y_hat, w, z=None):
     """The log likelihood."""
     if distr in ['softplus', 'poisson']:
         eps = np.spacing(1)
-        logL = np.dot(w, y * np.log(y_hat + eps) - y_hat)
+        logL = np.sum(w * (y * np.log(y_hat + eps) - y_hat))
     elif distr == 'gaussian':
-        logL = -0.5 * np.dot(w, (y - y_hat)**2)
+        logL = -0.5 * np.sum(w * ((y - y_hat) ** 2))
     elif distr == 'binomial':
 
         # prevents underflow
         if z is not None:
-            logL = np.dot(w, y * z - np.log(1 + np.exp(z)))
+            logL = np.sum(w * (y * z - np.log(1 + np.exp(z))))
         # for scoring
         else:
-            logL = np.dot(w, y * np.log(y_hat) + (1 - y) * np.log(1 - y_hat))
+            logL = np.sum(w * (y * np.log(y_hat) +
+                               (1 - y) * np.log(1 - y_hat)))
     elif distr == 'probit':
         if z is not None:
             pdfz, cdfz = norm.pdf(z), norm.cdf(z)
-            logL = np.dot(w, y * _probit_g1(z, pdfz, cdfz) +
-                          (1 - y) * _probit_g2(z, pdfz, cdfz))
+            logL = np.sum(w * (y * _probit_g1(z, pdfz, cdfz) +
+                          (1 - y) * _probit_g2(z, pdfz, cdfz)))
         else:
-            logL = np.dot(w, y * np.log(y_hat) + (1 - y) * np.log(1 - y_hat))
+            logL = np.sum(w * (y * np.log(y_hat) +
+                               (1 - y) * np.log(1 - y_hat)))
     elif distr == 'gamma':
         # see
         # https://www.statistics.ma.tum.de/fileadmin/w00bdb/www/czado/lec8.pdf
         nu = 1.  # shape parameter, exponential for now
-        logL = np.dot(w, nu * (-y / y_hat - np.log(y_hat)))
+        logL = np.sum(w * (nu * (-y / y_hat - np.log(y_hat))))
     return logL
 
 
@@ -183,6 +185,7 @@ def _L1penalty(beta, group=None):
         L1penalty += np.linalg.norm(beta[group == 0], 1)
     return L1penalty
 
+
 def _loss(distr, alpha, Tau, reg_lambda, X, y, w, eta, group, beta):
     """Define the objective function for elastic net."""
     n_samples = X.shape[0]
@@ -192,6 +195,7 @@ def _loss(distr, alpha, Tau, reg_lambda, X, y, w, eta, group, beta):
     P = _penalty(alpha, beta[1:], Tau, group)
     J = -L + reg_lambda * P
     return J
+
 
 def _L2loss(distr, alpha, Tau, reg_lambda, X, y, w, eta, group, beta):
     """Define the objective function for elastic net."""
@@ -250,6 +254,7 @@ def _grad_L2loss(distr, alpha, Tau, reg_lambda, X, y, w, eta, beta):
     g[1:] = grad_beta
     return g
 
+
 def _gradhess_logloss_1d(distr, xk, y, w, z, eta):
     """
     Compute gradient (1st derivative)
@@ -281,7 +286,8 @@ def _gradhess_logloss_1d(distr, xk, y, w, z, eta):
 
         grad_s = s * (1 - s)
         grad_s_by_mu = grad_s / mu - s / (mu ** 2)
-        hk = np.sum(w * grad_s * xk ** 2) - np.sum(w * y * grad_s_by_mu * xk ** 2)
+        hk = np.sum(w * grad_s * xk ** 2) - \
+            np.sum(w * y * grad_s_by_mu * xk ** 2)
 
     elif distr == 'poisson':
         mu = _mu(distr, z, eta)
@@ -662,7 +668,7 @@ class GLM(BaseEstimator):
                 beta[k], z = beta[k] - update, z - update * xk
         return beta, z
 
-    def fit(self, X, y, sample_weight = None):
+    def fit(self, X, y, sample_weight=None):
         """The fit function.
 
         Parameters
@@ -785,7 +791,7 @@ class GLM(BaseEstimator):
         # Update the estimated variables
         self.beta0_ = beta[0]
         self.beta_ = beta[1:]
-        self.ynull_ = np.sum(sample_weight * y)/np.sum(sample_weight)
+        self.ynull_ = np.sum(sample_weight * y) / np.sum(sample_weight)
         return self
 
     def predict(self, X):
@@ -845,7 +851,7 @@ class GLM(BaseEstimator):
         yhat = np.asarray(yhat)
         return yhat
 
-    def fit_predict(self, X, y, sample_weight):
+    def fit_predict(self, X, y, sample_weight=None):
         """Fit the model and predict on the same data.
 
         Parameters
@@ -862,7 +868,7 @@ class GLM(BaseEstimator):
         """
         return self.fit(X, y, sample_weight).predict(X)
 
-    def score(self, X, y, sample_weight = None):
+    def score(self, X, y, sample_weight=None):
         """Score the model.
 
         Parameters
@@ -1088,7 +1094,7 @@ class GLMCV(object):
         """
         return deepcopy(self)
 
-    def fit(self, X, y, sample_weight = None):
+    def fit(self, X, y, sample_weight=None):
         """The fit function.
         Parameters
         ----------
@@ -1109,7 +1115,8 @@ class GLMCV(object):
             sample_weight = np.ones_like(y)
         else:
             sample_weight /= np.mean(sample_weight)
-        self.ynull_ = np.sum(sample_weight * y)/np.sum(sample_weight)
+
+        self.ynull_ = np.sum(sample_weight * y) / np.sum(sample_weight)
 
         if not type(int):
             raise ValueError('cv must be int. We do not support scikit-learn '
@@ -1202,7 +1209,7 @@ class GLMCV(object):
         """
         return self.glm_.predict_proba(X)
 
-    def fit_predict(self, X, y, sample_weight = None):
+    def fit_predict(self, X, y, sample_weight=None):
         """Fit the model and predict on the same data.
 
         Parameters
@@ -1220,7 +1227,7 @@ class GLMCV(object):
         self.fit(X, y, sample_weight)
         return self.glm_.predict(X)
 
-    def score(self, X, y, sample_weight = None):
+    def score(self, X, y, sample_weight=None):
         """Score the model.
 
         Parameters

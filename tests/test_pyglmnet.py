@@ -27,7 +27,7 @@ def test_sample_weight_cv():
     glm_normal = GLM(distr='gaussian', alpha=0.01, reg_lambda=0.1)
     # check that cv and rest of sklearn interface works
     cv_scores = cross_val_score(glm_normal, X, y, fit_params={'sample_weight': w}, cv=cv)
-    assert(len(scores) == 5)
+    assert(len(cv_scores) == 5)
 
     param_grid = [{'alpha': np.linspace(0.01, 0.99, 2)},
                   {'reg_lambda': np.logspace(np.log(0.5), np.log(0.01),
@@ -341,7 +341,8 @@ def test_cdfast():
         z = beta_[0] + np.dot(X, beta_[1:])
         k = 1
         xk = X[:, k - 1]
-        gk, hk = _gradhess_logloss_1d(glm.distr, xk, y, z, glm.eta)
+        w = np.ones_like(y)
+        gk, hk = _gradhess_logloss_1d(glm.distr, xk, y, z, w, glm.eta)
 
         # test grad and hess
         if distr != 'multinomial':
@@ -359,7 +360,7 @@ def test_cdfast():
 
         # test cdfast
         ActiveSet = np.ones(n_features + 1)
-        beta_ret, z_ret = glm._cdfast(X, y, z,
+        beta_ret, z_ret = glm._cdfast(X, y, w, z,
                                       ActiveSet, beta_, glm.reg_lambda)
         assert(beta_ret.shape == beta_.shape)
         assert(z_ret.shape == z.shape)

@@ -3,6 +3,7 @@
 import numpy as np
 from .pyglmnet import _logL
 
+
 def deviance(y, yhat, sample_weight, distr):
     """Deviance metrics.
 
@@ -33,6 +34,7 @@ def deviance(y, yhat, sample_weight, distr):
     L1 = _logL(distr, y, yhat, w=sample_weight)
     score = -2 * (L1 - LS)
     return score
+
 
 def pseudo_R2(X, y, yhat, ynull_, sample_weight, distr):
     """Pseudo-R2 metric.
@@ -72,6 +74,7 @@ def pseudo_R2(X, y, yhat, ynull_, sample_weight, distr):
     else:
         score = (1 - L1 / L0)
     return score
+
 
 def accuracy(y, yhat, sample_weight):
     """Accuracy as ratio of correct predictions.
