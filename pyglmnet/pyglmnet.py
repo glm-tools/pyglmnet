@@ -4,7 +4,7 @@ import warnings
 from copy import deepcopy
 
 import numpy as np
-from scipy.special import expit
+from scipy.special import expit, gamma
 from scipy.stats import norm
 
 from .utils import logger, set_log_level, _check_params
@@ -12,8 +12,7 @@ from .base import BaseEstimator, is_classifier, check_version
 
 
 ALLOWED_DISTRS = ['gaussian', 'binomial', 'softplus', 'poisson',
-                  'probit', 'gamma']
-
+                  'probit', 'gamma', 'neg-binomial']
 
 def _probit_g1(z, pdfz, cdfz, thresh=5):
     res = np.zeros_like(z)
@@ -89,7 +88,7 @@ def _lmb(distr, beta0, beta, X, eta, fit_intercept=True):
 
 def _mu(distr, z, eta, fit_intercept):
     """The non-linearity (inverse link)."""
-    if distr in ['softplus', 'gamma']:
+    if distr in ['softplus', 'gamma', 'neg-binomial']:
         mu = np.log1p(np.exp(z))
     elif distr == 'poisson':
         mu = z.copy()
@@ -107,7 +106,7 @@ def _mu(distr, z, eta, fit_intercept):
 
 def _grad_mu(distr, z, eta):
     """Derivative of the non-linearity."""
-    if distr in ['softplus', 'gamma']:
+    if distr in ['softplus', 'gamma', 'neg-binomial']:
         grad_mu = expit(z)
     elif distr == 'poisson':
         grad_mu = z.copy()
@@ -149,6 +148,11 @@ def _logL(distr, y, y_hat, z=None):
         # https://www.statistics.ma.tum.de/fileadmin/w00bdb/www/czado/lec8.pdf
         nu = 1.  # shape parameter, exponential for now
         logL = np.sum(nu * (-y / y_hat - np.log(y_hat)))
+    elif distr == 'neg-binomial':
+        r = 15.
+        C = np.sum(np.log(gamma(y + r)) - np.log(gamma(y + 1)) -
+                   np.log(gamma(r)) + r * np.log(r))
+        logL = C - np.sum(np.log(y_hat + r) * (y_hat + r) + y * np.log(y_hat))
     return logL
 
 
@@ -272,6 +276,13 @@ def _grad_L2loss(distr, alpha, Tau, reg_lambda, X, y, eta, beta,
             grad_beta0 = -nu * np.sum(grad_logl)
         grad_beta = -nu * np.dot(grad_logl.T, X).T
 
+    elif distr == 'neg-binomial':
+        r = 15.
+        partial_beta = grad_mu * (1 + np.log(mu + r))
+        partial_beta_2 = y * grad_mu * 1 / mu
+        grad_beta0 = np.sum(partial_beta + partial_beta_2)
+        grad_beta = np.dot(partial_beta.T, X) + np.dot(partial_beta_2.T, X)
+
     grad_beta0 *= 1. / n_samples
     grad_beta *= 1. / n_samples
     if fit_intercept:
@@ -352,6 +363,9 @@ def _gradhess_logloss_1d(distr, xk, y, z, eta, fit_intercept=True):
     elif distr == 'gamma':
         raise NotImplementedError('cdfast is not implemented for Gamma '
                                   'distribution')
+    elif distr == 'neg-binomial':
+        raise NotImplementedError('cdfast is not implemented for Gamma '
+                                  'distribution')
 
     return 1. / n_samples * gk, 1. / n_samples * hk
 
@@ -406,6 +420,11 @@ def simulate_glm(distr, beta0, beta, X, eta=2.0, random_state=None,
     if distr == 'gamma':
         mu = _lmb(distr, beta0, beta, X, eta)
         y = np.exp(mu)
+    if distr == 'neg-binomial':
+        mu = _lmb(distr, beta0, beta, X, eta)
+        r = 15.
+        p = mu / float(mu + r)
+        y = np.random.negative_binomial(r, p)
     return y
 
 
@@ -443,6 +462,7 @@ class GLM(BaseEstimator):
     distr: str
         distribution family can be one of the following
         'gaussian' | 'binomial' | 'poisson' | 'softplus' | 'probit' | 'gamma'
+        | 'neg-binomial'
         default: 'poisson'.
     alpha: float
         the weighting between L1 penalty and L2 penalty term
