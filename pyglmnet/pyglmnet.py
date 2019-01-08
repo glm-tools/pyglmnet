@@ -385,6 +385,9 @@ def _gradhess_logloss_1d(distr, xk, y, z, eta, fit_intercept=True, theta=1):
     elif distr == 'gamma':
         raise NotImplementedError('cdfast is not implemented for Gamma '
                                   'distribution')
+    elif distr == 'neg-binomial':
+        raise NotImplementedError('cdfast is not implemented for Gamma '
+                                  'distribution')
 
     return 1. / n_samples * gk, 1. / n_samples * hk
 
@@ -463,7 +466,6 @@ def simulate_glm(distr, beta0, beta, X, eta=2.0, random_state=None,
         y = np.exp(mu)
     if distr == 'neg-binomial':
         mu = _lmb(distr, beta0, beta, X, eta, fit_intercept=fit_intercept)
-        theta = 5
         p = theta / (theta + mu)  # Probability of success
         y = _random_state.negative_binomial(theta, p)
     return y
