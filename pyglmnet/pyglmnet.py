@@ -393,7 +393,7 @@ def _gradhess_logloss_1d(distr, xk, y, z, eta, fit_intercept=True, theta=1):
 
 
 def simulate_glm(distr, beta0, beta, X, eta=2.0, random_state=None,
-                 sample=False, fit_intercept=True):
+                 sample=False, theta=1.0, fit_intercept=True):
     """Simulate target data under a generative model.
 
     Parameters
