@@ -292,3 +292,50 @@ and normal for :math:`\nu = \infty`.
     - \frac{1}{\mu_i}\Bigg\}{\mu_i'}x_{ij} + \lambda (1 - \alpha) \beta_j
 
 where :math:`\mu_i' = \frac{1}{1 + \exp(-z_i)}`.
+
+
+Negative Binomial
+-------------------------------
+**Mean Function**
+
+.. math::
+
+    z_i = \beta_0 + \sum_j \beta_j x_{ij} \\
+    \mu_i = \log(1 + \exp(z_i))
+
+**Log-likelihood function**
+
+.. math::
+
+    \mathcal{L} &= \sum_{i=1}^N \log(\Gamma(y_i+\theta))-\log(\Gamma(y_i+\theta))\\
+    &-\log(\Gamma(\theta))+r\log(\theta))-(\log(\mu_i +\theta)(\mu_i+\theta))+y\log(\mu_i)
+
+
+**L2-penalized loss function**
+
+.. math::
+
+    J &= -\frac{1}{N}\sum_{i=1}^N \log(\Gamma(y_i+\theta))-\log(\Gamma(y_i+\theta))\\
+    &-\log(\Gamma(\theta))+r\log(\theta))-(\log(\mu_i +\theta)(\mu_i+\theta))+y\log(\mu_i)\\
+    &+ \lambda (1 - \alpha) \frac{1}{2}\sum_j \beta_j^2\\
+
+
+**Gradient**
+
+.. math::
+
+    \frac{\partial J}{\partial \beta_0} &=-\frac{1}{N}\sum_{i=0}^{N}\mu_i'(1+\log(\mu_i+\theta))+y\frac{\mu_i'}{\mu_i}\\
+    \frac{\partial J}{\partial \beta_j} &=-\frac{1}{N}\sum_{i=0}^{N}\mu_i'(1+\log(\mu_i+\theta))x_{ij}+y_i\frac{\mu_i'}{\mu_i}x_{ij}
+
+where :math:`\mu_i' = \frac{1}{1 + \exp(-z_i)}`.
+
+**Hessian**
+
+.. math::
+
+    \frac{\partial^2 J}{\partial \beta_0^2} &= -\frac{1}{N}\sum_{i=0}\mu_i''(1+\log(\mu_i+\theta))+\frac{(\mu_i')^2}{\mu_i+\theta}
+    \\& +y_i \left(\frac{\mu_i''}{\mu_i} -\frac{(\mu_i')^2}{\mu_i^2}\right)\\
+    \frac{\partial^2 J}{\partial \beta_j^2} &= -\frac{1}{N}\sum_{i=0} \mu_{i}''(1+\log(\mu_i+\theta))x_{ij}^2 + \frac{(\mu_i')^2}{\mu_i+\theta}x_{ij}^2
+    \\& +y_ix_{ij}^2\left(\frac{\mu_i''}{\mu_i} -\frac{(\mu_i')^2}{\mu_i^2}\right)
+
+where :math:`\mu_i'' = \frac{\exp(-z_i)}{(1+\exp(-z_i))^{2}}`.
