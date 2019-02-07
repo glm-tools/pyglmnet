@@ -488,6 +488,13 @@ class GLM(BaseEstimator):
         self.rng = np.random.RandomState(self.random_state)
         self.callback = callback
         self.verbose = verbose
+        
+        # These are set during fitting
+        self.niter = None
+        self.converged = False
+        self.loss_by_iter = []
+        self.loss = None
+        
         set_log_level(verbose)
 
     def _set_cv(cv, estimator=None, X=None, y=None):
@@ -716,16 +723,23 @@ class GLM(BaseEstimator):
             z = beta[0] + np.dot(X, beta[1:])       # cache z
 
         # Iterative updates
+        self.converged = False
         for t in range(0, self.max_iter):
+            # Update the number of iterations so far
+            self.niter = t
+            
             if self.solver == 'batch-gradient':
                 grad = _grad_L2loss(self.distr,
                                     alpha, self.Tau,
                                     reg_lambda, X, y, self.eta,
                                     beta)
                 # Converged if the norm(gradient) < tol
-                if (t > 1) and (np.linalg.norm(grad) < tol):
+                self.loss = np.linalg.norm(grad)
+                self.loss_by_iter.append(self.loss)
+                if (t > 1) and (self.loss < tol):
                         msg = ('\tConverged in {0:d} iterations'.format(t))
                         logger.info(msg)
+                        self.converged = True
                         break
                 beta = beta - self.learning_rate * grad
 
@@ -734,9 +748,12 @@ class GLM(BaseEstimator):
                 beta, z = \
                     self._cdfast(X, y, z, ActiveSet, beta, reg_lambda)
                 # Converged if the norm(update) < tol
-                if (t > 1) and (np.linalg.norm(beta - beta_old) < tol):
+                self.loss = np.linalg.norm(beta - beta_old)
+                self.loss_by_iter.append(self.loss)
+                if (t > 1) and (self.loss < tol):
                         msg = ('\tConverged in {0:d} iterations'.format(t))
                         logger.info(msg)
+                        self.converged = True
                         break
             # Apply proximal operator
             beta[1:] = self._prox(beta[1:], reg_lambda * alpha)
