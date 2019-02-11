@@ -766,6 +766,8 @@ class GLM(BaseEstimator):
             # Compute and save loss if callbacks are requested
             if callable(self.callback):
                 self.callback(beta)
+            
+            logger.info('Iteration: %d. Loss: %f' % (self.niter, self.loss))
 
         # Update the estimated variables
         self.beta0_ = beta[0]
