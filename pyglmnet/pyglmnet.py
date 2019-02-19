@@ -386,6 +386,20 @@ def _gradhess_logloss_1d(distr, xk, y, z, eta, fit_intercept=True, theta=1):
         raise NotImplementedError('cdfast is not implemented for Gamma '
                                   'distribution')
     elif distr == 'neg-binomial':
+
+        r = 15.
+        mu = _mu(distr, z, eta)
+        grad_mu = _grad_mu(distr, z, eta)
+        hess_mu = np.exp(-z)/expit(z)**2
+
+        partial_beta_a =hess_mu * (1 + np.log(mu + r))
+        partial_beta_b = grad_mu ** 2 / (mu + r)
+        partial_beta_c =  y * (hess_mu / mu - (grad_mu) ** 2 / mu ** 2)
+
+        gk = -np.sum(partial_beta_a+partial_beta_b+partial_beta_c)
+        hk = -np.sum(np.dot(partial_beta_a.T, xk)+np.dot(partial_beta_b.T, xk)+np.dot(partial_beta_c.T, xk))
+
+    elif distr == 'gamma':
         raise NotImplementedError('cdfast is not implemented for Gamma '
                                   'distribution')
 
