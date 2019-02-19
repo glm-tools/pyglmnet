@@ -4,7 +4,7 @@ import warnings
 from copy import deepcopy
 
 import numpy as np
-from scipy.special import expit, gamma
+from scipy.special import expit, log1p, loggamma
 from scipy.stats import norm
 
 from .utils import logger, set_log_level, _check_params, \
@@ -92,7 +92,7 @@ def _lmb(distr, beta0, beta, X, eta, fit_intercept=True):
 def _mu(distr, z, eta, fit_intercept):
     """The non-linearity (inverse link)."""
     if distr in ['softplus', 'gamma', 'neg-binomial']:
-        mu = np.log1p(np.exp(z))
+        mu = log1p(np.exp(z))
     elif distr == 'poisson':
         mu = z.copy()
         beta0 = (1 - eta) * np.exp(eta) if fit_intercept else 0.
@@ -153,8 +153,8 @@ def _logL(distr, y, y_hat, z=None):
         logL = np.sum(nu * (-y / y_hat - np.log(y_hat)))
     elif distr == 'neg-binomial':
         r = 15.
-        C = np.sum(np.log(gamma(y + r)) - np.log(gamma(y + 1)) -
-                   np.log(gamma(r)) + r * np.log(r))
+        C = np.sum(loggamma(y + r) - loggamma(y + 1) -
+                   loggamma(r) + r * np.log(r))
         logL = C - np.sum(np.log(y_hat + r) * (y_hat + r) + y * np.log(y_hat))
     return logL
 
@@ -282,7 +282,7 @@ def _grad_L2loss(distr, alpha, Tau, reg_lambda, X, y, eta, beta,
     elif distr == 'neg-binomial':
         r = 15.
         partial_beta = grad_mu * (1 + np.log(mu + r))
-        partial_beta_2 = y * grad_mu * 1 / mu
+        partial_beta_2 = y * (grad_mu / mu)
         grad_beta0 = np.sum(partial_beta + partial_beta_2)
         grad_beta = np.dot(partial_beta.T, X) + np.dot(partial_beta_2.T, X)
 
@@ -363,10 +363,21 @@ def _gradhess_logloss_1d(distr, xk, y, z, eta, fit_intercept=True):
         hk = np.sum((y * _probit_g5(z, pdfz, cdfz) +
                      (1 - y) * _probit_g6(z, pdfz, cdfz)) * (xk * xk))
 
-    elif distr == 'gamma':
-        raise NotImplementedError('cdfast is not implemented for Gamma '
-                                  'distribution')
     elif distr == 'neg-binomial':
+
+        r = 15.
+        mu = _mu(distr, z, eta)
+        grad_mu = _grad_mu(distr, z, eta)
+        hess_mu = np.exp(-z)/expit(z)**2
+
+        partial_beta_a =hess_mu * (1 + np.log(mu + r))
+        partial_beta_b = grad_mu ** 2 / (mu + r)
+        partial_beta_c =  y * (hess_mu / mu - (grad_mu) ** 2 / mu ** 2)
+
+        gk = -np.sum(partial_beta_a+partial_beta_b+partial_beta_c)
+        hk = -np.sum(np.dot(partial_beta_a.T, xk)+np.dot(partial_beta_b.T, xk)+np.dot(partial_beta_c.T, xk))
+
+    elif distr == 'gamma':
         raise NotImplementedError('cdfast is not implemented for Gamma '
                                   'distribution')
 
