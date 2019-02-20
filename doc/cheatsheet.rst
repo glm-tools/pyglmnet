@@ -307,16 +307,16 @@ Negative Binomial
 
 .. math::
 
-    \mathcal{L} &= \sum_{i=1}^N \log(\Gamma(y_i+\theta))-\log(\Gamma(y_i+\theta))\\
-    &-\log(\Gamma(\theta))+r\log(\theta))-(\log(\mu_i +\theta)(\mu_i+\theta))+y\log(\mu_i)
+    \mathcal{L} &= \sum_{i=1}^N \log(\Gamma(y_i+\theta))-\log(\Gamma(y_i+1))\\
+    &-\log(\Gamma(\theta))+\theta\log(\theta))-(\log(\mu_i +\theta)(\mu_i+\theta))+y\log(\mu_i)
 
 
 **L2-penalized loss function**
 
 .. math::
 
-    J &= -\frac{1}{N}\sum_{i=1}^N \log(\Gamma(y_i+\theta))-\log(\Gamma(y_i+\theta))\\
-    &-\log(\Gamma(\theta))+r\log(\theta))-(\log(\mu_i +\theta)(\mu_i+\theta))+y\log(\mu_i)\\
+    J &= -\frac{1}{N}\sum_{i=1}^N \log(\Gamma(y_i+\theta))-\log(\Gamma(y_i+1))\\
+    &-\log(\Gamma(\theta))+\theta\log(\theta))-(\log(\mu_i +\theta)(\mu_i+\theta))+y\log(\mu_i)\\
     &+ \lambda (1 - \alpha) \frac{1}{2}\sum_j \beta_j^2\\
 
 
