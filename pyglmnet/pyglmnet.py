@@ -153,9 +153,8 @@ def _logL(distr, y, y_hat, z=None):
         logL = np.sum(nu * (-y / y_hat - np.log(y_hat)))
     elif distr == 'neg-binomial':
         r = 15.
-        C = np.sum(loggamma(y + r) - loggamma(y + 1) -
-                   loggamma(r) + r * np.log(r))
-        logL = C - np.sum(np.log(y_hat + r) * (y_hat + r) + y * np.log(y_hat))
+        logL =  np.sum(loggamma(y + r) + r * np.log(r) + y * np.log(y_hat) - loggamma(y + 1) -
+                   loggamma(r) - np.log(y_hat + r) * (y + r))
     return logL
 
 
@@ -281,10 +280,9 @@ def _grad_L2loss(distr, alpha, Tau, reg_lambda, X, y, eta, beta,
 
     elif distr == 'neg-binomial':
         r = 15.
-        partial_beta = grad_mu * (1 + np.log(mu + r))
-        partial_beta_2 = y * (grad_mu / mu)
-        grad_beta0 = np.sum(partial_beta + partial_beta_2)
-        grad_beta = np.dot(partial_beta.T, X) + np.dot(partial_beta_2.T, X)
+        partial_beta_0 = grad_mu * ((r+y)/(r+mu)-y/mu)
+        grad_beta0 = np.sum(partial_beta_0)
+        grad_beta = np.dot(partial_beta_0.T, X)
 
     grad_beta0 *= 1. / n_samples
     grad_beta *= 1. / n_samples
@@ -368,14 +366,13 @@ def _gradhess_logloss_1d(distr, xk, y, z, eta, fit_intercept=True):
         r = 15.
         mu = _mu(distr, z, eta)
         grad_mu = _grad_mu(distr, z, eta)
-        hess_mu = np.exp(-z)/expit(z)**2
+        hess_mu = np.exp(-z)*expit(z)**2
 
-        partial_beta_a =hess_mu * (1 + np.log(mu + r))
-        partial_beta_b = grad_mu ** 2 / (mu + r)
-        partial_beta_c =  y * (hess_mu / mu - (grad_mu) ** 2 / mu ** 2)
-
-        gk = -np.sum(partial_beta_a+partial_beta_b+partial_beta_c)
-        hk = -np.sum(np.dot(partial_beta_a.T, xk)+np.dot(partial_beta_b.T, xk)+np.dot(partial_beta_c.T, xk))
+        partial_beta_0_1 = hess_mu*((r+y)/(r+mu)-(y/mu))
+        partial_beta_0_2 = grad_mu**2 * (y/mu**2 - (r+y)/(r+mu)**2)
+        partial_beta_0 = partial_beta_0_1+partial_beta_0_2
+        gk = np.sum(partial_beta_0)
+        hk = np.dot(partial_beta_0.T, xk**2)
 
     elif distr == 'gamma':
         raise NotImplementedError('cdfast is not implemented for Gamma '
