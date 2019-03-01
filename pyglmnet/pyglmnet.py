@@ -1,6 +1,7 @@
 """Python implementation of elastic-net regularized GLMs."""
 
 from copy import deepcopy
+from math import inf
 
 import numpy as np
 from scipy.special import expit
@@ -478,6 +479,8 @@ class GLM(BaseEstimator):
         self.solver = solver
         self.learning_rate = learning_rate
         self.max_iter = max_iter
+        self.n_iter = 0
+        self.converged = False
         self.beta0_ = None
         self.beta_ = None
         self.ynull_ = None
@@ -717,14 +720,21 @@ class GLM(BaseEstimator):
 
         # Iterative updates
         for t in range(0, self.max_iter):
+            logger.info("t: %i" % t)
+            convergence_metric = inf
             if self.solver == 'batch-gradient':
                 grad = _grad_L2loss(self.distr,
                                     alpha, self.Tau,
                                     reg_lambda, X, y, self.eta,
                                     beta)
                 # Converged if the norm(gradient) < tol
-                if (t > 1) and (np.linalg.norm(grad) < tol):
-                        msg = ('\tConverged in {0:d} iterations'.format(t))
+                convergence_metric = np.linalg.norm(grad)
+                logger.info("convergence_metric: %f" % convergence_metric)
+                if (t > 1) and (convergence_metric < tol):
+                        self.converged = True
+                        self.n_iter += t
+                        msg = ('\tConverged in {0:d} iterations'
+                               .format(self.n_iter))
                         logger.info(msg)
                         break
                 beta = beta - self.learning_rate * grad
@@ -734,8 +744,13 @@ class GLM(BaseEstimator):
                 beta, z = \
                     self._cdfast(X, y, z, ActiveSet, beta, reg_lambda)
                 # Converged if the norm(update) < tol
-                if (t > 1) and (np.linalg.norm(beta - beta_old) < tol):
-                        msg = ('\tConverged in {0:d} iterations'.format(t))
+                convergence_metric = np.linalg.norm(beta - beta_old)
+                logger.info("convergence_metric: %f" % convergence_metric)
+                if (t > 1) and (convergence_metric < tol):
+                        self.converged = True
+                        self.n_iter += t
+                        msg = ('\tConverged in {0:d} iterations'
+                               .format(self.n_iter))
                         logger.info(msg)
                         break
             # Apply proximal operator
@@ -749,6 +764,16 @@ class GLM(BaseEstimator):
             # Compute and save loss if callbacks are requested
             if callable(self.callback):
                 self.callback(beta)
+        else:
+            # Warn if it hit max_iter without converging
+            self.converged = False
+            self.n_iter += t + 1
+            msg = ('\t'
+                   'Failed to converge after {0:d} iterations.'
+                   ' Last convergence metric was {1:f}'
+                   ' and convergence threshold {2:f}.'
+                   ).format(self.n_iter, convergence_metric, tol)
+            logger.warn(msg)
 
         # Update the estimated variables
         self.beta0_ = beta[0]
