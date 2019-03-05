@@ -731,6 +731,7 @@ class GLM(BaseEstimator):
 
             elif self.solver == 'cdfast':
                 beta_old = deepcopy(beta)
+                z = beta[0] + np.dot(X, beta[1:])
                 beta, z = \
                     self._cdfast(X, y, z, ActiveSet, beta, reg_lambda)
                 # Converged if the norm(update) < tol
