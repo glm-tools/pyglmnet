@@ -365,10 +365,8 @@ def test_cdfast():
 
         # test cdfast
         ActiveSet = np.ones(n_features + 1)
-        beta_ret, z_ret = glm._cdfast(X, y, z,
-                                      ActiveSet, beta_, glm.reg_lambda)
+        beta_ret = glm._cdfast(X, y, ActiveSet, beta_, glm.reg_lambda)
         assert(beta_ret.shape == beta_.shape)
-        assert(z_ret.shape == z.shape)
 
 
 def test_fetch_datasets():
