@@ -595,7 +595,7 @@ class GLM(BaseEstimator):
 
             return result
 
-    def _cdfast(self, X, y, z, ActiveSet, beta, rl):
+    def _cdfast(self, X, y, ActiveSet, beta, rl):
         """
         Perform one cycle of Newton updates for all coordinates.
 
@@ -607,9 +607,6 @@ class GLM(BaseEstimator):
         y : array
             Labels to the data
             n_samples x 1
-        z:  array
-            n_samples x 1
-            beta[0] + X * beta[1:]
         ActiveSet: array
             n_features + 1 x 1
             Active set storing which betas are non-zero
@@ -631,6 +628,7 @@ class GLM(BaseEstimator):
         n_samples = X.shape[0]
         n_features = X.shape[1]
         reg_scale = rl * (1 - self.alpha)
+        z = beta[0] + np.dot(X, beta[1:])
 
         for k in range(0, n_features + 1):
             # Only update parameters in active set
@@ -656,8 +654,8 @@ class GLM(BaseEstimator):
 
                 # Update parameters, z
                 update = 1. / hk * gk
-                beta[k], z = beta[k] - update, z - update * xk
-        return beta, z
+                beta[k] = beta[k] - update
+        return beta
 
     def fit(self, X, y):
         """The fit function.
@@ -731,9 +729,8 @@ class GLM(BaseEstimator):
 
             elif self.solver == 'cdfast':
                 beta_old = deepcopy(beta)
-                z = beta[0] + np.dot(X, beta[1:])
-                beta, z = \
-                    self._cdfast(X, y, z, ActiveSet, beta, reg_lambda)
+                beta = \
+                    self._cdfast(X, y, ActiveSet, beta, reg_lambda)
                 # Converged if the norm(update) < tol
                 if (t > 1) and (np.linalg.norm(beta - beta_old) < tol):
                         msg = ('\tConverged in {0:d} iterations'.format(t))
