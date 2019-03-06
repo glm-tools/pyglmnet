@@ -1,4 +1,5 @@
 from functools import partial
+import itertools
 
 import numpy as np
 from numpy.testing import assert_allclose, assert_array_equal
@@ -201,19 +202,21 @@ def test_glmnet():
 
                 glm.fit(X_train, y_train)
 
-                # verify loss decreases or increases only slightly
-                loss_trace_decreased = np.diff(loss_trace) <= 1e-3
-                if np.any(~loss_trace_decreased):
-                    idx_of_first_increase = 2 + \
-                        np.min(np.nonzero(~loss_trace_decreased))
-                assert np.all(loss_trace_decreased), \
-                    ('Loss increased between iterations'
+                # verify that loss doesn't increase more than tolerance
+                # for too many consecutive iterations
+                loss_increased = (np.diff(loss_trace) > glm.tol)
+                loss_increase_runlengths = [sum(grp) for
+                                            val, grp in
+                                            itertools.groupby(loss_increased)
+                                            if val]
+                loss_increase_runlengths = np.array(loss_increase_runlengths)
+                assert np.all(loss_increase_runlengths <= 5), \
+                    ('Loss increased for {maxlen} consecutive iterations'
                      ' on distr={d} solver={s} with'
                      ' reg_lambda={rl}'
-                     '\n Loss trace:\n {lt}'
                      ).format(d=distr, s=solver,
                               rl=reg_lambda,
-                              lt=loss_trace[:idx_of_first_increase])
+                              maxlen=np.max(loss_increase_runlengths))
 
                 if reg_lambda == 0.0:
                     # check that the true model can be recreated
