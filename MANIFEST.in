@@ -1,5 +1,0 @@
-include *.rst *.md
-include LICENSE
-recursive-include doc *
-recursive-include examples *
-recursive-include pyglmnet *.py
