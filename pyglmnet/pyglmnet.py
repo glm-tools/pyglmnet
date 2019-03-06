@@ -711,7 +711,6 @@ class GLM(BaseEstimator):
 
         if self.solver == 'cdfast':
             ActiveSet = np.ones(n_features + 1)     # init active set
-            z = beta[0] + np.dot(X, beta[1:])       # cache z
 
         # Iterative updates
         for t in range(0, self.max_iter):
