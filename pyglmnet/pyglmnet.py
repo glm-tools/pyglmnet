@@ -721,9 +721,9 @@ class GLM(BaseEstimator):
                                     beta)
                 # Converged if the norm(gradient) < tol
                 if (t > 1) and (np.linalg.norm(grad) < tol):
-                        msg = ('\tConverged in {0:d} iterations'.format(t))
-                        logger.info(msg)
-                        break
+                    msg = ('\tConverged in {0:d} iterations'.format(t))
+                    logger.info(msg)
+                    break
                 beta = beta - self.learning_rate * grad
 
             elif self.solver == 'cdfast':
@@ -732,9 +732,9 @@ class GLM(BaseEstimator):
                     self._cdfast(X, y, ActiveSet, beta, reg_lambda)
                 # Converged if the norm(update) < tol
                 if (t > 1) and (np.linalg.norm(beta - beta_old) < tol):
-                        msg = ('\tConverged in {0:d} iterations'.format(t))
-                        logger.info(msg)
-                        break
+                    msg = ('\tConverged in {0:d} iterations'.format(t))
+                    logger.info(msg)
+                    break
             # Apply proximal operator
             beta[1:] = self._prox(beta[1:], reg_lambda * alpha)
 
