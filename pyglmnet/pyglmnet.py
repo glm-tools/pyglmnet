@@ -739,12 +739,12 @@ class GLM(BaseEstimator):
                 convergence_metric = np.linalg.norm(grad)
                 logger.debug("convergence_metric: %f" % convergence_metric)
                 if (t > 1) and (convergence_metric < tol):
-                        self.converged = True
-                        self.n_iter += t
-                        msg = ('\tConverged in {0:d} iterations'
-                               .format(self.n_iter))
-                        logger.info(msg)
-                        break
+                    self.converged = True
+                    self.n_iter += t
+                    msg = ('\tConverged in {0:d} iterations'
+                           .format(self.n_iter))
+                    logger.info(msg)
+                    break
                 beta = beta - self.learning_rate * grad
 
             elif self.solver == 'cdfast':
@@ -756,12 +756,12 @@ class GLM(BaseEstimator):
                 convergence_metric = np.linalg.norm(beta - beta_old)
                 logger.debug("convergence_metric: %f" % convergence_metric)
                 if (t > 1) and (convergence_metric < tol):
-                        self.converged = True
-                        self.n_iter += t
-                        msg = ('\tConverged in {0:d} iterations'
-                               .format(self.n_iter))
-                        logger.info(msg)
-                        break
+                    self.converged = True
+                    self.n_iter += t
+                    msg = ('\tConverged in {0:d} iterations'
+                           .format(self.n_iter))
+                    logger.info(msg)
+                    break
             # Apply proximal operator
             beta[1:] = self._prox(beta[1:], reg_lambda * alpha)
 
