@@ -600,7 +600,8 @@ class GLM(BaseEstimator):
 
             return result
 
-    def _cdfast(self, X, y, w, z, ActiveSet, beta, rl):
+
+    def _cdfast(self, X, y, w, ActiveSet, beta, rl):
         """
         Perform one cycle of Newton updates for all coordinates.
 
@@ -615,9 +616,7 @@ class GLM(BaseEstimator):
         w : array
             Weights to the data
             n_samples x 1
-        z:  array
-            n_samples x 1
-            beta[0] + X * beta[1:]
+
         ActiveSet: array
             n_features + 1 x 1
             Active set storing which betas are non-zero
@@ -632,9 +631,6 @@ class GLM(BaseEstimator):
         beta: array
             (n_features + 1) x 1
             Updated parameters
-        z: array
-            beta[0] + X * beta[1:]
-            (n_features + 1) x 1
         """
         n_samples = X.shape[0]
         n_features = X.shape[1]
@@ -649,6 +645,7 @@ class GLM(BaseEstimator):
                     xk = np.ones((n_samples, ))
 
                 # Calculate grad and hess of log likelihood term
+                z = beta[0] + np.dot(X, beta[1:])
                 gk, hk = _gradhess_logloss_1d(self.distr, xk, y, w, z, self.eta)
 
                 # Add grad and hess of regularization term
@@ -664,8 +661,8 @@ class GLM(BaseEstimator):
 
                 # Update parameters, z
                 update = 1. / hk * gk
-                beta[k], z = beta[k] - update, z - update * xk
-        return beta, z
+                beta[k] = beta[k] - update
+        return beta
 
     def fit(self, X, y, sample_weight=None):
         """The fit function.
@@ -728,7 +725,6 @@ class GLM(BaseEstimator):
 
         if self.solver == 'cdfast':
             ActiveSet = np.ones(n_features + 1)     # init active set
-            z = beta[0] + np.dot(X, beta[1:])       # cache z
 
         # Iterative updates
         for t in range(0, self.max_iter):
@@ -741,7 +737,7 @@ class GLM(BaseEstimator):
                                     beta)
                 # Converged if the norm(gradient) < tol
                 convergence_metric = np.linalg.norm(grad)
-                logger.info("convergence_metric: %f" % convergence_metric)
+                logger.debug("convergence_metric: %f" % convergence_metric)
                 if (t > 1) and (convergence_metric < tol):
                         self.converged = True
                         self.n_iter += t
@@ -753,11 +749,12 @@ class GLM(BaseEstimator):
 
             elif self.solver == 'cdfast':
                 beta_old = deepcopy(beta)
-                beta, z = \
-                    self._cdfast(X, y, sample_weight, z, ActiveSet, beta, reg_lambda)
+
+                beta = self._cdfast(X, y, sample_weight,
+                                    ActiveSet, beta, reg_lambda)
                 # Converged if the norm(update) < tol
                 convergence_metric = np.linalg.norm(beta - beta_old)
-                logger.info("convergence_metric: %f" % convergence_metric)
+                logger.debug("convergence_metric: %f" % convergence_metric)
                 if (t > 1) and (convergence_metric < tol):
                         self.converged = True
                         self.n_iter += t

@@ -1,4 +1,5 @@
 from functools import partial
+import itertools
 
 import numpy as np
 from numpy.testing import assert_allclose, assert_array_equal
@@ -187,62 +188,94 @@ def test_glmnet():
 
     distrs = ['softplus', 'gaussian', 'poisson', 'binomial', 'probit']
     solvers = ['batch-gradient', 'cdfast']
+    reg_lambdas = [0.0, 0.1]
 
     score_metric = 'pseudo_R2'
     learning_rate = 2e-1
     random_state = 0
 
     for distr in distrs:
-        betas_ = list()
-        for solver in solvers:
+        for reg_lambda in reg_lambdas:
+            betas_ = list()
+            for solver in solvers:
 
-            np.random.seed(random_state)
+                np.random.seed(random_state)
 
-            X_train = np.random.normal(0.0, 1.0, [n_samples, n_features])
-            y_train = simulate_glm(distr, beta0, beta, X_train,
-                                   sample=False)
-            w_train = np.ones_like(y_train)
+                X_train = np.random.normal(0.0, 1.0, [n_samples, n_features])
+                y_train = simulate_glm(distr, beta0, beta, X_train,
+                                       sample=False)
+                w_train = np.ones_like(y_train)
+                alpha = 0.5
+                loss_trace = list()
 
-            alpha = 0.
-            reg_lambda = 0.
-            loss_trace = list()
+                def callback(beta):
+                    Tau = None
+                    eta = 2.0
+                    group = None
 
-            def callback(beta):
-                Tau = None
-                eta = 2.0
-                group = None
+                    loss_trace.append(
+                        _loss(distr, alpha, Tau, reg_lambda,
+                              X_train, y_train, w_train, eta, group, beta))
 
-                loss_trace.append(
-                    _loss(distr, alpha, Tau, reg_lambda,
-                          X_train, y_train, w_train, eta, group, beta))
+                glm = GLM(distr, learning_rate=learning_rate,
+                          reg_lambda=reg_lambda, tol=1e-3, max_iter=5000,
+                          alpha=alpha, solver=solver,
+                          score_metric=score_metric,
+                          random_state=random_state, callback=callback)
+                assert(repr(glm))
 
-            glm = GLM(distr, learning_rate=learning_rate,
-                      reg_lambda=reg_lambda, tol=1e-3, max_iter=5000,
-                      alpha=alpha, solver=solver, score_metric=score_metric,
-                      random_state=random_state, callback=callback)
-            assert(repr(glm))
+                glm.fit(X_train, y_train)
 
-            glm.fit(X_train, y_train)
+                # verify that loss doesn't increase more than tolerance
+                # for too many consecutive iterations
+                loss_increased = (np.diff(loss_trace) > glm.tol)
+                loss_increase_runlengths = [sum(grp) for
+                                            val, grp in
+                                            itertools.groupby(loss_increased)
+                                            if val]
+                loss_increase_runlengths = np.array(loss_increase_runlengths)
+                assert np.all(loss_increase_runlengths <= 5), \
+                    ('Loss increased for {maxlen} consecutive iterations'
+                     ' on distr={d} solver={s} with'
+                     ' reg_lambda={rl}'
+                     ).format(d=distr, s=solver,
+                              rl=reg_lambda,
+                              maxlen=np.max(loss_increase_runlengths))
 
-            # verify loss decreases
-            assert(np.all(np.diff(loss_trace) <= 1e-7))
+                if reg_lambda == 0.0:
+                    # check that the true model can be recreated
+                    # almost perfectly when no regularization is applied
+                    # verify loss at convergence = loss when beta=beta_
+                    l_true = _loss(distr, alpha, np.eye(beta.shape[0]),
+                                   reg_lambda, X_train, y_train, w_train,
+                                   2.0, None, np.concatenate(([beta0], beta)))
+                    assert_allclose(loss_trace[-1], l_true,
+                                    rtol=1e-4, atol=1e-5,
+                                    err_msg=('Final loss trace value different'
+                                             ' from true loss '
+                                             ' on distr={d} solver={s}'
+                                             ' with reg_lambda={rl}'
+                                             ).format(d=distr, s=solver,
+                                                      rl=reg_lambda))
+                    # beta=beta_ when reg_lambda = 0.
+                    assert_allclose(beta, glm.beta_, rtol=0.05, atol=1e-2,
+                                    err_msg=('Fitted beta too different'
+                                             ' from true beta'
+                                             ' in distr={} solver={}'
+                                             ).format(distr, solver))
+                    betas_.append(glm.beta_)
 
-            # verify loss at convergence = loss when beta=beta_
-            l_true = _loss(distr, 0., np.eye(beta.shape[0]), 0.,
-                           X_train, y_train, w_train, 2.0, None,
-                           np.concatenate(([beta0], beta)))
-            assert_allclose(loss_trace[-1], l_true, rtol=1e-4, atol=1e-5)
-            # beta=beta_ when reg_lambda = 0.
-            assert_allclose(beta, glm.beta_, rtol=0.05, atol=1e-2)
-            betas_.append(glm.beta_)
+                y_pred = glm.predict(X_train)
+                assert y_pred.shape[0] == X_train.shape[0], \
+                    ('Fitted values have wrong number of rows in '
+                     ' on distr={d} solver={s} with reg_lambda={rl}'
+                     ).format(d=distr, s=solver, rl=reg_lambda)
 
-            y_pred = glm.predict(X_train)
-            assert(y_pred.shape[0] == X_train.shape[0])
-
-        # compare all solvers pairwise to make sure they're close
-        for i, first_beta in enumerate(betas_[:-1]):
-            for second_beta in betas_[i + 1:]:
-                assert_allclose(first_beta, second_beta, rtol=0.05, atol=1e-2)
+            # compare all solvers pairwise to make sure they're close
+            for i, first_beta in enumerate(betas_[:-1]):
+                for second_beta in betas_[i + 1:]:
+                    assert_allclose(first_beta, second_beta,
+                                    rtol=0.05, atol=1e-2)
 
     # test fit_predict
     glm_poisson = GLM(distr='softplus')
@@ -360,10 +393,9 @@ def test_cdfast():
 
         # test cdfast
         ActiveSet = np.ones(n_features + 1)
-        beta_ret, z_ret = glm._cdfast(X, y, w, z,
-                                      ActiveSet, beta_, glm.reg_lambda)
+        beta_ret = glm._cdfast(X, y, w,
+                               ActiveSet, beta_, glm.reg_lambda)
         assert(beta_ret.shape == beta_.shape)
-        assert(z_ret.shape == z.shape)
 
 
 def test_fetch_datasets():
