@@ -15,7 +15,8 @@ from sklearn.model_selection import GridSearchCV, cross_val_score, KFold
 from pyglmnet import (GLM, GLMCV, _grad_L2loss, _L2loss, simulate_glm,
                       _gradhess_logloss_1d, _loss, datasets)
 
-#TODO move this into a better place in line after branch testing is done
+
+# TODO move this into a better place in line after branch testing is done
 def test_sample_weight_cv():
     """Simple sample weight check."""
     # XXX: don't use scikit-learn for tests.
@@ -27,7 +28,8 @@ def test_sample_weight_cv():
 
     glm_normal = GLM(distr='gaussian', alpha=0.01, reg_lambda=0.1)
     # check that cv and rest of sklearn interface works
-    cv_scores = cross_val_score(glm_normal, X, y, fit_params={'sample_weight': w}, cv=cv)
+    cv_scores = cross_val_score(glm_normal, X, y,
+                                fit_params={'sample_weight': w}, cv=cv)
     assert(len(cv_scores) == 5)
 
     param_grid = [{'alpha': np.linspace(0.01, 0.99, 2)},
@@ -35,7 +37,6 @@ def test_sample_weight_cv():
                                              10, base=np.exp(1))}]
     glmcv = GridSearchCV(glm_normal, param_grid, cv=cv)
     glmcv.fit(X, y)
-
 
 
 def test_gradients():
@@ -61,7 +62,7 @@ def test_gradients():
         func = partial(_L2loss, distr, glm.alpha,
                        glm.Tau, reg_lambda, X, y, w, glm.eta, glm.group)
         grad = partial(_grad_L2loss, distr, glm.alpha, glm.Tau,
-                       reg_lambda, X, y, w, 
+                       reg_lambda, X, y, w,
                        glm.eta)
         approx_grad = approx_fprime(beta_, func, 1.5e-8)
         analytical_grad = grad(beta_)

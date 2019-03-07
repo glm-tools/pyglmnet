@@ -600,7 +600,6 @@ class GLM(BaseEstimator):
 
             return result
 
-
     def _cdfast(self, X, y, w, ActiveSet, beta, rl):
         """
         Perform one cycle of Newton updates for all coordinates.
@@ -646,7 +645,8 @@ class GLM(BaseEstimator):
 
                 # Calculate grad and hess of log likelihood term
                 z = beta[0] + np.dot(X, beta[1:])
-                gk, hk = _gradhess_logloss_1d(self.distr, xk, y, w, z, self.eta)
+                gk, hk = \
+                    _gradhess_logloss_1d(self.distr, xk, y, w, z, self.eta)
 
                 # Add grad and hess of regularization term
                 if self.Tau is None:
@@ -913,7 +913,8 @@ class GLM(BaseEstimator):
         if self.score_metric == 'deviance':
             return metrics.deviance(y, yhat, sample_weight, self.distr)
         elif self.score_metric == 'pseudo_R2':
-            return metrics.pseudo_R2(X, y, yhat, self.ynull_, sample_weight, self.distr)
+            return metrics.pseudo_R2(X, y, yhat, self.ynull_,
+                                     sample_weight, self.distr)
         if self.score_metric == 'accuracy':
             return metrics.accuracy(y, yhat, sample_weight)
 
@@ -1148,7 +1149,8 @@ class GLMCV(object):
                     glm.beta0_, glm.beta_ = glms[-1].beta0_, glms[-1].beta_
 
                 glm.fit(X[train], y[train], sample_weight[train])
-                scores_fold.append(glm.score(X[val], y[val], sample_weight[val]))
+                scores_fold.append(
+                    glm.score(X[val], y[val], sample_weight[val]))
             scores.append(np.mean(scores_fold))
 
             if idx == 0:
