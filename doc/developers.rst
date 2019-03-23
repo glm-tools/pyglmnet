@@ -5,7 +5,7 @@ Developer Documentation
 We could use help with a number of ongoing issues. If you'd like to help,
 check the `issue tree <https://github.com/glm-tools/pyglmnet/issues>`_
 as well as our
-`requests for pull requests <https://glm-tools.github.io/requests.html>`_.
+`requests for pull requests <https://glm-tools.github.io/pyglmnet/requests.html>`_.
 
 If you've decided to make a pull request, here is an outline of the
 development workflow that we have successfully adopted.
@@ -14,7 +14,7 @@ Setting up
 ----------
 
 Fork the `repository <https://github.com/glm-tools/pyglmnet>`_
-to your own account (e.g. user).
+to your own account (i.e. github user).
 
 Clone or pull your forked repository locally. If you are doing it for the
 first time:
@@ -23,7 +23,7 @@ first time:
 
   git clone https://github.com/user/pyglmnet
 
-Or if you have an already existing local clone:
+Or if you have already cloned the repository:
 
 .. code:: bash
 
@@ -46,7 +46,7 @@ You should see this:
   origin	http://github.com/user/pyglmnet.git (push)
 
 Before you start developing a feature, make sure that your local master is
-up to date. This will save you a lot of merge conflicts later.
+up to date. This can save you from a lot of merge conflicts later.
 
 .. code:: bash
 
@@ -64,7 +64,7 @@ developing.
 
 Develop
 -------
-Make sure you develop each feature on a new branch
+Make sure you develop each feature on a new branch:
 
 .. code:: bash
 
