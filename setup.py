@@ -25,7 +25,6 @@ MAINTAINER_EMAIL = "pavan.ramkumar@gmail.com"
 LICENSE = "MIT"
 DOWNLOAD_URL = "https://github.com/glm-tools/pyglmnet.git"
 VERSION = get_version()  # Get version without importing
-INSTALL_REQUIRES = ["numpy", "scipy", "scikit-learn"]
 
 if __name__ == "__main__":
     setuptools.setup(
@@ -36,7 +35,6 @@ if __name__ == "__main__":
         license=LICENSE,
         version=VERSION,
         download_url=DOWNLOAD_URL,
-        install_requires=INSTALL_REQUIRES,
         long_description=open("README.rst").read(),
         classifiers=[
             "Intended Audience :: Science/Research",
