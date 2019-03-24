@@ -25,7 +25,7 @@ MAINTAINER_EMAIL = "pavan.ramkumar@gmail.com"
 LICENSE = "MIT"
 DOWNLOAD_URL = "https://github.com/glm-tools/pyglmnet.git"
 VERSION = get_version()  # Get version without importing
-INSTALL_REQUIRES = ["numpy>=1.11", "scipy>=0.17", "scikit-learn>=0.18", "pytest"]
+INSTALL_REQUIRES = ["numpy", "scipy", "scikit-learn"]
 
 if __name__ == "__main__":
     setuptools.setup(
