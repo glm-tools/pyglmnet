@@ -4,12 +4,14 @@ env:
     - PYTHON=3.5
     - PYTHON=3.6
     - PYTHON=3.7
+
 before_install:
   - wget -q http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh
   - chmod +x miniconda.sh
   - ./miniconda.sh -b -p /home/travis/miniconda
   - export PATH=/home/travis/miniconda/bin:$PATH
   - conda update --yes conda
+
 install:
     - conda create -n testenv --yes pip python=$PYTHON
     - source activate testenv
@@ -18,12 +20,16 @@ install:
         pip install black
       fi
     - python setup.py develop
+
 script:
-    - py.test --cov=pyglmnet tests/
-    - flake8 --count pyglmnet
+    - # Run tests, show verbose output and print the top 10 slowest running tests
+    - py.test --cov=pyglmnet tests/ --verbose --durations=10
+    - # Run flake8 to check that package and tests adhere to PEP8
+    - flake8 --count pyglmnet tests
     # Run the black code formatter to check if code adheres
     - if [[ "$PYTHON" == "3.7" ]]; then
         pip install black
       fi
+
 after_success:
     - bash <(curl -s https://codecov.io/bash)

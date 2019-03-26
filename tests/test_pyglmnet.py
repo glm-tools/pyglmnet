@@ -1,5 +1,5 @@
 from functools import partial
-
+import pytest
 import numpy as np
 from numpy.testing import assert_allclose, assert_array_equal
 from pytest import raises
@@ -11,19 +11,15 @@ from sklearn.datasets import make_regression
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import GridSearchCV, cross_val_score, KFold
 
-from pyglmnet import (
-    GLM,
-    GLMCV,
-    _grad_L2loss,
-    _L2loss,
-    simulate_glm,
-    _gradhess_logloss_1d,
-    _loss,
-    datasets,
-)
+from pyglmnet import (GLM, GLMCV, _grad_L2loss, _L2loss, simulate_glm,
+                      _gradhess_logloss_1d, _loss, datasets)
+
+DISTRIBUTIONS = ['gaussian', 'binomial', 'softplus',
+                 'poisson', 'probit', 'gamma']
 
 
-def test_gradients():
+@pytest.mark.parametrize("distr", DISTRIBUTIONS)
+def test_gradients(distr):
     """Test gradient accuracy."""
     # data
     scaler = StandardScaler()
@@ -37,28 +33,18 @@ def test_gradients():
     beta_[1:] = sps.rand(n_features, 1, density=density).toarray()[:, 0]
 
     reg_lambda = 0.1
-    distrs = ["gaussian", "binomial", "softplus", "poisson", "probit", "gamma"]
-    for distr in distrs:
-        glm = GLM(distr=distr, reg_lambda=reg_lambda)
-        y = simulate_glm(glm.distr, beta_[0], beta_[1:], X)
 
-        func = partial(
-            _L2loss,
-            distr,
-            glm.alpha,
-            glm.Tau,
-            reg_lambda,
-            X,
-            y,
-            glm.eta,
-            glm.group,
-        )
-        grad = partial(
-            _grad_L2loss, distr, glm.alpha, glm.Tau, reg_lambda, X, y, glm.eta
-        )
-        approx_grad = approx_fprime(beta_, func, 1.5e-8)
-        analytical_grad = grad(beta_)
-        assert_allclose(approx_grad, analytical_grad, rtol=1e-5, atol=1e-3)
+    glm = GLM(distr=distr, reg_lambda=reg_lambda)
+    y = simulate_glm(glm.distr, beta_[0], beta_[1:], X)
+
+    func = partial(_L2loss, distr, glm.alpha,
+                   glm.Tau, reg_lambda, X, y, glm.eta, glm.group)
+    grad = partial(_grad_L2loss, distr, glm.alpha, glm.Tau,
+                   reg_lambda, X, y,
+                   glm.eta)
+    approx_grad = approx_fprime(beta_, func, 1.5e-8)
+    analytical_grad = grad(beta_)
+    assert_allclose(approx_grad, analytical_grad, rtol=1e-5, atol=1e-3)
 
 
 def test_tikhonov():
@@ -66,70 +52,60 @@ def test_tikhonov():
     n_samples, n_features = 100, 10
 
     # design covariance matrix of parameters
-    Gam = 15.0
+    Gam = 15.
     PriorCov = np.zeros([n_features, n_features])
     for i in np.arange(0, n_features):
         for j in np.arange(i, n_features):
-            PriorCov[i, j] = np.exp(
-                -Gam
-                * 1.0
-                / (np.float(n_features) ** 2)
-                * (np.float(i) - np.float(j)) ** 2
-            )
+            PriorCov[i, j] = np.exp(-Gam * 1. / (np.float(n_features) ** 2) *
+                                    (np.float(i) - np.float(j)) ** 2)
             PriorCov[j, i] = PriorCov[i, j]
             if i == j:
                 PriorCov[i, j] += 0.01
-    PriorCov = 1.0 / np.max(PriorCov) * PriorCov
+    PriorCov = 1. / np.max(PriorCov) * PriorCov
 
     # sample parameters as multivariate normal
     beta0 = np.random.randn()
     beta = np.random.multivariate_normal(np.zeros(n_features), PriorCov)
 
     # sample train and test data
-    glm_sim = GLM(distr="softplus", score_metric="pseudo_R2")
+    glm_sim = GLM(distr='softplus', score_metric='pseudo_R2')
     X = np.random.randn(n_samples, n_features)
     y = simulate_glm(glm_sim.distr, beta0, beta, X)
 
     from sklearn.model_selection import train_test_split
-
-    Xtrain, Xtest, ytrain, ytest = train_test_split(
-        X, y, test_size=0.5, random_state=42
-    )
+    Xtrain, Xtest, ytrain, ytest = \
+        train_test_split(X, y, test_size=0.5, random_state=42)
 
     # design tikhonov matrix
     [U, S, V] = np.linalg.svd(PriorCov, full_matrices=False)
-    Tau = np.dot(np.diag(1.0 / np.sqrt(S)), U)
-    Tau = 1.0 / np.sqrt(np.float(n_samples)) * Tau / Tau.max()
+    Tau = np.dot(np.diag(1. / np.sqrt(S)), U)
+    Tau = 1. / np.sqrt(np.float(n_samples)) * Tau / Tau.max()
 
     # fit model with batch gradient
-    glm_tikhonov = GLM(
-        distr="softplus",
-        alpha=0.0,
-        Tau=Tau,
-        solver="batch-gradient",
-        tol=1e-3,
-        score_metric="pseudo_R2",
-    )
+    glm_tikhonov = GLM(distr='softplus',
+                       alpha=0.0,
+                       Tau=Tau,
+                       solver='batch-gradient',
+                       tol=1e-3,
+                       score_metric='pseudo_R2')
     glm_tikhonov.fit(Xtrain, ytrain)
 
     R2_train, R2_test = dict(), dict()
-    R2_train["tikhonov"] = glm_tikhonov.score(Xtrain, ytrain)
-    R2_test["tikhonov"] = glm_tikhonov.score(Xtest, ytest)
+    R2_train['tikhonov'] = glm_tikhonov.score(Xtrain, ytrain)
+    R2_test['tikhonov'] = glm_tikhonov.score(Xtest, ytest)
 
     # fit model with cdfast
-    glm_tikhonov = GLM(
-        distr="softplus",
-        alpha=0.0,
-        Tau=Tau,
-        solver="cdfast",
-        tol=1e-3,
-        score_metric="pseudo_R2",
-    )
+    glm_tikhonov = GLM(distr='softplus',
+                       alpha=0.0,
+                       Tau=Tau,
+                       solver='cdfast',
+                       tol=1e-3,
+                       score_metric='pseudo_R2')
     glm_tikhonov.fit(Xtrain, ytrain)
 
     R2_train, R2_test = dict(), dict()
-    R2_train["tikhonov"] = glm_tikhonov.score(Xtrain, ytrain)
-    R2_test["tikhonov"] = glm_tikhonov.score(Xtest, ytest)
+    R2_train['tikhonov'] = glm_tikhonov.score(Xtrain, ytrain)
+    R2_test['tikhonov'] = glm_tikhonov.score(Xtest, ytest)
 
 
 def test_group_lasso():
@@ -145,10 +121,10 @@ def test_group_lasso():
     # sample random coefficients
     beta0 = np.random.normal(0.0, 1.0, 1)
     beta = np.random.normal(0.0, 1.0, n_features)
-    beta[groups == 2] = 0.0
+    beta[groups == 2] = 0.
 
     # create an instance of the GLM class
-    glm_group = GLM(distr="softplus", alpha=1.0, reg_lambda=0.2, group=groups)
+    glm_group = GLM(distr='softplus', alpha=1., reg_lambda=0.2, group=groups)
 
     # simulate training data
     np.random.seed(glm_group.random_state)
@@ -172,168 +148,130 @@ def test_group_lasso():
         assert n_nonzero in (len(target_beta), 0)
 
     # one of the groups must be [all zero]
-    assert np.any(
-        [
-            beta[groups == group_id].sum() == 0
-            for group_id in group_ids
-            if group_id != 0
-        ]
-    )
+    assert np.any([beta[groups == group_id].sum() == 0
+                   for group_id in group_ids if group_id != 0])
 
 
-def test_glmnet():
+@pytest.mark.parametrize("distr", DISTRIBUTIONS)
+def test_glmnet(distr):
     """Test glmnet."""
-    raises(ValueError, GLM, distr="blah")
-    raises(ValueError, GLM, distr="gaussian", max_iter=1.8)
+    raises(ValueError, GLM, distr='blah')
+    raises(ValueError, GLM, distr='gaussian', max_iter=1.8)
 
     n_samples, n_features = 100, 10
 
     # coefficients
-    beta0 = 1.0 / (np.float(n_features) + 1.0) * np.random.normal(0.0, 1.0)
-    beta = (
-        1.0
-        / (np.float(n_features) + 1.0)
-        * np.random.normal(0.0, 1.0, (n_features,))
-    )
+    beta0 = 1. / (np.float(n_features) + 1.) * \
+        np.random.normal(0.0, 1.0)
+    beta = 1. / (np.float(n_features) + 1.) * \
+        np.random.normal(0.0, 1.0, (n_features,))
 
-    distrs = ["softplus", "gaussian", "poisson", "binomial", "probit"]
-    solvers = ["batch-gradient", "cdfast"]
+    solvers = ['batch-gradient', 'cdfast']
 
-    score_metric = "pseudo_R2"
+    score_metric = 'pseudo_R2'
     learning_rate = 2e-1
     random_state = 0
 
-    for distr in distrs:
-        betas_ = list()
-        for solver in solvers:
+    betas_ = list()
+    for solver in solvers:
 
-            np.random.seed(random_state)
+        if distr == 'gamma' and solver == 'cdfast':
+            continue
 
-            X_train = np.random.normal(0.0, 1.0, [n_samples, n_features])
-            y_train = simulate_glm(distr, beta0, beta, X_train, sample=False)
+        np.random.seed(random_state)
 
-            alpha = 0.0
-            reg_lambda = 0.0
-            loss_trace = list()
+        X_train = np.random.normal(0.0, 1.0, [n_samples, n_features])
+        y_train = simulate_glm(distr, beta0, beta, X_train,
+                               sample=False)
 
-            def callback(beta):
-                Tau = None
-                eta = 2.0
-                group = None
+        alpha = 0.
+        reg_lambda = 0.
+        loss_trace = list()
 
-                loss_trace.append(
-                    _loss(
-                        distr,
-                        alpha,
-                        Tau,
-                        reg_lambda,
-                        X_train,
-                        y_train,
-                        eta,
-                        group,
-                        beta,
-                    )
-                )
+        def callback(beta):
+            Tau = None
+            eta = 2.0
+            group = None
 
-            glm = GLM(
-                distr,
-                learning_rate=learning_rate,
-                reg_lambda=reg_lambda,
-                tol=1e-3,
-                max_iter=5000,
-                alpha=alpha,
-                solver=solver,
-                score_metric=score_metric,
-                random_state=random_state,
-                callback=callback,
-            )
-            assert repr(glm)
+            loss_trace.append(
+                _loss(distr, alpha, Tau, reg_lambda,
+                      X_train, y_train, eta, group, beta))
 
-            glm.fit(X_train, y_train)
+        glm = GLM(distr, learning_rate=learning_rate,
+                  reg_lambda=reg_lambda, tol=1e-3, max_iter=5000,
+                  alpha=alpha, solver=solver, score_metric=score_metric,
+                  random_state=random_state, callback=callback)
+        assert(repr(glm))
 
-            # verify loss decreases
-            assert np.all(np.diff(loss_trace) <= 1e-7)
+        glm.fit(X_train, y_train)
 
-            # verify loss at convergence = loss when beta=beta_
-            l_true = _loss(
-                distr,
-                0.0,
-                np.eye(beta.shape[0]),
-                0.0,
-                X_train,
-                y_train,
-                2.0,
-                None,
-                np.concatenate(([beta0], beta)),
-            )
-            assert_allclose(loss_trace[-1], l_true, rtol=1e-4, atol=1e-5)
-            # beta=beta_ when reg_lambda = 0.
-            assert_allclose(beta, glm.beta_, rtol=0.05, atol=1e-2)
-            betas_.append(glm.beta_)
+        # verify loss decreases
+        assert(np.all(np.diff(loss_trace) <= 1e-7))
 
-            y_pred = glm.predict(X_train)
-            assert y_pred.shape[0] == X_train.shape[0]
+        # verify loss at convergence = loss when beta=beta_
+        l_true = _loss(distr, 0., np.eye(beta.shape[0]), 0.,
+                       X_train, y_train, 2.0, None,
+                       np.concatenate(([beta0], beta)))
+        assert_allclose(loss_trace[-1], l_true, rtol=1e-4, atol=1e-5)
+        # beta=beta_ when reg_lambda = 0.
+        assert_allclose(beta, glm.beta_, rtol=0.05, atol=1e-2)
+        betas_.append(glm.beta_)
 
-        # compare all solvers pairwise to make sure they're close
-        for i, first_beta in enumerate(betas_[:-1]):
-            for second_beta in betas_[i + 1 :]:
-                assert_allclose(first_beta, second_beta, rtol=0.05, atol=1e-2)
+        y_pred = glm.predict(X_train)
+        assert(y_pred.shape[0] == X_train.shape[0])
+
+    # compare all solvers pairwise to make sure they're close
+    for i, first_beta in enumerate(betas_[:-1]):
+        for second_beta in betas_[i + 1:]:
+            assert_allclose(first_beta, second_beta, rtol=0.05, atol=1e-2)
 
     # test fit_predict
-    glm_poisson = GLM(distr="softplus")
+    glm_poisson = GLM(distr='softplus')
     glm_poisson.fit_predict(X_train, y_train)
     raises(ValueError, glm_poisson.fit_predict, X_train[None, ...], y_train)
 
 
-def test_glmcv():
+@pytest.mark.parametrize("distr", DISTRIBUTIONS)
+def test_glmcv(distr):
     """Test GLMCV class."""
-    raises(ValueError, GLM, distr="blah")
-    raises(ValueError, GLM, distr="gaussian", max_iter=1.8)
+    raises(ValueError, GLM, distr='blah')
+    raises(ValueError, GLM, distr='gaussian', max_iter=1.8)
 
     scaler = StandardScaler()
     n_samples, n_features = 100, 10
 
     # coefficients
-    beta0 = 1.0 / (np.float(n_features) + 1.0) * np.random.normal(0.0, 1.0)
-    beta = (
-        1.0
-        / (np.float(n_features) + 1.0)
-        * np.random.normal(0.0, 1.0, (n_features,))
-    )
+    beta0 = 1. / (np.float(n_features) + 1.) * \
+        np.random.normal(0.0, 1.0)
+    beta = 1. / (np.float(n_features) + 1.) * \
+        np.random.normal(0.0, 1.0, (n_features,))
 
-    distrs = ["softplus", "gaussian", "poisson", "binomial", "probit", "gamma"]
-    solvers = ["batch-gradient", "cdfast"]
-    score_metric = "pseudo_R2"
+    solvers = ['batch-gradient', 'cdfast']
+    score_metric = 'pseudo_R2'
     learning_rate = 2e-1
 
     for solver in solvers:
-        for distr in distrs:
 
-            if distr == "gamma" and solver == "cdfast":
-                continue
+        if distr == 'gamma' and solver == 'cdfast':
+            continue
 
-            glm = GLMCV(
-                distr,
-                learning_rate=learning_rate,
-                solver=solver,
-                score_metric=score_metric,
-                cv=2,
-            )
+        glm = GLMCV(distr, learning_rate=learning_rate,
+                    solver=solver, score_metric=score_metric, cv=2)
 
-            assert repr(glm)
+        assert(repr(glm))
 
-            np.random.seed(glm.random_state)
-            X_train = np.random.normal(0.0, 1.0, [n_samples, n_features])
-            y_train = simulate_glm(glm.distr, beta0, beta, X_train)
+        np.random.seed(glm.random_state)
+        X_train = np.random.normal(0.0, 1.0, [n_samples, n_features])
+        y_train = simulate_glm(glm.distr, beta0, beta, X_train)
 
-            X_train = scaler.fit_transform(X_train)
-            glm.fit(X_train, y_train)
+        X_train = scaler.fit_transform(X_train)
+        glm.fit(X_train, y_train)
 
-            beta_ = glm.beta_
-            assert_allclose(beta, beta_, atol=0.5)  # check fit
+        beta_ = glm.beta_
+        assert_allclose(beta, beta_, atol=0.5)  # check fit
 
-            y_pred = glm.predict(scaler.transform(X_train))
-            assert y_pred.shape[0] == X_train.shape[0]
+        y_pred = glm.predict(scaler.transform(X_train))
+        assert(y_pred.shape[0] == X_train.shape[0])
 
 
 def test_cv():
@@ -342,24 +280,20 @@ def test_cv():
     X, y = make_regression()
     cv = KFold(n_splits=5)
 
-    glm_normal = GLM(distr="gaussian", alpha=0.01, reg_lambda=0.1)
+    glm_normal = GLM(distr='gaussian', alpha=0.01, reg_lambda=0.1)
     # check that it returns 5 scores
     scores = cross_val_score(glm_normal, X, y, cv=cv)
-    assert len(scores) == 5
+    assert(len(scores) == 5)
 
-    param_grid = [
-        {"alpha": np.linspace(0.01, 0.99, 2)},
-        {
-            "reg_lambda": np.logspace(
-                np.log(0.5), np.log(0.01), 10, base=np.exp(1)
-            )
-        },
-    ]
+    param_grid = [{'alpha': np.linspace(0.01, 0.99, 2)},
+                  {'reg_lambda': np.logspace(np.log(0.5), np.log(0.01),
+                                             10, base=np.exp(1))}]
     glmcv = GridSearchCV(glm_normal, param_grid, cv=cv)
     glmcv.fit(X, y)
 
 
-def test_cdfast():
+@pytest.mark.parametrize("distr", DISTRIBUTIONS)
+def test_cdfast(distr):
     """Test all functionality related to fast coordinate descent."""
     scaler = StandardScaler()
     n_samples = 1000
@@ -367,55 +301,56 @@ def test_cdfast():
     n_classes = 5
     density = 0.1
 
-    distrs = ["softplus", "gaussian", "binomial", "poisson", "probit"]
-    for distr in distrs:
-        glm = GLM(distr, solver="cdfast")
+    # Batch gradient not available for gamma
+    if distr == 'gamma':
+        return
 
-        np.random.seed(glm.random_state)
+    glm = GLM(distr, solver='cdfast')
 
-        # coefficients
-        beta0 = np.random.rand()
-        beta = sps.rand(n_features, 1, density=density).toarray()[:, 0]
-        # data
-        X = np.random.normal(0.0, 1.0, [n_samples, n_features])
-        X = scaler.fit_transform(X)
-        y = simulate_glm(glm.distr, beta0, beta, X)
+    np.random.seed(glm.random_state)
 
-        # compute grad and hess
-        beta_ = np.zeros((n_features + 1,))
-        beta_[0] = beta0
-        beta_[1:] = beta
-        z = beta_[0] + np.dot(X, beta_[1:])
-        k = 1
-        xk = X[:, k - 1]
-        gk, hk = _gradhess_logloss_1d(glm.distr, xk, y, z, glm.eta)
+    # coefficients
+    beta0 = np.random.rand()
+    beta = sps.rand(n_features, 1, density=density).toarray()[:, 0]
+    # data
+    X = np.random.normal(0.0, 1.0, [n_samples, n_features])
+    X = scaler.fit_transform(X)
+    y = simulate_glm(glm.distr, beta0, beta, X)
 
-        # test grad and hess
-        if distr != "multinomial":
-            assert np.size(gk) == 1
-            assert np.size(hk) == 1
-            assert isinstance(gk, float)
-            assert isinstance(hk, float)
-        else:
-            assert gk.shape[0] == n_classes
-            assert hk.shape[0] == n_classes
-            assert isinstance(gk, np.ndarray)
-            assert isinstance(hk, np.ndarray)
-            assert gk.ndim == 1
-            assert hk.ndim == 1
+    # compute grad and hess
+    beta_ = np.zeros((n_features + 1,))
+    beta_[0] = beta0
+    beta_[1:] = beta
+    z = beta_[0] + np.dot(X, beta_[1:])
+    k = 1
+    xk = X[:, k - 1]
+    gk, hk = _gradhess_logloss_1d(glm.distr, xk, y, z, glm.eta)
 
-        # test cdfast
-        ActiveSet = np.ones(n_features + 1)
-        beta_ret, z_ret = glm._cdfast(
-            X, y, z, ActiveSet, beta_, glm.reg_lambda
-        )
-        assert beta_ret.shape == beta_.shape
-        assert z_ret.shape == z.shape
+    # test grad and hess
+    if distr != 'multinomial':
+        assert(np.size(gk) == 1)
+        assert(np.size(hk) == 1)
+        assert(isinstance(gk, float))
+        assert(isinstance(hk, float))
+    else:
+        assert(gk.shape[0] == n_classes)
+        assert(hk.shape[0] == n_classes)
+        assert(isinstance(gk, np.ndarray))
+        assert(isinstance(hk, np.ndarray))
+        assert(gk.ndim == 1)
+        assert(hk.ndim == 1)
+
+    # test cdfast
+    ActiveSet = np.ones(n_features + 1)
+    beta_ret, z_ret = glm._cdfast(X, y, z,
+                                  ActiveSet, beta_, glm.reg_lambda)
+    assert(beta_ret.shape == beta_.shape)
+    assert(z_ret.shape == z.shape)
 
 
 def test_fetch_datasets():
     """Test fetching datasets."""
-    datasets.fetch_community_crime_data("/tmp/glm-tools")
+    datasets.fetch_community_crime_data('/tmp/glm-tools')
 
 
 def test_random_state_consistency():
@@ -424,17 +359,13 @@ def test_random_state_consistency():
     # Generate the dataset
     n_samples, n_features = 1000, 10
 
-    beta0 = 1.0 / (np.float(n_features) + 1.0) * np.random.normal(0.0, 1.0)
-    beta = (
-        1.0
-        / (np.float(n_features) + 1.0)
-        * np.random.normal(0.0, 1.0, (n_features,))
-    )
+    beta0 = 1. / (np.float(n_features) + 1.) * np.random.normal(0.0, 1.0)
+    beta = 1. / (np.float(n_features) + 1.) * \
+        np.random.normal(0.0, 1.0, (n_features,))
     Xtrain = np.random.normal(0.0, 1.0, [n_samples, n_features])
 
-    ytrain = simulate_glm(
-        "gaussian", beta0, beta, Xtrain, sample=False, random_state=42
-    )
+    ytrain = simulate_glm("gaussian", beta0, beta, Xtrain,
+                          sample=False, random_state=42)
 
     # Test simple glm
     glm_a = GLM(distr="gaussian", random_state=1)
