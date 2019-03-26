@@ -12,14 +12,14 @@ def test_deviance():
     beta = np.random.normal(0.0, 1.0, n_features)
 
     # sample train and test data
-    glm_sim = GLM(score_metric='deviance')
+    glm_sim = GLM(score_metric="deviance")
     X = np.random.randn(n_samples, n_features)
     y = simulate_glm(glm_sim.distr, beta0, beta, X)
 
     glm_sim.fit(X, y)
     score = glm_sim.score(X, y)
 
-    assert(isinstance(score, float))
+    assert isinstance(score, float)
 
 
 def test_pseudoR2():
@@ -30,14 +30,14 @@ def test_pseudoR2():
     beta = np.random.normal(0.0, 1.0, n_features)
 
     # sample train and test data
-    glm_sim = GLM(score_metric='pseudo_R2')
+    glm_sim = GLM(score_metric="pseudo_R2")
     X = np.random.randn(n_samples, n_features)
     y = simulate_glm(glm_sim.distr, beta0, beta, X)
 
     glm_sim.fit(X, y)
     score = glm_sim.score(X, y)
 
-    assert(isinstance(score, float))
+    assert isinstance(score, float)
 
 
 def test_accuracy():
@@ -48,11 +48,11 @@ def test_accuracy():
     beta = np.random.normal(0.0, 1.0, (n_features, n_classes))
 
     # sample train and test data
-    glm_sim = GLM(distr='binomial', score_metric='accuracy')
+    glm_sim = GLM(distr="binomial", score_metric="accuracy")
     X = np.random.randn(n_samples, n_features)
     y = simulate_glm(glm_sim.distr, beta0, beta, X)
     y = np.argmax(y, axis=1)
     glm_sim.fit(X, y)
     score = glm_sim.score(X, y)
 
-    assert(isinstance(score, float))
+    assert isinstance(score, float)
