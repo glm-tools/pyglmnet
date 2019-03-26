@@ -9,8 +9,7 @@ from .utils import logger, set_log_level
 from .base import BaseEstimator, is_classifier, check_version
 
 
-ALLOWED_DISTRS = ['gaussian', 'binomial', 'softplus', 'poisson',
-                  'probit', 'gamma']
+ALLOWED_DISTRS = ["gaussian", "binomial", "softplus", "poisson", "probit", "gamma"]
 
 
 def _probit_g1(z, pdfz, cdfz, thresh=5):
@@ -32,8 +31,7 @@ def _probit_g2(z, pdfz, cdfz, thresh=5):
 def _probit_g3(z, pdfz, cdfz, thresh=5):
     res = np.zeros_like(z)
     res[z < -thresh] = -z[z < -thresh]
-    res[np.abs(z) <= thresh] = \
-        pdfz[np.abs(z) <= thresh] / cdfz[np.abs(z) <= thresh]
+    res[np.abs(z) <= thresh] = pdfz[np.abs(z) <= thresh] / cdfz[np.abs(z) <= thresh]
     res[z > thresh] = pdfz[z > thresh]
     return res
 
@@ -41,8 +39,9 @@ def _probit_g3(z, pdfz, cdfz, thresh=5):
 def _probit_g4(z, pdfz, cdfz, thresh=5):
     res = np.zeros_like(z)
     res[z < -thresh] = pdfz[z < -thresh]
-    res[np.abs(z) <= thresh] = \
-        pdfz[np.abs(z) <= thresh] / (1 - cdfz[np.abs(z) <= thresh])
+    res[np.abs(z) <= thresh] = pdfz[np.abs(z) <= thresh] / (
+        1 - cdfz[np.abs(z) <= thresh]
+    )
     res[z > thresh] = z[z > thresh]
     return res
 
@@ -50,22 +49,22 @@ def _probit_g4(z, pdfz, cdfz, thresh=5):
 def _probit_g5(z, pdfz, cdfz, thresh=5):
     res = np.zeros_like(z)
     res[z < -thresh] = 0 * z[z < -thresh]
-    res[np.abs(z) <= thresh] = \
-        z[np.abs(z) <= thresh] * pdfz[np.abs(z) <= thresh] / \
-        cdfz[np.abs(z) <= thresh] + (pdfz[np.abs(z) <= thresh] /
-                                     cdfz[np.abs(z) <= thresh]) ** 2
+    res[np.abs(z) <= thresh] = (
+        z[np.abs(z) <= thresh] * pdfz[np.abs(z) <= thresh] / cdfz[np.abs(z) <= thresh]
+        + (pdfz[np.abs(z) <= thresh] / cdfz[np.abs(z) <= thresh]) ** 2
+    )
     res[z > thresh] = z[z > thresh] * pdfz[z > thresh] + pdfz[z > thresh] ** 2
     return res
 
 
 def _probit_g6(z, pdfz, cdfz, thresh=5):
     res = np.zeros_like(z)
-    res[z < -thresh] = \
-        pdfz[z < -thresh] ** 2 - z[z < -thresh] * pdfz[z < -thresh]
-    res[np.abs(z) <= thresh] = \
-        (pdfz[np.abs(z) <= thresh] / (1 - cdfz[np.abs(z) <= thresh])) ** 2 - \
-        z[np.abs(z) <= thresh] * pdfz[np.abs(z) <= thresh] / \
-        (1 - cdfz[np.abs(z) <= thresh])
+    res[z < -thresh] = pdfz[z < -thresh] ** 2 - z[z < -thresh] * pdfz[z < -thresh]
+    res[np.abs(z) <= thresh] = (
+        pdfz[np.abs(z) <= thresh] / (1 - cdfz[np.abs(z) <= thresh])
+    ) ** 2 - z[np.abs(z) <= thresh] * pdfz[np.abs(z) <= thresh] / (
+        1 - cdfz[np.abs(z) <= thresh]
+    )
     res[z > thresh] = 0 * z[z > thresh]
     return res
 
@@ -78,47 +77,47 @@ def _lmb(distr, beta0, beta, X, eta):
 
 def _mu(distr, z, eta):
     """The non-linearity (inverse link)."""
-    if distr in ['softplus', 'gamma']:
+    if distr in ["softplus", "gamma"]:
         mu = np.log1p(np.exp(z))
-    elif distr == 'poisson':
+    elif distr == "poisson":
         mu = z.copy()
         intercept = (1 - eta) * np.exp(eta)
         mu[z > eta] = z[z > eta] * np.exp(eta) + intercept
         mu[z <= eta] = np.exp(z[z <= eta])
-    elif distr == 'gaussian':
+    elif distr == "gaussian":
         mu = z
-    elif distr == 'binomial':
+    elif distr == "binomial":
         mu = expit(z)
-    elif distr == 'probit':
+    elif distr == "probit":
         mu = norm.cdf(z)
     return mu
 
 
 def _grad_mu(distr, z, eta):
     """Derivative of the non-linearity."""
-    if distr in ['softplus', 'gamma']:
+    if distr in ["softplus", "gamma"]:
         grad_mu = expit(z)
-    elif distr == 'poisson':
+    elif distr == "poisson":
         grad_mu = z.copy()
         grad_mu[z > eta] = np.ones_like(z)[z > eta] * np.exp(eta)
         grad_mu[z <= eta] = np.exp(z[z <= eta])
-    elif distr == 'gaussian':
+    elif distr == "gaussian":
         grad_mu = np.ones_like(z)
-    elif distr == 'binomial':
+    elif distr == "binomial":
         grad_mu = expit(z) * (1 - expit(z))
-    elif distr in 'probit':
+    elif distr in "probit":
         grad_mu = norm.pdf(z)
     return grad_mu
 
 
 def _logL(distr, y, y_hat, z=None):
     """The log likelihood."""
-    if distr in ['softplus', 'poisson']:
+    if distr in ["softplus", "poisson"]:
         eps = np.spacing(1)
         logL = np.sum(y * np.log(y_hat + eps) - y_hat)
-    elif distr == 'gaussian':
-        logL = -0.5 * np.sum((y - y_hat)**2)
-    elif distr == 'binomial':
+    elif distr == "gaussian":
+        logL = -0.5 * np.sum((y - y_hat) ** 2)
+    elif distr == "binomial":
 
         # prevents underflow
         if z is not None:
@@ -126,17 +125,18 @@ def _logL(distr, y, y_hat, z=None):
         # for scoring
         else:
             logL = np.sum(y * np.log(y_hat) + (1 - y) * np.log(1 - y_hat))
-    elif distr == 'probit':
+    elif distr == "probit":
         if z is not None:
             pdfz, cdfz = norm.pdf(z), norm.cdf(z)
-            logL = np.sum(y * _probit_g1(z, pdfz, cdfz) +
-                          (1 - y) * _probit_g2(z, pdfz, cdfz))
+            logL = np.sum(
+                y * _probit_g1(z, pdfz, cdfz) + (1 - y) * _probit_g2(z, pdfz, cdfz)
+            )
         else:
             logL = np.sum(y * np.log(y_hat) + (1 - y) * np.log(1 - y_hat))
-    elif distr == 'gamma':
+    elif distr == "gamma":
         # see
         # https://www.statistics.ma.tum.de/fileadmin/w00bdb/www/czado/lec8.pdf
-        nu = 1.  # shape parameter, exponential for now
+        nu = 1.0  # shape parameter, exponential for now
         logL = np.sum(nu * (-y / y_hat - np.log(y_hat)))
     return logL
 
@@ -144,8 +144,7 @@ def _logL(distr, y, y_hat, z=None):
 def _penalty(alpha, beta, Tau, group):
     """The penalty."""
     # Combine L1 and L2 penalty terms
-    P = 0.5 * (1 - alpha) * _L2penalty(beta, Tau) + \
-        alpha * _L1penalty(beta, group)
+    P = 0.5 * (1 - alpha) * _L2penalty(beta, Tau) + alpha * _L1penalty(beta, group)
     return P
 
 
@@ -157,9 +156,8 @@ def _L2penalty(beta, Tau):
         L2penalty = np.linalg.norm(beta, 2) ** 2
     else:
         # Tikhonov penalty
-        if (Tau.shape[0] != beta.shape[0] or
-           Tau.shape[1] != beta.shape[0]):
-            raise ValueError('Tau should be (n_features x n_features)')
+        if Tau.shape[0] != beta.shape[0] or Tau.shape[1] != beta.shape[0]:
+            raise ValueError("Tau should be (n_features x n_features)")
         else:
             L2penalty = np.linalg.norm(np.dot(Tau, beta), 2) ** 2
     return L2penalty
@@ -177,8 +175,7 @@ def _L1penalty(beta, group=None):
         L1penalty = 0.0
         for group_id in group_ids:
             if group_id != 0:
-                L1penalty += \
-                    np.linalg.norm(beta[group == group_id], 2)
+                L1penalty += np.linalg.norm(beta[group == group_id], 2)
         L1penalty += np.linalg.norm(beta[group == 0], 1)
     return L1penalty
 
@@ -188,7 +185,7 @@ def _loss(distr, alpha, Tau, reg_lambda, X, y, eta, group, beta):
     n_samples = X.shape[0]
     z = beta[0] + np.dot(X, beta[1:])
     y_hat = _mu(distr, z, eta)
-    L = 1. / n_samples * _logL(distr, y, y_hat, z)
+    L = 1.0 / n_samples * _logL(distr, y, y_hat, z)
     P = _penalty(alpha, beta[1:], Tau, group)
     J = -L + reg_lambda * P
     return J
@@ -199,7 +196,7 @@ def _L2loss(distr, alpha, Tau, reg_lambda, X, y, eta, group, beta):
     n_samples = X.shape[0]
     z = beta[0] + np.dot(X, beta[1:])
     y_hat = _mu(distr, z, eta)
-    L = 1. / n_samples * _logL(distr, y, y_hat, z)
+    L = 1.0 / n_samples * _logL(distr, y, y_hat, z)
     P = 0.5 * (1 - alpha) * _L2penalty(beta[1:], Tau)
     J = -L + reg_lambda * P
     return J
@@ -217,36 +214,36 @@ def _grad_L2loss(distr, alpha, Tau, reg_lambda, X, y, eta, beta):
     mu = _mu(distr, z, eta)
     grad_mu = _grad_mu(distr, z, eta)
 
-    if distr in ['poisson', 'softplus']:
+    if distr in ["poisson", "softplus"]:
         grad_beta0 = np.sum(grad_mu) - np.sum(y * grad_mu / mu)
-        grad_beta = ((np.dot(grad_mu.T, X) -
-                     np.dot((y * grad_mu / mu).T, X)).T)
+        grad_beta = (np.dot(grad_mu.T, X) - np.dot((y * grad_mu / mu).T, X)).T
 
-    elif distr == 'gaussian':
+    elif distr == "gaussian":
         grad_beta0 = np.sum((mu - y) * grad_mu)
         grad_beta = np.dot((mu - y).T, X * grad_mu[:, None]).T
 
-    elif distr == 'binomial':
+    elif distr == "binomial":
         grad_beta0 = np.sum(mu - y)
         grad_beta = np.dot((mu - y).T, X).T
 
-    elif distr == 'probit':
-        grad_logl = (y * _probit_g3(z, grad_mu, mu) -
-                     (1 - y) * _probit_g4(z, grad_mu, mu))
+    elif distr == "probit":
+        grad_logl = y * _probit_g3(z, grad_mu, mu) - (1 - y) * _probit_g4(
+            z, grad_mu, mu
+        )
         grad_beta0 = -np.sum(grad_logl)
         grad_beta = -np.dot(grad_logl.T, X).T
 
-    elif distr == 'gamma':
-        nu = 1.
+    elif distr == "gamma":
+        nu = 1.0
         grad_logl = (y / mu ** 2 - 1 / mu) * grad_mu
         grad_beta0 = -nu * np.sum(grad_logl)
         grad_beta = -nu * np.dot(grad_logl.T, X).T
 
-    grad_beta0 *= 1. / n_samples
-    grad_beta *= 1. / n_samples
+    grad_beta0 *= 1.0 / n_samples
+    grad_beta *= 1.0 / n_samples
     grad_beta += reg_lambda * (1 - alpha) * np.dot(InvCov, beta[1:])
     n_features = X.shape[1]
-    g = np.zeros((n_features + 1, ))
+    g = np.zeros((n_features + 1,))
     g[0] = grad_beta0
     g[1:] = grad_beta
     return g
@@ -276,7 +273,7 @@ def _gradhess_logloss_1d(distr, xk, y, z, eta):
     """
     n_samples = xk.shape[0]
 
-    if distr == 'softplus':
+    if distr == "softplus":
         mu = _mu(distr, z, eta)
         s = expit(z)
         gk = np.sum(s * xk) - np.sum(y * s / mu * xk)
@@ -285,45 +282,43 @@ def _gradhess_logloss_1d(distr, xk, y, z, eta):
         grad_s_by_mu = grad_s / mu - s / (mu ** 2)
         hk = np.sum(grad_s * xk ** 2) - np.sum(y * grad_s_by_mu * xk ** 2)
 
-    elif distr == 'poisson':
+    elif distr == "poisson":
         mu = _mu(distr, z, eta)
         s = expit(z)
-        gk = np.sum((mu[z <= eta] - y[z <= eta]) *
-                    xk[z <= eta]) + \
-            np.exp(eta) * \
-            np.sum((1 - y[z > eta] / mu[z > eta]) *
-                   xk[z > eta])
-        hk = np.sum(mu[z <= eta] * xk[z <= eta] ** 2) + \
-            np.exp(eta) ** 2 * \
-            np.sum(y[z > eta] / (mu[z > eta] ** 2) *
-                   (xk[z > eta] ** 2))
+        gk = np.sum((mu[z <= eta] - y[z <= eta]) * xk[z <= eta]) + np.exp(eta) * np.sum(
+            (1 - y[z > eta] / mu[z > eta]) * xk[z > eta]
+        )
+        hk = np.sum(mu[z <= eta] * xk[z <= eta] ** 2) + np.exp(eta) ** 2 * np.sum(
+            y[z > eta] / (mu[z > eta] ** 2) * (xk[z > eta] ** 2)
+        )
 
-    elif distr == 'gaussian':
+    elif distr == "gaussian":
         gk = np.sum((z - y) * xk)
         hk = np.sum(xk * xk)
 
-    elif distr == 'binomial':
+    elif distr == "binomial":
         mu = _mu(distr, z, eta)
         gk = np.sum((mu - y) * xk)
         hk = np.sum(mu * (1.0 - mu) * xk * xk)
 
-    elif distr == 'probit':
+    elif distr == "probit":
         pdfz = norm.pdf(z)
         cdfz = norm.cdf(z)
-        gk = -np.sum((y * _probit_g3(z, pdfz, cdfz) -
-                      (1 - y) * _probit_g4(z, pdfz, cdfz)) * xk)
-        hk = np.sum((y * _probit_g5(z, pdfz, cdfz) +
-                     (1 - y) * _probit_g6(z, pdfz, cdfz)) * (xk * xk))
+        gk = -np.sum(
+            (y * _probit_g3(z, pdfz, cdfz) - (1 - y) * _probit_g4(z, pdfz, cdfz)) * xk
+        )
+        hk = np.sum(
+            (y * _probit_g5(z, pdfz, cdfz) + (1 - y) * _probit_g6(z, pdfz, cdfz))
+            * (xk * xk)
+        )
 
-    elif distr == 'gamma':
-        raise NotImplementedError('cdfast is not implemented for Gamma '
-                                  'distribution')
+    elif distr == "gamma":
+        raise NotImplementedError("cdfast is not implemented for Gamma " "distribution")
 
-    return 1. / n_samples * gk, 1. / n_samples * hk
+    return 1.0 / n_samples * gk, 1.0 / n_samples * hk
 
 
-def simulate_glm(distr, beta0, beta, X, eta=2.0, random_state=None,
-                 sample=False):
+def simulate_glm(distr, beta0, beta, X, eta=2.0, random_state=None, sample=False):
     """Simulate target data under a generative model.
 
     Parameters
@@ -353,13 +348,13 @@ def simulate_glm(distr, beta0, beta, X, eta=2.0, random_state=None,
         return _lmb(distr, beta0, beta, X, eta)
 
     _random_state = np.random.RandomState(random_state)
-    if distr == 'softplus' or distr == 'poisson':
+    if distr == "softplus" or distr == "poisson":
         y = _random_state.poisson(_lmb(distr, beta0, beta, X, eta))
-    if distr == 'gaussian':
+    if distr == "gaussian":
         y = _random_state.normal(_lmb(distr, beta0, beta, X, eta))
-    if distr == 'binomial' or distr == 'probit':
+    if distr == "binomial" or distr == "probit":
         y = _random_state.binomial(1, _lmb(distr, beta0, beta, X, eta))
-    if distr == 'gamma':
+    if distr == "gamma":
         mu = _lmb(distr, beta0, beta, X, eta)
         y = np.exp(mu)
     return y
@@ -455,20 +450,32 @@ class GLM(BaseEstimator):
         https://core.ac.uk/download/files/153/6287975.pdf
     """
 
-    def __init__(self, distr='poisson', alpha=0.5,
-                 Tau=None, group=None,
-                 reg_lambda=0.1,
-                 solver='batch-gradient',
-                 learning_rate=2e-1, max_iter=1000,
-                 tol=1e-3, eta=2.0, score_metric='deviance',
-                 random_state=0, callback=None, verbose=False):
+    def __init__(
+        self,
+        distr="poisson",
+        alpha=0.5,
+        Tau=None,
+        group=None,
+        reg_lambda=0.1,
+        solver="batch-gradient",
+        learning_rate=2e-1,
+        max_iter=1000,
+        tol=1e-3,
+        eta=2.0,
+        score_metric="deviance",
+        random_state=0,
+        callback=None,
+        verbose=False,
+    ):
 
         if not isinstance(max_iter, int):
-            raise ValueError('max_iter must be of type int')
+            raise ValueError("max_iter must be of type int")
 
         if distr not in ALLOWED_DISTRS:
-            raise ValueError('distr must be one of %s, Got '
-                             '%s' % (', '.join(ALLOWED_DISTRS), distr))
+            raise ValueError(
+                "distr must be one of %s, Got "
+                "%s" % (", ".join(ALLOWED_DISTRS), distr)
+            )
 
         self.distr = distr
         self.alpha = alpha
@@ -494,28 +501,28 @@ class GLM(BaseEstimator):
         """Set the default CV depending on whether clf
            is classifier/regressor."""
         # Detect whether classification or regression
-        if estimator in ['classifier', 'regressor']:
-            est_is_classifier = estimator == 'classifier'
+        if estimator in ["classifier", "regressor"]:
+            est_is_classifier = estimator == "classifier"
         else:
             est_is_classifier = is_classifier(estimator)
         # Setup CV
-        if check_version('sklearn', '0.18'):
+        if check_version("sklearn", "0.18"):
             from sklearn import model_selection as models
-            from sklearn.model_selection import (check_cv,
-                                                 StratifiedKFold, KFold)
+            from sklearn.model_selection import check_cv, StratifiedKFold, KFold
+
             if isinstance(cv, (int, np.int)):
                 XFold = StratifiedKFold if est_is_classifier else KFold
                 cv = XFold(n_splits=cv)
             elif isinstance(cv, str):
                 if not hasattr(models, cv):
-                    raise ValueError('Unknown cross-validation')
+                    raise ValueError("Unknown cross-validation")
                 cv = getattr(models, cv)
                 cv = cv()
             cv = check_cv(cv=cv, y=y, classifier=est_is_classifier)
         else:
             from sklearn import cross_validation as models
-            from sklearn.cross_validation import (check_cv,
-                                                  StratifiedKFold, KFold)
+            from sklearn.cross_validation import check_cv, StratifiedKFold, KFold
+
             if isinstance(cv, (int, np.int)):
                 if est_is_classifier:
                     cv = StratifiedKFold(y=y, n_folds=cv)
@@ -523,34 +530,36 @@ class GLM(BaseEstimator):
                     cv = KFold(n=len(y), n_folds=cv)
             elif isinstance(cv, str):
                 if not hasattr(models, cv):
-                    raise ValueError('Unknown cross-validation')
+                    raise ValueError("Unknown cross-validation")
                 cv = getattr(models, cv)
-                if cv.__name__ not in ['KFold', 'LeaveOneOut']:
-                    raise NotImplementedError('CV cannot be defined with str'
-                                              ' for sklearn < .017.')
+                if cv.__name__ not in ["KFold", "LeaveOneOut"]:
+                    raise NotImplementedError(
+                        "CV cannot be defined with str" " for sklearn < .017."
+                    )
                 cv = cv(len(y))
             cv = check_cv(cv=cv, X=X, y=y, classifier=est_is_classifier)
 
         # Extract train and test set to retrieve them at predict time
-        if hasattr(cv, 'split'):
-            cv_splits = [(train, test) for train, test in
-                         cv.split(X=np.zeros_like(y), y=y)]
+        if hasattr(cv, "split"):
+            cv_splits = [
+                (train, test) for train, test in cv.split(X=np.zeros_like(y), y=y)
+            ]
         else:
             # XXX support sklearn.cross_validation cv
             cv_splits = [(train, test) for train, test in cv]
 
         if not np.all([len(train) for train, _ in cv_splits]):
-            raise ValueError('Some folds do not have any train epochs.')
+            raise ValueError("Some folds do not have any train epochs.")
 
         return cv, cv_splits
 
     def __repr__(self):
         """Description of the object."""
         reg_lambda = self.reg_lambda
-        s = '<\nDistribution | %s' % self.distr
-        s += '\nalpha | %0.2f' % self.alpha
-        s += '\nmax_iter | %0.2f' % self.max_iter
-        s += '\nlambda: %0.2f\n>' % reg_lambda
+        s = "<\nDistribution | %s" % self.distr
+        s += "\nalpha | %0.2f" % self.alpha
+        s += "\nmax_iter | %0.2f" % self.max_iter
+        s += "\nlambda: %0.2f\n>" % reg_lambda
         return s
 
     def copy(self):
@@ -571,8 +580,7 @@ class GLM(BaseEstimator):
         """Proximal operator."""
         if self.group is None:
             # The default case: soft thresholding
-            return np.sign(beta) * (np.abs(beta) - thresh) * \
-                (np.abs(beta) > thresh)
+            return np.sign(beta) * (np.abs(beta) - thresh) * (np.abs(beta) > thresh)
         else:
             # Group sparsity case: apply group sparsity operator
             group_ids = np.unique(self.group)
@@ -580,17 +588,19 @@ class GLM(BaseEstimator):
 
             for group_id in group_ids:
                 if group_id != 0:
-                    group_norms[self.group == group_id] = \
-                        np.linalg.norm(beta[self.group == group_id], 2)
+                    group_norms[self.group == group_id] = np.linalg.norm(
+                        beta[self.group == group_id], 2
+                    )
 
             nzero_norms = group_norms > 0.0
             over_thresh = group_norms > thresh
             idxs_to_update = nzero_norms & over_thresh
 
             result = beta
-            result[idxs_to_update] = (beta[idxs_to_update] -
-                                      thresh * beta[idxs_to_update] /
-                                      group_norms[idxs_to_update])
+            result[idxs_to_update] = (
+                beta[idxs_to_update]
+                - thresh * beta[idxs_to_update] / group_norms[idxs_to_update]
+            )
             result[~idxs_to_update] = 0.0
 
             return result
@@ -638,7 +648,7 @@ class GLM(BaseEstimator):
                 if k > 0:
                     xk = X[:, k - 1]
                 else:
-                    xk = np.ones((n_samples, ))
+                    xk = np.ones((n_samples,))
 
                 # Calculate grad and hess of log likelihood term
                 gk, hk = _gradhess_logloss_1d(self.distr, xk, y, z, self.eta)
@@ -655,7 +665,7 @@ class GLM(BaseEstimator):
                 hk += np.ravel([reg_scale * hk_reg if k > 0 else 0.0])
 
                 # Update parameters, z
-                update = 1. / hk * gk
+                update = 1.0 / hk * gk
                 beta[k], z = beta[k] - update, z - update * xk
         return beta, z
 
@@ -682,69 +692,64 @@ class GLM(BaseEstimator):
             self.group.dtype = np.int64
             # shape check
             if self.group.shape[0] != X.shape[1]:
-                raise ValueError('group should be (n_features,)')
+                raise ValueError("group should be (n_features,)")
             # int check
             if not np.all([isinstance(g, np.int64) for g in self.group]):
-                raise ValueError('all entries of group should be integers')
+                raise ValueError("all entries of group should be integers")
 
         # type check for data matrix
         if not isinstance(X, np.ndarray):
-            raise ValueError('Input data should be of type ndarray (got %s).'
-                             % type(X))
+            raise ValueError("Input data should be of type ndarray (got %s)." % type(X))
 
         n_features = X.shape[1]
 
         # Initialize parameters
         beta = np.zeros((n_features + 1,))
         if self.beta0_ is None and self.beta_ is None:
-            beta[0] = 1 / (n_features + 1) * \
-                self.rng.normal(0.0, 1.0, 1)
-            beta[1:] = 1 / (n_features + 1) * \
-                self.rng.normal(0.0, 1.0, (n_features, ))
+            beta[0] = 1 / (n_features + 1) * self.rng.normal(0.0, 1.0, 1)
+            beta[1:] = 1 / (n_features + 1) * self.rng.normal(0.0, 1.0, (n_features,))
         else:
             beta[0] = self.beta0_
             beta[1:] = self.beta_
 
-        logger.info('Lambda: %6.4f' % self.reg_lambda)
+        logger.info("Lambda: %6.4f" % self.reg_lambda)
 
         tol = self.tol
         alpha = self.alpha
         reg_lambda = self.reg_lambda
 
-        if self.solver == 'cdfast':
-            ActiveSet = np.ones(n_features + 1)     # init active set
-            z = beta[0] + np.dot(X, beta[1:])       # cache z
+        if self.solver == "cdfast":
+            ActiveSet = np.ones(n_features + 1)  # init active set
+            z = beta[0] + np.dot(X, beta[1:])  # cache z
 
         # Iterative updates
         for t in range(0, self.max_iter):
-            if self.solver == 'batch-gradient':
-                grad = _grad_L2loss(self.distr,
-                                    alpha, self.Tau,
-                                    reg_lambda, X, y, self.eta,
-                                    beta)
+            if self.solver == "batch-gradient":
+                grad = _grad_L2loss(
+                    self.distr, alpha, self.Tau, reg_lambda, X, y, self.eta, beta
+                )
                 # Converged if the norm(gradient) < tol
                 if (t > 1) and (np.linalg.norm(grad) < tol):
-                    msg = ('\tConverged in {0:d} iterations'.format(t))
+                    msg = "\tConverged in {0:d} iterations".format(t)
                     logger.info(msg)
                     break
                 beta = beta - self.learning_rate * grad
 
-            elif self.solver == 'cdfast':
+            elif self.solver == "cdfast":
                 beta_old = deepcopy(beta)
-                beta, z = \
-                    self._cdfast(X, y, z, ActiveSet, beta, reg_lambda)
+                beta, z = self._cdfast(X, y, z, ActiveSet, beta, reg_lambda)
                 # Converged if the norm(update) < tol
                 if (t > 1) and (np.linalg.norm(beta - beta_old) < tol):
-                    msg = ('\tConverged in {0:d} iterations'.format(t))
+                    msg = "\tConverged in {0:d} iterations".format(t)
                     logger.info(msg)
                     break
             # Apply proximal operator
             beta[1:] = self._prox(beta[1:], reg_lambda * alpha)
 
             # Update active set
-            if self.solver == 'cdfast':
+            if self.solver == "cdfast":
                 ActiveSet[beta == 0] = 0
-                ActiveSet[0] = 1.
+                ActiveSet[0] = 1.0
 
             # Compute and save loss if callbacks are requested
             if callable(self.callback):
@@ -770,13 +775,11 @@ class GLM(BaseEstimator):
             The predicted targets of shape (n_samples,)
         """
         if not isinstance(X, np.ndarray):
-            raise ValueError('Input data should be of type ndarray (got %s).'
-                             % type(X))
+            raise ValueError("Input data should be of type ndarray (got %s)." % type(X))
 
-        yhat = _lmb(self.distr, self.beta0_,
-                    self.beta_, X, self.eta)
+        yhat = _lmb(self.distr, self.beta0_, self.beta_, X, self.eta)
 
-        if self.distr == 'binomial':
+        if self.distr == "binomial":
             yhat = (yhat > 0.5).astype(int)
         yhat = np.asarray(yhat)
         return yhat
@@ -800,16 +803,16 @@ class GLM(BaseEstimator):
         Raises error otherwise.
 
         """
-        if self.distr != 'binomial':
-            raise ValueError('This is only applicable for \
-                              the binomial distribution.')
+        if self.distr != "binomial":
+            raise ValueError(
+                "This is only applicable for \
+                              the binomial distribution."
+            )
 
         if not isinstance(X, np.ndarray):
-            raise ValueError('Input data should be of type ndarray (got %s).'
-                             % type(X))
+            raise ValueError("Input data should be of type ndarray (got %s)." % type(X))
 
-        yhat = _lmb(self.distr,
-                    self.beta0_, self.beta_, X, self.eta)
+        yhat = _lmb(self.distr, self.beta0_, self.beta_, X, self.eta)
         yhat = np.asarray(yhat)
         return yhat
 
@@ -848,35 +851,36 @@ class GLM(BaseEstimator):
             The score metric
         """
         from . import metrics
-        if self.score_metric not in ['deviance', 'pseudo_R2', 'accuracy']:
-            raise ValueError('score_metric has to be one of' +
-                             ' deviance or pseudo_R2')
+
+        if self.score_metric not in ["deviance", "pseudo_R2", "accuracy"]:
+            raise ValueError("score_metric has to be one of" + " deviance or pseudo_R2")
 
         # If the model has not been fit it cannot be scored
         if self.ynull_ is None:
-            raise ValueError('Model must be fit before ' +
-                             'prediction can be scored')
+            raise ValueError("Model must be fit before " + "prediction can be scored")
 
         # For f1 as well
-        if self.score_metric in ['accuracy']:
-            if self.distr not in ['binomial', 'multinomial']:
-                raise ValueError(self.score_metric +
-                                 ' is only defined for binomial ' +
-                                 'or multinomial distributions')
+        if self.score_metric in ["accuracy"]:
+            if self.distr not in ["binomial", "multinomial"]:
+                raise ValueError(
+                    self.score_metric
+                    + " is only defined for binomial "
+                    + "or multinomial distributions"
+                )
 
         y = y.ravel()
 
-        if self.distr == 'binomial' and self.score_metric != 'accuracy':
+        if self.distr == "binomial" and self.score_metric != "accuracy":
             yhat = self.predict_proba(X)
         else:
             yhat = self.predict(X)
 
         # Check whether we have a list of estimators or a single estimator
-        if self.score_metric == 'deviance':
+        if self.score_metric == "deviance":
             return metrics.deviance(y, yhat, self.distr)
-        elif self.score_metric == 'pseudo_R2':
+        elif self.score_metric == "pseudo_R2":
             return metrics.pseudo_R2(X, y, yhat, self.ynull_, self.distr)
-        if self.score_metric == 'accuracy':
+        if self.score_metric == "accuracy":
             return metrics.accuracy(y, yhat)
 
 
@@ -982,26 +986,37 @@ class GLMCV(object):
     >>> glm[2].predict(X_test)
     """
 
-    def __init__(self, distr='poisson', alpha=0.5,
-                 Tau=None, group=None,
-                 reg_lambda=None, cv=10,
-                 solver='batch-gradient',
-                 learning_rate=2e-1, max_iter=1000,
-                 tol=1e-3, eta=2.0, score_metric='deviance',
-                 random_state=0, verbose=False):
+    def __init__(
+        self,
+        distr="poisson",
+        alpha=0.5,
+        Tau=None,
+        group=None,
+        reg_lambda=None,
+        cv=10,
+        solver="batch-gradient",
+        learning_rate=2e-1,
+        max_iter=1000,
+        tol=1e-3,
+        eta=2.0,
+        score_metric="deviance",
+        random_state=0,
+        verbose=False,
+    ):
 
         if reg_lambda is None:
-            reg_lambda = np.logspace(np.log(0.5), np.log(0.01), 10,
-                                     base=np.exp(1))
+            reg_lambda = np.logspace(np.log(0.5), np.log(0.01), 10, base=np.exp(1))
         if not isinstance(reg_lambda, (list, np.ndarray)):
             reg_lambda = [reg_lambda]
 
         if distr not in ALLOWED_DISTRS:
-            raise ValueError('distr must be one of %s, Got '
-                             '%s' % (', '.join(ALLOWED_DISTRS), distr))
+            raise ValueError(
+                "distr must be one of %s, Got "
+                "%s" % (", ".join(ALLOWED_DISTRS), distr)
+            )
 
         if not isinstance(max_iter, int):
-            raise ValueError('max_iter must be of type int')
+            raise ValueError("max_iter must be of type int")
 
         self.distr = distr
         self.alpha = alpha
@@ -1028,14 +1043,13 @@ class GLMCV(object):
     def __repr__(self):
         """Description of the object."""
         reg_lambda = self.reg_lambda
-        s = '<\nDistribution | %s' % self.distr
-        s += '\nalpha | %0.2f' % self.alpha
-        s += '\nmax_iter | %0.2f' % self.max_iter
+        s = "<\nDistribution | %s" % self.distr
+        s += "\nalpha | %0.2f" % self.alpha
+        s += "\nmax_iter | %0.2f" % self.max_iter
         if len(reg_lambda) > 1:
-            s += ('\nlambda: %0.2f to %0.2f\n>'
-                  % (reg_lambda[0], reg_lambda[-1]))
+            s += "\nlambda: %0.2f to %0.2f\n>" % (reg_lambda[0], reg_lambda[-1])
         else:
-            s += '\nlambda: %0.2f\n>' % reg_lambda[0]
+            s += "\nlambda: %0.2f\n>" % reg_lambda[0]
         return s
 
     def copy(self):
@@ -1067,32 +1081,36 @@ class GLMCV(object):
         self : instance of GLM
             The fitted model.
         """
-        logger.info('Looping through the regularization path')
+        logger.info("Looping through the regularization path")
         glms, scores = list(), list()
         self.ynull_ = np.mean(y)
 
         if not type(int):
-            raise ValueError('cv must be int. We do not support scikit-learn '
-                             'cv objects at the moment')
+            raise ValueError(
+                "cv must be int. We do not support scikit-learn "
+                "cv objects at the moment"
+            )
 
         idxs = np.arange(y.shape[0])
         np.random.shuffle(idxs)
         cv_splits = np.array_split(idxs, self.cv)
 
         for idx, rl in enumerate(self.reg_lambda):
-            glm = GLM(distr=self.distr,
-                      alpha=self.alpha,
-                      Tau=self.Tau,
-                      reg_lambda=0.1,
-                      solver=self.solver,
-                      learning_rate=self.learning_rate,
-                      max_iter=self.max_iter,
-                      tol=self.tol,
-                      eta=self.eta,
-                      score_metric=self.score_metric,
-                      random_state=self.random_state,
-                      verbose=self.verbose)
-            logger.info('Lambda: %6.4f' % rl)
+            glm = GLM(
+                distr=self.distr,
+                alpha=self.alpha,
+                Tau=self.Tau,
+                reg_lambda=0.1,
+                solver=self.solver,
+                learning_rate=self.learning_rate,
+                max_iter=self.max_iter,
+                tol=self.tol,
+                eta=self.eta,
+                score_metric=self.score_metric,
+                random_state=self.random_state,
+                verbose=self.verbose,
+            )
+            logger.info("Lambda: %6.4f" % rl)
             glm.reg_lambda = rl
 
             scores_fold = list()
@@ -1115,9 +1133,9 @@ class GLMCV(object):
             glm.fit(X, y)
             glms.append(glm)
         # Update the estimated variables
-        if self.score_metric == 'deviance':
+        if self.score_metric == "deviance":
             opt = np.array(scores).argmin()
-        elif self.score_metric in ['pseudo_R2', 'accuracy']:
+        elif self.score_metric in ["pseudo_R2", "accuracy"]:
             opt = np.array(scores).argmax()
         self.beta0_, self.beta_ = glms[opt].beta0_, glms[opt].beta_
         self.reg_lambda_opt_ = self.reg_lambda[opt]

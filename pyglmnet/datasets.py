@@ -19,14 +19,13 @@ def _reporthook(count, block_size, total_size):
     # https://blog.shichao.io/2012/10/04/progress_speed_indicator_for_urlretrieve_in_python.html  # noqa
 
     if count == 0 or count * block_size >= total_size:
-        print('')
+        print("")
     progress_size = int(count * block_size)
     percent = min(int(count * block_size * 100 / total_size), 100)
-    sys.stdout.write("\r...%d%%, %d MB"
-                     % (percent, progress_size / (1024 * 1024)))
+    sys.stdout.write("\r...%d%%, %d MB" % (percent, progress_size / (1024 * 1024)))
 
 
-def fetch_tikhonov_data(dpath='/tmp/glm-tools'):
+def fetch_tikhonov_data(dpath="/tmp/glm-tools"):
     """
     Downloads data for Tikhonov example and returns data frames
 
@@ -45,7 +44,7 @@ def fetch_tikhonov_data(dpath='/tmp/glm-tools'):
     os.mkdir(dpath)
 
     base_url = "https://raw.githubusercontent.com/glm-tools/datasets/master"
-    fnames = ['fixations.csv', 'probes.csv', 'spiketimes.csv']
+    fnames = ["fixations.csv", "probes.csv", "spiketimes.csv"]
 
     for fname in fnames:
         url = os.path.join(base_url, "tikhonov/%s" % fname)
@@ -55,7 +54,7 @@ def fetch_tikhonov_data(dpath='/tmp/glm-tools'):
     return dpath
 
 
-def fetch_community_crime_data(dpath='/tmp/glm-tools'):
+def fetch_community_crime_data(dpath="/tmp/glm-tools"):
     """
     Downloads data for the community crime example,
     removes missing values, extracts features, and
@@ -76,23 +75,24 @@ def fetch_community_crime_data(dpath='/tmp/glm-tools'):
     try:
         import pandas as pd
     except ImportError:
-        raise ImportError('The pandas module is required for reading the '
-                          'community crime dataset')
+        raise ImportError(
+            "The pandas module is required for reading the " "community crime dataset"
+        )
 
     if os.path.exists(dpath):
         shutil.rmtree(dpath)
     os.mkdir(dpath)
 
-    fname = os.path.join(dpath, 'communities.csv')
-    base_url = ("http://archive.ics.uci.edu/ml/machine-learning-databases")
+    fname = os.path.join(dpath, "communities.csv")
+    base_url = "http://archive.ics.uci.edu/ml/machine-learning-databases"
     url = os.path.join(base_url, "communities/communities.data")
     urllib.request.urlretrieve(url, fname, _reporthook)
 
     # Read in the file
-    df = pd.read_csv('/tmp/glm-tools/communities.csv', header=None)
+    df = pd.read_csv("/tmp/glm-tools/communities.csv", header=None)
 
     # Remove missing values
-    df.replace('?', np.nan, inplace=True)
+    df.replace("?", np.nan, inplace=True)
     df.dropna(inplace=True, axis=1)
     df.dropna(inplace=True, axis=0)
     df.reset_index(inplace=True, drop=True)
@@ -121,39 +121,38 @@ def fetch_group_lasso_datasets():
     try:
         import pandas as pd
     except ImportError:
-        raise ImportError('The pandas module is required for the '
-                          'group lasso dataset')
+        raise ImportError(
+            "The pandas module is required for the " "group lasso dataset"
+        )
 
     # helper functions
 
-    def find_interaction_index(seq, subseq,
-                               alphabet="ATGC",
-                               all_possible_len_n_interactions=None):
+    def find_interaction_index(
+        seq, subseq, alphabet="ATGC", all_possible_len_n_interactions=None
+    ):
         n = len(subseq)
-        alphabet_interactions = \
-            [set(p) for
-             p in list(itertools.combinations_with_replacement(alphabet, n))]
+        alphabet_interactions = [
+            set(p) for p in list(itertools.combinations_with_replacement(alphabet, n))
+        ]
 
         num_interactions = len(alphabet_interactions)
         if all_possible_len_n_interactions is None:
-            all_possible_len_n_interactions = \
-                [set(interaction) for
-                 interaction in
-                 list(itertools.combinations_with_replacement(seq, n))]
+            all_possible_len_n_interactions = [
+                set(interaction)
+                for interaction in list(itertools.combinations_with_replacement(seq, n))
+            ]
 
         subseq = set(subseq)
 
-        group_index = num_interactions * \
-            all_possible_len_n_interactions.index(subseq)
+        group_index = num_interactions * all_possible_len_n_interactions.index(subseq)
         value_index = alphabet_interactions.index(subseq)
 
         final_index = group_index + value_index
         return final_index
 
-    def create_group_indicies_list(seqlength=7,
-                                   alphabet="ATGC",
-                                   interactions=[1, 2, 3],
-                                   include_extra=True):
+    def create_group_indicies_list(
+        seqlength=7, alphabet="ATGC", interactions=[1, 2, 3], include_extra=True
+    ):
         alphabet_length = len(alphabet)
         index_groups = []
         if include_extra:
@@ -161,9 +160,7 @@ def fetch_group_lasso_datasets():
         group_count = 1
         for inter in interactions:
             n_interactions = comb(seqlength, inter)
-            n_alphabet_combos = comb(alphabet_length,
-                                     inter,
-                                     repetition=True)
+            n_alphabet_combos = comb(alphabet_length, inter, repetition=True)
 
             for x1 in range(int(n_interactions)):
                 for x2 in range(int(n_alphabet_combos)):
@@ -172,37 +169,43 @@ def fetch_group_lasso_datasets():
                 group_count += 1
         return index_groups
 
-    def create_feature_vector_for_sequence(seq,
-                                           alphabet="ATGC",
-                                           interactions=[1, 2, 3]):
-        feature_vector_length = \
-            sum([comb(len(seq), inter) *
-                 comb(len(alphabet), inter, repetition=True)
-                 for inter in interactions]) + 1
+    def create_feature_vector_for_sequence(
+        seq, alphabet="ATGC", interactions=[1, 2, 3]
+    ):
+        feature_vector_length = (
+            sum(
+                [
+                    comb(len(seq), inter) * comb(len(alphabet), inter, repetition=True)
+                    for inter in interactions
+                ]
+            )
+            + 1
+        )
 
         feature_vector = np.zeros(int(feature_vector_length))
         feature_vector[0] = 1.0
         for inter in interactions:
             # interactions at the current level
-            cur_interactions = \
-                [set(p) for p in list(itertools.combinations(seq, inter))]
-            interaction_idxs = \
-                [find_interaction_index(
-                 seq, cur_inter,
-                 all_possible_len_n_interactions=cur_interactions) + 1
-                 for cur_inter in cur_interactions]
+            cur_interactions = [
+                set(p) for p in list(itertools.combinations(seq, inter))
+            ]
+            interaction_idxs = [
+                find_interaction_index(
+                    seq, cur_inter, all_possible_len_n_interactions=cur_interactions
+                )
+                + 1
+                for cur_inter in cur_interactions
+            ]
             feature_vector[interaction_idxs] = 1.0
 
         return feature_vector
 
-    positive_url = \
-        "http://genes.mit.edu/burgelab/maxent/ssdata/MEMset/train5_hs"
-    negative_url = \
-        "http://genes.mit.edu/burgelab/maxent/ssdata/MEMset/train0_5_hs"
+    positive_url = "http://genes.mit.edu/burgelab/maxent/ssdata/MEMset/train5_hs"
+    negative_url = "http://genes.mit.edu/burgelab/maxent/ssdata/MEMset/train0_5_hs"
 
     if sys.version_info[0] == 3:
-        pos_file = tempfile.NamedTemporaryFile('w+', buffering=1)
-        neg_file = tempfile.NamedTemporaryFile('w+', buffering=1)
+        pos_file = tempfile.NamedTemporaryFile("w+", buffering=1)
+        neg_file = tempfile.NamedTemporaryFile("w+", buffering=1)
     elif sys.version_info[0] == 2:
         pos_file = tempfile.NamedTemporaryFile(bufsize=0)
         neg_file = tempfile.NamedTemporaryFile(bufsize=0)
@@ -210,28 +213,34 @@ def fetch_group_lasso_datasets():
     urllib.request.urlretrieve(positive_url, pos_file.name, _reporthook)
     urllib.request.urlretrieve(negative_url, neg_file.name, _reporthook)
 
-    positive_sequences = [str(line.strip().upper()) for idx, line in
-                          enumerate(pos_file.readlines())
-                          if ">" not in line and idx < 2 * 8000]
+    positive_sequences = [
+        str(line.strip().upper())
+        for idx, line in enumerate(pos_file.readlines())
+        if ">" not in line and idx < 2 * 8000
+    ]
 
-    negative_sequences = [str(line.strip().upper()) for idx, line in
-                          enumerate(neg_file.readlines())
-                          if ">" not in line and
-                          idx < 2 * len(positive_sequences)]
+    negative_sequences = [
+        str(line.strip().upper())
+        for idx, line in enumerate(neg_file.readlines())
+        if ">" not in line and idx < 2 * len(positive_sequences)
+    ]
 
-    assert len(positive_sequences) == len(negative_sequences), \
-        "lengths were not the same: p={pos} n={neg}" \
-        .format(pos=len(positive_sequences), neg=len(negative_sequences))
+    assert len(positive_sequences) == len(
+        negative_sequences
+    ), "lengths were not the same: p={pos} n={neg}".format(
+        pos=len(positive_sequences), neg=len(negative_sequences)
+    )
 
-    positive_vector_matrix = np.array([create_feature_vector_for_sequence(s)
-                                       for s in positive_sequences])
-    negative_vector_matrix = np.array([create_feature_vector_for_sequence(s)
-                                       for s in negative_sequences])
+    positive_vector_matrix = np.array(
+        [create_feature_vector_for_sequence(s) for s in positive_sequences]
+    )
+    negative_vector_matrix = np.array(
+        [create_feature_vector_for_sequence(s) for s in negative_sequences]
+    )
 
-    df = pd.DataFrame(data=np.vstack((positive_vector_matrix,
-                                      negative_vector_matrix)))
-    df.loc[0:positive_vector_matrix.shape[0], "Label"] = 1.0
-    df.loc[positive_vector_matrix.shape[0]:, "Label"] = 0.0
+    df = pd.DataFrame(data=np.vstack((positive_vector_matrix, negative_vector_matrix)))
+    df.loc[0 : positive_vector_matrix.shape[0], "Label"] = 1.0
+    df.loc[positive_vector_matrix.shape[0] :, "Label"] = 0.0
 
     design_matrix = df
     groups = create_group_indicies_list()

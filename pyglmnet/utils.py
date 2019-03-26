@@ -7,7 +7,7 @@ from copy import copy
 import logging
 
 
-logger = logging.getLogger('pyglmnet')
+logger = logging.getLogger("pyglmnet")
 logger.addHandler(logging.StreamHandler())
 
 
@@ -47,7 +47,7 @@ def label_binarizer(y):
         one-hot encoding of labels in y
     """
     if y.ndim != 1:
-        raise ValueError('y has to be one-dimensional')
+        raise ValueError("y has to be one-dimensional")
     y_flat = y.ravel()
     yb = np.zeros([len(y), y.max() + 1])
     yb[np.arange(len(y)), y_flat] = 1
@@ -82,11 +82,11 @@ def tikhonov_from_prior(prior_cov, n_samples, threshold=0.0001):
 
     S_inv = copy(np.sqrt(S))
     S_inv[zero_indices] = threshold
-    S_inv[nonzero_indices] = 1. / S_inv[nonzero_indices]
+    S_inv[nonzero_indices] = 1.0 / S_inv[nonzero_indices]
 
     Tau = np.dot(np.diag(S_inv), V)
     n_features = Tau.shape[0]
-    Tau = 1. / n_features * Tau
+    Tau = 1.0 / n_features * Tau
     return Tau
 
 
@@ -103,15 +103,19 @@ def set_log_level(verbose):
     """
     if isinstance(verbose, bool):
         if verbose is True:
-            verbose = 'INFO'
+            verbose = "INFO"
         else:
-            verbose = 'WARNING'
+            verbose = "WARNING"
     if isinstance(verbose, str):
         verbose = verbose.upper()
-        logging_types = dict(DEBUG=logging.DEBUG, INFO=logging.INFO,
-                             WARNING=logging.WARNING, ERROR=logging.ERROR,
-                             CRITICAL=logging.CRITICAL)
+        logging_types = dict(
+            DEBUG=logging.DEBUG,
+            INFO=logging.INFO,
+            WARNING=logging.WARNING,
+            ERROR=logging.ERROR,
+            CRITICAL=logging.CRITICAL,
+        )
         if verbose not in logging_types:
-            raise ValueError('verbose must be of a valid type')
+            raise ValueError("verbose must be of a valid type")
         verbose = logging_types[verbose]
     logger.setLevel(verbose)

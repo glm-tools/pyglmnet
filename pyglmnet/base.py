@@ -67,7 +67,7 @@ class BaseEstimator(object):
             from .externals.funcsigs import signature
         # fetch the constructor or the original constructor before
         # deprecation wrapping if any
-        init = getattr(cls.__init__, 'deprecated_original', cls.__init__)
+        init = getattr(cls.__init__, "deprecated_original", cls.__init__)
         if init is object.__init__:
             # No explicit constructor to introspect
             return []
@@ -76,16 +76,20 @@ class BaseEstimator(object):
         # to represent
         init_signature = signature(init)
         # Consider the constructor parameters excluding 'self'
-        parameters = [p for p in init_signature.parameters.values()
-                      if p.name != 'self' and p.kind != p.VAR_KEYWORD]
+        parameters = [
+            p
+            for p in init_signature.parameters.values()
+            if p.name != "self" and p.kind != p.VAR_KEYWORD
+        ]
         for p in parameters:
             if p.kind == p.VAR_POSITIONAL:
-                raise RuntimeError("scikit-learn estimators should always "
-                                   "specify their parameters in the signature"
-                                   " of their __init__ (no varargs)."
-                                   " %s with constructor %s doesn't "
-                                   " follow this convention."
-                                   % (cls, init_signature))
+                raise RuntimeError(
+                    "scikit-learn estimators should always "
+                    "specify their parameters in the signature"
+                    " of their __init__ (no varargs)."
+                    " %s with constructor %s doesn't "
+                    " follow this convention." % (cls, init_signature)
+                )
         # Extract and sort argument names excluding 'self'
         return sorted([p.name for p in parameters])
 
@@ -118,9 +122,9 @@ class BaseEstimator(object):
                 warnings.filters.pop(0)
 
             # XXX: should we rather test if instance of estimator?
-            if deep and hasattr(value, 'get_params'):
+            if deep and hasattr(value, "get_params"):
                 deep_items = value.get_params().items()
-                out.update((key + '__' + k, val) for k, val in deep_items)
+                out.update((key + "__" + k, val) for k, val in deep_items)
             out[key] = value
         return out
 
@@ -139,32 +143,38 @@ class BaseEstimator(object):
             return self
         valid_params = self.get_params(deep=True)
         for key, value in iteritems(params):
-            split = key.split('__', 1)
+            split = key.split("__", 1)
             if len(split) > 1:
                 # nested objects case
                 name, sub_name = split
                 if name not in valid_params:
-                    raise ValueError('Invalid parameter %s for estimator %s. '
-                                     'Check the list of available parameters '
-                                     'with `estimator.get_params().keys()`.' %
-                                     (name, self))
+                    raise ValueError(
+                        "Invalid parameter %s for estimator %s. "
+                        "Check the list of available parameters "
+                        "with `estimator.get_params().keys()`." % (name, self)
+                    )
                 sub_object = valid_params[name]
                 sub_object.set_params(**{sub_name: value})
             else:
                 # simple objects case
                 if key not in valid_params:
-                    raise ValueError('Invalid parameter %s for estimator %s. '
-                                     'Check the list of available parameters '
-                                     'with `estimator.get_params().keys()`.' %
-                                     (key, self.__class__.__name__))
+                    raise ValueError(
+                        "Invalid parameter %s for estimator %s. "
+                        "Check the list of available parameters "
+                        "with `estimator.get_params().keys()`."
+                        % (key, self.__class__.__name__)
+                    )
                 setattr(self, key, value)
         return self
 
     def __repr__(self):
         from sklearn.base import _pprint
+
         class_name = self.__class__.__name__
-        return '%s(%s)' % (class_name, _pprint(self.get_params(deep=False),
-                                               offset=len(class_name),),)
+        return "%s(%s)" % (
+            class_name,
+            _pprint(self.get_params(deep=False), offset=len(class_name)),
+        )
 
     # __getstate__ and __setstate__ are omitted because they only contain
     # conditionals that are not satisfied by our objects (e.g.,

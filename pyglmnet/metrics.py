@@ -23,7 +23,7 @@ def deviance(y, yhat, distr):
     score : float
         Deviance of the predicted labels.
     """
-    if distr in ['softplus', 'poisson']:
+    if distr in ["softplus", "poisson"]:
         LS = _logL(distr, y, y)
     else:
         LS = 0
@@ -55,7 +55,7 @@ def pseudo_R2(X, y, yhat, ynull_, distr):
     score : float
         Pseudo-R2 score.
     """
-    if distr in ['softplus', 'poisson']:
+    if distr in ["softplus", "poisson"]:
         LS = _logL(distr, y, y)
     else:
         LS = 0
@@ -63,10 +63,10 @@ def pseudo_R2(X, y, yhat, ynull_, distr):
     L0 = _logL(distr, y, ynull_)
     L1 = _logL(distr, y, yhat)
 
-    if distr in ['softplus', 'poisson']:
-        score = (1 - (LS - L1) / (LS - L0))
+    if distr in ["softplus", "poisson"]:
+        score = 1 - (LS - L1) / (LS - L0)
     else:
-        score = (1 - L1 / L0)
+        score = 1 - L1 / L0
     return score
 
 
