@@ -16,9 +16,7 @@ install:
     - conda create -n testenv --yes pip python=$PYTHON
     - source activate testenv
     - conda install --yes --file requirements.txt
-    - if [[ "$PYTHON" == "3.7" ]]; then
-        pip install black
-      fi
+    - if [[ $TRAVIS_PYTHON_VERSION == '3.7' ]]; then pip install black; fi
     - python setup.py develop
 
 script:
@@ -26,10 +24,8 @@ script:
     - py.test --cov=pyglmnet tests/ --verbose --durations=10
     - # Run flake8 to check that package and tests adhere to PEP8
     - flake8 --count pyglmnet tests
-    # Run the black code formatter to check if code adheres
-    - if [[ "$PYTHON" == "3.7" ]]; then
-        pip install black
-      fi
+    # Run the black code formatter to check if code adheres to style
+    - if [[ $TRAVIS_PYTHON_VERSION == '3.7' ]]; then black tests pyglmnet --check --line-length 79; fi
 
 after_success:
     - bash <(curl -s https://codecov.io/bash)
