@@ -18,5 +18,7 @@ install:
 script:
     - py.test --cov=pyglmnet tests/
     - flake8 --count pyglmnet
+    # Run the black code formatter to check if code adheres
+    - black tests pyglmnet --check --line-length 79
 after_success:
     - bash <(curl -s https://codecov.io/bash)
