@@ -43,7 +43,15 @@ def test_gradients():
         y = simulate_glm(glm.distr, beta_[0], beta_[1:], X)
 
         func = partial(
-            _L2loss, distr, glm.alpha, glm.Tau, reg_lambda, X, y, glm.eta, glm.group
+            _L2loss,
+            distr,
+            glm.alpha,
+            glm.Tau,
+            reg_lambda,
+            X,
+            y,
+            glm.eta,
+            glm.group,
         )
         grad = partial(
             _grad_L2loss, distr, glm.alpha, glm.Tau, reg_lambda, X, y, glm.eta
@@ -165,7 +173,11 @@ def test_group_lasso():
 
     # one of the groups must be [all zero]
     assert np.any(
-        [beta[groups == group_id].sum() == 0 for group_id in group_ids if group_id != 0]
+        [
+            beta[groups == group_id].sum() == 0
+            for group_id in group_ids
+            if group_id != 0
+        ]
     )
 
 
@@ -179,7 +191,9 @@ def test_glmnet():
     # coefficients
     beta0 = 1.0 / (np.float(n_features) + 1.0) * np.random.normal(0.0, 1.0)
     beta = (
-        1.0 / (np.float(n_features) + 1.0) * np.random.normal(0.0, 1.0, (n_features,))
+        1.0
+        / (np.float(n_features) + 1.0)
+        * np.random.normal(0.0, 1.0, (n_features,))
     )
 
     distrs = ["softplus", "gaussian", "poisson", "binomial", "probit"]
@@ -282,7 +296,9 @@ def test_glmcv():
     # coefficients
     beta0 = 1.0 / (np.float(n_features) + 1.0) * np.random.normal(0.0, 1.0)
     beta = (
-        1.0 / (np.float(n_features) + 1.0) * np.random.normal(0.0, 1.0, (n_features,))
+        1.0
+        / (np.float(n_features) + 1.0)
+        * np.random.normal(0.0, 1.0, (n_features,))
     )
 
     distrs = ["softplus", "gaussian", "poisson", "binomial", "probit", "gamma"]
@@ -333,7 +349,11 @@ def test_cv():
 
     param_grid = [
         {"alpha": np.linspace(0.01, 0.99, 2)},
-        {"reg_lambda": np.logspace(np.log(0.5), np.log(0.01), 10, base=np.exp(1))},
+        {
+            "reg_lambda": np.logspace(
+                np.log(0.5), np.log(0.01), 10, base=np.exp(1)
+            )
+        },
     ]
     glmcv = GridSearchCV(glm_normal, param_grid, cv=cv)
     glmcv.fit(X, y)
@@ -386,7 +406,9 @@ def test_cdfast():
 
         # test cdfast
         ActiveSet = np.ones(n_features + 1)
-        beta_ret, z_ret = glm._cdfast(X, y, z, ActiveSet, beta_, glm.reg_lambda)
+        beta_ret, z_ret = glm._cdfast(
+            X, y, z, ActiveSet, beta_, glm.reg_lambda
+        )
         assert beta_ret.shape == beta_.shape
         assert z_ret.shape == z.shape
 
@@ -404,7 +426,9 @@ def test_random_state_consistency():
 
     beta0 = 1.0 / (np.float(n_features) + 1.0) * np.random.normal(0.0, 1.0)
     beta = (
-        1.0 / (np.float(n_features) + 1.0) * np.random.normal(0.0, 1.0, (n_features,))
+        1.0
+        / (np.float(n_features) + 1.0)
+        * np.random.normal(0.0, 1.0, (n_features,))
     )
     Xtrain = np.random.normal(0.0, 1.0, [n_samples, n_features])
 

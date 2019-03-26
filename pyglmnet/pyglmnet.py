@@ -9,7 +9,14 @@ from .utils import logger, set_log_level
 from .base import BaseEstimator, is_classifier, check_version
 
 
-ALLOWED_DISTRS = ["gaussian", "binomial", "softplus", "poisson", "probit", "gamma"]
+ALLOWED_DISTRS = [
+    "gaussian",
+    "binomial",
+    "softplus",
+    "poisson",
+    "probit",
+    "gamma",
+]
 
 
 def _probit_g1(z, pdfz, cdfz, thresh=5):
@@ -31,7 +38,9 @@ def _probit_g2(z, pdfz, cdfz, thresh=5):
 def _probit_g3(z, pdfz, cdfz, thresh=5):
     res = np.zeros_like(z)
     res[z < -thresh] = -z[z < -thresh]
-    res[np.abs(z) <= thresh] = pdfz[np.abs(z) <= thresh] / cdfz[np.abs(z) <= thresh]
+    res[np.abs(z) <= thresh] = (
+        pdfz[np.abs(z) <= thresh] / cdfz[np.abs(z) <= thresh]
+    )
     res[z > thresh] = pdfz[z > thresh]
     return res
 
@@ -50,7 +59,9 @@ def _probit_g5(z, pdfz, cdfz, thresh=5):
     res = np.zeros_like(z)
     res[z < -thresh] = 0 * z[z < -thresh]
     res[np.abs(z) <= thresh] = (
-        z[np.abs(z) <= thresh] * pdfz[np.abs(z) <= thresh] / cdfz[np.abs(z) <= thresh]
+        z[np.abs(z) <= thresh]
+        * pdfz[np.abs(z) <= thresh]
+        / cdfz[np.abs(z) <= thresh]
         + (pdfz[np.abs(z) <= thresh] / cdfz[np.abs(z) <= thresh]) ** 2
     )
     res[z > thresh] = z[z > thresh] * pdfz[z > thresh] + pdfz[z > thresh] ** 2
@@ -59,7 +70,9 @@ def _probit_g5(z, pdfz, cdfz, thresh=5):
 
 def _probit_g6(z, pdfz, cdfz, thresh=5):
     res = np.zeros_like(z)
-    res[z < -thresh] = pdfz[z < -thresh] ** 2 - z[z < -thresh] * pdfz[z < -thresh]
+    res[z < -thresh] = (
+        pdfz[z < -thresh] ** 2 - z[z < -thresh] * pdfz[z < -thresh]
+    )
     res[np.abs(z) <= thresh] = (
         pdfz[np.abs(z) <= thresh] / (1 - cdfz[np.abs(z) <= thresh])
     ) ** 2 - z[np.abs(z) <= thresh] * pdfz[np.abs(z) <= thresh] / (
@@ -129,7 +142,8 @@ def _logL(distr, y, y_hat, z=None):
         if z is not None:
             pdfz, cdfz = norm.pdf(z), norm.cdf(z)
             logL = np.sum(
-                y * _probit_g1(z, pdfz, cdfz) + (1 - y) * _probit_g2(z, pdfz, cdfz)
+                y * _probit_g1(z, pdfz, cdfz)
+                + (1 - y) * _probit_g2(z, pdfz, cdfz)
             )
         else:
             logL = np.sum(y * np.log(y_hat) + (1 - y) * np.log(1 - y_hat))
@@ -144,7 +158,9 @@ def _logL(distr, y, y_hat, z=None):
 def _penalty(alpha, beta, Tau, group):
     """The penalty."""
     # Combine L1 and L2 penalty terms
-    P = 0.5 * (1 - alpha) * _L2penalty(beta, Tau) + alpha * _L1penalty(beta, group)
+    P = 0.5 * (1 - alpha) * _L2penalty(beta, Tau) + alpha * _L1penalty(
+        beta, group
+    )
     return P
 
 
@@ -285,12 +301,12 @@ def _gradhess_logloss_1d(distr, xk, y, z, eta):
     elif distr == "poisson":
         mu = _mu(distr, z, eta)
         s = expit(z)
-        gk = np.sum((mu[z <= eta] - y[z <= eta]) * xk[z <= eta]) + np.exp(eta) * np.sum(
-            (1 - y[z > eta] / mu[z > eta]) * xk[z > eta]
-        )
-        hk = np.sum(mu[z <= eta] * xk[z <= eta] ** 2) + np.exp(eta) ** 2 * np.sum(
-            y[z > eta] / (mu[z > eta] ** 2) * (xk[z > eta] ** 2)
-        )
+        gk = np.sum((mu[z <= eta] - y[z <= eta]) * xk[z <= eta]) + np.exp(
+            eta
+        ) * np.sum((1 - y[z > eta] / mu[z > eta]) * xk[z > eta])
+        hk = np.sum(mu[z <= eta] * xk[z <= eta] ** 2) + np.exp(
+            eta
+        ) ** 2 * np.sum(y[z > eta] / (mu[z > eta] ** 2) * (xk[z > eta] ** 2))
 
     elif distr == "gaussian":
         gk = np.sum((z - y) * xk)
@@ -305,20 +321,31 @@ def _gradhess_logloss_1d(distr, xk, y, z, eta):
         pdfz = norm.pdf(z)
         cdfz = norm.cdf(z)
         gk = -np.sum(
-            (y * _probit_g3(z, pdfz, cdfz) - (1 - y) * _probit_g4(z, pdfz, cdfz)) * xk
+            (
+                y * _probit_g3(z, pdfz, cdfz)
+                - (1 - y) * _probit_g4(z, pdfz, cdfz)
+            )
+            * xk
         )
         hk = np.sum(
-            (y * _probit_g5(z, pdfz, cdfz) + (1 - y) * _probit_g6(z, pdfz, cdfz))
+            (
+                y * _probit_g5(z, pdfz, cdfz)
+                + (1 - y) * _probit_g6(z, pdfz, cdfz)
+            )
             * (xk * xk)
         )
 
     elif distr == "gamma":
-        raise NotImplementedError("cdfast is not implemented for Gamma " "distribution")
+        raise NotImplementedError(
+            "cdfast is not implemented for Gamma " "distribution"
+        )
 
     return 1.0 / n_samples * gk, 1.0 / n_samples * hk
 
 
-def simulate_glm(distr, beta0, beta, X, eta=2.0, random_state=None, sample=False):
+def simulate_glm(
+    distr, beta0, beta, X, eta=2.0, random_state=None, sample=False
+):
     """Simulate target data under a generative model.
 
     Parameters
@@ -508,7 +535,11 @@ class GLM(BaseEstimator):
         # Setup CV
         if check_version("sklearn", "0.18"):
             from sklearn import model_selection as models
-            from sklearn.model_selection import check_cv, StratifiedKFold, KFold
+            from sklearn.model_selection import (
+                check_cv,
+                StratifiedKFold,
+                KFold,
+            )
 
             if isinstance(cv, (int, np.int)):
                 XFold = StratifiedKFold if est_is_classifier else KFold
@@ -521,7 +552,11 @@ class GLM(BaseEstimator):
             cv = check_cv(cv=cv, y=y, classifier=est_is_classifier)
         else:
             from sklearn import cross_validation as models
-            from sklearn.cross_validation import check_cv, StratifiedKFold, KFold
+            from sklearn.cross_validation import (
+                check_cv,
+                StratifiedKFold,
+                KFold,
+            )
 
             if isinstance(cv, (int, np.int)):
                 if est_is_classifier:
@@ -542,7 +577,8 @@ class GLM(BaseEstimator):
         # Extract train and test set to retrieve them at predict time
         if hasattr(cv, "split"):
             cv_splits = [
-                (train, test) for train, test in cv.split(X=np.zeros_like(y), y=y)
+                (train, test)
+                for train, test in cv.split(X=np.zeros_like(y), y=y)
             ]
         else:
             # XXX support sklearn.cross_validation cv
@@ -580,7 +616,11 @@ class GLM(BaseEstimator):
         """Proximal operator."""
         if self.group is None:
             # The default case: soft thresholding
-            return np.sign(beta) * (np.abs(beta) - thresh) * (np.abs(beta) > thresh)
+            return (
+                np.sign(beta)
+                * (np.abs(beta) - thresh)
+                * (np.abs(beta) > thresh)
+            )
         else:
             # Group sparsity case: apply group sparsity operator
             group_ids = np.unique(self.group)
@@ -699,7 +739,9 @@ class GLM(BaseEstimator):
 
         # type check for data matrix
         if not isinstance(X, np.ndarray):
-            raise ValueError("Input data should be of type ndarray (got %s)." % type(X))
+            raise ValueError(
+                "Input data should be of type ndarray (got %s)." % type(X)
+            )
 
         n_features = X.shape[1]
 
@@ -707,7 +749,9 @@ class GLM(BaseEstimator):
         beta = np.zeros((n_features + 1,))
         if self.beta0_ is None and self.beta_ is None:
             beta[0] = 1 / (n_features + 1) * self.rng.normal(0.0, 1.0, 1)
-            beta[1:] = 1 / (n_features + 1) * self.rng.normal(0.0, 1.0, (n_features,))
+            beta[1:] = (
+                1 / (n_features + 1) * self.rng.normal(0.0, 1.0, (n_features,))
+            )
         else:
             beta[0] = self.beta0_
             beta[1:] = self.beta_
@@ -726,7 +770,14 @@ class GLM(BaseEstimator):
         for t in range(0, self.max_iter):
             if self.solver == "batch-gradient":
                 grad = _grad_L2loss(
-                    self.distr, alpha, self.Tau, reg_lambda, X, y, self.eta, beta
+                    self.distr,
+                    alpha,
+                    self.Tau,
+                    reg_lambda,
+                    X,
+                    y,
+                    self.eta,
+                    beta,
                 )
                 # Converged if the norm(gradient) < tol
                 if (t > 1) and (np.linalg.norm(grad) < tol):
@@ -775,7 +826,9 @@ class GLM(BaseEstimator):
             The predicted targets of shape (n_samples,)
         """
         if not isinstance(X, np.ndarray):
-            raise ValueError("Input data should be of type ndarray (got %s)." % type(X))
+            raise ValueError(
+                "Input data should be of type ndarray (got %s)." % type(X)
+            )
 
         yhat = _lmb(self.distr, self.beta0_, self.beta_, X, self.eta)
 
@@ -810,7 +863,9 @@ class GLM(BaseEstimator):
             )
 
         if not isinstance(X, np.ndarray):
-            raise ValueError("Input data should be of type ndarray (got %s)." % type(X))
+            raise ValueError(
+                "Input data should be of type ndarray (got %s)." % type(X)
+            )
 
         yhat = _lmb(self.distr, self.beta0_, self.beta_, X, self.eta)
         yhat = np.asarray(yhat)
@@ -853,11 +908,15 @@ class GLM(BaseEstimator):
         from . import metrics
 
         if self.score_metric not in ["deviance", "pseudo_R2", "accuracy"]:
-            raise ValueError("score_metric has to be one of" + " deviance or pseudo_R2")
+            raise ValueError(
+                "score_metric has to be one of" + " deviance or pseudo_R2"
+            )
 
         # If the model has not been fit it cannot be scored
         if self.ynull_ is None:
-            raise ValueError("Model must be fit before " + "prediction can be scored")
+            raise ValueError(
+                "Model must be fit before " + "prediction can be scored"
+            )
 
         # For f1 as well
         if self.score_metric in ["accuracy"]:
@@ -1005,7 +1064,9 @@ class GLMCV(object):
     ):
 
         if reg_lambda is None:
-            reg_lambda = np.logspace(np.log(0.5), np.log(0.01), 10, base=np.exp(1))
+            reg_lambda = np.logspace(
+                np.log(0.5), np.log(0.01), 10, base=np.exp(1)
+            )
         if not isinstance(reg_lambda, (list, np.ndarray)):
             reg_lambda = [reg_lambda]
 
@@ -1047,7 +1108,10 @@ class GLMCV(object):
         s += "\nalpha | %0.2f" % self.alpha
         s += "\nmax_iter | %0.2f" % self.max_iter
         if len(reg_lambda) > 1:
-            s += "\nlambda: %0.2f to %0.2f\n>" % (reg_lambda[0], reg_lambda[-1])
+            s += "\nlambda: %0.2f to %0.2f\n>" % (
+                reg_lambda[0],
+                reg_lambda[-1],
+            )
         else:
             s += "\nlambda: %0.2f\n>" % reg_lambda[0]
         return s

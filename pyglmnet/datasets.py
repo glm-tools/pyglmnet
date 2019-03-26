@@ -22,7 +22,9 @@ def _reporthook(count, block_size, total_size):
         print("")
     progress_size = int(count * block_size)
     percent = min(int(count * block_size * 100 / total_size), 100)
-    sys.stdout.write("\r...%d%%, %d MB" % (percent, progress_size / (1024 * 1024)))
+    sys.stdout.write(
+        "\r...%d%%, %d MB" % (percent, progress_size / (1024 * 1024))
+    )
 
 
 def fetch_tikhonov_data(dpath="/tmp/glm-tools"):
@@ -76,7 +78,8 @@ def fetch_community_crime_data(dpath="/tmp/glm-tools"):
         import pandas as pd
     except ImportError:
         raise ImportError(
-            "The pandas module is required for reading the " "community crime dataset"
+            "The pandas module is required for reading the "
+            "community crime dataset"
         )
 
     if os.path.exists(dpath):
@@ -132,26 +135,34 @@ def fetch_group_lasso_datasets():
     ):
         n = len(subseq)
         alphabet_interactions = [
-            set(p) for p in list(itertools.combinations_with_replacement(alphabet, n))
+            set(p)
+            for p in list(itertools.combinations_with_replacement(alphabet, n))
         ]
 
         num_interactions = len(alphabet_interactions)
         if all_possible_len_n_interactions is None:
             all_possible_len_n_interactions = [
                 set(interaction)
-                for interaction in list(itertools.combinations_with_replacement(seq, n))
+                for interaction in list(
+                    itertools.combinations_with_replacement(seq, n)
+                )
             ]
 
         subseq = set(subseq)
 
-        group_index = num_interactions * all_possible_len_n_interactions.index(subseq)
+        group_index = num_interactions * all_possible_len_n_interactions.index(
+            subseq
+        )
         value_index = alphabet_interactions.index(subseq)
 
         final_index = group_index + value_index
         return final_index
 
     def create_group_indicies_list(
-        seqlength=7, alphabet="ATGC", interactions=[1, 2, 3], include_extra=True
+        seqlength=7,
+        alphabet="ATGC",
+        interactions=[1, 2, 3],
+        include_extra=True,
     ):
         alphabet_length = len(alphabet)
         index_groups = []
@@ -175,7 +186,8 @@ def fetch_group_lasso_datasets():
         feature_vector_length = (
             sum(
                 [
-                    comb(len(seq), inter) * comb(len(alphabet), inter, repetition=True)
+                    comb(len(seq), inter)
+                    * comb(len(alphabet), inter, repetition=True)
                     for inter in interactions
                 ]
             )
@@ -191,7 +203,9 @@ def fetch_group_lasso_datasets():
             ]
             interaction_idxs = [
                 find_interaction_index(
-                    seq, cur_inter, all_possible_len_n_interactions=cur_interactions
+                    seq,
+                    cur_inter,
+                    all_possible_len_n_interactions=cur_interactions,
                 )
                 + 1
                 for cur_inter in cur_interactions
@@ -200,8 +214,12 @@ def fetch_group_lasso_datasets():
 
         return feature_vector
 
-    positive_url = "http://genes.mit.edu/burgelab/maxent/ssdata/MEMset/train5_hs"
-    negative_url = "http://genes.mit.edu/burgelab/maxent/ssdata/MEMset/train0_5_hs"
+    positive_url = (
+        "http://genes.mit.edu/burgelab/maxent/ssdata/MEMset/train5_hs"
+    )
+    negative_url = (
+        "http://genes.mit.edu/burgelab/maxent/ssdata/MEMset/train0_5_hs"
+    )
 
     if sys.version_info[0] == 3:
         pos_file = tempfile.NamedTemporaryFile("w+", buffering=1)
@@ -238,7 +256,9 @@ def fetch_group_lasso_datasets():
         [create_feature_vector_for_sequence(s) for s in negative_sequences]
     )
 
-    df = pd.DataFrame(data=np.vstack((positive_vector_matrix, negative_vector_matrix)))
+    df = pd.DataFrame(
+        data=np.vstack((positive_vector_matrix, negative_vector_matrix))
+    )
     df.loc[0 : positive_vector_matrix.shape[0], "Label"] = 1.0
     df.loc[positive_vector_matrix.shape[0] :, "Label"] = 0.0
 

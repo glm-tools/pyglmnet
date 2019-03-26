@@ -91,7 +91,9 @@ class BenchmarkGLM(object):
                 if distr in ["gaussian", "binomial"]:
                     # initialize model
                     if distr == "gaussian":
-                        model = ElasticNet(alpha=self.reg_lambda, l1_ratio=self.alpha)
+                        model = ElasticNet(
+                            alpha=self.reg_lambda, l1_ratio=self.alpha
+                        )
                     elif distr == "binomial":
 
                         model = SGDClassifier(
@@ -122,15 +124,21 @@ class BenchmarkGLM(object):
                 # initialize model
                 if distr == "gaussian":
                     model = sm.GLM(
-                        y_train, sm.add_constant(X_train), family=sm.families.Gaussian()
+                        y_train,
+                        sm.add_constant(X_train),
+                        family=sm.families.Gaussian(),
                     )
                 elif distr == "binomial":
                     model = sm.GLM(
-                        y_train, sm.add_constant(X_train), family=sm.families.Binomial()
+                        y_train,
+                        sm.add_constant(X_train),
+                        family=sm.families.Binomial(),
                     )
                 elif distr == "poisson":
                     model = sm.GLM(
-                        y_train, sm.add_constant(X_train), family=sm.families.Poisson()
+                        y_train,
+                        sm.add_constant(X_train),
+                        family=sm.families.Poisson(),
                     )
 
                 # fit-predict-score
@@ -164,7 +172,11 @@ class BenchmarkGLM(object):
                 # fit-predict-score
                 try:
                     fit = glmnet.glmnet(
-                        X_train, y_train, family=distr, alpha=self.alpha, nlambda=1
+                        X_train,
+                        y_train,
+                        family=distr,
+                        alpha=self.alpha,
+                        nlambda=1,
                     )
                     tmp = predict(fit, newx=X_test, s=0)
 
@@ -184,7 +196,11 @@ class BenchmarkGLM(object):
                     for r in range(n_repeats):
                         start = time.time()
                         fit = glmnet.glmnet(
-                            X_train, y_train, family=distr, alpha=self.alpha, nlambda=1
+                            X_train,
+                            y_train,
+                            family=distr,
+                            alpha=self.alpha,
+                            nlambda=1,
                         )
                         stop = time.time()
                         tmp.append(stop - start)

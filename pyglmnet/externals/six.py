@@ -158,7 +158,9 @@ _moved_attributes = [
     MovedModule("html_entities", "htmlentitydefs", "html.entities"),
     MovedModule("html_parser", "HTMLParser", "html.parser"),
     MovedModule("http_client", "httplib", "http.client"),
-    MovedModule("email_mime_multipart", "email.MIMEMultipart", "email.mime.multipart"),
+    MovedModule(
+        "email_mime_multipart", "email.MIMEMultipart", "email.mime.multipart"
+    ),
     MovedModule("email_mime_text", "email.MIMEText", "email.mime.text"),
     MovedModule("email_mime_base", "email.MIMEBase", "email.mime.base"),
     MovedModule("BaseHTTPServer", "BaseHTTPServer", "http.server"),
@@ -171,20 +173,36 @@ _moved_attributes = [
     MovedModule("tkinter", "Tkinter"),
     MovedModule("tkinter_dialog", "Dialog", "tkinter.dialog"),
     MovedModule("tkinter_filedialog", "FileDialog", "tkinter.filedialog"),
-    MovedModule("tkinter_scrolledtext", "ScrolledText", "tkinter.scrolledtext"),
-    MovedModule("tkinter_simpledialog", "SimpleDialog", "tkinter.simpledialog"),
+    MovedModule(
+        "tkinter_scrolledtext", "ScrolledText", "tkinter.scrolledtext"
+    ),
+    MovedModule(
+        "tkinter_simpledialog", "SimpleDialog", "tkinter.simpledialog"
+    ),
     MovedModule("tkinter_tix", "Tix", "tkinter.tix"),
     MovedModule("tkinter_constants", "Tkconstants", "tkinter.constants"),
     MovedModule("tkinter_dnd", "Tkdnd", "tkinter.dnd"),
-    MovedModule("tkinter_colorchooser", "tkColorChooser", "tkinter.colorchooser"),
-    MovedModule("tkinter_commondialog", "tkCommonDialog", "tkinter.commondialog"),
+    MovedModule(
+        "tkinter_colorchooser", "tkColorChooser", "tkinter.colorchooser"
+    ),
+    MovedModule(
+        "tkinter_commondialog", "tkCommonDialog", "tkinter.commondialog"
+    ),
     MovedModule("tkinter_tkfiledialog", "tkFileDialog", "tkinter.filedialog"),
     MovedModule("tkinter_font", "tkFont", "tkinter.font"),
     MovedModule("tkinter_messagebox", "tkMessageBox", "tkinter.messagebox"),
-    MovedModule("tkinter_tksimpledialog", "tkSimpleDialog", "tkinter.simpledialog"),
-    MovedModule("urllib_parse", __name__ + ".moves.urllib_parse", "urllib.parse"),
-    MovedModule("urllib_error", __name__ + ".moves.urllib_error", "urllib.error"),
-    MovedModule("urllib", __name__ + ".moves.urllib", __name__ + ".moves.urllib"),
+    MovedModule(
+        "tkinter_tksimpledialog", "tkSimpleDialog", "tkinter.simpledialog"
+    ),
+    MovedModule(
+        "urllib_parse", __name__ + ".moves.urllib_parse", "urllib.parse"
+    ),
+    MovedModule(
+        "urllib_error", __name__ + ".moves.urllib_error", "urllib.error"
+    ),
+    MovedModule(
+        "urllib", __name__ + ".moves.urllib", __name__ + ".moves.urllib"
+    ),
     MovedModule("urllib_robotparser", "robotparser", "urllib.robotparser"),
     MovedModule("winreg", "_winreg"),
 ]
@@ -267,7 +285,9 @@ _urllib_request_moved_attributes = [
     MovedAttribute("ProxyHandler", "urllib2", "urllib.request"),
     MovedAttribute("BaseHandler", "urllib2", "urllib.request"),
     MovedAttribute("HTTPPasswordMgr", "urllib2", "urllib.request"),
-    MovedAttribute("HTTPPasswordMgrWithDefaultRealm", "urllib2", "urllib.request"),
+    MovedAttribute(
+        "HTTPPasswordMgrWithDefaultRealm", "urllib2", "urllib.request"
+    ),
     MovedAttribute("AbstractBasicAuthHandler", "urllib2", "urllib.request"),
     MovedAttribute("HTTPBasicAuthHandler", "urllib2", "urllib.request"),
     MovedAttribute("ProxyBasicAuthHandler", "urllib2", "urllib.request"),
@@ -290,12 +310,12 @@ for attr in _urllib_request_moved_attributes:
     setattr(Module_six_moves_urllib_request, attr.name, attr)
 del attr
 
-sys.modules[__name__ + ".moves.urllib_request"] = Module_six_moves_urllib_request(
+sys.modules[
     __name__ + ".moves.urllib_request"
-)
-sys.modules[__name__ + ".moves.urllib.request"] = Module_six_moves_urllib_request(
+] = Module_six_moves_urllib_request(__name__ + ".moves.urllib_request")
+sys.modules[
     __name__ + ".moves.urllib.request"
-)
+] = Module_six_moves_urllib_request(__name__ + ".moves.urllib.request")
 
 
 class Module_six_moves_urllib_response(types.ModuleType):
@@ -312,12 +332,12 @@ for attr in _urllib_response_moved_attributes:
     setattr(Module_six_moves_urllib_response, attr.name, attr)
 del attr
 
-sys.modules[__name__ + ".moves.urllib_response"] = Module_six_moves_urllib_response(
+sys.modules[
     __name__ + ".moves.urllib_response"
-)
-sys.modules[__name__ + ".moves.urllib.response"] = Module_six_moves_urllib_response(
+] = Module_six_moves_urllib_response(__name__ + ".moves.urllib_response")
+sys.modules[
     __name__ + ".moves.urllib.response"
-)
+] = Module_six_moves_urllib_response(__name__ + ".moves.urllib.response")
 
 
 class Module_six_moves_urllib_robotparser(types.ModuleType):
@@ -439,7 +459,8 @@ else:
 
     callable = callable
 _add_doc(
-    get_unbound_function, """Get the function out of a possibly unbound function"""
+    get_unbound_function,
+    """Get the function out of a possibly unbound function""",
 )
 
 
