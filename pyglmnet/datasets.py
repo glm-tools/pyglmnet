@@ -5,11 +5,11 @@ import os
 import sys
 import shutil
 import tempfile
+import urllib
 import itertools
 import numpy as np
 from scipy.misc import comb
 
-from .externals.six.moves import urllib
 
 pbar = None
 

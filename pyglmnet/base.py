@@ -1,8 +1,6 @@
 import warnings
 from distutils.version import LooseVersion
 
-from .externals.six import iteritems
-
 ##############################################################################
 # adapted from scikit-learn
 
@@ -61,10 +59,8 @@ class BaseEstimator(object):
     @classmethod
     def _get_param_names(cls):
         """Get parameter names for the estimator"""
-        try:
-            from inspect import signature
-        except ImportError:
-            from .externals.funcsigs import signature
+        from inspect import signature
+
         # fetch the constructor or the original constructor before
         # deprecation wrapping if any
         init = getattr(cls.__init__, 'deprecated_original', cls.__init__)
@@ -138,7 +134,7 @@ class BaseEstimator(object):
             # Simple optimisation to gain speed (inspect is slow)
             return self
         valid_params = self.get_params(deep=True)
-        for key, value in iteritems(params):
+        for key, value in params.items():
             split = key.split('__', 1)
             if len(split) > 1:
                 # nested objects case
