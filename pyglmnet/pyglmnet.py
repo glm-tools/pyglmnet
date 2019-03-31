@@ -350,7 +350,7 @@ def simulate_glm(distr, beta0, beta, X, eta=2.0, random_state=None,
         simulated target data of shape (n_samples,)
     """
     if distr not in ALLOWED_DISTRS:
-        raise ValueError("'distr' must be in "+ repr(ALLOWED_DISTRS))
+        raise ValueError("'distr' must be in " + repr(ALLOWED_DISTRS))
 
     if not sample:
         return _lmb(distr, beta0, beta, X, eta)
@@ -696,7 +696,8 @@ class GLM(BaseEstimator):
                              % type(X))
 
         if not X.ndim == 2:
-            raise ValueError('Input data should be of shape (n_observations, n_features)')
+            raise ValueError('Input data should be of shape' +
+                             '(n_observations, n_features)')
 
         y = np.asarray(y)
         if y.ndim == 2:
@@ -705,7 +706,9 @@ class GLM(BaseEstimator):
         n_observations, n_features = X.shape
 
         if not n_observations == len(y):
-            raise ValueError('Shape mismatch. X has {} observations, y has {}.'.format(n_observations, len(y)))
+            raise ValueError('Shape mismatch.' +
+                             'X has {} observations, y has {}.'
+                             .format(n_observations, len(y)))
         # Initialize parameters
         beta = np.zeros((n_features + 1,))
         if self.beta0_ is None and self.beta_ is None:

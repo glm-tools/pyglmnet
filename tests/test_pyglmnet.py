@@ -1,6 +1,5 @@
 from functools import partial
 import pytest
-import itertools
 import numpy as np
 from numpy.testing import assert_allclose, assert_array_equal
 from pytest import raises
@@ -14,7 +13,6 @@ from sklearn.model_selection import GridSearchCV, cross_val_score, KFold
 
 from pyglmnet import (GLM, GLMCV, _grad_L2loss, _L2loss, simulate_glm,
                       _gradhess_logloss_1d, _loss, datasets, ALLOWED_DISTRS)
-
 
 
 @pytest.mark.parametrize("distr", ALLOWED_DISTRS)
@@ -388,6 +386,7 @@ def test_random_state_consistency():
     assert_array_equal(ypred_a, ypred_b)
     assert_array_equal(ypred_b, ypred_c)
 
+
 @pytest.mark.parametrize("distr", ALLOWED_DISTRS)
 def test_simulate_glm(distr):
     """
@@ -404,6 +403,7 @@ def test_simulate_glm(distr):
     X = np.random.normal(0.0, 1.0, [n_samples, n_features])
     simulate_glm(distr, beta0, beta, X)
 
+
 def test_simulate_glm_failing():
     """
     Test that an error is raised if an invalid parameter name is passed.
@@ -412,13 +412,16 @@ def test_simulate_glm_failing():
     with pytest.raises(ValueError):
         simulate_glm(distr, 1.0, 1.0, np.array([[1.0]]))
 
-@pytest.mark.parametrize("y_func", [list, tuple, np.array, lambda x: np.array(x).reshape(-1, 1)])
+
+@pytest.mark.parametrize("y_func",
+                         [list, tuple, np.array,
+                          lambda x: np.array(x).reshape(-1, 1)])
 def test_API_input_types_y(y_func):
     """
     Test that the input value of y can be of different types.
     """
     np.random.seed(1)
-    n_samples , n_features= 100, 5
+    n_samples, n_features = 100, 5
 
     X = np.random.randn(n_samples, n_features)
     y = np.random.randn(n_samples)
@@ -431,6 +434,7 @@ def test_API_input_types_y(y_func):
     glm.predict(X)
     glm.score(X, y)
 
+
 def test_API_shape_mismatch():
     """
     Test that a ValueError is raised if the shapes mismatch.
@@ -438,4 +442,4 @@ def test_API_shape_mismatch():
     X = np.random.randn(10, 5)
     y = np.random.randn(11)
     with pytest.raises(ValueError):
-        glm = GLM().fit(X, y)
+        GLM().fit(X, y)
