@@ -349,6 +349,9 @@ def simulate_glm(distr, beta0, beta, X, eta=2.0, random_state=None,
     y: array
         simulated target data of shape (n_samples,)
     """
+    if distr not in ALLOWED_DISTRS:
+        raise ValueError("'distr' must be in "+ repr(ALLOWED_DISTRS))
+
     if not sample:
         return _lmb(distr, beta0, beta, X, eta)
 
