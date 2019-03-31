@@ -1,5 +1,6 @@
 from functools import partial
 import pytest
+import itertools
 import numpy as np
 from numpy.testing import assert_allclose, assert_array_equal
 from pytest import raises
@@ -410,3 +411,31 @@ def test_simulate_glm_failing():
     distr = 'multivariate_gaussian_poisson'
     with pytest.raises(ValueError):
         simulate_glm(distr, 1.0, 1.0, np.array([[1.0]]))
+
+@pytest.mark.parametrize("y_func", [list, tuple, np.array, lambda x: np.array(x).reshape(-1, 1)])
+def test_API_input_types_y(y_func):
+    """
+    Test that the input value of y can be of different types.
+    """
+    np.random.seed(1)
+    n_samples , n_features= 100, 5
+
+    X = np.random.randn(n_samples, n_features)
+    y = np.random.randn(n_samples)
+
+    y = y_func(y)
+
+    glm = GLM(distr='gaussian')
+    glm.fit(X, y)
+
+    glm.predict(X)
+    glm.score(X, y)
+
+def test_API_shape_mismatch():
+    """
+    Test that a ValueError is raised if the shapes mismatch.
+    """
+    X = np.random.randn(10, 5)
+    y = np.random.randn(11)
+    with pytest.raises(ValueError):
+        glm = GLM().fit(X, y)

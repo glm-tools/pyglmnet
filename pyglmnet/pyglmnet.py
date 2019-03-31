@@ -470,7 +470,7 @@ class GLM(BaseEstimator):
             raise ValueError('max_iter must be of type int')
 
         if distr not in ALLOWED_DISTRS:
-            raise ValueError('distr must be one of %s, Got '
+            raise ValueError('distr must be one of %s. Got:'
                              '%s' % (', '.join(ALLOWED_DISTRS), distr))
 
         self.distr = distr
@@ -695,8 +695,17 @@ class GLM(BaseEstimator):
             raise ValueError('Input data should be of type ndarray (got %s).'
                              % type(X))
 
-        n_features = X.shape[1]
+        if not X.ndim == 2:
+            raise ValueError('Input data should be of shape (n_observations, n_features)')
 
+        y = np.asarray(y)
+        if y.ndim == 2:
+            y = y.squeeze()
+
+        n_observations, n_features = X.shape
+
+        if not n_observations == len(y):
+            raise ValueError('Shape mismatch. X has {} observations, y has {}.'.format(n_observations, len(y)))
         # Initialize parameters
         beta = np.zeros((n_features + 1,))
         if self.beta0_ is None and self.beta_ is None:
@@ -851,9 +860,9 @@ class GLM(BaseEstimator):
             The score metric
         """
         from . import metrics
-        if self.score_metric not in ['deviance', 'pseudo_R2', 'accuracy']:
-            raise ValueError('score_metric has to be one of' +
-                             ' deviance or pseudo_R2')
+        valid_metrics = ['deviance', 'pseudo_R2', 'accuracy']
+        if self.score_metric not in valid_metrics:
+            raise ValueError('score_metric has to be one of:' + valid_metrics)
 
         # If the model has not been fit it cannot be scored
         if self.ynull_ is None:
@@ -867,7 +876,7 @@ class GLM(BaseEstimator):
                                  ' is only defined for binomial ' +
                                  'or multinomial distributions')
 
-        y = y.ravel()
+        y = np.asarray(y).ravel()
 
         if self.distr == 'binomial' and self.score_metric != 'accuracy':
             yhat = self.predict_proba(X)
