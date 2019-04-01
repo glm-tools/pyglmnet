@@ -695,7 +695,7 @@ class GLM(BaseEstimator):
             raise ValueError('Input data should be of type ndarray (got %s).'
                              % type(X))
 
-        if not X.ndim == 2:
+        if X.ndim != 2:
             raise ValueError('Input data should be of shape' +
                              '(n_observations, n_features)')
 
@@ -705,7 +705,7 @@ class GLM(BaseEstimator):
 
         n_observations, n_features = X.shape
 
-        if not n_observations == len(y):
+        if n_observations != len(y):
             raise ValueError('Shape mismatch.' +
                              'X has {} observations, y has {}.'
                              .format(n_observations, len(y)))
