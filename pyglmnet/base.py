@@ -1,4 +1,5 @@
 import warnings
+from distutils.version import LooseVersion
 
 ##############################################################################
 # adapted from scikit-learn
@@ -16,6 +17,35 @@ def is_classifier(estimator):
         True if estimator is a classifier and False otherwise.
     """
     return getattr(estimator, "_estimator_type", None) == "classifier"
+
+
+def check_version(library, min_version):
+    r"""Check minimum library version required.
+    Parameters
+    ----------
+    library : str
+        The library name to import. Must have a ``__version__`` property.
+    min_version : str
+        The minimum version string. Anything that matches
+        ``'(\d+ | [a-z]+ | \.)'``. Can also be empty to skip version
+        check (just check for library presence).
+    Returns
+    -------
+    ok : bool
+        True if the library exists with at least the specified version.
+    """
+    ok = True
+    try:
+        library = __import__(library)
+    except ImportError:
+        ok = False
+    else:
+        if min_version:
+            this_version = LooseVersion(library.__version__)
+            if this_version < min_version:
+                ok = False
+    return ok
+
 
 class BaseEstimator(object):
     """Base class for all estimators in scikit-learn

@@ -6,7 +6,7 @@ import numpy as np
 from scipy.special import expit
 from scipy.stats import norm
 from .utils import logger, set_log_level
-from .base import BaseEstimator, is_classifier
+from .base import BaseEstimator, is_classifier, check_version
 
 
 ALLOWED_DISTRS = ['gaussian', 'binomial', 'softplus', 'poisson',
@@ -366,7 +366,7 @@ def simulate_glm(distr, beta0, beta, X, eta=2.0, random_state=None,
 
 
 class GLM(BaseEstimator):
-    r"""Class for estimating regularized generalized linear models (GLM).
+    """Class for estimating regularized generalized linear models (GLM).
     The regularized GLM minimizes the penalized negative log likelihood:
 
     .. math::
@@ -499,19 +499,37 @@ class GLM(BaseEstimator):
         else:
             est_is_classifier = is_classifier(estimator)
         # Setup CV
-
-        from sklearn import model_selection as models
-        from sklearn.model_selection import (check_cv,
-                                             StratifiedKFold, KFold)
-        if isinstance(cv, (int, np.int)):
-            XFold = StratifiedKFold if est_is_classifier else KFold
-            cv = XFold(n_splits=cv)
-        elif isinstance(cv, str):
-            if not hasattr(models, cv):
-                raise ValueError('Unknown cross-validation')
-            cv = getattr(models, cv)
-            cv = cv()
-        cv = check_cv(cv=cv, y=y, classifier=est_is_classifier)
+        if check_version('sklearn', '0.18'):
+            from sklearn import model_selection as models
+            from sklearn.model_selection import (check_cv,
+                                                 StratifiedKFold, KFold)
+            if isinstance(cv, (int, np.int)):
+                XFold = StratifiedKFold if est_is_classifier else KFold
+                cv = XFold(n_splits=cv)
+            elif isinstance(cv, str):
+                if not hasattr(models, cv):
+                    raise ValueError('Unknown cross-validation')
+                cv = getattr(models, cv)
+                cv = cv()
+            cv = check_cv(cv=cv, y=y, classifier=est_is_classifier)
+        else:
+            from sklearn import cross_validation as models
+            from sklearn.cross_validation import (check_cv,
+                                                  StratifiedKFold, KFold)
+            if isinstance(cv, (int, np.int)):
+                if est_is_classifier:
+                    cv = StratifiedKFold(y=y, n_folds=cv)
+                else:
+                    cv = KFold(n=len(y), n_folds=cv)
+            elif isinstance(cv, str):
+                if not hasattr(models, cv):
+                    raise ValueError('Unknown cross-validation')
+                cv = getattr(models, cv)
+                if cv.__name__ not in ['KFold', 'LeaveOneOut']:
+                    raise NotImplementedError('CV cannot be defined with str'
+                                              ' for sklearn < .017.')
+                cv = cv(len(y))
+            cv = check_cv(cv=cv, X=X, y=y, classifier=est_is_classifier)
 
         # Extract train and test set to retrieve them at predict time
         if hasattr(cv, 'split'):
@@ -863,7 +881,7 @@ class GLM(BaseEstimator):
 
 
 class GLMCV(object):
-    r"""Class for estimating regularized generalized linear models (GLM)
+    """Class for estimating regularized generalized linear models (GLM)
     along a regularization path with warm restarts.
 
     The regularized GLM minimizes the penalized negative log likelihood:
