@@ -14,11 +14,12 @@ from sklearn.model_selection import GridSearchCV, cross_val_score, KFold
 from pyglmnet import (GLM, GLMCV, _grad_L2loss, _L2loss, simulate_glm,
                       _gradhess_logloss_1d, _loss, datasets)
 
-DISTRIBUTIONS = ['gaussian', 'binomial', 'softplus',
-                 'poisson', 'probit', 'gamma']
+DISTRIBUTIONS = ['gaussian', 'binomial', 'softplus', 'poisson', 'probit', 'gamma']
 
 
-@pytest.mark.parametrize("distr", DISTRIBUTIONS)
+@pytest.mark.parametrize(
+    "distr", DISTRIBUTIONS
+)
 def test_gradients(distr):
     """Test gradient accuracy."""
     # data
@@ -151,8 +152,9 @@ def test_group_lasso():
     assert np.any([beta[groups == group_id].sum() == 0
                    for group_id in group_ids if group_id != 0])
 
-
-@pytest.mark.parametrize("distr", DISTRIBUTIONS)
+@pytest.mark.parametrize(
+    "distr", DISTRIBUTIONS
+)
 def test_glmnet(distr):
     """Test glmnet."""
     raises(ValueError, GLM, distr='blah')
@@ -166,11 +168,13 @@ def test_glmnet(distr):
     beta = 1. / (np.float(n_features) + 1.) * \
         np.random.normal(0.0, 1.0, (n_features,))
 
+
     solvers = ['batch-gradient', 'cdfast']
 
     score_metric = 'pseudo_R2'
     learning_rate = 2e-1
     random_state = 0
+
 
     betas_ = list()
     for solver in solvers:
@@ -230,8 +234,9 @@ def test_glmnet(distr):
     glm_poisson.fit_predict(X_train, y_train)
     raises(ValueError, glm_poisson.fit_predict, X_train[None, ...], y_train)
 
-
-@pytest.mark.parametrize("distr", DISTRIBUTIONS)
+@pytest.mark.parametrize(
+    "distr", DISTRIBUTIONS
+)
 def test_glmcv(distr):
     """Test GLMCV class."""
     raises(ValueError, GLM, distr='blah')
@@ -292,7 +297,9 @@ def test_cv():
     glmcv.fit(X, y)
 
 
-@pytest.mark.parametrize("distr", DISTRIBUTIONS)
+@pytest.mark.parametrize(
+    "distr", DISTRIBUTIONS
+)
 def test_cdfast(distr):
     """Test all functionality related to fast coordinate descent."""
     scaler = StandardScaler()
@@ -304,7 +311,7 @@ def test_cdfast(distr):
     # Batch gradient not available for gamma
     if distr == 'gamma':
         return
-
+        
     glm = GLM(distr, solver='cdfast')
 
     np.random.seed(glm.random_state)
