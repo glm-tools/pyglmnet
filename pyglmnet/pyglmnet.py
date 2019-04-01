@@ -6,7 +6,7 @@ import numpy as np
 from scipy.special import expit
 from scipy.stats import norm
 from .utils import logger, set_log_level
-from sklearn.base import BaseEstimator, is_classifier
+from .base import BaseEstimator, is_classifier
 
 
 ALLOWED_DISTRS = ['gaussian', 'binomial', 'softplus', 'poisson',
