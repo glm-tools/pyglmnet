@@ -5,7 +5,6 @@ import os
 import sys
 import shutil
 import tempfile
-import urllib
 import itertools
 import numpy as np
 from scipy.misc import comb
@@ -50,7 +49,7 @@ def fetch_tikhonov_data(dpath='/tmp/glm-tools'):
     for fname in fnames:
         url = os.path.join(base_url, "tikhonov/%s" % fname)
         fname = os.path.join(dpath, fname)
-        urllib.request.urlretrieve(url, fname, _reporthook)
+        urlretrieve(url, fname, _reporthook)
 
     return dpath
 
@@ -86,7 +85,7 @@ def fetch_community_crime_data(dpath='/tmp/glm-tools'):
     fname = os.path.join(dpath, 'communities.csv')
     base_url = ("http://archive.ics.uci.edu/ml/machine-learning-databases")
     url = os.path.join(base_url, "communities/communities.data")
-    urllib.request.urlretrieve(url, fname, _reporthook)
+    urlretrieve(url, fname, _reporthook)
 
     # Read in the file
     df = pd.read_csv('/tmp/glm-tools/communities.csv', header=None)
@@ -207,8 +206,8 @@ def fetch_group_lasso_datasets():
         pos_file = tempfile.NamedTemporaryFile(bufsize=0)
         neg_file = tempfile.NamedTemporaryFile(bufsize=0)
 
-    urllib.request.urlretrieve(positive_url, pos_file.name, _reporthook)
-    urllib.request.urlretrieve(negative_url, neg_file.name, _reporthook)
+    urlretrieve(positive_url, pos_file.name, _reporthook)
+    urlretrieve(negative_url, neg_file.name, _reporthook)
 
     positive_sequences = [str(line.strip().upper()) for idx, line in
                           enumerate(pos_file.readlines())
