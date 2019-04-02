@@ -4,7 +4,6 @@ jobs:
         docker:
             - image: circleci/python:3.7.0-stretch-node-browsers
         steps:
-            - sudo apt-get update
             - checkout
             - run:
                 name: Install miniconda
