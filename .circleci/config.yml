@@ -4,6 +4,7 @@ jobs:
         docker:
             - image: circleci/python:3.7.0-stretch-node-browsers
         steps:
+            - sudo apt-get update
             - checkout
             - run:
                 name: Install miniconda
@@ -15,6 +16,9 @@ jobs:
             - run:
                 name: Setup Python environment
                 command: |
+                    conda update --yes conda
+                    conda create -n testenv --yes python=3.7
+                    source activate testenv
                     pip install --upgrade pip
                     pip install sphinx matplotlib coverage Pillow
                     pip install sphinx-gallery
