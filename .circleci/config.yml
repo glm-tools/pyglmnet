@@ -18,12 +18,12 @@ jobs:
                     pip install --upgrade pip
                     pip install sphinx matplotlib coverage Pillow
                     pip install sphinx-gallery
-                    pip install scipy
-                    pip install scikit-learn
-                    pip install pandas
+                    pip install scipy scikit-learn pandas
                     pip install -e .
                     pip install sphinx_bootstrap_theme numpydoc
                     pip install -e git+http://github.com/KordingLab/spykes.git#egg=spykes
+                    python --version
+                    pip list
             - run:
                 name: Build the documentation
                 command: |
