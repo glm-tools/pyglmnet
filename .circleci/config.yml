@@ -30,6 +30,7 @@ jobs:
             - run:
                 name: Build the documentation
                 command: |
+                    source activate testenv
                     cd doc && make html
             - store_artifacts:
                 path: doc/_build/html/
