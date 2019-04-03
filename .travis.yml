@@ -21,6 +21,8 @@ install:
 script:
     - # Run tests, show verbose output and print the top 10 slowest running tests
     - py.test --cov=pyglmnet tests/ --verbose --durations=10
+    - # Run doctests
+    - py.test pyglmnet/pyglmnet.py --verbose --doctest-modules 
     - # Run flake8 to check that package and tests adhere to PEP8
     - flake8 --count pyglmnet tests
 

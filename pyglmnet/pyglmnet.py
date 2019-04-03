@@ -451,6 +451,23 @@ class GLM(BaseEstimator):
     verbose : boolean or int
         default: False
 
+    Examples
+    --------
+    >>> import numpy as np
+    >>> random_state = 1
+    >>> np.random.seed(random_state)
+    >>> n_samples, n_features = 100, 4
+    >>> X = np.random.randn(n_samples, n_features)
+    >>> y = y = 2.2 * X[:, 0] -1.0 * X[:, 1] + 0.3 * X[:, 3] + 1.0
+    >>> glm = GLM(distr='gaussian', verbose=False, random_state=random_state)
+    >>> glm = glm.fit(X, y)
+    >>> glm.beta0_ # The intercept
+    1.005377890812967
+    >>> glm.beta_ # The coefficients
+    array([ 1.90217526, -0.78781579, -0.        ,  0.03227754])
+    >>> y_pred = glm.predict(X)
+
+
     Reference
     ---------
     Friedman, Hastie, Tibshirani (2010). Regularization Paths for Generalized
@@ -993,8 +1010,8 @@ class GLMCV(object):
     -----
     To select subset of fitted glm models, you can simply do:
 
-    >>> glm = glm[1:3]
-    >>> glm[2].predict(X_test)
+    glm = glm[1:3]
+    glm[2].predict(X_test)
     """
 
     def __init__(self, distr='poisson', alpha=0.5,
