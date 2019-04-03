@@ -401,9 +401,7 @@ def test_simulate_glm(distr):
     X = np.random.normal(0.0, 1.0, [n_samples, n_features])
     simulate_glm(distr, beta0, beta, X)
 
-
-def test_simulate_glm_failing():
-    """Test that an error is raised if an invalid parameter name is passed."""
+    # If the distribution name is garbage it will fail
     distr = 'multivariate_gaussian_poisson'
     with pytest.raises(ValueError):
         simulate_glm(distr, 1.0, 1.0, np.array([[1.0]]))
@@ -428,10 +426,6 @@ def test_api_input_types_y(y_func):
     glm.predict(X)
     glm.score(X, y)
 
-
-def test_api_shape_mismatch():
-    """Test that a ValueError is raised if the shapes mismatch."""
-    X = np.random.randn(10, 5)
-    y = np.random.randn(11)
+    # Test that ValueError is raised when the shapes mismatch
     with pytest.raises(ValueError):
-        GLM().fit(X, y)
+        GLM().fit(X, y[3:])
