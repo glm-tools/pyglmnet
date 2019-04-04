@@ -34,8 +34,8 @@ specifically,
    provides elastic net and group lasso regularization, but only for
    linear and logistic regression.
 
-**Pyglmnet** is a response to this fragmentation. Here are some
-highlights.
+**Pyglmnet** is a response to this fragmentation. It runs on Python 3.5+,
+and here are some of the highlights.
 
 -  Pyglmnet provides a wide range of noise models (and paired canonical
    link functions): ``'gaussian'``, ``'binomial'``, ``'multinomial'``,
@@ -168,7 +168,7 @@ optimization and pseudo-code.
 
 Here are
 `slides <https://pavanramkumar.github.io/pydata-chicago-2016>`__ from a
-recent talk at `PyData Chicago
+talk at `PyData Chicago
 2016 <http://pydata.org/chicago2016/schedule/presentation/15/>`__,
 corresponding `tutorial
 notebooks <http://github.com/pavanramkumar/pydata-chicago-2016>`__ and a

@@ -7,7 +7,7 @@
 Python implementation of regularized generalized linear models
 ==============================================================
 
-Pyglmnet is a Python library implementing generalized linear models (GLMs)
+Pyglmnet is a Python 3.5+ library implementing generalized linear models (GLMs)
 with advanced regularization options. It provides a wide range of noise models
 (with paired canonical link functions) including gaussian, binomial, multinomial,
 poisson, and softplus. It supports a wide range of regularizers: ridge, lasso,
