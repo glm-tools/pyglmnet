@@ -391,15 +391,16 @@ def test_random_state_consistency():
 def test_simulate_glm(distr):
     """Test that every generative model can be simulated from."""
 
+    random_state = 1
+    state = np.random.RandomState(random_state)
     n_samples, n_features = 10, 3
 
     # sample random coefficients
-    beta0 = np.random.normal(0.0, 1.0, 1)
-    beta = np.random.normal(0.0, 1.0, n_features)
+    beta0 = state.normal(0.0, 1.0, 1)
+    beta = state.normal(0.0, 1.0, n_features)
 
-    np.random.seed(1)
-    X = np.random.normal(0.0, 1.0, [n_samples, n_features])
-    simulate_glm(distr, beta0, beta, X)
+    X = state.normal(0.0, 1.0, [n_samples, n_features])
+    simulate_glm(distr, beta0, beta, X, random_state=random_state)
 
     # If the distribution name is garbage it will fail
     distr = 'multivariate_gaussian_poisson'
@@ -407,25 +408,27 @@ def test_simulate_glm(distr):
         simulate_glm(distr, 1.0, 1.0, np.array([[1.0]]))
 
 
-@pytest.mark.parametrize("y_func",
-                         [list, tuple, np.array,
-                          lambda x: np.array(x).reshape(-1, 1)])
-def test_api_input_types_y(y_func):
+def test_api_input_types_y():
     """Test that the input value of y can be of different types."""
-    np.random.seed(1)
+
+    random_state = 1
+    state = np.random.RandomState(random_state)
     n_samples, n_features = 100, 5
 
-    X = np.random.randn(n_samples, n_features)
-    y = np.random.randn(n_samples)
-
-    y = y_func(y)
+    X = state.normal(0, 1, (n_samples, n_features))
+    y = state.normal(0, 1, (n_samples, ))
 
     glm = GLM(distr='gaussian')
-    glm.fit(X, y)
 
-    glm.predict(X)
-    glm.score(X, y)
+    # Test that a list will not work - the types have to be ndarray
+    with pytest.raises(ValueError):
+        glm.fit(X, list(y))
 
     # Test that ValueError is raised when the shapes mismatch
     with pytest.raises(ValueError):
         GLM().fit(X, y[3:])
+
+    # This would work without errors
+    glm.fit(X, y)
+    glm.predict(X)
+    glm.score(X, y)

@@ -455,10 +455,10 @@ class GLM(BaseEstimator):
     --------
     >>> import numpy as np
     >>> random_state = 1
-    >>> np.random.seed(random_state)
     >>> n_samples, n_features = 100, 4
-    >>> X = np.random.randn(n_samples, n_features)
-    >>> y = y = 2.2 * X[:, 0] -1.0 * X[:, 1] + 0.3 * X[:, 3] + 1.0
+    >>> rng = np.random.RandomState(random_state)
+    >>> X = rng.normal(0, 1, (n_samples, n_features))
+    >>> y = 2.2 * X[:, 0] -1.0 * X[:, 1] + 0.3 * X[:, 3] + 1.0
     >>> glm = GLM(distr='gaussian', verbose=False, random_state=random_state)
     >>> glm = glm.fit(X, y)
     >>> glm.beta0_ # The intercept
@@ -685,10 +685,10 @@ class GLM(BaseEstimator):
         Parameters
         ----------
         X : array
-            The input data of shape (n_samples, n_features)
+            The 2D input data of shape (n_samples, n_features)
 
         y : array
-            The target data
+            The 1D target data of shape (n_samples,)
 
         Returns
         -------
@@ -707,18 +707,15 @@ class GLM(BaseEstimator):
             if not np.all([isinstance(g, np.int64) for g in self.group]):
                 raise ValueError('all entries of group should be integers')
 
-        # type check for data matrix
-        if not isinstance(X, np.ndarray):
-            raise ValueError('Input data should be of type ndarray (got %s).'
-                             % type(X))
+        # type check for data
+        if not (isinstance(X, np.ndarray) and isinstance(y, np.ndarray)):
+            msg = ("Input must be ndarray. Got {} and {}"
+                   .format(type(X), type(y)))
+            raise ValueError(msg)
 
-        if X.ndim != 2:
-            raise ValueError('Input data should be of shape' +
-                             '(n_observations, n_features)')
-
-        y = np.asarray(y)
-        if y.ndim == 2:
-            y = y.squeeze()
+        if X.ndim != 2 or y.ndim != 1:
+            msg = "X must be a 2D ndarray, and y must be 1D"
+            raise ValueError(msg)
 
         n_observations, n_features = X.shape
 
@@ -726,6 +723,7 @@ class GLM(BaseEstimator):
             raise ValueError('Shape mismatch.' +
                              'X has {} observations, y has {}.'
                              .format(n_observations, len(y)))
+
         # Initialize parameters
         beta = np.zeros((n_features + 1,))
         if self.beta0_ is None and self.beta_ is None:
