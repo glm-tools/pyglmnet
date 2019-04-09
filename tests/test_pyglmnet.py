@@ -12,13 +12,10 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import GridSearchCV, cross_val_score, KFold
 
 from pyglmnet import (GLM, GLMCV, _grad_L2loss, _L2loss, simulate_glm,
-                      _gradhess_logloss_1d, _loss, datasets)
-
-DISTRIBUTIONS = ['gaussian', 'binomial', 'softplus',
-                 'poisson', 'probit', 'gamma']
+                      _gradhess_logloss_1d, _loss, datasets, ALLOWED_DISTRS)
 
 
-@pytest.mark.parametrize("distr", DISTRIBUTIONS)
+@pytest.mark.parametrize("distr", ALLOWED_DISTRS)
 def test_gradients(distr):
     """Test gradient accuracy."""
     # data
@@ -152,7 +149,7 @@ def test_group_lasso():
                    for group_id in group_ids if group_id != 0])
 
 
-@pytest.mark.parametrize("distr", DISTRIBUTIONS)
+@pytest.mark.parametrize("distr", ALLOWED_DISTRS)
 def test_glmnet(distr):
     """Test glmnet."""
     raises(ValueError, GLM, distr='blah')
@@ -231,7 +228,7 @@ def test_glmnet(distr):
     raises(ValueError, glm_poisson.fit_predict, X_train[None, ...], y_train)
 
 
-@pytest.mark.parametrize("distr", DISTRIBUTIONS)
+@pytest.mark.parametrize("distr", ALLOWED_DISTRS)
 def test_glmcv(distr):
     """Test GLMCV class."""
     raises(ValueError, GLM, distr='blah')
@@ -292,7 +289,7 @@ def test_cv():
     glmcv.fit(X, y)
 
 
-@pytest.mark.parametrize("distr", DISTRIBUTIONS)
+@pytest.mark.parametrize("distr", ALLOWED_DISTRS)
 def test_cdfast(distr):
     """Test all functionality related to fast coordinate descent."""
     scaler = StandardScaler()
@@ -388,3 +385,50 @@ def test_random_state_consistency():
 
     assert_array_equal(ypred_a, ypred_b)
     assert_array_equal(ypred_b, ypred_c)
+
+
+@pytest.mark.parametrize("distr", ALLOWED_DISTRS)
+def test_simulate_glm(distr):
+    """Test that every generative model can be simulated from."""
+
+    random_state = 1
+    state = np.random.RandomState(random_state)
+    n_samples, n_features = 10, 3
+
+    # sample random coefficients
+    beta0 = state.normal(0.0, 1.0, 1)
+    beta = state.normal(0.0, 1.0, n_features)
+
+    X = state.normal(0.0, 1.0, [n_samples, n_features])
+    simulate_glm(distr, beta0, beta, X, random_state=random_state)
+
+    # If the distribution name is garbage it will fail
+    distr = 'multivariate_gaussian_poisson'
+    with pytest.raises(ValueError):
+        simulate_glm(distr, 1.0, 1.0, np.array([[1.0]]))
+
+
+def test_api_input_types_y():
+    """Test that the input value of y can be of different types."""
+
+    random_state = 1
+    state = np.random.RandomState(random_state)
+    n_samples, n_features = 100, 5
+
+    X = state.normal(0, 1, (n_samples, n_features))
+    y = state.normal(0, 1, (n_samples, ))
+
+    glm = GLM(distr='gaussian')
+
+    # Test that a list will not work - the types have to be ndarray
+    with pytest.raises(ValueError):
+        glm.fit(X, list(y))
+
+    # Test that ValueError is raised when the shapes mismatch
+    with pytest.raises(ValueError):
+        GLM().fit(X, y[3:])
+
+    # This would work without errors
+    glm.fit(X, y)
+    glm.predict(X)
+    glm.score(X, y)

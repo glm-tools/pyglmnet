@@ -349,6 +349,9 @@ def simulate_glm(distr, beta0, beta, X, eta=2.0, random_state=None,
     y: array
         simulated target data of shape (n_samples,)
     """
+    if distr not in ALLOWED_DISTRS:
+        raise ValueError("'distr' must be in " + repr(ALLOWED_DISTRS))
+
     if not sample:
         return _lmb(distr, beta0, beta, X, eta)
 
@@ -448,6 +451,23 @@ class GLM(BaseEstimator):
     verbose : boolean or int
         default: False
 
+    Examples
+    --------
+    >>> import numpy as np
+    >>> random_state = 1
+    >>> n_samples, n_features = 100, 4
+    >>> rng = np.random.RandomState(random_state)
+    >>> X = rng.normal(0, 1, (n_samples, n_features))
+    >>> y = 2.2 * X[:, 0] -1.0 * X[:, 1] + 0.3 * X[:, 3] + 1.0
+    >>> glm = GLM(distr='gaussian', verbose=False, random_state=random_state)
+    >>> glm = glm.fit(X, y)
+    >>> glm.beta0_ # The intercept
+    1.005377890812967
+    >>> glm.beta_ # The coefficients
+    array([ 1.90217526, -0.78781579, -0.        ,  0.03227754])
+    >>> y_pred = glm.predict(X)
+
+
     Reference
     ---------
     Friedman, Hastie, Tibshirani (2010). Regularization Paths for Generalized
@@ -467,7 +487,7 @@ class GLM(BaseEstimator):
             raise ValueError('max_iter must be of type int')
 
         if distr not in ALLOWED_DISTRS:
-            raise ValueError('distr must be one of %s, Got '
+            raise ValueError('distr must be one of %s. Got:'
                              '%s' % (', '.join(ALLOWED_DISTRS), distr))
 
         self.distr = distr
@@ -665,10 +685,10 @@ class GLM(BaseEstimator):
         Parameters
         ----------
         X : array
-            The input data of shape (n_samples, n_features)
+            The 2D input data of shape (n_samples, n_features)
 
         y : array
-            The target data
+            The 1D target data of shape (n_samples,)
 
         Returns
         -------
@@ -687,12 +707,22 @@ class GLM(BaseEstimator):
             if not np.all([isinstance(g, np.int64) for g in self.group]):
                 raise ValueError('all entries of group should be integers')
 
-        # type check for data matrix
-        if not isinstance(X, np.ndarray):
-            raise ValueError('Input data should be of type ndarray (got %s).'
-                             % type(X))
+        # type check for data
+        if not (isinstance(X, np.ndarray) and isinstance(y, np.ndarray)):
+            msg = ("Input must be ndarray. Got {} and {}"
+                   .format(type(X), type(y)))
+            raise ValueError(msg)
 
-        n_features = X.shape[1]
+        if X.ndim != 2 or y.ndim != 1:
+            msg = "X must be a 2D ndarray, and y must be 1D"
+            raise ValueError(msg)
+
+        n_observations, n_features = X.shape
+
+        if n_observations != len(y):
+            raise ValueError('Shape mismatch.' +
+                             'X has {} observations, y has {}.'
+                             .format(n_observations, len(y)))
 
         # Initialize parameters
         beta = np.zeros((n_features + 1,))
@@ -848,9 +878,9 @@ class GLM(BaseEstimator):
             The score metric
         """
         from . import metrics
-        if self.score_metric not in ['deviance', 'pseudo_R2', 'accuracy']:
-            raise ValueError('score_metric has to be one of' +
-                             ' deviance or pseudo_R2')
+        valid_metrics = ['deviance', 'pseudo_R2', 'accuracy']
+        if self.score_metric not in valid_metrics:
+            raise ValueError('score_metric has to be one of:' + valid_metrics)
 
         # If the model has not been fit it cannot be scored
         if self.ynull_ is None:
@@ -864,7 +894,7 @@ class GLM(BaseEstimator):
                                  ' is only defined for binomial ' +
                                  'or multinomial distributions')
 
-        y = y.ravel()
+        y = np.asarray(y).ravel()
 
         if self.distr == 'binomial' and self.score_metric != 'accuracy':
             yhat = self.predict_proba(X)
@@ -978,8 +1008,8 @@ class GLMCV(object):
     -----
     To select subset of fitted glm models, you can simply do:
 
-    >>> glm = glm[1:3]
-    >>> glm[2].predict(X_test)
+    glm = glm[1:3]
+    glm[2].predict(X_test)
     """
 
     def __init__(self, distr='poisson', alpha=0.5,
