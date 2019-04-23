@@ -8,8 +8,12 @@ import tempfile
 import itertools
 import numpy as np
 from scipy.misc import comb
-from urllib.request import urlretrieve
-
+try:
+    # Python 3
+    from urllib.request import urlretrieve
+except ImportError:
+    # Python 2 (?)
+    from urllib import urlretrieve
 pbar = None
 
 
