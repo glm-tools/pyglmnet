@@ -7,7 +7,7 @@
 Python implementation of regularized generalized linear models
 ==============================================================
 
-Pyglmnet is a Python library implementing generalized linear models (GLMs)
+Pyglmnet is a Python 3.5+ library implementing generalized linear models (GLMs)
 with advanced regularization options. It provides a wide range of noise models
 (with paired canonical link functions) including gaussian, binomial, multinomial,
 poisson, and softplus. It supports a wide range of regularizers: ridge, lasso,
@@ -19,23 +19,23 @@ elastic net, group lasso, and Tikhonov regularization.
 A brief introduction to GLMs
 ============================
 
-Linear models are estimated as
+Linear models are given by
 
 .. math::
-    y = \beta_0 + X\beta + \epsilon
+    y = \beta_0 + X\beta + \epsilon.
 
 The parameters :math:`\beta_0, \beta` are estimated using ordinary least squares, under the
-implicit assumption the :math:`y` is normally distributed.
+implicit assumption that :math:`y` is normally distributed.
 
 Generalized linear models allow us to generalize this approach to point-wise
-nonlinearities :math:`q(.)` and a family of exponential distributions for :math:`y`.
+nonlinearities :math:`q(\cdot)` and a family of exponential distributions for :math:`y`.
 
 .. math::
     y = q(\beta_0 + X\beta) + \epsilon
 
 Regularized GLMs are estimated by minimizing a loss function specified by
 the penalized negative log-likelihood. The elastic net penalty interpolates
-between L2 and L1 norm. Thus, we solve the following optimization problem:
+between the L2 and L1 norm. We solve the following optimization problem:
 
 .. math::
     \min_{\beta_0, \beta} \frac{1}{N} \sum_{i = 1}^N \mathcal{L} (y_i, \beta_0 + \beta^T x_i)
@@ -72,6 +72,6 @@ Contents
 Questions / Errors / Bugs
 =========================
 
-If you have a question about the code or find errors or bugs,
+If you have questions about the code or find errors or bugs,
 please `report it here <https://github.com/glm-tools/pyglmnet/issues>`__.
-For more specific question, feel free to email us directly.
+For more specific questions, feel free to email us directly.

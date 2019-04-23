@@ -34,8 +34,8 @@ specifically,
    provides elastic net and group lasso regularization, but only for
    linear and logistic regression.
 
-**Pyglmnet** is a response to this fragmentation. Here are some
-highlights.
+**Pyglmnet** is a response to this fragmentation. It runs on Python 3.5+,
+and here are some of the highlights.
 
 -  Pyglmnet provides a wide range of noise models (and paired canonical
    link functions): ``'gaussian'``, ``'binomial'``, ``'multinomial'``,
@@ -119,42 +119,43 @@ Install ``pyglmnet`` using ``setup.py`` as follows
 Getting Started
 ~~~~~~~~~~~~~~~
 
+
 Here is an example on how to use the ``GLM`` estimator.
+.. This example is also found in examples/intro_example.py.
 
 .. code:: python
+   
+   import numpy as np
+   import scipy.sparse as sps
+   from pyglmnet import GLM, simulate_glm
 
-    import numpy as np
-    import scipy.sparse as sps
-    from sklearn.preprocessing import StandardScaler
-    from pyglmnet import GLM
+   # create an instance of the GLM class
+   glm = GLM(distr="poisson")
 
-    # create an instance of the GLM class
-    glm = GLM(distr='poisson')
+   # sample random coefficients
+   n_samples, n_features = 1000, 100
+   beta0 = np.random.normal(0.0, 1.0, 1)
+   beta = sps.rand(n_features, 1, 0.1)
+   beta = np.array(beta.todense())
 
-    n_samples, n_features = 10000, 100
+   # simulate training data
+   X_train = np.random.normal(0.0, 1.0, [n_samples, n_features])
+   y_train = simulate_glm("poisson", beta0, beta, X_train)
 
-    # sample random coefficients
-    beta0 = np.random.normal(0.0, 1.0, 1)
-    beta = sps.rand(n_features, 1, 0.1)
-    beta = np.array(beta.todense())
+   # simulate testing data
+   X_test = np.random.normal(0.0, 1.0, [n_samples, n_features])
+   y_test = simulate_glm("poisson", beta0, beta, X_test)
 
-    # simulate training data
-    X_train = np.random.normal(0.0, 1.0, [n_samples, n_features])
-    y_train = glm.simulate(beta0, beta, X_train)
+   # fit the model on the training data
+   #scaler = StandardScaler().fit(X_train)
+   glm.fit(X_train, y_train)
 
-    # simulate testing data
-    X_test = np.random.normal(0.0, 1.0, [n_samples, n_features])
-    y_test = glm.simulate(beta0, beta, X_test)
+   # predict using fitted model on the test data
+   yhat_test = glm.predict(X_test)
 
-    # fit the model on the training data
-    scaler = StandardScaler().fit(X_train)
-    glm.fit(scaler.transform(X_train), y_train)
+   # score the model
+   deviance = glm.score(X_test, y_test)
 
-    # predict using fitted model on the test data
-    yhat_test = glm.predict(scaler.transform(X_test))
-
-    # score the model
-    deviance = glm.score(X_test, y_test)
 
 `More pyglmnet examples and use
 cases <http://glm-tools.github.io/pyglmnet/auto_examples/index.html>`__.
@@ -168,7 +169,7 @@ optimization and pseudo-code.
 
 Here are
 `slides <https://pavanramkumar.github.io/pydata-chicago-2016>`__ from a
-recent talk at `PyData Chicago
+talk at `PyData Chicago
 2016 <http://pydata.org/chicago2016/schedule/presentation/15/>`__,
 corresponding `tutorial
 notebooks <http://github.com/pavanramkumar/pydata-chicago-2016>`__ and a

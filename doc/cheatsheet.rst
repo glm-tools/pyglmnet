@@ -215,7 +215,7 @@ where :math:`\Phi(z_i)` is the standard normal cumulative distribution function.
 
 .. math::
 
-    J = J = -\frac{1}{n}\sum_i \left\{ y_i \log(\mu_i) +
+    J = -\frac{1}{n}\sum_i \left\{ y_i \log(\mu_i) +
     (1-y_i) \log(1 - \mu_i) \right\}
     + \lambda (1 - \alpha) \frac{1}{2}\sum_j \beta_j^2\\
 
@@ -265,7 +265,7 @@ Gamma
 
 .. math::
 
-    \mathcal{L} = \sum_{i} \nu\Bigg\{\frac{-y_i}{\mu_i} - log(\mu_i)\Bigg\}
+    \mathcal{L} = \sum_{i} \nu\Bigg\{\frac{-y_i}{\mu_i} - \log(\mu_i)\Bigg\}
 
 where :math:`\nu` is the shape parameter. It is exponential for :math:`\nu = 1`
 and normal for :math:`\nu = \infty`.
@@ -274,7 +274,7 @@ and normal for :math:`\nu = \infty`.
 
 .. math::
 
-    J = -\frac{1}{n}\sum_{i} \nu\Bigg\{\frac{-y_i}{\mu_i} - log(\mu_i)\Bigg\}
+    J = -\frac{1}{n}\sum_{i} \nu\Bigg\{\frac{-y_i}{\mu_i} - \log(\mu_i)\Bigg\}
     + \lambda (1 - \alpha) \frac{1}{2}\sum_j \beta_j^2\\
 
 **Gradient**
