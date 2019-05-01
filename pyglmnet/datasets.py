@@ -195,9 +195,9 @@ def fetch_group_lasso_datasets():
         return feature_vector
 
     positive_url = \
-        "http://genes.mit.edu/burgelab/maxent/ssdata/MEMset/train5_hs"
+        "http://hollywood.mit.edu/burgelab/maxent/ssdata/MEMset/train5_hs"
     negative_url = \
-        "http://genes.mit.edu/burgelab/maxent/ssdata/MEMset/train0_5_hs"
+        "http://hollywood.mit.edu/burgelab/maxent/ssdata/MEMset/train0_5_hs"
 
     if sys.version_info[0] == 3:
         pos_file = tempfile.NamedTemporaryFile('w+', buffering=1)
