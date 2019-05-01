@@ -699,7 +699,7 @@ class GLM(BaseEstimator):
         # checks for group
         if self.group is not None:
             self.group = np.array(self.group)
-            self.group.dtype = np.int64
+            self.group = self.group.astype(np.int64)
             # shape check
             if self.group.shape[0] != X.shape[1]:
                 raise ValueError('group should be (n_features,)')
@@ -1113,6 +1113,7 @@ class GLMCV(object):
             glm = GLM(distr=self.distr,
                       alpha=self.alpha,
                       Tau=self.Tau,
+                      group=self.group,
                       reg_lambda=0.1,
                       solver=self.solver,
                       learning_rate=self.learning_rate,
