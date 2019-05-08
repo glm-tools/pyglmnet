@@ -12,7 +12,7 @@ try:
     # Python 3
     from urllib.request import urlretrieve
 except ImportError:
-    # Python 2 (?)
+    # Python 2
     from urllib import urlretrieve
 pbar = None
 
