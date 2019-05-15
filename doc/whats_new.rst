@@ -27,6 +27,7 @@ BUG
     - Fixed incorrect proximal operator for group lasso by `Yu Umegaki`_.
     - Changed stopping criteria for convergence (a threshold on the change in objective value) which
       stopped too learly. The new criteria is a threshold on the norm of the gradient, by `Pavan Ramkumar`_. 
+    - Fixed `group` parameter not being passed for Group Lasso by `Beibin Li`_.
 
 API
 ~~~
@@ -65,3 +66,4 @@ Changelog
 .. _Ravi Garg: https://github.com/ravigarg27
 .. _Yu Umegaki: https://github.com/AnchorBlues
 .. _Giovanni De Toni: https://github.com/geektoni
+.. _Beibin Li: https://github.com/BeibinLi
