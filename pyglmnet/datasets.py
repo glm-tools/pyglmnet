@@ -7,7 +7,7 @@ import shutil
 import tempfile
 import itertools
 import numpy as np
-from scipy.misc import comb
+from scipy.special import comb
 
 from .externals.six.moves import urllib
 
