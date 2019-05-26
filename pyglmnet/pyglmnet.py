@@ -365,6 +365,7 @@ def simulate_glm(distr, beta0, beta, X, eta=2.0, random_state=None,
     if distr == 'gamma':
         mu = _lmb(distr, beta0, beta, X, eta)
         y = np.exp(mu)
+        
     return y
 
 

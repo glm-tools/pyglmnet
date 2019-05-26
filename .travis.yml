@@ -24,6 +24,8 @@ script:
     - py.test pyglmnet/pyglmnet.py --verbose --doctest-modules 
     - # Run flake8 to check that package and tests adhere to PEP8
     - flake8 --count pyglmnet tests
+    - # Make sure the README example runs
+    - python examples/intro_example.py
 
 after_success:
     - bash <(curl -s https://codecov.io/bash)
