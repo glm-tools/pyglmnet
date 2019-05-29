@@ -89,7 +89,12 @@ Install ``pytest`` and ``pytest-cov``:
   py.test --cov=pyglmnet tests/
 
 If you don't see error messages, go ahead and test with a pep8 style checker.
-We use flake8
+We use flake8.  Install ``flake8``:
+
+.. code:: bash
+
+  pip install flake8
+  
 
 .. code:: bash
 
