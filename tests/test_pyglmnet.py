@@ -347,8 +347,7 @@ def test_cdfast(distr):
 
 def test_fetch_datasets():
     """Test fetching datasets."""
-    datasets.fetch_community_crime_data('/tmp/glm-tools')
-
+    datasets.fetch_community_crime_data()
 
 def test_random_state_consistency():
     """ Test model's random_state """
