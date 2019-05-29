@@ -4,11 +4,11 @@ A set of convenience functions to download datasets for illustrative examples
 import os
 import sys
 import shutil
-import tempfile
 import itertools
 import numpy as np
 from scipy.special import comb
 from urllib.request import urlretrieve
+from tempfile import TemporaryDirectory
 
 pbar = None
 
@@ -25,20 +25,21 @@ def _reporthook(count, block_size, total_size):
                      % (percent, progress_size / (1024 * 1024)))
 
 
-def fetch_tikhonov_data(dpath='/tmp/glm-tools'):
+def fetch_tikhonov_data(dpath):
     """
     Downloads data for Tikhonov example and returns data frames
 
     Parameters
     ----------
     dpath: str
-        specifies path to which the data files should be downloaded
+        specifies path to which the data files should be downloaded.
 
     Returns
     -------
     dpath : str
         The data path
     """
+
     if os.path.exists(dpath):
         shutil.rmtree(dpath)
     os.mkdir(dpath)
@@ -47,14 +48,14 @@ def fetch_tikhonov_data(dpath='/tmp/glm-tools'):
     fnames = ['fixations.csv', 'probes.csv', 'spiketimes.csv']
 
     for fname in fnames:
-        url = os.path.join(base_url, "tikhonov/%s" % fname)
+        url = base_url + "/tikhonov/" + fname
         fname = os.path.join(dpath, fname)
         urlretrieve(url, fname, _reporthook)
 
     return dpath
 
 
-def fetch_community_crime_data(dpath='/tmp/glm-tools'):
+def fetch_community_crime_data():
     """
     Downloads data for the community crime example,
     removes missing values, extracts features, and
@@ -62,8 +63,7 @@ def fetch_community_crime_data(dpath='/tmp/glm-tools'):
 
     Parameters
     ----------
-    dpath: str
-        specifies path to which the data files should be downloaded
+    None
 
     Returns
     -------
@@ -78,17 +78,15 @@ def fetch_community_crime_data(dpath='/tmp/glm-tools'):
         raise ImportError('The pandas module is required for reading the '
                           'community crime dataset')
 
-    if os.path.exists(dpath):
-        shutil.rmtree(dpath)
-    os.mkdir(dpath)
+    with TemporaryDirectory(prefix="tmp_glm-tools") as dpath:
+        fname = os.path.join(dpath, 'communities.csv')
+        base_url = ("http://archive.ics.uci.edu/ml/machine-learning-databases")
+        url = base_url + "/" + "communities/communities.data"
 
-    fname = os.path.join(dpath, 'communities.csv')
-    base_url = ("http://archive.ics.uci.edu/ml/machine-learning-databases")
-    url = os.path.join(base_url, "communities/communities.data")
-    urlretrieve(url, fname, _reporthook)
+        urlretrieve(url, fname, _reporthook)
 
-    # Read in the file
-    df = pd.read_csv('/tmp/glm-tools/communities.csv', header=None)
+        # Read in the file
+        df = pd.read_csv(fname, header=None)
 
     # Remove missing values
     df.replace('?', np.nan, inplace=True)
@@ -199,24 +197,23 @@ def fetch_group_lasso_datasets():
     negative_url = \
         "http://hollywood.mit.edu/burgelab/maxent/ssdata/MEMset/train0_5_hs"
 
-    if sys.version_info[0] == 3:
-        pos_file = tempfile.NamedTemporaryFile('w+', buffering=1)
-        neg_file = tempfile.NamedTemporaryFile('w+', buffering=1)
-    elif sys.version_info[0] == 2:
-        pos_file = tempfile.NamedTemporaryFile(bufsize=0)
-        neg_file = tempfile.NamedTemporaryFile(bufsize=0)
+    with TemporaryDirectory(prefix="tmp_glm-tools") as dpath:
+        pos_file = os.path.join(dpath, 'pos')
+        neg_file = os.path.join(dpath, 'neg')
 
-    urlretrieve(positive_url, pos_file.name, _reporthook)
-    urlretrieve(negative_url, neg_file.name, _reporthook)
+        urlretrieve(positive_url, pos_file, _reporthook)
+        urlretrieve(negative_url, neg_file, _reporthook)
 
-    positive_sequences = [str(line.strip().upper()) for idx, line in
-                          enumerate(pos_file.readlines())
-                          if ">" not in line and idx < 2 * 8000]
+        with open(pos_file) as posfp:
+            positive_sequences = [str(line.strip().upper()) for idx, line in
+                                  enumerate(posfp.readlines())
+                                  if ">" not in line and idx < 2 * 8000]
 
-    negative_sequences = [str(line.strip().upper()) for idx, line in
-                          enumerate(neg_file.readlines())
-                          if ">" not in line and
-                          idx < 2 * len(positive_sequences)]
+        with open(neg_file) as negfp:
+            negative_sequences = [str(line.strip().upper()) for idx, line in
+                                  enumerate(negfp.readlines())
+                                  if ">" not in line and
+                                  idx < 2 * len(positive_sequences)]
 
     assert len(positive_sequences) == len(negative_sequences), \
         "lengths were not the same: p={pos} n={neg}" \

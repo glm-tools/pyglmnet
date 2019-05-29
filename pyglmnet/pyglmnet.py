@@ -374,25 +374,25 @@ class GLM(BaseEstimator):
 
     .. math::
 
-        \min_{\\beta_0, \\beta} \\frac{1}{N}
-        \sum_{i = 1}^N \mathcal{L} (y_i, \\beta_0 + \\beta^T x_i)
-        + \lambda [ \\frac{1}{2}(1 - \\alpha) \mathcal{P}_2 +
-                    \\alpha \mathcal{P}_1 ]
+        \\min_{\\beta_0, \\beta} \\frac{1}{N}
+        \\sum_{i = 1}^N \\mathcal{L} (y_i, \\beta_0 + \\beta^T x_i)
+        + \\lambda [ \\frac{1}{2}(1 - \\alpha) \\mathcal{P}_2 +
+                    \\alpha \\mathcal{P}_1 ]
 
-    where :math:`\mathcal{P}_2` and :math:`\mathcal{P}_1` are the generalized
+    where :math:`\\mathcal{P}_2` and :math:`\\mathcal{P}_1` are the generalized
     L2 (Tikhonov) and generalized L1 (Group Lasso) penalties, given by:
 
     .. math::
 
-        \mathcal{P}_2 = \|\Gamma \\beta \|_2^2 \\
-        \mathcal{P}_1 = \sum_g \|\\beta_{j,g}\|_2
+        \\mathcal{P}_2 = \\|\\Gamma \\beta \\|_2^2 \\
+        \\mathcal{P}_1 = \\sum_g \\|\\beta_{j,g}\\|_2
 
-    where :math:`\Gamma` is the Tikhonov matrix: a square factorization
+    where :math:`\\Gamma` is the Tikhonov matrix: a square factorization
     of the inverse covariance matrix and :math:`\\beta_{j,g}` is the
     :math:`j` th coefficient of group :math:`g`.
 
     The generalized L2 penalty defaults to the ridge penalty when
-    :math:`\Gamma` is identity.
+    :math:`\\Gamma` is identity.
 
     The generalized L1 penalty defaults to the lasso penalty when each
     :math:`\\beta` belongs to its own group.
@@ -880,7 +880,8 @@ class GLM(BaseEstimator):
         from . import metrics
         valid_metrics = ['deviance', 'pseudo_R2', 'accuracy']
         if self.score_metric not in valid_metrics:
-            raise ValueError('score_metric has to be one of:' + valid_metrics)
+            raise ValueError("score_metric has to be one of: "
+                             ",".join(valid_metrics))
 
         # If the model has not been fit it cannot be scored
         if self.ynull_ is None:
@@ -918,25 +919,24 @@ class GLMCV(object):
 
     .. math::
 
-        \min_{\\beta_0, \\beta} \\frac{1}{N}
-        \sum_{i = 1}^N \mathcal{L} (y_i, \\beta_0 + \\beta^T x_i)
-        + \lambda [ \\frac{1}{2}(1 - \\alpha) \mathcal{P}_2 +
-                    \\alpha \mathcal{P}_1 ]
+        \\min_{\\beta_0, \\beta} \\frac{1}{N}
+        \\sum_{i = 1}^N \\mathcal{L} (y_i, \\beta_0 + \\beta^T x_i)
+        + \\lambda [ \\frac{1}{2}(1 - \\alpha) \\mathcal{P}_2 +
+                    \\alpha \\mathcal{P}_1 ]
 
-    where :math:`\mathcal{P}_2` and :math:`\mathcal{P}_1` are the generalized
+    where :math:`\\mathcal{P}_2` and :math:`\\mathcal{P}_1` are the generalized
     L2 (Tikhonov) and generalized L1 (Group Lasso) penalties, given by:
 
     .. math::
 
-        \mathcal{P}_2 = \|\Gamma \\beta \|_2^2 \\
-        \mathcal{P}_1 = \sum_g \|\\beta_{j,g}\|_2
-
-    where :math:`\Gamma` is the Tikhonov matrix: a square factorization
+        \\mathcal{P}_2 = \\|\\Gamma \\beta \\|_2^2 \\
+        \\mathcal{P}_1 = \\sum_g \\|\\beta_{j,g}\\|_2
+    where :math:`\\Gamma` is the Tikhonov matrix: a square factorization
     of the inverse covariance matrix and :math:`\\beta_{j,g}` is the
     :math:`j` th coefficient of group :math:`g`.
 
     The generalized L2 penalty defaults to the ridge penalty when
-    :math:`\Gamma` is identity.
+    :math:`\\Gamma` is identity.
 
     The generalized L1 penalty defaults to the lasso penalty when each
     :math:`\\beta` belongs to its own group.
@@ -1150,6 +1150,9 @@ class GLMCV(object):
             opt = np.array(scores).argmin()
         elif self.score_metric in ['pseudo_R2', 'accuracy']:
             opt = np.array(scores).argmax()
+        else:
+            raise ValueError("Unknown score_metric: %s" % (self.score_metric))
+
         self.beta0_, self.beta_ = glms[opt].beta0_, glms[opt].beta_
         self.reg_lambda_opt_ = self.reg_lambda[opt]
         self.glm_ = glms[opt]

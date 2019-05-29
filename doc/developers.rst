@@ -21,7 +21,7 @@ first time:
 
 .. code:: bash
 
-  git clone https://github.com/user/pyglmnet
+  git clone https://github.com/<your-user-name>/pyglmnet
 
 Or if you have already cloned the repository:
 
@@ -42,8 +42,8 @@ You should see this:
 
   upstream	  https://github.com/glm-tools/pyglmnet.git (fetch)
   upstream	  https://github.com/glm-tools/pyglmnet.git (push)
-  origin	http://github.com/user/pyglmnet.git (fetch)
-  origin	http://github.com/user/pyglmnet.git (push)
+  origin	http://github.com/<your-user-name>/pyglmnet.git (fetch)
+  origin	http://github.com/<your-user-name>/pyglmnet.git (push)
 
 Before you start developing a feature, make sure that your local master is
 up to date. This can save you from a lot of merge conflicts later.
@@ -89,7 +89,12 @@ Install ``pytest`` and ``pytest-cov``:
   py.test --cov=pyglmnet tests/
 
 If you don't see error messages, go ahead and test with a pep8 style checker.
-We use flake8
+We use flake8.  Install ``flake8``:
+
+.. code:: bash
+
+  pip install flake8
+  
 
 .. code:: bash
 
@@ -116,7 +121,7 @@ Once committed, push your local branch to a branch in your fork.
 
 Make pull request
 -----------------
-From the ``feat`` branch of your fork: https://github.com/user/pyglmnet
+From the ``feat`` branch of your fork: https://github.com/<your-user-name>/pyglmnet
 you can create a pull request on to the main repo. Give the PR a meaningful
 name. We recommend prefixing it with a ``[WIP]`` if the feature is being built.
 If you think it is ready to merge, prefix with ``[MRG]``.
@@ -147,7 +152,7 @@ before it can be merged.
 Once the PR is merged, you can optionally delete the ``feat`` branch both
 locally and on your fork.
 
-Build documenation
+Build documentation
 ------------------
 The following should be installed in order to build the documentation.
 
