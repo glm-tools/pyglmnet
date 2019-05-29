@@ -30,7 +30,7 @@ from pyglmnet import GLM, GLMCV, datasets
 ########################################################
 # Download and preprocess data files
 
-X, y = datasets.fetch_community_crime_data('/tmp/glm-tools')
+X, y = datasets.fetch_community_crime_data()
 n_samples, n_features = X.shape
 
 ########################################################
@@ -57,9 +57,9 @@ print ("test set pseudo $R^2$ = %f" % glm.score(X_test, y_test))
 
 import numpy as np # noqa
 from sklearn.model_selection import GridSearchCV # noqa
-from sklearn.model_selection import StratifiedKFold # noqa
+from sklearn.model_selection import KFold 
 
-cv = StratifiedKFold(3)
+cv = KFold(3)
 
 reg_lambda = np.logspace(np.log(0.5), np.log(0.01), 10,
                          base=np.exp(1))
