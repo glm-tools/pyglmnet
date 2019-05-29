@@ -21,7 +21,7 @@ first time:
 
 .. code:: bash
 
-  git clone https://github.com/user/pyglmnet
+  git clone https://github.com/glm-tools/pyglmnet
 
 Or if you have already cloned the repository:
 
@@ -121,7 +121,7 @@ Once committed, push your local branch to a branch in your fork.
 
 Make pull request
 -----------------
-From the ``feat`` branch of your fork: https://github.com/user/pyglmnet
+From the ``feat`` branch of your fork: https://github.com/glm-tools/pyglmnet
 you can create a pull request on to the main repo. Give the PR a meaningful
 name. We recommend prefixing it with a ``[WIP]`` if the feature is being built.
 If you think it is ready to merge, prefix with ``[MRG]``.
