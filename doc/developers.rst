@@ -21,7 +21,7 @@ first time:
 
 .. code:: bash
 
-  git clone https://github.com/glm-tools/pyglmnet
+  git clone https://github.com/Your_User_Name/pyglmnet
 
 Or if you have already cloned the repository:
 
@@ -42,8 +42,8 @@ You should see this:
 
   upstream	  https://github.com/glm-tools/pyglmnet.git (fetch)
   upstream	  https://github.com/glm-tools/pyglmnet.git (push)
-  origin	http://github.com/user/pyglmnet.git (fetch)
-  origin	http://github.com/user/pyglmnet.git (push)
+  origin	http://github.com/Your_User_Name/pyglmnet.git (fetch)
+  origin	http://github.com/Your_User_Name/pyglmnet.git (push)
 
 Before you start developing a feature, make sure that your local master is
 up to date. This can save you from a lot of merge conflicts later.
@@ -121,7 +121,7 @@ Once committed, push your local branch to a branch in your fork.
 
 Make pull request
 -----------------
-From the ``feat`` branch of your fork: https://github.com/glm-tools/pyglmnet
+From the ``feat`` branch of your fork: https://github.com/Your_User_Name/pyglmnet
 you can create a pull request on to the main repo. Give the PR a meaningful
 name. We recommend prefixing it with a ``[WIP]`` if the feature is being built.
 If you think it is ready to merge, prefix with ``[MRG]``.
