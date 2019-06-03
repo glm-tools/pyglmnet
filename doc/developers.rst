@@ -21,7 +21,7 @@ first time:
 
 .. code:: bash
 
-  git clone https://github.com/Your_User_Name/pyglmnet
+  git clone https://github.com/<your-user-name>/pyglmnet
 
 Or if you have already cloned the repository:
 
