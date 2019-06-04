@@ -880,7 +880,8 @@ class GLM(BaseEstimator):
         from . import metrics
         valid_metrics = ['deviance', 'pseudo_R2', 'accuracy']
         if self.score_metric not in valid_metrics:
-            raise ValueError('score_metric has to be one of:' + valid_metrics)
+            raise ValueError("score_metric has to be one of: "
+                             ",".join(valid_metrics))
 
         # If the model has not been fit it cannot be scored
         if self.ynull_ is None:
