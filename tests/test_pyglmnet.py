@@ -227,7 +227,20 @@ def test_glmnet(distr):
     glm_poisson.fit_predict(X_train, y_train)
     raises(ValueError, glm_poisson.fit_predict, X_train[None, ...], y_train)
 
+    # test picky score_metric check within fit(). 
+    glm.score_metric='bad_score_metric' # reuse last glm
+    try:
+        glm.fit(X_train, y_train)
+        assert(False) # should have thrown exception
+    except:
+        assert(True) # OK if here
 
+    glm = GLM(distr, learning_rate=learning_rate,
+              reg_lambda=reg_lambda, tol=1e-3, max_iter=5000,
+              alpha=alpha, solver=solver, score_metric='bad_score_metric',
+              random_state=random_state, callback=callback)
+
+    
 @pytest.mark.parametrize("distr", ALLOWED_DISTRS)
 def test_glmcv(distr):
     """Test GLMCV class."""
