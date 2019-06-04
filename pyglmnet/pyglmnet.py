@@ -930,7 +930,6 @@ class GLMCV(object):
 
         \\mathcal{P}_2 = \\|\\Gamma \\beta \\|_2^2 \\
         \\mathcal{P}_1 = \\sum_g \\|\\beta_{j,g}\\|_2
-
     where :math:`\\Gamma` is the Tikhonov matrix: a square factorization
     of the inverse covariance matrix and :math:`\\beta_{j,g}` is the
     :math:`j` th coefficient of group :math:`g`.
@@ -1151,7 +1150,7 @@ class GLMCV(object):
         elif self.score_metric in ['pseudo_R2', 'accuracy']:
             opt = np.array(scores).argmax()
         else:
-            raise ValueError("Unknown score_metric: '%s'" % (self.score_metric))
+            raise ValueError("Unknown score_metric: %s" % (self.score_metric))
 
         self.beta0_, self.beta_ = glms[opt].beta0_, glms[opt].beta_
         self.reg_lambda_opt_ = self.reg_lambda[opt]
