@@ -152,7 +152,7 @@ before it can be merged.
 Once the PR is merged, you can optionally delete the ``feat`` branch both
 locally and on your fork.
 
-Build documenation
+Build documentation
 ------------------
 The following should be installed in order to build the documentation.
 
