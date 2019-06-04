@@ -1151,7 +1151,7 @@ class GLMCV(object):
         elif self.score_metric in ['pseudo_R2', 'accuracy']:
             opt = np.array(scores).argmax()
         else:
-            raise Exception("Unknown score_metric: '%s'" % (self.score_metric))
+            raise ValueError("Unknown score_metric: '%s'" % (self.score_metric))
 
         self.beta0_, self.beta_ = glms[opt].beta0_, glms[opt].beta_
         self.reg_lambda_opt_ = self.reg_lambda[opt]
