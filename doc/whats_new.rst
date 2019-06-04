@@ -19,9 +19,7 @@ Changelog
     - Add support for running :class:`sklearn.model_selection.GridSearchCV` on :class:`pyglmnet.GLM` objects by `Mainak Jas`_.
     - Improved testing of gradients for optimization by `Mainak Jas`_ and `Pavan Ramkumar`_.
     - Improved testing of estimated coefficients at convergence by `Mainak Jas`_ and `Pavan Ramkumar`_
-    - Made temporary file handling OS independent and usable on a cluster `Scott Otterson`_.
-    - Misc. documentation updates `Scott Otterson`_.
-
+ 
 BUG
 ~~~
 
@@ -31,6 +29,7 @@ BUG
       stopped too learly. The new criteria is a threshold on the norm of the gradient, by `Pavan Ramkumar`_. 
     - Fixed `group` parameter not being passed for Group Lasso by `Beibin Li`_.
     - Fix URL paths when running on Windows  `Scott Otterson`_.
+    - Made temporary file handling OS independent and usable on a cluster `Scott Otterson`_.
     - Replace StratifiedKFold() with KFold(), as StratifiedKFold() doesn't work for continuous values `Scott Otterson`_.
       
 API
