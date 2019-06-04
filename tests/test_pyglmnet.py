@@ -272,11 +272,7 @@ def test_glmcv(distr):
 
     # test picky score_metric check within fit().
     glm.score_metric = 'bad_score_metric'  # reuse last glm
-    try:
-        glm.fit(X_train, y_train)
-        assert(False)  # should have thrown exception
-    except ValueError:
-        assert(True)  # OK if here
+    raises(ValueError, glm.fit, X_train, y_train)
 
 
 def test_cv():

@@ -28,9 +28,9 @@ BUG
     - Changed stopping criteria for convergence (a threshold on the change in objective value) which
       stopped too learly. The new criteria is a threshold on the norm of the gradient, by `Pavan Ramkumar`_. 
     - Fixed `group` parameter not being passed for Group Lasso by `Beibin Li`_.
-    - Fix URL paths when running on Windows  `Scott Otterson`_.
-    - Made temporary file handling OS independent and usable on a cluster `Scott Otterson`_.
-    - Replace StratifiedKFold() with KFold(), as StratifiedKFold() doesn't work for continuous values `Scott Otterson`_.
+    - Fix URL paths when running on Windows by `Scott Otterson`_.
+    - Made temporary file handling OS independent and usable on a cluster by `Scott Otterson`_.
+    - Replace StratifiedKFold() with KFold(), as StratifiedKFold() doesn't work for continuous values by `Scott Otterson`_.
       
 API
 ~~~
