@@ -882,7 +882,7 @@ class GLM(BaseEstimator):
                              % type(X))
 
         if self.fit_intercept:
-            beta = [self.beta0_] + self.beta
+            beta = [self.beta0_] + self.beta_
         else:
             beta = self.beta_
 
