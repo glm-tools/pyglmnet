@@ -71,20 +71,28 @@ def _probit_g6(z, pdfz, cdfz, thresh=5):
     return res
 
 
-def _lmb(distr, beta0, beta, X, eta):
+def _lmb(distr, beta, X, eta):
     """Conditional intensity function."""
-    z = beta0 + np.dot(X, beta)
-    return _mu(distr, z, eta)
+    n_samples, n_features = X.shape
+    fit_intercept = len(beta) > n_features
+    if fit_intercept:
+        z = beta[0] + np.dot(X, beta[1:])
+    else:
+        z = np.dot(X, beta)
+    return _mu(distr, z, eta, fit_intercept)
 
 
-def _mu(distr, z, eta):
+def _mu(distr, z, eta, fit_intercept):
     """The non-linearity (inverse link)."""
     if distr in ['softplus', 'gamma']:
         mu = np.log1p(np.exp(z))
     elif distr == 'poisson':
         mu = z.copy()
-        intercept = (1 - eta) * np.exp(eta)
-        mu[z > eta] = z[z > eta] * np.exp(eta) + intercept
+        if fit_intercept:
+            beta0 = (1 - eta) * np.exp(eta)
+        else:
+            beta0 = 0
+        mu[z > eta] = z[z > eta] * np.exp(eta) + beta0
         mu[z <= eta] = np.exp(z[z <= eta])
     elif distr == 'gaussian':
         mu = z
@@ -186,38 +194,61 @@ def _L1penalty(beta, group=None):
 
 def _loss(distr, alpha, Tau, reg_lambda, X, y, eta, group, beta):
     """Define the objective function for elastic net."""
-    n_samples = X.shape[0]
-    z = beta[0] + np.dot(X, beta[1:])
-    y_hat = _mu(distr, z, eta)
+    n_samples, n_features = X.shape
+    fit_intercept = len(beta) > n_features
+    if fit_intercept:
+        z = beta[0] + np.dot(X, beta[1:])
+    else:
+        z = np.dot(X, beta)
+    y_hat = _mu(distr, z, eta, fit_intercept)
     L = 1. / n_samples * _logL(distr, y, y_hat, z)
-    P = _penalty(alpha, beta[1:], Tau, group)
+    if fit_intercept:
+        P = _penalty(alpha, beta[1:], Tau, group)
+    else:
+        P = _penalty(alpha, beta, Tau, group)
     J = -L + reg_lambda * P
     return J
 
 
 def _L2loss(distr, alpha, Tau, reg_lambda, X, y, eta, group, beta):
     """Define the objective function for elastic net."""
-    n_samples = X.shape[0]
-    z = beta[0] + np.dot(X, beta[1:])
-    y_hat = _mu(distr, z, eta)
+    n_samples, n_features = X.shape
+    fit_intercept = len(beta) > n_features
+    if fit_intercept:
+        z = beta[0] + np.dot(X, beta[1:])
+    else:
+        z = np.dot(X, beta)
+    y_hat = _mu(distr, z, eta, fit_intercept)
     L = 1. / n_samples * _logL(distr, y, y_hat, z)
-    P = 0.5 * (1 - alpha) * _L2penalty(beta[1:], Tau)
+    if fit_intercept:
+        P = 0.5 * (1 - alpha) * _L2penalty(beta[1:], Tau)
+    else:
+        P = 0.5 * (1 - alpha) * _L2penalty(beta, Tau)
     J = -L + reg_lambda * P
     return J
 
 
 def _grad_L2loss(distr, alpha, Tau, reg_lambda, X, y, eta, beta):
     """The gradient."""
-    n_samples = np.float(X.shape[0])
+    n_samples, n_features = X.shape
+    n_samples = np.float(n_samples)
+    fit_intercept = len(beta) > n_features
 
     if Tau is None:
-        Tau = np.eye(beta[1:].shape[0])
+        if fit_intercept:
+            Tau = np.eye(beta[1:].shape[0])
+        else:
+            Tau = np.eye(beta.shape[0])
     InvCov = np.dot(Tau.T, Tau)
 
-    z = beta[0] + np.dot(X, beta[1:])
-    mu = _mu(distr, z, eta)
+    if fit_intercept:
+        z = beta[0] + np.dot(X, beta[1:])
+    else:
+        z = np.dot(X, beta)
+    mu = _mu(distr, z, eta, fit_intercept)
     grad_mu = _grad_mu(distr, z, eta)
 
+    # TODO remove calculating grad_beta0 if it is not necessary
     if distr in ['poisson', 'softplus']:
         grad_beta0 = np.sum(grad_mu) - np.sum(y * grad_mu / mu)
         grad_beta = ((np.dot(grad_mu.T, X) -
@@ -245,11 +276,15 @@ def _grad_L2loss(distr, alpha, Tau, reg_lambda, X, y, eta, beta):
 
     grad_beta0 *= 1. / n_samples
     grad_beta *= 1. / n_samples
-    grad_beta += reg_lambda * (1 - alpha) * np.dot(InvCov, beta[1:])
-    n_features = X.shape[1]
-    g = np.zeros((n_features + 1, ))
-    g[0] = grad_beta0
-    g[1:] = grad_beta
+    if fit_intercept:
+        grad_beta += reg_lambda * (1 - alpha) * np.dot(InvCov, beta[1:])
+        g = np.zeros((n_features + 1, ))
+        g[0] = grad_beta0
+        g[1:] = grad_beta
+    else:
+        grad_beta += reg_lambda * (1 - alpha) * np.dot(InvCov, beta)
+        g = grad_beta
+
     return g
 
 
@@ -275,10 +310,11 @@ def _gradhess_logloss_1d(distr, xk, y, z, eta):
     hk: float:
         (n_features + 1,)
     """
-    n_samples = xk.shape[0]
+    n_samples, n_features = xk.shape
+    fit_intercept = len(z) > n_features
 
     if distr == 'softplus':
-        mu = _mu(distr, z, eta)
+        mu = _mu(distr, z, eta, fit_intercept)
         s = expit(z)
         gk = np.sum(s * xk) - np.sum(y * s / mu * xk)
 
@@ -287,7 +323,7 @@ def _gradhess_logloss_1d(distr, xk, y, z, eta):
         hk = np.sum(grad_s * xk ** 2) - np.sum(y * grad_s_by_mu * xk ** 2)
 
     elif distr == 'poisson':
-        mu = _mu(distr, z, eta)
+        mu = _mu(distr, z, eta, fit_intercept)
         s = expit(z)
         gk = np.sum((mu[z <= eta] - y[z <= eta]) *
                     xk[z <= eta]) + \
@@ -304,7 +340,7 @@ def _gradhess_logloss_1d(distr, xk, y, z, eta):
         hk = np.sum(xk * xk)
 
     elif distr == 'binomial':
-        mu = _mu(distr, z, eta)
+        mu = _mu(distr, z, eta, fit_intercept)
         gk = np.sum((mu - y) * xk)
         hk = np.sum(mu * (1.0 - mu) * xk * xk)
 
@@ -354,18 +390,20 @@ def simulate_glm(distr, beta0, beta, X, eta=2.0, random_state=None,
         raise ValueError("'distr' must be in %s, got %s"
                          % (repr(ALLOWED_DISTRS), distr))
 
+    beta = [beta0] + beta
+
     if not sample:
-        return _lmb(distr, beta0, beta, X, eta)
+        return _lmb(distr, beta, X, eta)
 
     _random_state = np.random.RandomState(random_state)
     if distr == 'softplus' or distr == 'poisson':
-        y = _random_state.poisson(_lmb(distr, beta0, beta, X, eta))
+        y = _random_state.poisson(_lmb(distr, beta, X, eta))
     if distr == 'gaussian':
-        y = _random_state.normal(_lmb(distr, beta0, beta, X, eta))
+        y = _random_state.normal(_lmb(distr, beta, X, eta))
     if distr == 'binomial' or distr == 'probit':
-        y = _random_state.binomial(1, _lmb(distr, beta0, beta, X, eta))
+        y = _random_state.binomial(1, _lmb(distr, beta, X, eta))
     if distr == 'gamma':
-        mu = _lmb(distr, beta0, beta, X, eta)
+        mu = _lmb(distr, beta, X, eta)
         y = np.exp(mu)
     return y
 
@@ -447,7 +485,11 @@ class GLM(BaseEstimator):
         specifies the scoring metric.
         one of either 'deviance' or 'pseudo_R2'.
         default: 'deviance'
-    random_state: int
+    fit_intercept: boolean
+        specifies if a constant (a.k.a. bias or intercept) should be
+        added to the decision function.
+        default: True
+    random_state : int
         seed of the random number generator used to initialize the solution.
         default: 0
     verbose: boolean or int
@@ -492,6 +534,7 @@ class GLM(BaseEstimator):
                  solver='batch-gradient',
                  learning_rate=2e-1, max_iter=1000,
                  tol=1e-3, eta=2.0, score_metric='deviance',
+                 fit_intercept=True,
                  random_state=0, callback=None, verbose=False):
 
         if not isinstance(max_iter, int):
@@ -516,6 +559,7 @@ class GLM(BaseEstimator):
         self.tol = tol
         self.eta = eta
         self.score_metric = score_metric
+        self.fit_intercept = fit_intercept
         self.random_state = random_state
         self.rng = np.random.RandomState(self.random_state)
         self.callback = callback
@@ -643,7 +687,7 @@ class GLM(BaseEstimator):
             n_features + 1 x 1
             Active set storing which betas are non-zero
         beta: array
-            n_features + 1 x 1
+            n_features + 1 x 1, or n_features
             Parameters to be updated
         rl: float
             Regularization lambda
@@ -651,15 +695,15 @@ class GLM(BaseEstimator):
         Returns
         -------
         beta: array
-            (n_features + 1) x 1
+            (n_features + 1) x 1, or (n_features)
             Updated parameters
         """
-        n_samples = X.shape[0]
-        n_features = X.shape[1]
+        n_samples, n_features = X.shape
+        fit_intercept = len(beta) > n_features
         reg_scale = rl * (1 - self.alpha)
         z = beta[0] + np.dot(X, beta[1:])
 
-        for k in range(0, n_features + 1):
+        for k in range(0, n_features + int(fit_intercept)):
             # Only update parameters in active set
             if ActiveSet[k] != 0:
                 if k > 0:
@@ -676,7 +720,10 @@ class GLM(BaseEstimator):
                     hk_reg = 1.0
                 else:
                     InvCov = np.dot(self.Tau.T, self.Tau)
-                    gk_reg = np.sum(InvCov[k - 1, :] * beta[1:])
+                    if fit_intercept:
+                        gk_reg = np.sum(InvCov[k - 1, :] * beta[1:])
+                    else:
+                        gk_reg = np.sum(InvCov[k - 1, :] * beta)
                     hk_reg = InvCov[k - 1, k - 1]
                 gk += np.ravel([reg_scale * gk_reg if k > 0 else 0.0])
                 hk += np.ravel([reg_scale * hk_reg if k > 0 else 0.0])
@@ -684,7 +731,6 @@ class GLM(BaseEstimator):
                 # Update parameters, z
                 update = 1. / hk * gk
                 beta[k], z = beta[k] - update, z - update * xk
-        return beta
 
     def fit(self, X, y):
         """The fit function.
@@ -732,15 +778,22 @@ class GLM(BaseEstimator):
                              .format(n_observations, len(y)))
 
         # Initialize parameters
-        beta = np.zeros((n_features + 1,))
-        if self.beta0_ is None and self.beta_ is None:
-            beta[0] = 1 / (n_features + 1) * \
-                self.rng.normal(0.0, 1.0, 1)
-            beta[1:] = 1 / (n_features + 1) * \
-                self.rng.normal(0.0, 1.0, (n_features, ))
+        beta = np.zeros((n_features + int(self.fit_intercept),))
+        if self.fit_intercept:
+            if self.beta0_ is None and self.beta_ is None:
+                beta[0] = 1 / (n_features + 1) * \
+                    self.rng.normal(0.0, 1.0, 1)
+                beta[1:] = 1 / (n_features + 1) * \
+                    self.rng.normal(0.0, 1.0, (n_features, ))
+            else:
+                beta[0] = self.beta0_
+                beta[1:] = self.beta_
         else:
-            beta[0] = self.beta0_
-            beta[1:] = self.beta_
+            if self.beta0_ is None and self.beta_ is None:
+                beta = 1 / (n_features + 1) * \
+                    self.rng.normal(0.0, 1.0, (n_features, ))
+            else:
+                beta = self.beta_
 
         logger.info('Lambda: %6.4f' % self.reg_lambda)
 
@@ -749,7 +802,8 @@ class GLM(BaseEstimator):
         reg_lambda = self.reg_lambda
 
         if self.solver == 'cdfast':
-            ActiveSet = np.ones(n_features + 1)     # init active set
+            # init active set
+            ActiveSet = np.ones(n_features + int(self.fit_intercept))
 
         # Iterative updates
         for t in range(0, self.max_iter):
@@ -781,12 +835,16 @@ class GLM(BaseEstimator):
                                  "'('batch-gradient', 'cdfast'), got %s."
                                  % (self.solver))
             # Apply proximal operator
-            beta[1:] = self._prox(beta[1:], reg_lambda * alpha)
+            if self.fit_intercept:
+                beta[1:] = self._prox(beta[1:], reg_lambda * alpha)
+            else:
+                beta = self._prox(beta, reg_lambda * alpha)
 
             # Update active set
             if self.solver == 'cdfast':
                 ActiveSet[beta == 0] = 0
-                ActiveSet[0] = 1.
+                if self.fit_intercept:
+                    ActiveSet[0] = 1.
 
             # Compute and save loss if callbacks are requested
             if callable(self.callback):
@@ -797,8 +855,12 @@ class GLM(BaseEstimator):
                 "Reached max number of iterations without convergence.")
 
         # Update the estimated variables
-        self.beta0_ = beta[0]
-        self.beta_ = beta[1:]
+        if self.fit_intercept:
+            self.beta0_ = beta[0]
+            self.beta_ = beta[1:]
+        else:
+            self.beta0_ = 0
+            self.beta_ = beta
         self.ynull_ = np.mean(y)
         return self
 
@@ -819,8 +881,12 @@ class GLM(BaseEstimator):
             raise ValueError('Input data should be of type ndarray (got %s).'
                              % type(X))
 
-        yhat = _lmb(self.distr, self.beta0_,
-                    self.beta_, X, self.eta)
+        if self.fit_intercept:
+            beta = [self.beta0_] + self.beta
+        else:
+            beta = self.beta_
+
+        yhat = _lmb(self.distr, beta, X, self.eta)
 
         if self.distr == 'binomial':
             yhat = (yhat > 0.5).astype(int)
@@ -854,8 +920,12 @@ class GLM(BaseEstimator):
             raise ValueError('Input data should be of type ndarray (got %s).'
                              % type(X))
 
-        yhat = _lmb(self.distr,
-                    self.beta0_, self.beta_, X, self.eta)
+        if self.fit_intercept:
+            beta = [self.beta0_] + self.beta_
+        else:
+            beta = self.beta_
+
+        yhat = _lmb(self.distr, beta, X, self.eta)
         yhat = np.asarray(yhat)
         return yhat
 
@@ -1008,7 +1078,11 @@ class GLMCV(object):
         specifies the scoring metric.
         one of either 'deviance' or 'pseudo_R2'.
         default: 'deviance'
-    random_state: int
+    fit_intercept: boolean
+        specifies if a constant (a.k.a. bias or intercept) should be
+        added to the decision function.
+        default: True
+    random_state : int
         seed of the random number generator used to initialize the solution.
         default: 0
     verbose: boolean or int
@@ -1047,6 +1121,7 @@ class GLMCV(object):
                  solver='batch-gradient',
                  learning_rate=2e-1, max_iter=1000,
                  tol=1e-3, eta=2.0, score_metric='deviance',
+                 fit_intercept=True,
                  random_state=0, verbose=False):
 
         if reg_lambda is None:
@@ -1080,6 +1155,7 @@ class GLMCV(object):
         self.tol = tol
         self.eta = eta
         self.score_metric = score_metric
+        self.fit_intercept = fit_intercept
         self.random_state = random_state
         self.verbose = verbose
         set_log_level(verbose)
@@ -1150,6 +1226,7 @@ class GLMCV(object):
                       tol=self.tol,
                       eta=self.eta,
                       score_metric=self.score_metric,
+                      fit_intercept=self.fit_intercept,
                       random_state=self.random_state,
                       verbose=self.verbose)
             logger.info('Lambda: %6.4f' % rl)
@@ -1172,6 +1249,7 @@ class GLMCV(object):
                 glm.beta0_, glm.beta_ = self.beta0_, self.beta_
             else:
                 glm.beta0_, glm.beta_ = glms[-1].beta0_, glms[-1].beta_
+
             glm.fit(X, y)
             glms.append(glm)
         # Update the estimated variables
