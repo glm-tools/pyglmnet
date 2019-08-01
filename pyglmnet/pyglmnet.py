@@ -501,6 +501,7 @@ class GLM(BaseEstimator):
         self.beta0_ = None
         self.beta_ = None
         self.ynull_ = None
+        self.n_iter_ = 0
         self.tol = tol
         self.eta = eta
         self.score_metric = score_metric
@@ -741,6 +742,8 @@ class GLM(BaseEstimator):
 
         # Iterative updates
         for t in range(0, self.max_iter):
+            self.n_iter_ += 1
+
             if self.solver == 'batch-gradient':
                 grad = _grad_L2loss(self.distr,
                                     alpha, self.Tau,
@@ -762,6 +765,8 @@ class GLM(BaseEstimator):
                     msg = ('\tConverged in {0:d} iterations'.format(t))
                     logger.info(msg)
                     break
+            else:
+                raise ValueError("Solver", self.solver, "not supported.")
             # Apply proximal operator
             beta[1:] = self._prox(beta[1:], reg_lambda * alpha)
 
@@ -773,6 +778,10 @@ class GLM(BaseEstimator):
             # Compute and save loss if callbacks are requested
             if callable(self.callback):
                 self.callback(beta)
+
+        if self.n_iter_ == self.max_iter:
+            logger.warning(
+                "Reached max number of iterations without conversion.")
 
         # Update the estimated variables
         self.beta0_ = beta[0]
