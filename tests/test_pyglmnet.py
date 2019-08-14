@@ -150,7 +150,8 @@ def test_group_lasso():
 
 
 @pytest.mark.parametrize("distr", ALLOWED_DISTRS)
-def test_glmnet(distr):
+@pytest.mark.parametrize("reg_lambda", [0.0, 0.1])
+def test_glmnet(distr, reg_lambda):
     """Test glmnet."""
     raises(ValueError, GLM, distr='blah')
     raises(ValueError, GLM, distr='gaussian', max_iter=1.8)
@@ -182,7 +183,6 @@ def test_glmnet(distr):
                                sample=False)
 
         alpha = 0.
-        reg_lambda = 0.
         loss_trace = list()
 
         def callback(beta):
@@ -211,7 +211,8 @@ def test_glmnet(distr):
                        np.concatenate(([beta0], beta)))
         assert_allclose(loss_trace[-1], l_true, rtol=1e-4, atol=1e-5)
         # beta=beta_ when reg_lambda = 0.
-        assert_allclose(beta, glm.beta_, rtol=0.05, atol=1e-2)
+        if reg_lambda == 0.0:
+            assert_allclose(beta, glm.beta_, rtol=0.05, atol=1e-2)
         betas_.append(glm.beta_)
 
         y_pred = glm.predict(X_train)
