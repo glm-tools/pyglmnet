@@ -184,12 +184,12 @@ def test_glmnet(distr, reg_lambda):
 
         alpha = 0.
         loss_trace = list()
+        eta = 2.0
+        group = None
+        Tau = None
 
         def callback(beta):
             Tau = None
-            eta = 2.0
-            group = None
-
             loss_trace.append(
                 _loss(distr, alpha, Tau, reg_lambda,
                       X_train, y_train, eta, group, beta))
@@ -206,12 +206,12 @@ def test_glmnet(distr, reg_lambda):
         assert(np.all(np.diff(loss_trace) <= 1e-7))
 
         # verify loss at convergence = loss when beta=beta_
-        l_true = _loss(distr, 0., np.eye(beta.shape[0]), 0.,
-                       X_train, y_train, 2.0, None,
+        l_true = _loss(distr, alpha, Tau, reg_lambda,
+                       X_train, y_train, eta, group,
                        np.concatenate(([beta0], beta)))
         assert_allclose(loss_trace[-1], l_true, rtol=1e-4, atol=1e-5)
         # beta=beta_ when reg_lambda = 0.
-        if reg_lambda == 0.0:
+        if reg_lambda == 0.:
             assert_allclose(beta, glm.beta_, rtol=0.05, atol=1e-2)
         betas_.append(glm.beta_)
 
