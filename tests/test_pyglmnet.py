@@ -205,13 +205,14 @@ def test_glmnet(distr, reg_lambda):
         # verify loss decreases
         assert(np.all(np.diff(loss_trace) <= 1e-7))
 
-        # verify loss at convergence = loss when beta=beta_
-        l_true = _loss(distr, alpha, Tau, reg_lambda,
-                       X_train, y_train, eta, group,
-                       np.concatenate(([beta0], beta)))
-        assert_allclose(loss_trace[-1], l_true, rtol=1e-4, atol=1e-5)
-        # beta=beta_ when reg_lambda = 0.
+        # true loss and beta should be recovered when reg_lambda == 0
         if reg_lambda == 0.:
+            # verify loss at convergence = loss when beta=beta_
+            l_true = _loss(distr, alpha, Tau, reg_lambda,
+                           X_train, y_train, eta, group,
+                           np.concatenate(([beta0], beta)))
+            assert_allclose(loss_trace[-1], l_true, rtol=1e-4, atol=1e-5)
+            # beta=beta_ when reg_lambda = 0.
             assert_allclose(beta, glm.beta_, rtol=0.05, atol=1e-2)
         betas_.append(glm.beta_)
 
