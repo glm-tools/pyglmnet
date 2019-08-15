@@ -10,6 +10,7 @@ from scipy.optimize import approx_fprime
 from sklearn.datasets import make_regression
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import GridSearchCV, cross_val_score, KFold
+from sklearn.linear_model import ElasticNet
 
 from pyglmnet import (GLM, GLMCV, _grad_L2loss, _L2loss, simulate_glm,
                       _gradhess_logloss_1d, _loss, datasets, ALLOWED_DISTRS)
@@ -291,6 +292,31 @@ def test_cv():
                                              10, base=np.exp(1))}]
     glmcv = GridSearchCV(glm_normal, param_grid, cv=cv)
     glmcv.fit(X, y)
+
+
+def test_compare_sklearn():
+    """Test results against sklearn."""
+
+    def rmse(a, b):
+        return np.sqrt(np.mean((a - b) ** 2))
+
+    X, Y, coef_ = make_regression(
+        n_samples=1000, n_features=1000,
+        noise=0.1, n_informative=10, coef=True,
+        random_state=42)
+
+    alpha = 0.1
+    l1_ratio = 0.5
+
+    clf = ElasticNet(alpha=alpha, l1_ratio=l1_ratio, tol=1e-5)
+    clf.fit(X, Y)
+    glm = GLM(distr='gaussian', alpha=l1_ratio, reg_lambda=alpha,
+              solver='cdfast', tol=1e-5, max_iter=50)
+    glm.fit(X, Y)
+
+    y_sk = clf.predict(X)
+    y_pg = glm.predict(X)
+    assert abs(rmse(Y, y_sk) - rmse(Y, y_pg)) < 1.0
 
 
 @pytest.mark.parametrize("distr", ALLOWED_DISTRS)
