@@ -294,7 +294,8 @@ def test_cv():
     glmcv.fit(X, y)
 
 
-def test_compare_sklearn():
+@pytest.mark.parametrize("solver", ['batch-gradient', 'cdfast'])
+def test_compare_sklearn(solver):
     """Test results against sklearn."""
 
     def rmse(a, b):
@@ -311,7 +312,7 @@ def test_compare_sklearn():
     clf = ElasticNet(alpha=alpha, l1_ratio=l1_ratio, tol=1e-5)
     clf.fit(X, Y)
     glm = GLM(distr='gaussian', alpha=l1_ratio, reg_lambda=alpha,
-              solver='cdfast', tol=1e-5, max_iter=50)
+              solver=solver, tol=1e-5, max_iter=70)
     glm.fit(X, Y)
 
     y_sk = clf.predict(X)
