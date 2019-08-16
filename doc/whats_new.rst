@@ -23,6 +23,7 @@ Changelog
 BUG
 ~~~
 
+    - Fixed z cache inconsistency in cdfast when alpha and reg_lambda are nonzero by `Peter Foley`_. 
     - Fixed incorrect usage of the random_state parameter by `Giovanni De Toni`_.
     - Fixed incorrect proximal operator for group lasso by `Yu Umegaki`_.
     - Changed stopping criteria for convergence (a threshold on the change in objective value) which
@@ -71,3 +72,4 @@ Changelog
 .. _Giovanni De Toni: https://github.com/geektoni
 .. _Beibin Li: https://github.com/BeibinLi
 .. _Scott Otterson: https://github.com/notuntoward
+.. _Peter Foley: https://github.com/peterfoley
