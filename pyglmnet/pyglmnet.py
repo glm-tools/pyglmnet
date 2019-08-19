@@ -797,7 +797,7 @@ class GLM(BaseEstimator):
                    ' Last convergence metric was {1:f}'
                    ' and convergence threshold {2:f}.'
                    ).format(self.n_iter, convergence_metric, tol)
-            logger.warn(msg)
+            logger.warning(msg)
 
         # Update the estimated variables
         self.beta0_ = beta[0]
