@@ -743,9 +743,9 @@ class GLM(BaseEstimator):
             ActiveSet = np.ones(n_features + 1)     # init active set
 
         # Iterative updates
+        convergence_metric = inf
         for t in range(0, self.max_iter):
             logger.info("t: %i" % t)
-            convergence_metric = inf
             if self.solver == 'batch-gradient':
                 grad = _grad_L2loss(self.distr,
                                     alpha, self.Tau,
