@@ -745,7 +745,7 @@ class GLM(BaseEstimator):
         # Iterative updates
         convergence_metric = inf
         for t in range(0, self.max_iter):
-            logger.info("t: %i" % t)
+            logger.debug("t: %i" % t)
             if self.solver == 'batch-gradient':
                 grad = _grad_L2loss(self.distr,
                                     alpha, self.Tau,
