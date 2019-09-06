@@ -10,33 +10,6 @@ A python implementation of elastic-net regularized generalized linear models
 
 .. image:: https://user-images.githubusercontent.com/15852194/67919367-70482600-fb76-11e9-9b86-891969bd2bee.jpg
 
-`Generalized linear
-models <https://en.wikipedia.org/wiki/Generalized_linear_model>`__ are
-well-established tools for regression and classification and are widely
-applied across the sciences, economics, business, and finance. They are
-uniquely identifiable due to their convex loss and easy to interpret due
-to their point-wise non-linearities and well-defined noise models.
-
-In the era of exploratory data analyses with a large number of predictor
-variables, it is important to regularize. Regularization prevents
-overfitting by penalizing the negative log likelihood and can be used to
-articulate prior knowledge about the parameters in a structured form.
-
-Despite the attractiveness of regularized GLMs, the available tools in
-the Python data science eco-system are highly fragmented. More
-specifically,
-
--  `statsmodels <http://statsmodels.sourceforge.net/devel/glm.html>`__
-   provides a wide range of link functions but no regularization.
--  `scikit-learn <http://scikit-learn.org/stable/modules/generated/sklearn.linear_model.ElasticNet.html>`__
-   provides elastic net regularization but only for linear models.
--  `lightning <https://github.com/scikit-learn-contrib/lightning>`__
-   provides elastic net and group lasso regularization, but only for
-   linear and logistic regression.
-
-**Pyglmnet** is a response to this fragmentation. It runs on Python 3.5+,
-and here are some of the highlights.
-
 -  Pyglmnet provides a wide range of noise models (and paired canonical
    link functions): ``'gaussian'``, ``'binomial'``, ``'probit'``,
    ``'gamma'``, '``poisson``', and ``'softplus'``.
