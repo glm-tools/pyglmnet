@@ -74,7 +74,7 @@ specifically,
 -  [lightning] provides elastic net and group lasso regularization, but only for
    linear and logistic regression.
 
-**Pyglmnet** is a response to this fragmentation. It runs on Python 3.5+,
+[Pyglmnet] is a response to this fragmentation. It runs on Python 3.5+,
 and here are is a comparison with existing toolboxes.
 
 |                    | [pyglmnet] | [scikit-learn] | [statsmodels] |   [lightning]   |   [py-glm]    | [Matlab]|   [glmnet] in R |
@@ -108,6 +108,10 @@ Pyglmnet has already been used in a range of domains.
 It is unit tested and has documentation (tutorials, docstrings, examples)
 and is unit tested.
 
+# Acknowledgements
+
+We acknowledge contributions from Brigitta Sipocz, Syrtis Major, and Semyeong
+Oh, and support from Kathryn Johnston during the genesis of this project.
 
 # Citations
 
@@ -123,68 +127,6 @@ For a quick reference, the following citation commands can be used:
 # Figures
 
 Figures can be included like this: ![Example figure.](figure.png)
-
-# Acknowledgements
-
-We acknowledge contributions from Brigitta Sipocz, Syrtis Major, and Semyeong
-Oh, and support from Kathryn Johnston during the genesis of this project.
-
-# References
-
-Example paper.bib file:
-
-@article{Pearson:2017,
-  	Adsnote = {Provided by the SAO/NASA Astrophysics Data System},
-  	Adsurl = {http://adsabs.harvard.edu/abs/2017arXiv170304627P},
-  	Archiveprefix = {arXiv},
-  	Author = {{Pearson}, S. and {Price-Whelan}, A.~M. and {Johnston}, K.~V.},
-  	Eprint = {1703.04627},
-  	Journal = {ArXiv e-prints},
-  	Keywords = {Astrophysics - Astrophysics of Galaxies},
-  	Month = mar,
-  	Title = {{Gaps in Globular Cluster Streams: Pal 5 and the Galactic Bar}},
-  	Year = 2017
-}
-
-@book{Binney:2008,
-  	Adsnote = {Provided by the SAO/NASA Astrophysics Data System},
-  	Adsurl = {http://adsabs.harvard.edu/abs/2008gady.book.....B},
-  	Author = {{Binney}, J. and {Tremaine}, S.},
-  	Booktitle = {Galactic Dynamics: Second Edition, by James Binney and Scott Tremaine.~ISBN 978-0-691-13026-2 (HB).~Published by Princeton University Press, Princeton, NJ USA, 2008.},
-  	Publisher = {Princeton University Press},
-  	Title = {{Galactic Dynamics: Second Edition}},
-  	Year = 2008
-}
-
-@article{gaia,
-    author = {{Gaia Collaboration}},
-    title = "{The Gaia mission}",
-    journal = {\aap},
-    archivePrefix = "arXiv",
-    eprint = {1609.04153},
-    primaryClass = "astro-ph.IM",
-    keywords = {space vehicles: instruments, Galaxy: structure, astrometry, parallaxes, proper motions, telescopes},
-    year = 2016,
-    month = nov,
-    volume = 595,
-    doi = {10.1051/0004-6361/201629272},
-    adsurl = {http://adsabs.harvard.edu/abs/2016A%26A...595A...1G},
-}
-
-@article{astropy,
-    author = {{Astropy Collaboration}},
-    title = "{Astropy: A community Python package for astronomy}",
-    journal = {\aap},
-    archivePrefix = "arXiv",
-    eprint = {1307.6212},
-    primaryClass = "astro-ph.IM",
-    keywords = {methods: data analysis, methods: miscellaneous, virtual observatory tools},
-    year = 2013,
-    month = oct,
-    volume = 558,
-    doi = {10.1051/0004-6361/201322068},
-    adsurl = {http://adsabs.harvard.edu/abs/2013A%26A...558A..33A}
-}
 
 [Generalized linear models]: https://en.wikipedia.org/wiki/Generalized_linear_model>`__
 [statsmodel]: https://www.statsmodels.org/
