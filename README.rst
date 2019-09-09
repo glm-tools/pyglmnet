@@ -20,10 +20,6 @@ A python implementation of elastic-net regularized generalized linear models
    and `Tikhonov
    regularization <https://en.wikipedia.org/wiki/Tikhonov_regularization>`__.
 
--  Pyglmnet's API is designed to be compatible with scikit-learn, so you
-   can deploy ``Pipeline`` tools such as ``GridSearchCV()`` and
-   ``cross_val_score()``.
-
 -  We follow the same approach and notations as in `Friedman, J.,
    Hastie, T., & Tibshirani, R.
    (2010) <https://core.ac.uk/download/files/153/6287975.pdf>`__ and the
