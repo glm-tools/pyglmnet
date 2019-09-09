@@ -74,8 +74,7 @@ specifically,
 -  [lightning] provides elastic net and group lasso regularization, but only for
    linear and logistic regression.
 
-[Pyglmnet] is a response to this fragmentation. It runs on Python 3.5+,
-and here are is a comparison with existing toolboxes.
+[Pyglmnet] is a response to this fragmentation and here are is a comparison with existing toolboxes.
 
 |                    | [pyglmnet] | [scikit-learn] | [statsmodels] |   [lightning]   |   [py-glm]    | [Matlab]|   [glmnet] in R |
 |--------------------|:----------:|:--------------:|:-------------:|:---------------:|:-------------:|:-------:|:---------------:|
@@ -92,7 +91,7 @@ and here are is a comparison with existing toolboxes.
 | group lasso        |    x       |                |               |       x         |               |         |  x              |
 | tikhonov           |    x       |                |               |                 |               |         |                 |
 
-The implementation is compatible with the existing data science ecosystem.
+It runs on Python 3.5+. The implementation is compatible with the existing data science ecosystem.
 Pyglmnet API was designed to follow scikit-learn as closely as possible.
 Specifically, it is possible to do::
 
