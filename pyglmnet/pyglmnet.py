@@ -394,7 +394,7 @@ def simulate_glm(distr, beta0, beta, X, eta=2.0, random_state=None,
         raise ValueError("'beta' must be 1D, got %dD" % beta.ndim)
 
     if not sample:
-        return _lmb(distr, beta0, beta, X, eta)
+        return _lmb(distr, beta0, beta, X, eta)[:, 0]
 
     _random_state = np.random.RandomState(random_state)
     if distr == 'softplus' or distr == 'poisson':
