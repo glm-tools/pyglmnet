@@ -92,8 +92,7 @@ specifically,
 | tikhonov           |    x       |                |               |                 |               |         |                 |
 
 It runs on Python 3.5+. The implementation is compatible with the existing data science ecosystem.
-Pyglmnet API was designed to follow scikit-learn as closely as possible.
-Specifically, it is possible to do::
+Pyglmnet's API is designed to be compatible with scikit-learn, thus it is possible to do::
 
 
 ```py
@@ -101,31 +100,18 @@ Specifically, it is possible to do::
            glm.predict(y)
 ```
 
-The scikit-learn cross-validation and grid search procedure can be used.
+As a result of this compatibility, we do not reinvent the wheel and scikit-learn tools
+for building pipelines, cross-validation and grid search can be reused.
 
-Pyglmnet has already been used in a range of domains.
-It is unit tested and has documentation (tutorials, docstrings, examples)
-and is unit tested.
+Pyglmnet has already been used in a number of published research investigations
+`[bertran2018active; rybakken2019decoding; hofling2019probing; benjamin2017modern]`
+
+It is unit tested and includes documentation in the form of tutorials, docstrings and
+examples that are run through continuous integration.
 
 # Acknowledgements
 
-We acknowledge contributions from Brigitta Sipocz, Syrtis Major, and Semyeong
-Oh, and support from Kathryn Johnston during the genesis of this project.
-
-# Citations
-
-Citations to entries in paper.bib should be in
-[rMarkdown](http://rmarkdown.rstudio.com/authoring_bibliographies_and_citations.html)
-format.
-
-For a quick reference, the following citation commands can be used:
-- `@author:2001`  ->  "Author et al. (2001)"
-- `[@author:2001]` -> "(Author et al., 2001)"
-- `[@author1:2001; @author2:2001]` -> "(Author1 et al., 2001; Author2 et al., 2002)"
-
-# Figures
-
-Figures can be included like this: ![Example figure.](figure.png)
+...
 
 [Generalized linear models]: https://en.wikipedia.org/wiki/Generalized_linear_model>`__
 [statsmodel]: https://www.statsmodels.org/
