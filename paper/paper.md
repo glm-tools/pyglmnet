@@ -72,18 +72,25 @@ bibliography: paper.bib
 
 # Summary
 
-[Generalized linear models] are
+[Generalized linear models](GLMs) are
 well-established tools for regression and classification and are widely
 applied across the sciences, economics, business, and finance. They are
 uniquely identifiable due to their convex loss and easy to interpret due
-to their point-wise non-linearities and well-defined noise models.
+to their point-wise non-linearities and well-defined noise models. Mathematically,
+we want to solve problems of the form:
 
-... add two line equation to explain the model and the solvers.
+$$\min_{\beta_0, \beta} \frac{1}{N} \sum_{i = 1}^N \ell (y_i, \beta_0 + \beta^T x_i)
++ \lambda \mathcal{P}(\beta)$$
+
+where $\ell (y_i, \beta_0 + \beta^T x_i)$ is the negative log-likelihood of an 
+observation $i$. and $\mathcal{P}(\cdot)$ is the penalty that regularizes the solution.
 
 In the era of exploratory data analyses with a large number of predictor
 variables, it is important to regularize. Regularization prevents
 overfitting by penalizing the negative log likelihood and can be used to
-articulate prior knowledge about the parameters in a structured form.
+articulate prior knowledge about the parameters in a structured form. In Pyglmnet, we offer
+users the ability to combine different types of regularization with different noise
+distributions in the GLMs.
 
 Despite the attractiveness of regularized GLMs, the available tools in
 the Python data science eco-system are highly fragmented. More
@@ -94,7 +101,7 @@ specifically,
 -  [lightning] provides elastic net and group lasso regularization, but only for
    linear and logistic regression.
 
-[Pyglmnet] is a response to this fragmentation and here are is a comparison with existing toolboxes.
+[Pyglmnet] is a response to this fragmentation. Here are is a comparison with existing toolboxes.
 
 |                    | [pyglmnet] | [scikit-learn] | [statsmodels] |   [lightning]   |   [py-glm]    | [Matlab]|   [glmnet] in R |
 |--------------------|:----------:|:--------------:|:-------------:|:---------------:|:-------------:|:-------:|:---------------:|
