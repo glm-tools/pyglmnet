@@ -12,18 +12,28 @@ authors:
     affiliation: "1, 2"
   - name: Pavan Ramkumar
     affiliation: 3
-  - name: Daniel Acuna
-    affiliation: 5
-  - name: Ravi Garg
-    affiliation: 4
-  - name: Peter Foley
-    affiliation: 5
-  - name: Chris Rodgers
-    affiliation: 6
-  - name: Eva Dyer
-    affiliation: 7
   - name: Hugo Fernandes
+    affiliation: 10
+  - name: Daniel Acuna
+    affiliation: 6
+  - name: Ravi Garg
+    affiliation: 5
+  - name: Aid Idrizović
+    affiliation: 4
+  - name: Vinicius Marques
+    affiliation: 4
+  - name: Tommy Odland
+    affiliation: 13
+  - name: Giovanni De Toni
+    affiliation: 14
+  - name: Peter Foley
+    affiliation: 11
+  - name: Chris Rodgers
     affiliation: 8
+  - name: Beibin Li
+    affiliation: 12
+  - name: Eva Dyer
+    affiliation: 9
   - name: Matti Hamalainen
     affiliation: "1, 2"
   - name: Konrad Kording
@@ -35,16 +45,26 @@ affiliations:
    index: 2
  - name: Balbix
    index: 3
- - name: University of Pennsylvania
+ - name: Unknown
    index: 4
- - name: University of Syracuse
+ - name: University of Pennsylvania
    index: 5
- - name: Columbia University
+ - name: University of Syracuse
    index: 6
- - name: Georgia Tech
-   index: 7
- - name: Rockets of Awesome
+ - name: Columbia University
    index: 8
+ - name: Georgia Tech
+   index: 9
+ - name: Rockets of Awesome
+   index: 10
+ - name: 605
+   index: 11
+ - name: University of Washington
+   index: 12
+ - name: Sonat Consulting
+   index: 13
+ - name: University of Trento
+   index: 14
 
 date: 6 September 2019
 bibliography: paper.bib
