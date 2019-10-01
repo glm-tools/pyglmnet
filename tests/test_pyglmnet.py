@@ -448,7 +448,7 @@ def test_solver_check():
     X = state.normal(0, 1, (n_samples, n_features))
     y = state.normal(0, 1, (n_samples, ))
 
-    glm = GLM(distr='gaussian', solver=='test')
+    glm = GLM(distr='gaussian', solver='test')
 
     # Test that solver has to be supported, otherwise ValueError thrown
     with pytest.raises(ValueError):
