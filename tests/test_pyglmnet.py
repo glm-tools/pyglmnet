@@ -437,6 +437,7 @@ def test_api_input_types_y():
     glm.predict(X)
     glm.score(X, y)
 
+
 def test_solver_check():
     """Test that the input value of y can be of different types."""
 
