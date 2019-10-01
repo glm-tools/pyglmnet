@@ -749,7 +749,7 @@ class GLM(BaseEstimator):
         # Iterative updates
         for t in range(0, self.max_iter):
             self.n_iter_ += 1
-            
+
             if self.solver == 'batch-gradient':
                 grad = _grad_L2loss(self.distr,
                                     alpha, self.Tau,
