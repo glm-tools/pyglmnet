@@ -501,7 +501,7 @@ class GLM(BaseEstimator):
         self.beta0_ = None
         self.beta_ = None
         self.ynull_ = None
-        self.n_iter = 0
+        self.n_iter_ = 0
         self.tol = tol
         self.eta = eta
         self.score_metric = score_metric
@@ -748,7 +748,7 @@ class GLM(BaseEstimator):
 
         # Iterative updates
         for t in range(0, self.max_iter):
-            self.n_iter += 1
+            self.n_iter_ += 1
             
             if self.solver == 'batch-gradient':
                 grad = _grad_L2loss(self.distr,
@@ -785,8 +785,9 @@ class GLM(BaseEstimator):
             if callable(self.callback):
                 self.callback(beta)
 
-        if self.n_iter == self.max_iter:
-            logger.warning("Reached max number of iterations without conversion.")
+        if self.n_iter_ == self.max_iter:
+            logger.warning(
+                "Reached max number of iterations without conversion.")
 
         # Update the estimated variables
         self.beta0_ = beta[0]
