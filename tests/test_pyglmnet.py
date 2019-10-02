@@ -412,7 +412,7 @@ def test_simulate_glm(distr):
         simulate_glm(distr, 1.0, 1.0, np.array([[1.0]]))
 
 
-def test_api_input_types_y():
+def test_api_input():
     """Test that the input value of y can be of different types."""
 
     random_state = 1
@@ -437,27 +437,8 @@ def test_api_input_types_y():
     glm.predict(X)
     glm.score(X, y)
 
-
-def test_solver_check():
-    """Test that the input value of y can be of different types."""
-
-    random_state = 1
-    state = np.random.RandomState(random_state)
-    n_samples, n_features = 100, 5
-
-    X = state.normal(0, 1, (n_samples, n_features))
-    y = state.normal(0, 1, (n_samples, ))
-
     glm = GLM(distr='gaussian', solver='test')
 
     # Test that solver has to be supported, otherwise ValueError thrown
     with pytest.raises(ValueError):
         glm.fit(X, y)
-
-    # test that normal solver is OK
-    glm = GLM(distr='gaussian', solver="batch-gradient")
-
-    # This would work without errors
-    glm.fit(X, y)
-    glm.predict(X)
-    glm.score(X, y)
