@@ -1,3 +1,6 @@
+import subprocess
+import os.path as op
+
 from functools import partial
 import pytest
 import numpy as np
@@ -463,3 +466,20 @@ def test_api_input_types_y():
     glm.fit(X, y)
     glm.predict(X)
     glm.score(X, y)
+
+
+def test_intro_example():
+    """Test that the intro example works."""
+    base, _ = op.split(op.realpath(__file__))
+    fname = op.join(base, '..', 'README.rst')
+
+    start_idx = 0  # where does Python code start?
+    code_lines = []
+    for idx, line in enumerate(open(fname, "r")):
+        if '.. code:: python' in line:
+            start_idx = idx
+        if start_idx > 0 and idx >= start_idx + 2:
+            if line.startswith('`More'):
+                break
+            code_lines.append(line.strip())
+    subprocess.run(['python', '-c', '\n'.join(code_lines)], check=True)

@@ -140,11 +140,11 @@ Here is an example on how to use the ``GLM`` estimator.
 
    # simulate training data
    X_train = np.random.normal(0.0, 1.0, [n_samples, n_features])
-   y_train = simulate_glm("poisson", beta0, beta, X_train)
+   y_train = simulate_glm("poisson", beta0, beta, X_train)[:, 0]
 
    # simulate testing data
    X_test = np.random.normal(0.0, 1.0, [n_samples, n_features])
-   y_test = simulate_glm("poisson", beta0, beta, X_test)
+   y_test = simulate_glm("poisson", beta0, beta, X_test)[:, 0]
 
    # fit the model on the training data
    #scaler = StandardScaler().fit(X_train)
