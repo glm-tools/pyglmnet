@@ -453,6 +453,15 @@ class GLM(BaseEstimator):
     verbose : boolean or int
         default: False
 
+    Attributes
+    ----------
+    beta0_ : int
+        The intercept
+    beta_ : array, (n_features)
+        The learned betas
+    n_iter_ : int
+        The number of iterations
+
     Examples
     --------
     >>> import numpy as np
@@ -1004,6 +1013,19 @@ class GLMCV(object):
         default: 0
     verbose : boolean or int
         default: False
+
+    Attributes
+    ----------
+    beta0_ : int
+        The intercept
+    beta_ : array, (n_features)
+        The learned betas
+    glm_ : instance of GLM
+        The GLM object with best score
+    reg_lambda_opt_ : float
+        The reg_lambda parameter for best GLM object
+    n_iter_ : int
+        The number of iterations
 
     Reference
     ---------

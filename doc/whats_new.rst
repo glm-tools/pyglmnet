@@ -19,7 +19,7 @@ Changelog
     - Add support for running :class:`sklearn.model_selection.GridSearchCV` on :class:`pyglmnet.GLM` objects by `Mainak Jas`_.
     - Improved testing of gradients for optimization by `Mainak Jas`_ and `Pavan Ramkumar`_.
     - Improved testing of estimated coefficients at convergence by `Mainak Jas`_ and `Pavan Ramkumar`_
-    - Add `n_iter_` attribute to :class:`pyglmnet.GLM` and `n_iters_` to :class:`pyglmnet.GLMCV` by `Mainak Jas`_, `Olivier Pieters`_, `Peter Foley`_ and `Chris Rogers`_
+    - Add `n_iter_` attribute to :class:`pyglmnet.GLM` by `Mainak Jas`_, `Olivier Pieters`_, `Peter Foley`_ and `Chris Rogers`_
 
 BUG
 ~~~
