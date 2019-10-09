@@ -468,8 +468,11 @@ def test_api_input():
     glm.score(X, y)
     glm = GLM(distr='gaussian', solver='test')
 
-    # Test that solver has to be supported, otherwise ValueError thrown
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="solver must be one of"):
+        glm.fit(X, y)
+
+    glm = GLM(distr='gaussian', max_iter=2)
+    with pytest.warns(UserWarning, match='Reached max number of iterat'):
         glm.fit(X, y)
 
 

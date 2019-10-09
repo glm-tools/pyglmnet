@@ -1,5 +1,6 @@
 """Python implementation of elastic-net regularized GLMs."""
 
+import warnings
 from copy import deepcopy
 
 import numpy as np
@@ -158,7 +159,7 @@ def _L2penalty(beta, Tau):
     else:
         # Tikhonov penalty
         if (Tau.shape[0] != beta.shape[0] or
-           Tau.shape[1] != beta.shape[0]):
+                Tau.shape[1] != beta.shape[0]):
             raise ValueError('Tau should be (n_features x n_features)')
         else:
             L2penalty = np.linalg.norm(np.dot(Tau, beta), 2) ** 2
@@ -220,7 +221,7 @@ def _grad_L2loss(distr, alpha, Tau, reg_lambda, X, y, eta, beta):
     if distr in ['poisson', 'softplus']:
         grad_beta0 = np.sum(grad_mu) - np.sum(y * grad_mu / mu)
         grad_beta = ((np.dot(grad_mu.T, X) -
-                     np.dot((y * grad_mu / mu).T, X)).T)
+                      np.dot((y * grad_mu / mu).T, X)).T)
 
     elif distr == 'gaussian':
         grad_beta0 = np.sum((mu - y) * grad_mu)
@@ -350,7 +351,8 @@ def simulate_glm(distr, beta0, beta, X, eta=2.0, random_state=None,
         simulated target data of shape (n_samples,)
     """
     if distr not in ALLOWED_DISTRS:
-        raise ValueError("'distr' must be in " + repr(ALLOWED_DISTRS))
+        raise ValueError("'distr' must be in %s, got %s"
+                         % (repr(ALLOWED_DISTRS), distr))
 
     if not sample:
         return _lmb(distr, beta0, beta, X, eta)
@@ -766,7 +768,9 @@ class GLM(BaseEstimator):
                     logger.info(msg)
                     break
             else:
-                raise ValueError("Solver", self.solver, "not supported.")
+                raise ValueError("solver must be one of "
+                                 "'('batch-gradient', 'cdfast'), got %s."
+                                 % (self.solver))
             # Apply proximal operator
             beta[1:] = self._prox(beta[1:], reg_lambda * alpha)
 
@@ -780,8 +784,8 @@ class GLM(BaseEstimator):
                 self.callback(beta)
 
         if self.n_iter_ == self.max_iter:
-            logger.warning(
-                "Reached max number of iterations without conversion.")
+            warnings.warn(
+                "Reached max number of iterations without convergence.")
 
         # Update the estimated variables
         self.beta0_ = beta[0]
