@@ -251,6 +251,11 @@ where :math:`\Phi(z_i)` and :math:`\phi(z_i)` are the standard normal cdf and pd
         (1 - y_i)\frac{-z_i(1 - \mu(z_i)) + \mu'(z_i)}{(1 - \mu(z_i))^2} \Bigg\} x_{ij}^2
     + \lambda (1 - \alpha)
 
+In practice, the probit gradients suffer from instability primarily due to precision of evaluating the normal cdf.
+Thus, in pyglmnet we use approximate formulas for computing the loss, gradients, and hessians from `Demidenko et al. (2001)
+<https://pdfs.semanticscholar.org/0c03/0537919f09575b9f2c0a98c62f6571bdceee.pdf>`_.
+For more details, see Eqns. 17-20 in the paper.
+
 Gamma
 -----
 
