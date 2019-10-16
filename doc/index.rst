@@ -9,8 +9,8 @@ Python implementation of regularized generalized linear models
 
 Pyglmnet is a Python 3.5+ library implementing generalized linear models (GLMs)
 with advanced regularization options. It provides a wide range of noise models
-(with paired canonical link functions) including gaussian, binomial, multinomial,
-poisson, and softplus. It supports a wide range of regularizers: ridge, lasso,
+(with paired canonical link functions) including gaussian, binomial, probit,
+gamma, poisson, and softplus. It supports a wide range of regularizers: ridge, lasso,
 elastic net, group lasso, and Tikhonov regularization.
 
 [`Repository <https://github.com/glm-tools/pyglmnet>`_]
@@ -19,7 +19,7 @@ elastic net, group lasso, and Tikhonov regularization.
 A brief introduction to GLMs
 ============================
 
-Linear models are given by
+For linear models specified as
 
 .. math::
     y = \beta_0 + X\beta + \epsilon.
@@ -28,7 +28,7 @@ The parameters :math:`\beta_0, \beta` are estimated using ordinary least squares
 implicit assumption that :math:`y` is normally distributed.
 
 Generalized linear models allow us to generalize this approach to point-wise
-nonlinearities :math:`q(\cdot)` and a family of exponential distributions for :math:`y`.
+nonlinearities :math:`q(\cdot)` and corresponding exponential family noise distributions for :math:`\epsilon`.
 
 .. math::
     y = q(\beta_0 + X\beta) + \epsilon

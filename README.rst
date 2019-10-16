@@ -38,8 +38,8 @@ specifically,
 and here are some of the highlights.
 
 -  Pyglmnet provides a wide range of noise models (and paired canonical
-   link functions): ``'gaussian'``, ``'binomial'``, ``'multinomial'``,
-   '``poisson``', and ``'softplus'``.
+   link functions): ``'gaussian'``, ``'binomial'``, ``'probit'``,
+   ``'gamma'``, '``poisson``', and ``'softplus'``.
 
 -  It supports a wide range of regularizers: ridge, lasso, elastic net,
    `group
@@ -191,7 +191,7 @@ Acknowledgments
 License
 ~~~~~~~
 
-MIT License Copyright (c) 2016 Pavan Ramkumar
+MIT License Copyright (c) 2016-2019 Pavan Ramkumar
 
 .. |License| image:: https://img.shields.io/badge/license-MIT-blue.svg?style=flat
    :target: https://github.com/glm-tools/pyglmnet/blob/master/LICENSE
