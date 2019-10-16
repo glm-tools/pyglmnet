@@ -11,3 +11,6 @@ Classes
 
 .. autoclass:: GLM
    :members:
+
+.. autoclass:: GLMCV
+  :members:
