@@ -7,7 +7,7 @@ We will go through the math to setup the penalized negative log-likelihood
 loss function and the coordinate descent algorithm for optimization.
 
 Here are some other resources from a
-`recent talk <https:github.com/pavanramkumar/pydata-chicago-2016>`_.
+`PyData 2016 talk <https:github.com/pavanramkumar/pydata-chicago-2016>`_.
 
 At present this tutorial does not cover Tikhonov regularization or group lasso,
 but we look forward to adding more material shortly.
@@ -37,18 +37,18 @@ want to solve the following convex optimization problem.
 
 .. math::
 
-    \min_{\beta_0, \beta} \frac{1}{N} \sum_{i = 1}^N \ell (y_i, \beta_0 + \beta^T x_i)
-    + \lambda [0.5(1 - \alpha)\| \beta \|_2^2 + \alpha \| \beta \|_1]
+    \min_{\beta_0, \beta} \frac{1}{N} \sum_{i = 1}^N \mathcal{L} (y_i, \beta_0 + \beta^T x_i)
+    + \lambda [\frac{1}{2}(1 - \alpha)\| \beta \|_2^2 + \alpha \| \beta \|_1]
 
-where :math:`\ell (y_i, \beta_0 + \beta^T x_i)` is the negative log-likelihood of
+where :math:`\mathcal{L} (y_i, \beta_0 + \beta^T x_i)` is the negative log-likelihood of
 observation :math:`i`. We will go through the softplus link function case
 and show how we optimize the cost function.
 
 Poisson-like GLM
 ----------------
-The `pyglmnet` implementation comes with `poisson`, `binomial`,
-`gaussian`, and `multinomial` distributions, but for illustration,
-we will walk you through a particular adaptation of the canonical
+The `pyglmnet` implementation comes with `gaussian`, `binomial`, `probit`
+`gamma`, `poisson` and `softplus` distributions, but for illustration,
+we will walk you through `softplus`: a particular adaptation of the canonical
 Poisson generalized linear model (GLM).
 
 For the Poisson GLM, :math:`\lambda_i` is the rate parameter of an
@@ -66,19 +66,19 @@ the conditional intensity function, conditioned on :math:`(\beta_0, \beta)` and
 :math:`q(z) = \exp(z)` is the nonlinearity.
 
 For numerical reasons, let's adopt a stabilizing non-linearity, known as the
-`softplus` or the smooth rectifier `Dugas et al., 2001
-<http://papers.nips.cc/paper/1920-incorporating-second-order-functional-knowledge-for-better-option-pricing.pdf>`_,
-and adopted by Jonathan Pillow's and Liam Paninski's groups for neural data
+`softplus` or the smooth rectifier (see `Dugas et al., 2001
+<http://papers.nips.cc/paper/1920-incorporating-second-order-functional-knowledge-for-better-option-pricing.pdf>`_),
+that has been adopted by Jonathan Pillow's and Liam Paninski's groups for neural data
 analysis.
 See for instance `Park et al., 2014
 <http://www.nature.com/neuro/journal/v17/n10/abs/nn.3800.html>`_.
 
 .. math::    q(z) = \log(1+\exp(z))
 
-The softplus prevents :math:`\lambda` in the canonical inverse link function
+The `softplus` prevents :math:`\lambda` in the canonical inverse link function
 from exploding when the argument to the exponent is large. In this
 modification, the formulation is no longer an exact LNP, nor an exact GLM,
-but :math:`\pm\mathcal{L}(\beta_0, \beta)` is still concave (convex) and we
+but :math:`\mathcal{L}(\beta_0, \beta)` is still concave (convex) and we
 can use gradient ascent (descent) to optimize it.
 
 .. math::    \lambda_i = q(\beta_0 + \beta^T x_i) = \log(1 + \exp(\beta_0 +
@@ -93,7 +93,7 @@ can use gradient ascent (descent) to optimize it.
    def lmb(self, beta0, beta, X):
       """Conditional intensity function."""
       z = beta0 + np.dot(X, beta)
-      l = self.qu(z)
+      l = qu(z)
       return l
 
 
@@ -102,7 +102,7 @@ Poisson Log-likelihood
 The likelihood of observing the spike count :math:`y_i` under the Poisson
 likelihood function with inhomogeneous rate :math:`\lambda_i` is given by:
 
-.. math::    \prod_i P(y = y_i) = \prod_i \frac{e^{-\lambda_i} \lambda_i^{y_i}}{y_i!}
+.. math::    \prod_i P(y = y_i | X) = \prod_i \frac{e^{-\lambda_i} \lambda_i^{y_i}}{y_i!}
 
 The log-likelihood is given by:
 
@@ -132,7 +132,7 @@ baseline term :math:`\beta_0`.
 
    def penalty(alpha, beta):
       """the penalty term"""
-      P = 0.5 * (1 - alpha) * np.linalg.norm(beta, 2) + \
+      P = 0.5 * (1 - alpha) * np.linalg.norm(beta, 2) ** 2 + \
             alpha * np.linalg.norm(beta, 1)
       return P
 
@@ -266,7 +266,7 @@ Let's use calculus again to compute these diagonal terms. Recall that:
 
      \begin{eqnarray}
      \dot q(z) & = \sigma(z)\\
-     \dot\sigma(z) = \sigma(z)(1-\sigma(z))
+     \dot\sigma(z) & = \sigma(z)(1-\sigma(z))
      \end{eqnarray}
 
 Using these, and applying the product rule
