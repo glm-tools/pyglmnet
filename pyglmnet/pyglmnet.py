@@ -341,7 +341,7 @@ def simulate_glm(distr, beta0, beta, X, eta=2.0, random_state=None,
         parameter for poisson non-linearity
     random_state: float
         random state
-    sample : bool
+    sample: bool
         If True, sample from distribution. Otherwise, return
         conditional intensity function
 
@@ -401,19 +401,19 @@ class GLM(BaseEstimator):
 
     Parameters
     ----------
-    distr : str
+    distr: str
         distribution family can be one of the following
         'gaussian' | 'binomial' | 'poisson' | 'softplus' | 'probit' | 'gamma'
         default: 'poisson'.
-    alpha : float
+    alpha: float
         the weighting between L1 penalty and L2 penalty term
         of the loss function.
         default: 0.5
-    Tau : array | None
+    Tau: array | None
         the (n_features, n_features) Tikhonov matrix.
         default: None, in which case Tau is identity
         and the L2 penalty is ridge-like
-    group : array | list | None
+    group: array | list | None
         the (n_features, )
         list or array of group identities for each parameter :math:`\\beta`.
         Each entry of the list/ array should contain an int from 1 to n_groups
@@ -422,44 +422,44 @@ class GLM(BaseEstimator):
         If you do not want to specify a group for a specific parameter,
         set it to zero.
         default: None, in which case it defaults to L1 regularization
-    reg_lambda : float
+    reg_lambda: float
         regularization parameter :math:`\\lambda` of penalty term.
         default: 0.1
-    solver : str
+    solver: str
         optimization method, can be one of the following
         'batch-gradient' (vanilla batch gradient descent)
         'cdfast' (Newton coordinate gradient descent).
         default: 'batch-gradient'
-    learning_rate : float
+    learning_rate: float
         learning rate for gradient descent.
         default: 2e-1
-    max_iter : int
+    max_iter: int
         maximum iterations for the model.
         default: 1000
-    tol : float
+    tol: float
         convergence threshold or stopping criteria.
         Optimization loop will stop when norm(gradient) is below the threshold.
         default: 1e-3
-    eta : float
+    eta: float
         a threshold parameter that linearizes the exp() function above eta.
         default: 2.0
-    score_metric : str
+    score_metric: str
         specifies the scoring metric.
         one of either 'deviance' or 'pseudo_R2'.
         default: 'deviance'
-    random_state : int
+    random_state: int
         seed of the random number generator used to initialize the solution.
         default: 0
-    verbose : boolean or int
+    verbose: boolean or int
         default: False
 
     Attributes
     ----------
-    beta0_ : int
+    beta0_: int
         The intercept
-    beta_ : array, (n_features)
+    beta_: array, (n_features)
         The learned betas
-    n_iter_ : int
+    n_iter_: int
         The number of iterations
 
     Examples
@@ -590,7 +590,7 @@ class GLM(BaseEstimator):
 
         Parameters
         ----------
-        none:
+        none
 
         Returns
         -------
@@ -633,10 +633,10 @@ class GLM(BaseEstimator):
 
         Parameters
         ----------
-        X : array
+        X: array
             n_samples x n_features
             The input data
-        y : array
+        y: array
             Labels to the data
             n_samples x 1
         ActiveSet: array
@@ -691,15 +691,15 @@ class GLM(BaseEstimator):
 
         Parameters
         ----------
-        X : array
+        X: array
             The 2D input data of shape (n_samples, n_features)
 
-        y : array
+        y: array
             The 1D target data of shape (n_samples,)
 
         Returns
         -------
-        self : instance of GLM
+        self: instance of GLM
             The fitted model.
         """
 
@@ -807,12 +807,12 @@ class GLM(BaseEstimator):
 
         Parameters
         ----------
-        X : array
+        X: array
             Input data for prediction, of shape (n_samples, n_features)
 
         Returns
         -------
-        yhat : array
+        yhat: array
             The predicted targets of shape (n_samples,)
         """
         if not isinstance(X, np.ndarray):
@@ -832,12 +832,12 @@ class GLM(BaseEstimator):
 
         Parameters
         ----------
-        X : array
+        X: array
             Input data for prediction, of shape (n_samples, n_features)
 
         Returns
         -------
-        yhat : array
+        yhat: array
             The predicted targets of shape (n_samples,).
 
         Raises
@@ -864,14 +864,14 @@ class GLM(BaseEstimator):
 
         Parameters
         ----------
-        X : array
+        X: array
             The input data to fit and predict,
             of shape (n_samples, n_features)
 
 
         Returns
         -------
-        yhat : array
+        yhat: array
             The predicted targets of shape (n_samples,).
         """
         return self.fit(X, y).predict(X)
@@ -881,10 +881,10 @@ class GLM(BaseEstimator):
 
         Parameters
         ----------
-        X : array
+        X: array
             The input data whose prediction will be scored,
             of shape (n_samples, n_features).
-        y : array
+        y: array
             The true targets against which to score the predicted targets,
             of shape (n_samples,).
 
@@ -959,19 +959,19 @@ class GLMCV(object):
 
     Parameters
     ----------
-    distr : str
+    distr: str
         distribution family can be one of the following
         'gaussian' | 'binomial' | 'poisson' | 'softplus' | 'probit' | 'gamma'
         default: 'poisson'.
-    alpha : float
+    alpha: float
         the weighting between L1 penalty and L2 penalty term
         of the loss function.
         default: 0.5
-    Tau : array | None
+    Tau: array | None
         the (n_features, n_features) Tikhonov matrix.
         default: None, in which case Tau is identity
         and the L2 penalty is ridge-like
-    group : array | list | None
+    group: array | list | None
         the (n_features, )
         list or array of group identities for each parameter :math:`\\beta`.
         Each entry of the list/ array should contain an int from 1 to n_groups
@@ -980,51 +980,51 @@ class GLMCV(object):
         If you do not want to specify a group for a specific parameter,
         set it to zero.
         default: None, in which case it defaults to L1 regularization
-    reg_lambda : array | list | None
+    reg_lambda: array | list | None
         array of regularized parameters :math:`\\lambda` of penalty term.
         default: None, a list of 10 floats spaced logarithmically (base e)
         between 0.5 and 0.01.
-    cv : cross validation object (default 10)
+    cv: cross validation object (default 10)
         Iterator for doing cross validation
-    solver : str
+    solver: str
         optimization method, can be one of the following
         'batch-gradient' (vanilla batch gradient descent)
         'cdfast' (Newton coordinate gradient descent).
         default: 'batch-gradient'
-    learning_rate : float
+    learning_rate: float
         learning rate for gradient descent.
         default: 2e-1
-    max_iter : int
+    max_iter: int
         maximum iterations for the model.
         default: 1000
-    tol : float
+    tol: float
         convergence threshold or stopping criteria.
         Optimization loop will stop when norm(gradient) is below the threshold.
         default: 1e-3
-    eta : float
+    eta: float
         a threshold parameter that linearizes the exp() function above eta.
         default: 2.0
-    score_metric : str
+    score_metric: str
         specifies the scoring metric.
         one of either 'deviance' or 'pseudo_R2'.
         default: 'deviance'
-    random_state : int
+    random_state: int
         seed of the random number generator used to initialize the solution.
         default: 0
-    verbose : boolean or int
+    verbose: boolean or int
         default: False
 
     Attributes
     ----------
-    beta0_ : int
+    beta0_: int
         The intercept
-    beta_ : array, (n_features)
+    beta_: array, (n_features)
         The learned betas
-    glm_ : instance of GLM
+    glm_: instance of GLM
         The GLM object with best score
-    reg_lambda_opt_ : float
+    reg_lambda_opt_: float
         The reg_lambda parameter for best GLM object
-    n_iter_ : int
+    n_iter_: int
         The number of iterations
 
     Reference
@@ -1102,7 +1102,7 @@ class GLMCV(object):
 
         Parameters
         ----------
-        none:
+        none
 
         Returns
         -------
@@ -1115,15 +1115,15 @@ class GLMCV(object):
         """The fit function.
         Parameters
         ----------
-        X : array
+        X: array
             The input data of shape (n_samples, n_features)
 
-        y : array
+        y: array
             The target data
 
         Returns
         -------
-        self : instance of GLM
+        self: instance of GLM
             The fitted model.
         """
         logger.info('Looping through the regularization path')
@@ -1193,12 +1193,12 @@ class GLMCV(object):
 
         Parameters
         ----------
-        X : array
+        X: array
             Input data for prediction, of shape (n_samples, n_features)
 
         Returns
         -------
-        yhat : array
+        yhat: array
             The predicted targets of shape based on the model with optimal
             reg_lambda (n_samples,)
         """
@@ -1209,12 +1209,12 @@ class GLMCV(object):
 
         Parameters
         ----------
-        X : array
+        X: array
             Input data for prediction, of shape (n_samples, n_features)
 
         Returns
         -------
-        yhat : array
+        yhat: array
             The predicted targets of shape (n_samples, ).
 
         Raises
@@ -1230,13 +1230,13 @@ class GLMCV(object):
 
         Parameters
         ----------
-        X : array
+        X: array
             The input data to fit and predict,
             of shape (n_samples, n_features)
 
         Returns
         -------
-        yhat : array
+        yhat: array
             The predicted targets of shape based on the model with optimal
             reg_lambda (n_samples,)
         """
@@ -1248,10 +1248,10 @@ class GLMCV(object):
 
         Parameters
         ----------
-        X : array
+        X: array
             The input data whose prediction will be scored,
             of shape (n_samples, n_features).
-        y : array
+        y: array
             The true targets against which to score the predicted targets,
             of shape (n_samples,).
 
