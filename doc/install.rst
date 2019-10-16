@@ -4,18 +4,19 @@ Installation
 
 Check dependencies
 ------------------
-You only need ``NumPy``, ``SciPy`` for the package and additionally ``scikit-learn``
-if you would like to run the examples. We currently support
-``Python 2.7``, ``Python 3.5``
-``scikit-learn >= 0.18``,
-``NumPy >= 1.11`` and ``SciPy >= 0.17``.
+We currently support ``Python 3.5+``.
+
+For the package: ``numpy>=1.11``, ``scipy>=0.17``, ``scikit-learn>=0.18``
+Additionally, for examples: ``pandas>=0.20``
 
 Both `Canopy <https://www.enthought.com/products/canopy/>`__
 and `Anaconda <https://www.continuum.io/downloads>`__
 ship with a recent version of all these packages.
 
+Additionally, development, tests and coverage: ``pytest``, ``pytest-cov``, ``coverage``, ``flake8``
+
 In case you have other distributions of Python, you can install
-``NumPy`` and ``SciPy`` using ``pip``.
+``numpy`` and ``scipy`` using ``pip``.
 
 .. code-block:: bash
 
@@ -44,4 +45,4 @@ Then run ``setup.py`` to install the library
 .. code-block:: bash
 
     cd pyglmnet
-    python setup.py develop install
+    python setup.py develop

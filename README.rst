@@ -96,13 +96,13 @@ care of the dependencies: ``scikit-learn``, ``Rpy2``, and
 Installation
 ~~~~~~~~~~~~
 
-Now ``pip`` installable!
+Install the stable PyPI version with ``pip``
 
 .. code:: bash
 
     $ pip install pyglmnet
 
-Manual installation instructions below:
+For the bleeding edge development version:
 
 Clone the repository.
 
