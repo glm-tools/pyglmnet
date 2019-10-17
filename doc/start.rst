@@ -22,9 +22,9 @@ Here is a brief example of how to use the ``GLM()`` class.
 
     # simulate data
     Xtrain = np.random.normal(0.0, 1.0, [n_samples, n_features])
-    ytrain = simulate_glm('poisson', beta0, beta, Xtrain)
+    ytrain = simulate_glm('poisson', beta0, beta, Xtrain)[:, 0]
     Xtest = np.random.normal(0.0, 1.0, [n_samples, n_features])
-    ytest = simulate_glm('poisson', beta0, beta, Xtest)
+    ytest = simulate_glm('poisson', beta0, beta, Xtest)[:, 0]
 
 .. code:: python
 
