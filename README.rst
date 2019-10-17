@@ -139,9 +139,9 @@ This example is also found in examples/intro_example.py.
 
    # simulate data
    Xtrain = np.random.normal(0.0, 1.0, [n_samples, n_features])
-   ytrain = simulate_glm('poisson', beta0, beta, Xtrain)
+   ytrain = simulate_glm('poisson', beta0, beta, Xtrain)[:, 0]
    Xtest = np.random.normal(0.0, 1.0, [n_samples, n_features])
-   ytest = simulate_glm('poisson', beta0, beta, Xtest)
+   ytest = simulate_glm('poisson', beta0, beta, Xtest)[:, 0]
 
    # create an instance of the GLM class
    glm = GLM(distr='poisson', score_metric='deviance')
