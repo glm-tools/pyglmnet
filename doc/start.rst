@@ -8,49 +8,34 @@ Here is a brief example of how to use the ``GLM()`` class.
 
     import numpy as np
     import scipy.sparse as sps
-    from sklearn.preprocessing import StandardScaler
-    from pyglmnet import GLM
+    from pyglmnet import GLM, simulate_glm
 
 .. code:: python
 
-    # create an instance of the GLM class
-    glm = GLM(distr='poisson')
+    n_samples, n_features = 1000, 100
+    distr = 'poisson'
 
-.. code:: python
-
-    n_samples, n_features = 10000, 100
-
-.. code:: python
-
-    # sample random coefficients
+    # sample a sparse model
     beta0 = np.random.normal(0.0, 1.0, 1)
     beta = sps.rand(n_features, 1, 0.1)
     beta = np.array(beta.todense())
 
-.. code:: python
-
-    # simulate training data
+    # simulate data
     Xtrain = np.random.normal(0.0, 1.0, [n_samples, n_features])
-    ytrain = glm.simulate(beta0, beta, Xtrain)
-
-.. code:: python
-
-    # simulate testing data
+    ytrain = simulate_glm('poisson', beta0, beta, Xtrain)
     Xtest = np.random.normal(0.0, 1.0, [n_samples, n_features])
-    ytest = glm.simulate(beta0, beta, Xtest)
+    ytest = simulate_glm('poisson', beta0, beta, Xtest)
 
 .. code:: python
+
+    # create an instance of the GLM class
+    glm = GLM(distr='poisson', score_metric='deviance')
 
     # fit the model on the training data
-    scaler = StandardScaler().fit(Xtrain)
-    glm.fit(scaler.transform(Xtrain), ytrain)
-
-.. code:: python
+    glm.fit(Xtrain, ytrain)
 
     # predict using fitted model on the test data
-    yhat = glm.predict(scaler.transform(Xtest))
-
-.. code:: python
+    yhat = glm.predict(Xtest)
 
     # score the model on test data
-    deviance = glm.score(scaler.transform(Xtest), ytest)
+    deviance = glm.score(Xtest, ytest)
