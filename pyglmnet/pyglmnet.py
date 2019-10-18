@@ -696,7 +696,10 @@ class GLM(BaseEstimator):
         """
         n_samples, n_features = X.shape
         reg_scale = rl * (1 - self.alpha)
-        z = beta[0] + np.dot(X, beta[1:])
+        if fit_intercept:
+            z = beta[0] + np.dot(X, beta[1:])
+        else:
+            z = np.dot(X, beta)
 
         for k in range(0, n_features + int(fit_intercept)):
             # Only update parameters in active set
@@ -776,14 +779,21 @@ class GLM(BaseEstimator):
 
         # Initialize parameters
         beta = np.zeros((n_features + int(self.fit_intercept),))
-        if self.beta0_ is None and self.beta_ is None:
-            beta[0] = 1 / (n_features + 1) * \
-                self.rng.normal(0.0, 1.0, 1)
-            beta[1:] = 1 / (n_features + 1) * \
-                self.rng.normal(0.0, 1.0, (n_features, ))
+        if self.fit_intercept:
+            if self.beta0_ is None and self.beta_ is None:
+                beta[0] = 1 / (n_features + 1) * \
+                    self.rng.normal(0.0, 1.0, 1)
+                beta[1:] = 1 / (n_features + 1) * \
+                    self.rng.normal(0.0, 1.0, (n_features, ))
+            else:
+                beta[0] = self.beta0_
+                beta[1:] = self.beta_
         else:
-            beta[0] = self.beta0_
-            beta[1:] = self.beta_
+            if self.beta0_ is None and self.beta_ is None:
+                beta = 1 / (n_features + 1) * \
+                    self.rng.normal(0.0, 1.0, (n_features, ))
+            else:
+                beta = self.beta_
 
         logger.info('Lambda: %6.4f' % self.reg_lambda)
 

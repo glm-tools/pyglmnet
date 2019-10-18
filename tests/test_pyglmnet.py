@@ -324,6 +324,13 @@ def test_compare_sklearn(solver):
     y_pg = glm.predict(X)
     assert abs(rmse(Y, y_sk) - rmse(Y, y_pg)) < 1.0
 
+    glm = GLM(distr='gaussian', alpha=l1_ratio, reg_lambda=alpha,
+              solver=solver, tol=1e-5, max_iter=70, fit_intercept=False)
+    glm.fit(X, Y)
+    assert glm.beta0_ == 0.
+
+    glm.predict(X)
+
 
 @pytest.mark.parametrize("distr", ALLOWED_DISTRS)
 def test_cdfast(distr):
