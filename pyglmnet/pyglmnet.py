@@ -71,12 +71,11 @@ def _probit_g6(z, pdfz, cdfz, thresh=5):
     return res
 
 
-def _lmb(distr, beta, X, eta):
+def _lmb(distr, beta0, beta, X, eta, fit_intercept=True):
     """Conditional intensity function."""
     n_samples, n_features = X.shape
-    fit_intercept = len(beta) > n_features
     if fit_intercept:
-        z = beta[0] + np.dot(X, beta[1:])
+        z = beta0 + np.dot(X, beta)
     else:
         z = np.dot(X, beta)
     return _mu(distr, z, eta, fit_intercept)
@@ -288,7 +287,7 @@ def _grad_L2loss(distr, alpha, Tau, reg_lambda, X, y, eta, beta):
     return g
 
 
-def _gradhess_logloss_1d(distr, xk, y, z, eta):
+def _gradhess_logloss_1d(distr, xk, y, z, eta, fit_intercept=True):
     """
     Compute gradient (1st derivative)
     and Hessian (2nd derivative)
@@ -310,8 +309,7 @@ def _gradhess_logloss_1d(distr, xk, y, z, eta):
     hk: float:
         (n_features + 1,)
     """
-    n_samples, n_features = xk.shape
-    fit_intercept = len(z) > n_features
+    n_samples = xk.shape[0]
 
     if distr == 'softplus':
         mu = _mu(distr, z, eta, fit_intercept)
@@ -390,20 +388,18 @@ def simulate_glm(distr, beta0, beta, X, eta=2.0, random_state=None,
         raise ValueError("'distr' must be in %s, got %s"
                          % (repr(ALLOWED_DISTRS), distr))
 
-    beta = [beta0] + beta
-
     if not sample:
-        return _lmb(distr, beta, X, eta)
+        return _lmb(distr, beta0, beta, X, eta)
 
     _random_state = np.random.RandomState(random_state)
     if distr == 'softplus' or distr == 'poisson':
-        y = _random_state.poisson(_lmb(distr, beta, X, eta))
+        y = _random_state.poisson(_lmb(distr, beta0, beta, X, eta))
     if distr == 'gaussian':
-        y = _random_state.normal(_lmb(distr, beta, X, eta))
+        y = _random_state.normal(_lmb(distr, beta0, beta, X, eta))
     if distr == 'binomial' or distr == 'probit':
-        y = _random_state.binomial(1, _lmb(distr, beta, X, eta))
+        y = _random_state.binomial(1, _lmb(distr, beta0, beta, X, eta))
     if distr == 'gamma':
-        mu = _lmb(distr, beta, X, eta)
+        mu = _lmb(distr, beta0, beta, X, eta)
         y = np.exp(mu)
     return y
 
@@ -671,7 +667,7 @@ class GLM(BaseEstimator):
 
             return result
 
-    def _cdfast(self, X, y, ActiveSet, beta, rl):
+    def _cdfast(self, X, y, ActiveSet, beta, rl, fit_intercept=True):
         """
         Perform one cycle of Newton updates for all coordinates.
 
@@ -699,7 +695,6 @@ class GLM(BaseEstimator):
             Updated parameters
         """
         n_samples, n_features = X.shape
-        fit_intercept = len(beta) > n_features
         reg_scale = rl * (1 - self.alpha)
         z = beta[0] + np.dot(X, beta[1:])
 
@@ -712,7 +707,8 @@ class GLM(BaseEstimator):
                     xk = np.ones((n_samples, ))
 
                 # Calculate grad and hess of log likelihood term
-                gk, hk = _gradhess_logloss_1d(self.distr, xk, y, z, self.eta)
+                gk, hk = _gradhess_logloss_1d(self.distr, xk, y, z, self.eta,
+                                              fit_intercept)
 
                 # Add grad and hess of regularization term
                 if self.Tau is None:
@@ -731,6 +727,7 @@ class GLM(BaseEstimator):
                 # Update parameters, z
                 update = 1. / hk * gk
                 beta[k], z = beta[k] - update, z - update * xk
+        return beta
 
     def fit(self, X, y):
         """The fit function.
@@ -779,21 +776,14 @@ class GLM(BaseEstimator):
 
         # Initialize parameters
         beta = np.zeros((n_features + int(self.fit_intercept),))
-        if self.fit_intercept:
-            if self.beta0_ is None and self.beta_ is None:
-                beta[0] = 1 / (n_features + 1) * \
-                    self.rng.normal(0.0, 1.0, 1)
-                beta[1:] = 1 / (n_features + 1) * \
-                    self.rng.normal(0.0, 1.0, (n_features, ))
-            else:
-                beta[0] = self.beta0_
-                beta[1:] = self.beta_
+        if self.beta0_ is None and self.beta_ is None:
+            beta[0] = 1 / (n_features + 1) * \
+                self.rng.normal(0.0, 1.0, 1)
+            beta[1:] = 1 / (n_features + 1) * \
+                self.rng.normal(0.0, 1.0, (n_features, ))
         else:
-            if self.beta0_ is None and self.beta_ is None:
-                beta = 1 / (n_features + 1) * \
-                    self.rng.normal(0.0, 1.0, (n_features, ))
-            else:
-                beta = self.beta_
+            beta[0] = self.beta0_
+            beta[1:] = self.beta_
 
         logger.info('Lambda: %6.4f' % self.reg_lambda)
 
@@ -824,7 +814,8 @@ class GLM(BaseEstimator):
             elif self.solver == 'cdfast':
                 beta_old = deepcopy(beta)
                 beta = \
-                    self._cdfast(X, y, ActiveSet, beta, reg_lambda)
+                    self._cdfast(X, y, ActiveSet, beta, reg_lambda,
+                                 self.fit_intercept)
                 # Converged if the norm(update) < tol
                 if (t > 1) and (np.linalg.norm(beta - beta_old) < tol):
                     msg = ('\tConverged in {0:d} iterations'.format(t))
@@ -881,12 +872,8 @@ class GLM(BaseEstimator):
             raise ValueError('Input data should be of type ndarray (got %s).'
                              % type(X))
 
-        if self.fit_intercept:
-            beta = [self.beta0_] + self.beta_
-        else:
-            beta = self.beta_
-
-        yhat = _lmb(self.distr, beta, X, self.eta)
+        yhat = _lmb(self.distr, self.beta0_, self.beta_, X, self.eta,
+                    self.fit_intercept)
 
         if self.distr == 'binomial':
             yhat = (yhat > 0.5).astype(int)
@@ -920,12 +907,8 @@ class GLM(BaseEstimator):
             raise ValueError('Input data should be of type ndarray (got %s).'
                              % type(X))
 
-        if self.fit_intercept:
-            beta = [self.beta0_] + self.beta_
-        else:
-            beta = self.beta_
-
-        yhat = _lmb(self.distr, beta, X, self.eta)
+        yhat = _lmb(self.distr, self.beta0_, self.beta_, X, self.eta,
+                    self.fit_intercept)
         yhat = np.asarray(yhat)
         return yhat
 
