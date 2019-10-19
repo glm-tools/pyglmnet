@@ -247,30 +247,35 @@ def _grad_L2loss(distr, alpha, Tau, reg_lambda, X, y, eta, beta):
     mu = _mu(distr, z, eta, fit_intercept)
     grad_mu = _grad_mu(distr, z, eta)
 
-    # TODO remove calculating grad_beta0 if it is not necessary
+    grad_beta0 = 0.
     if distr in ['poisson', 'softplus']:
-        grad_beta0 = np.sum(grad_mu) - np.sum(y * grad_mu / mu)
+        if fit_intercept:
+            grad_beta0 = np.sum(grad_mu) - np.sum(y * grad_mu / mu)
         grad_beta = ((np.dot(grad_mu.T, X) -
                       np.dot((y * grad_mu / mu).T, X)).T)
 
     elif distr == 'gaussian':
-        grad_beta0 = np.sum((mu - y) * grad_mu)
+        if fit_intercept:
+            grad_beta0 = np.sum((mu - y) * grad_mu)
         grad_beta = np.dot((mu - y).T, X * grad_mu[:, None]).T
 
     elif distr == 'binomial':
-        grad_beta0 = np.sum(mu - y)
+        if fit_intercept:
+            grad_beta0 = np.sum(mu - y)
         grad_beta = np.dot((mu - y).T, X).T
 
     elif distr == 'probit':
         grad_logl = (y * _probit_g3(z, grad_mu, mu) -
                      (1 - y) * _probit_g4(z, grad_mu, mu))
-        grad_beta0 = -np.sum(grad_logl)
+        if fit_intercept:
+            grad_beta0 = -np.sum(grad_logl)
         grad_beta = -np.dot(grad_logl.T, X).T
 
     elif distr == 'gamma':
         nu = 1.
         grad_logl = (y / mu ** 2 - 1 / mu) * grad_mu
-        grad_beta0 = -nu * np.sum(grad_logl)
+        if fit_intercept:
+            grad_beta0 = -nu * np.sum(grad_logl)
         grad_beta = -nu * np.dot(grad_logl.T, X).T
 
     grad_beta0 *= 1. / n_samples
