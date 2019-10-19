@@ -71,13 +71,17 @@ def _probit_g6(z, pdfz, cdfz, thresh=5):
     return res
 
 
-def _lmb(distr, beta0, beta, X, eta, fit_intercept=True):
-    """Conditional intensity function."""
-    n_samples, n_features = X.shape
+def _z(beta0, beta, X, fit_intercept):
     if fit_intercept:
         z = beta0 + np.dot(X, beta)
     else:
-        z = np.dot(X, beta)
+        z = np.dot(X, np.r_[beta0, beta])
+    return z
+
+
+def _lmb(distr, beta0, beta, X, eta, fit_intercept=True):
+    """Conditional intensity function."""
+    z = _z(beta0, beta, X, fit_intercept)
     return _mu(distr, z, eta, fit_intercept)
 
 
@@ -191,14 +195,11 @@ def _L1penalty(beta, group=None):
     return L1penalty
 
 
-def _loss(distr, alpha, Tau, reg_lambda, X, y, eta, group, beta):
+def _loss(distr, alpha, Tau, reg_lambda, X, y, eta, group, beta,
+          fit_intercept=True):
     """Define the objective function for elastic net."""
     n_samples, n_features = X.shape
-    fit_intercept = len(beta) > n_features
-    if fit_intercept:
-        z = beta[0] + np.dot(X, beta[1:])
-    else:
-        z = np.dot(X, beta)
+    z = _z(beta[0], beta[1:], X, fit_intercept)
     y_hat = _mu(distr, z, eta, fit_intercept)
     L = 1. / n_samples * _logL(distr, y, y_hat, z)
     if fit_intercept:
@@ -209,14 +210,11 @@ def _loss(distr, alpha, Tau, reg_lambda, X, y, eta, group, beta):
     return J
 
 
-def _L2loss(distr, alpha, Tau, reg_lambda, X, y, eta, group, beta):
+def _L2loss(distr, alpha, Tau, reg_lambda, X, y, eta, group, beta,
+            fit_intercept=True):
     """Define the objective function for elastic net."""
     n_samples, n_features = X.shape
-    fit_intercept = len(beta) > n_features
-    if fit_intercept:
-        z = beta[0] + np.dot(X, beta[1:])
-    else:
-        z = np.dot(X, beta)
+    z = _z(beta[0], beta[1:], X, fit_intercept)
     y_hat = _mu(distr, z, eta, fit_intercept)
     L = 1. / n_samples * _logL(distr, y, y_hat, z)
     if fit_intercept:
@@ -227,11 +225,11 @@ def _L2loss(distr, alpha, Tau, reg_lambda, X, y, eta, group, beta):
     return J
 
 
-def _grad_L2loss(distr, alpha, Tau, reg_lambda, X, y, eta, beta):
+def _grad_L2loss(distr, alpha, Tau, reg_lambda, X, y, eta, beta,
+                 fit_intercept=True):
     """The gradient."""
     n_samples, n_features = X.shape
     n_samples = np.float(n_samples)
-    fit_intercept = len(beta) > n_features
 
     if Tau is None:
         if fit_intercept:
@@ -240,10 +238,7 @@ def _grad_L2loss(distr, alpha, Tau, reg_lambda, X, y, eta, beta):
             Tau = np.eye(beta.shape[0])
     InvCov = np.dot(Tau.T, Tau)
 
-    if fit_intercept:
-        z = beta[0] + np.dot(X, beta[1:])
-    else:
-        z = np.dot(X, beta)
+    z = _z(beta[0], beta[1:], X, fit_intercept)
     mu = _mu(distr, z, eta, fit_intercept)
     grad_mu = _grad_mu(distr, z, eta)
 
@@ -701,10 +696,7 @@ class GLM(BaseEstimator):
         """
         n_samples, n_features = X.shape
         reg_scale = rl * (1 - self.alpha)
-        if fit_intercept:
-            z = beta[0] + np.dot(X, beta[1:])
-        else:
-            z = np.dot(X, beta)
+        z = _z(beta[0], beta[1:], X, fit_intercept)
 
         for k in range(0, n_features + int(fit_intercept)):
             # Only update parameters in active set
@@ -818,7 +810,7 @@ class GLM(BaseEstimator):
                 grad = _grad_L2loss(self.distr,
                                     alpha, self.Tau,
                                     reg_lambda, X, y, self.eta,
-                                    beta)
+                                    beta, self.fit_intercept)
                 # Converged if the norm(gradient) < tol
                 if (t > 1) and (np.linalg.norm(grad) < tol):
                     msg = ('\tConverged in {0:d} iterations'.format(t))
@@ -888,7 +880,7 @@ class GLM(BaseEstimator):
                              % type(X))
 
         yhat = _lmb(self.distr, self.beta0_, self.beta_, X, self.eta,
-                    self.fit_intercept)
+                    fit_intercept=True)
 
         if self.distr == 'binomial':
             yhat = (yhat > 0.5).astype(int)
