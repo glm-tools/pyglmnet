@@ -68,6 +68,7 @@ param_grid = [{'reg_lambda': reg_lambda}]
 glm = GLM(distr='gaussian', alpha=0.05, score_metric='pseudo_R2')
 glmcv = GridSearchCV(glm, param_grid, cv=cv)
 glmcv.fit(X_train, y_train)
+y_test_hat = glmcv.predict(X_test)
 
 print("test set pseudo $R^2$ = %f" % glmcv.score(X_test, y_test))
 
