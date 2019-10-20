@@ -90,6 +90,21 @@ def tikhonov_from_prior(prior_cov, n_samples, threshold=0.0001):
     return Tau
 
 
+def _check_params(distr, max_iter, fit_intercept):
+    from .pyglmnet import ALLOWED_DISTRS
+
+    if distr not in ALLOWED_DISTRS:
+        raise ValueError('distr must be one of %s, Got '
+                         '%s' % (', '.join(ALLOWED_DISTRS), distr))
+
+    if not isinstance(max_iter, int):
+        raise ValueError('max_iter must be of type int')
+
+    if not isinstance(fit_intercept, bool):
+        raise ValueError('fit_intercept must be bool, got %s'
+                         % type(fit_intercept))
+
+
 def set_log_level(verbose):
     """Convenience function for setting the log level.
 

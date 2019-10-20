@@ -6,7 +6,7 @@ from copy import deepcopy
 import numpy as np
 from scipy.special import expit
 from scipy.stats import norm
-from .utils import logger, set_log_level
+from .utils import logger, set_log_level, _check_params
 from .base import BaseEstimator, is_classifier, check_version
 
 
@@ -533,12 +533,8 @@ class GLM(BaseEstimator):
                  fit_intercept=True,
                  random_state=0, callback=None, verbose=False):
 
-        if not isinstance(max_iter, int):
-            raise ValueError('max_iter must be of type int')
-
-        if distr not in ALLOWED_DISTRS:
-            raise ValueError('distr must be one of %s. Got:'
-                             '%s' % (', '.join(ALLOWED_DISTRS), distr))
+        _check_params(distr=distr, max_iter=max_iter,
+                      fit_intercept=fit_intercept)
 
         self.distr = distr
         self.alpha = alpha
@@ -1120,12 +1116,7 @@ class GLMCV(object):
         if not isinstance(reg_lambda, (list, np.ndarray)):
             reg_lambda = [reg_lambda]
 
-        if distr not in ALLOWED_DISTRS:
-            raise ValueError('distr must be one of %s, Got '
-                             '%s' % (', '.join(ALLOWED_DISTRS), distr))
-
-        if not isinstance(max_iter, int):
-            raise ValueError('max_iter must be of type int')
+        _check_params(distr=distr, max_iter=max_iter, fit_intercept=fit_intercept)
 
         self.distr = distr
         self.alpha = alpha
