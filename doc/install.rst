@@ -23,8 +23,7 @@ the dependencies using ``pip``.
 
 .. code-block:: bash
 
-   pip install numpy
-   pip install scipy
+   pip install numpy scipy
    pip install -U scikit-learn
 
 Get pyglmnet
@@ -39,11 +38,4 @@ To install the development version of ``pyglmnet``, first clone the repository
 
 .. code-block:: bash
 
-    git clone http://github.com/glm-tools/pyglmnet
-
-Then run ``setup.py`` to install the library
-
-.. code-block:: bash
-
-    cd pyglmnet
-    python setup.py develop
+	pip install https://api.github.com/repos/glm-tools/pyglmnet/zipball/master

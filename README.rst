@@ -108,13 +108,7 @@ Clone the repository.
 
 .. code:: bash
 
-    $ git clone http://github.com/glm-tools/pyglmnet
-
-Install ``pyglmnet`` using ``setup.py`` as follows
-
-.. code:: bash
-
-    $ python setup.py develop
+    $ pip install https://api.github.com/repos/glm-tools/pyglmnet/zipball/master
 
 Getting Started
 ~~~~~~~~~~~~~~~
