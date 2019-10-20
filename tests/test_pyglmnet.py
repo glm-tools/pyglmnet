@@ -120,7 +120,7 @@ def test_group_lasso():
     groups[60:] = 3
 
     # sample random coefficients
-    beta0 = np.random.normal(0.0, 1.0, 1)
+    beta0 = np.random.rand()
     beta = np.random.normal(0.0, 1.0, n_features)
     beta[groups == 2] = 0.
 
@@ -442,15 +442,21 @@ def test_simulate_glm(distr):
     n_samples, n_features = 10, 3
 
     # sample random coefficients
-    beta0 = state.normal(0.0, 1.0, 1)
+    beta0 = state.rand()
     beta = state.normal(0.0, 1.0, n_features)
 
     X = state.normal(0.0, 1.0, [n_samples, n_features])
     simulate_glm(distr, beta0, beta, X, random_state=random_state)
 
+    with pytest.raises(ValueError, match="'beta0' must be float"):
+        simulate_glm(distr, np.array([1.0]), beta, X, random_state)
+
+    with pytest.raises(ValueError, match="'beta' must be 1D"):
+        simulate_glm(distr, 1.0, np.atleast_2d(beta), X, random_state)
+
     # If the distribution name is garbage it will fail
     distr = 'multivariate_gaussian_poisson'
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="'distr' must be in"):
         simulate_glm(distr, 1.0, 1.0, np.array([[1.0]]))
 
 
