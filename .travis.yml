@@ -23,7 +23,7 @@ script:
     - # Run doctests
     - py.test pyglmnet/pyglmnet.py --verbose --doctest-modules 
     - # Run flake8 to check that package and tests adhere to PEP8
-    - flake8 --count pyglmnet tests
+    - make pep
 
 after_success:
     - bash <(curl -s https://codecov.io/bash)
