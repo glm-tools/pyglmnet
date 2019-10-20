@@ -1,0 +1,26 @@
+include *.png
+include *.rst
+include requirements.txt
+include LICENSE
+include pyglmnet/__init__.py
+include examples/community_crime.csv
+
+recursive-include examples *.py
+recursive-include examples *.txt
+
+recursive-include pyglmnet *.py
+
+### Exclude
+
+exclude .github
+exclude Makefile
+exclude CONTRIBUTING.md
+exclude distribution_instructions.md
+exclude .coveragerc
+exclude *.yml
+exclude .mailmap
+exclude PLANS.md
+recursive-exclude pyglmnet *.pyc
+
+recursive-exclude doc *
+recursive-exclude tests *.py
