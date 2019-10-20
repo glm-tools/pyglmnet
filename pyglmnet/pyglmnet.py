@@ -72,6 +72,7 @@ def _probit_g6(z, pdfz, cdfz, thresh=5):
 
 
 def _z(beta0, beta, X, fit_intercept):
+    """Compute z to be passed through non-linearity"""
     if fit_intercept:
         z = beta0 + np.dot(X, beta)
     else:
@@ -91,10 +92,7 @@ def _mu(distr, z, eta, fit_intercept):
         mu = np.log1p(np.exp(z))
     elif distr == 'poisson':
         mu = z.copy()
-        if fit_intercept:
-            beta0 = (1 - eta) * np.exp(eta)
-        else:
-            beta0 = 0
+        beta0 = (1 - eta) * np.exp(eta) if fit_intercept else 0.
         mu[z > eta] = z[z > eta] * np.exp(eta) + beta0
         mu[z <= eta] = np.exp(z[z <= eta])
     elif distr == 'gaussian':
@@ -911,7 +909,7 @@ class GLM(BaseEstimator):
                              % type(X))
 
         yhat = _lmb(self.distr, self.beta0_, self.beta_, X, self.eta,
-                    self.fit_intercept)
+                    fit_intercept=True)
         yhat = np.asarray(yhat)
         return yhat
 
