@@ -674,7 +674,7 @@ class GLM(BaseEstimator):
             Labels to the data
             n_samples x 1
         ActiveSet: array
-            n_features + 1 x 1
+            n_features + 1 x 1, or n_features
             Active set storing which betas are non-zero
         beta: array
             n_features + 1 x 1, or n_features
@@ -695,10 +695,13 @@ class GLM(BaseEstimator):
         for k in range(0, n_features + int(fit_intercept)):
             # Only update parameters in active set
             if ActiveSet[k] != 0:
-                if k > 0:
-                    xk = X[:, k - 1]
+                if fit_intercept:
+                    if k == 0:
+                        xk = np.ones((n_samples, ))
+                    else:
+                        xk = X[:, k - 1]
                 else:
-                    xk = np.ones((n_samples, ))
+                    xk = X[:, k]
 
                 # Calculate grad and hess of log likelihood term
                 gk, hk = _gradhess_logloss_1d(self.distr, xk, y, z, self.eta,
@@ -706,15 +709,19 @@ class GLM(BaseEstimator):
 
                 # Add grad and hess of regularization term
                 if self.Tau is None:
-                    gk_reg = beta[k]
-                    hk_reg = 1.0
+                    if k > 0:
+                        gk_reg = beta[k - 1] if fit_intercept else beta[k]
+                        hk_reg = 1.0
+                    else:
+                        gk_reg, hk_reg = 0.0, 0.0
                 else:
                     InvCov = np.dot(self.Tau.T, self.Tau)
                     if fit_intercept:
                         gk_reg = np.sum(InvCov[k - 1, :] * beta[1:])
+                        hk_reg = InvCov[k - 1, k - 1]
                     else:
-                        gk_reg = np.sum(InvCov[k - 1, :] * beta)
-                    hk_reg = InvCov[k - 1, k - 1]
+                        gk_reg = np.sum(InvCov[k, :] * beta)
+                        hk_reg = InvCov[k, k]
                 gk += np.ravel([reg_scale * gk_reg if k > 0 else 0.0])
                 hk += np.ravel([reg_scale * hk_reg if k > 0 else 0.0])
 
@@ -739,7 +746,6 @@ class GLM(BaseEstimator):
         self: instance of GLM
             The fitted model.
         """
-
         # checks for group
         if self.group is not None:
             self.group = np.array(self.group)
@@ -794,7 +800,7 @@ class GLM(BaseEstimator):
 
         if self.solver == 'cdfast':
             # init active set
-            ActiveSet = np.ones(n_features + int(self.fit_intercept))
+            ActiveSet = np.ones_like(beta)
 
         # Iterative updates
         for t in range(0, self.max_iter):
