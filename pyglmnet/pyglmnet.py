@@ -774,6 +774,10 @@ class GLM(BaseEstimator):
         if y.ndim != 1:
             raise ValueError("y must be 1D, got %sD" % y.ndim)
 
+        if hasattr(self, '_allow_refit') and self._allow_refit is False:
+            raise ValueError("This glm object has already been fit before."
+                             "A refit is not allowed")
+
         n_observations, n_features = X.shape
 
         if n_observations != len(y):
@@ -867,6 +871,7 @@ class GLM(BaseEstimator):
             self.beta0_ = 0
             self.beta_ = beta
         self.ynull_ = np.mean(y)
+        self._allow_refit = False
         return self
 
     def predict(self, X):
@@ -1237,6 +1242,7 @@ class GLMCV(object):
 
                 glm.n_iter_ = 0
                 glm.fit(X[train], y[train])
+                glm._allow_refit = True
                 scores_fold.append(glm.score(X[val], y[val]))
             scores.append(np.mean(scores_fold))
 
@@ -1248,6 +1254,9 @@ class GLMCV(object):
             glm.n_iter_ = 0
             glm.fit(X, y)
             glms.append(glm)
+
+        for glm in glms:
+            glm._allow_refit = False
 
         # Update the estimated variables
         if self.score_metric == 'deviance':
