@@ -818,15 +818,6 @@ class GLM(BaseEstimator):
                                     alpha, self.Tau,
                                     reg_lambda, X, y, self.eta,
                                     beta, self.fit_intercept)
-
-                # Convergence by gradient norm tolerance
-                max_grad = np.max(grad)
-                if t > 1 and self.learning_rate * max_grad < tol:
-                    msg = ('\tGradient norm tolerance. ' +
-                           'Converged in {0:d} iterations'.format(t))
-                    logger.info(msg)
-                    break
-
                 # Update
                 beta = beta - self.learning_rate * grad
 
