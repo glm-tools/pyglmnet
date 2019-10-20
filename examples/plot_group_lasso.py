@@ -53,13 +53,13 @@ Xtrain, Xtest, ytrain, ytest = \
 # set up the group lasso GLM model
 gl_glm = GLMCV(distr="binomial", tol=1e-3,
                group=group_idxs, score_metric="pseudo_R2",
-               alpha=1.0, learning_rate=3, max_iter=100, cv=3)
+               alpha=1.0, learning_rate=3, max_iter=100, cv=3, verbose=True)
 
 
 # set up the lasso model
 glm = GLMCV(distr="binomial", tol=1e-3,
             score_metric="pseudo_R2",
-            alpha=1.0, learning_rate=3, max_iter=100, cv=3)
+            alpha=1.0, learning_rate=3, max_iter=100, cv=3, verbose=True)
 
 print("gl_glm: ", gl_glm)
 print("glm: ", glm)
