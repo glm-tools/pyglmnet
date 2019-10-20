@@ -20,6 +20,7 @@ Changelog
     - Improved testing of gradients for optimization by `Mainak Jas`_ and `Pavan Ramkumar`_.
     - Improved testing of estimated coefficients at convergence by `Mainak Jas`_ and `Pavan Ramkumar`_
     - Add `n_iter_` attribute to :class:`pyglmnet.GLM` by `Mainak Jas`_, `Olivier Pieters`_, `Peter Foley`_ and `Chris Rogers`_
+    - Add option to fit intercept or not with a fit_intercept boolean by `Drew Harris`_, `Mainak Jas`_ and `Pavan Ramkumar`_
 
 BUG
 ~~~
