@@ -533,7 +533,7 @@ class GLM(BaseEstimator):
                  reg_lambda=0.1,
                  solver='batch-gradient',
                  learning_rate=2e-1, max_iter=1000,
-                 tol=1e-3, eta=2.0, score_metric='deviance',
+                 tol=1e-6, eta=2.0, score_metric='deviance',
                  fit_intercept=True,
                  random_state=0, callback=None, verbose=False):
 
@@ -812,33 +812,34 @@ class GLM(BaseEstimator):
         # Iterative updates
         for t in range(0, self.max_iter):
             self.n_iter_ += 1
-
+            beta_old = deepcopy(beta)
             if self.solver == 'batch-gradient':
                 grad = _grad_L2loss(self.distr,
                                     alpha, self.Tau,
                                     reg_lambda, X, y, self.eta,
                                     beta, self.fit_intercept)
-                # Converged if the norm(gradient) < tol
-                if (t > 1) and (np.linalg.norm(grad) < tol):
-                    msg = ('\tConverged in {0:d} iterations'.format(t))
+
+                # Convergence by gradient norm tolerance
+                max_grad = np.max(grad)
+                if t > 1 and self.learning_rate * max_grad < tol:
+                    msg = ('\tGradient norm tolerance. ' +
+                           'Converged in {0:d} iterations'.format(t))
                     logger.info(msg)
                     break
+
+                # Update
                 beta = beta - self.learning_rate * grad
 
             elif self.solver == 'cdfast':
-                beta_old = deepcopy(beta)
                 beta = \
                     self._cdfast(X, y, ActiveSet, beta, reg_lambda,
                                  self.fit_intercept)
-                # Converged if the norm(update) < tol
-                if (t > 1) and (np.linalg.norm(beta - beta_old) < tol):
-                    msg = ('\tConverged in {0:d} iterations'.format(t))
-                    logger.info(msg)
-                    break
+
             else:
                 raise ValueError("solver must be one of "
                                  "'('batch-gradient', 'cdfast'), got %s."
                                  % (self.solver))
+
             # Apply proximal operator
             if self.fit_intercept:
                 beta[1:] = self._prox(beta[1:], reg_lambda * alpha)
@@ -850,6 +851,14 @@ class GLM(BaseEstimator):
                 ActiveSet[beta == 0] = 0
                 if self.fit_intercept:
                     ActiveSet[0] = 1.
+
+            # Convergence by relative parameter change tolerance
+            norm_update = np.linalg.norm(beta - beta_old)
+            if t > 1 and (norm_update / np.linalg.norm(beta)) < tol:
+                msg = ('\tParameter update tolerance. ' +
+                       'Converged in {0:d} iterations'.format(t))
+                logger.info(msg)
+                break
 
             # Compute and save loss if callbacks are requested
             if callable(self.callback):
@@ -1117,7 +1126,7 @@ class GLMCV(object):
                  reg_lambda=None, cv=10,
                  solver='batch-gradient',
                  learning_rate=2e-1, max_iter=1000,
-                 tol=1e-3, eta=2.0, score_metric='deviance',
+                 tol=1e-6, eta=2.0, score_metric='deviance',
                  fit_intercept=True,
                  random_state=0, verbose=False):
 
@@ -1182,6 +1191,7 @@ class GLMCV(object):
 
     def fit(self, X, y):
         """The fit function.
+
         Parameters
         ----------
         X: array
@@ -1234,6 +1244,7 @@ class GLMCV(object):
                 else:
                     glm.beta0_, glm.beta_ = glms[-1].beta0_, glms[-1].beta_
 
+                glm.n_iter_ = 0
                 glm.fit(X[train], y[train])
                 scores_fold.append(glm.score(X[val], y[val]))
             scores.append(np.mean(scores_fold))
@@ -1243,8 +1254,10 @@ class GLMCV(object):
             else:
                 glm.beta0_, glm.beta_ = glms[-1].beta0_, glms[-1].beta_
 
+            glm.n_iter_ = 0
             glm.fit(X, y)
             glms.append(glm)
+
         # Update the estimated variables
         if self.score_metric == 'deviance':
             opt = np.array(scores).argmin()
