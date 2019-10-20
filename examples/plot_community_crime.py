@@ -57,7 +57,7 @@ print("test set pseudo $R^2$ = %f" % glm.score(X_test, y_test))
 
 import numpy as np # noqa
 from sklearn.model_selection import GridSearchCV # noqa
-from sklearn.model_selection import KFold
+from sklearn.model_selection import KFold # noqa
 
 cv = KFold(3)
 
