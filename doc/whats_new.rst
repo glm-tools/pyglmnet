@@ -77,3 +77,4 @@ Changelog
 .. _Peter Foley: https://github.com/peterfoley
 .. _Olivier Pieters: https://olivierpieters.be/
 .. _Chris Rogers: https://github.com/cxrodgers
+: _Drew Harris: https://github.com/DreHar
