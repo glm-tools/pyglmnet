@@ -330,7 +330,7 @@ def test_compare_sklearn(solver):
     assert abs(rmse(Y, y_sk) - rmse(Y, y_pg)) < 1.0
 
     glm = GLM(distr='gaussian', alpha=l1_ratio, reg_lambda=alpha,
-              solver=solver, tol=1e-5, max_iter=70, fit_intercept=False)
+              solver=solver, tol=1e-5, max_iter=5, fit_intercept=False)
     glm.fit(X, Y)
     assert glm.beta0_ == 0.
 
