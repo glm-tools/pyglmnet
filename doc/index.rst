@@ -64,8 +64,7 @@ Contents
    cheatsheet
    auto_examples/index
    api
-   developers
-   requests
+   contributing
    resources
    whats_new
 

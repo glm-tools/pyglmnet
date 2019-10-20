@@ -121,7 +121,6 @@ Getting Started
 
 
 Here is an example on how to use the ``GLM`` estimator.
-This example is also found in examples/intro_example.py.
 
 .. code:: python
 
