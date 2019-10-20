@@ -14,7 +14,8 @@ gamma, poisson, and softplus. It supports a wide range of regularizers: ridge, l
 elastic net, group lasso, and Tikhonov regularization.
 
 [`Repository <https://github.com/glm-tools/pyglmnet>`_]
-[`Documentation <http://glm-tools.github.io/pyglmnet>`_]
+[`Documentation (stable release) <http://glm-tools.github.io/pyglmnet>`_]
+[`Documentation (development version) <https://circleci.com/api/v1.1/project/github/glm-tools/pyglmnet/latest/artifacts/0/html/index.html?branch=master>`_]
 
 A brief introduction to GLMs
 ============================
