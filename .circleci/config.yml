@@ -32,6 +32,7 @@ jobs:
                 command: |
                     source activate testenv
                     cd doc && make html
+                no_output_timeout: 30m
             - store_artifacts:
                 path: doc/_build/html/
                 destination: html
