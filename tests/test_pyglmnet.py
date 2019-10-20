@@ -203,7 +203,7 @@ def test_glmnet(distr, reg_lambda, fit_intercept):
                       fit_intercept=fit_intercept))
 
         glm = GLM(distr, learning_rate=learning_rate,
-                  reg_lambda=reg_lambda, tol=1e-3, max_iter=5000,
+                  reg_lambda=reg_lambda, tol=1e-5, max_iter=5000,
                   alpha=alpha, solver=solver, score_metric=score_metric,
                   random_state=random_state, callback=callback,
                   fit_intercept=fit_intercept)
@@ -397,8 +397,7 @@ def test_fetch_datasets():
 
 
 def test_random_state_consistency():
-    """ Test model's random_state """
-
+    """Test model's random_state."""
     # Generate the dataset
     n_samples, n_features = 1000, 10
 
@@ -421,6 +420,7 @@ def test_random_state_consistency():
     assert_array_equal(ypred_a, ypred_b)
     # Consistency between different run of the same model
     assert_array_equal(ypred_b, ypred_c)
+    # assert_allclose(ypred_b, ypred_c, atol=1e-5, rtol=1e-4)
 
     # Test also cross-validation
     glm_cv_a = GLMCV(distr="gaussian", cv=3, random_state=1)
