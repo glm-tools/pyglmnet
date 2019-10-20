@@ -307,7 +307,6 @@ def test_cv():
 @pytest.mark.parametrize("solver", ['batch-gradient', 'cdfast'])
 def test_compare_sklearn(solver):
     """Test results against sklearn."""
-
     def rmse(a, b):
         return np.sqrt(np.mean((a - b) ** 2))
 
