@@ -515,7 +515,7 @@ class GLM(BaseEstimator):
     >>> glm = GLM(distr='gaussian', verbose=False, random_state=random_state)
     >>> glm = glm.fit(X, y)
     >>> glm.beta0_ # The intercept
-    1.005377890812967
+    1.005380485553247
     >>> glm.beta_ # The coefficients
     array([ 1.90217526, -0.78781579, -0.        ,  0.03227754])
     >>> y_pred = glm.predict(X)
