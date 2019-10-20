@@ -419,8 +419,7 @@ def test_random_state_consistency():
     # Consistency between two different models
     assert_array_equal(ypred_a, ypred_b)
     # Consistency between different run of the same model
-    assert_array_equal(ypred_b, ypred_c)
-    # assert_allclose(ypred_b, ypred_c, atol=1e-5, rtol=1e-4)
+    assert_allclose(ypred_b, ypred_c, atol=1e-5, rtol=1e-4)
 
     # Test also cross-validation
     glm_cv_a = GLMCV(distr="gaussian", cv=3, random_state=1)
