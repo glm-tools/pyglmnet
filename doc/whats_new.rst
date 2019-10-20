@@ -28,11 +28,12 @@ BUG
     - Fixed incorrect usage of the random_state parameter by `Giovanni De Toni`_.
     - Fixed incorrect proximal operator for group lasso by `Yu Umegaki`_.
     - Changed stopping criteria for convergence (a threshold on the change in objective value) which
-      stopped too learly. The new criteria is a threshold on the norm of the gradient, by `Pavan Ramkumar`_.
+      stopped too early. The new criteria is a threshold on the norm of the gradient, by `Pavan Ramkumar`_.
     - Fixed `group` parameter not being passed for Group Lasso by `Beibin Li`_.
     - Fix URL paths when running on Windows by `Scott Otterson`_.
     - Made temporary file handling OS independent and usable on a cluster by `Scott Otterson`_.
-    - Replace StratifiedKFold() with KFold(), as StratifiedKFold() doesn't work for continuous values by `Scott Otterson`_.
+    - Replace `StratifiedKFold()` with `KFold()`, as `StratifiedKFold()` doesn't work for continuous values by `Scott Otterson`_.
+    - :func:`pyglmnet.simulate_glm` accepts `beta0` as float and `beta` of shape (n_features,) only, by `Mainak Jas`_
 
 API
 ~~~

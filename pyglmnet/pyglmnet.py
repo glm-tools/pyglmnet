@@ -354,6 +354,12 @@ def simulate_glm(distr, beta0, beta, X, eta=2.0, random_state=None,
         raise ValueError("'distr' must be in %s, got %s"
                          % (repr(ALLOWED_DISTRS), distr))
 
+    if not isinstance(beta0, float):
+        raise ValueError("'beta0' must be float, got %s" % type(beta0))
+
+    if beta.ndim != 1:
+        raise ValueError("'beta' must be 1D, got %dD" % beta.ndim)
+
     if not sample:
         return _lmb(distr, beta0, beta, X, eta)
 
@@ -720,9 +726,11 @@ class GLM(BaseEstimator):
                    .format(type(X), type(y)))
             raise ValueError(msg)
 
-        if X.ndim != 2 or y.ndim != 1:
-            msg = "X must be a 2D ndarray, and y must be 1D"
-            raise ValueError(msg)
+        if X.ndim != 2:
+            raise ValueError("X must be a 2D array, got %sD" % X.ndim)
+
+        if y.ndim != 1:
+            raise ValueError("y must be 1D, got %sD" % y.ndim)
 
         n_observations, n_features = X.shape
 
