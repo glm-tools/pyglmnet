@@ -517,7 +517,7 @@ class GLM(BaseEstimator):
     >>> glm.beta0_ # The intercept
     1.005380485553247
     >>> glm.beta_ # The coefficients
-    array([ 1.90217526, -0.78781579, -0.        ,  0.03227754])
+    array([ 1.90216711, -0.78782533, -0.        ,  0.03227455])
     >>> y_pred = glm.predict(X)
 
 
