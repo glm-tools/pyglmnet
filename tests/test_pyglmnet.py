@@ -394,6 +394,7 @@ def test_cdfast(distr):
 def test_fetch_datasets():
     """Test fetching datasets."""
     datasets.fetch_community_crime_data()
+    datasets.fetch_group_lasso_datasets()
 
 
 def test_random_state_consistency():
