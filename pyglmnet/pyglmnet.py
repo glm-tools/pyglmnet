@@ -1116,7 +1116,8 @@ class GLMCV(object):
         if not isinstance(reg_lambda, (list, np.ndarray)):
             reg_lambda = [reg_lambda]
 
-        _check_params(distr=distr, max_iter=max_iter, fit_intercept=fit_intercept)
+        _check_params(distr=distr, max_iter=max_iter,
+                      fit_intercept=fit_intercept)
 
         self.distr = distr
         self.alpha = alpha

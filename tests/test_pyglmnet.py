@@ -155,7 +155,8 @@ def test_group_lasso():
 
 @pytest.mark.parametrize("distr", ALLOWED_DISTRS)
 @pytest.mark.parametrize("reg_lambda", [0.0, 0.1])
-def test_glmnet(distr, reg_lambda):
+@pytest.mark.parametrize("fit_intercept", [True, False])
+def test_glmnet(distr, reg_lambda, fit_intercept):
     """Test glmnet."""
     raises(ValueError, GLM, distr='blah')
     raises(ValueError, GLM, distr='gaussian', max_iter=1.8)
@@ -163,9 +164,11 @@ def test_glmnet(distr, reg_lambda):
     n_samples, n_features = 100, 10
 
     # coefficients
-    beta0 = 1. / (np.float(n_features) + 1.) * \
-        np.random.normal(0.0, 1.0)
-    beta = 1. / (np.float(n_features) + 1.) * \
+    beta0 = 0.
+    if fit_intercept:
+        beta0 = 1. / (np.float(n_features) + 1.) * \
+            np.random.normal(0.0, 1.0)
+    beta = 1. / (np.float(n_features) + int(fit_intercept)) * \
         np.random.normal(0.0, 1.0, (n_features,))
 
     solvers = ['batch-gradient', 'cdfast']
@@ -196,13 +199,14 @@ def test_glmnet(distr, reg_lambda):
             Tau = None
             loss_trace.append(
                 _loss(distr, alpha, Tau, reg_lambda,
-                      X_train, y_train, eta, group, beta))
+                      X_train, y_train, eta, group, beta,
+                      fit_intercept=fit_intercept))
 
         glm = GLM(distr, learning_rate=learning_rate,
                   reg_lambda=reg_lambda, tol=1e-3, max_iter=5000,
                   alpha=alpha, solver=solver, score_metric=score_metric,
                   random_state=random_state, callback=callback,
-                  fit_intercept=True)
+                  fit_intercept=fit_intercept)
         assert(repr(glm))
 
         glm.fit(X_train, y_train)
