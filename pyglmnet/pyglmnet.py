@@ -709,11 +709,10 @@ class GLM(BaseEstimator):
 
                 # Add grad and hess of regularization term
                 if self.Tau is None:
-                    if k > 0:
-                        gk_reg = beta[k - 1] if fit_intercept else beta[k]
-                        hk_reg = 1.0
-                    else:
+                    if k == 0 and fit_intercept:
                         gk_reg, hk_reg = 0.0, 0.0
+                    else:
+                        gk_reg, hk_reg = beta[k], 1.0
                 else:
                     InvCov = np.dot(self.Tau.T, self.Tau)
                     if fit_intercept:
@@ -722,8 +721,8 @@ class GLM(BaseEstimator):
                     else:
                         gk_reg = np.sum(InvCov[k, :] * beta)
                         hk_reg = InvCov[k, k]
-                gk += np.ravel([reg_scale * gk_reg if k > 0 else 0.0])
-                hk += np.ravel([reg_scale * hk_reg if k > 0 else 0.0])
+                gk += reg_scale * gk_reg
+                hk += reg_scale * hk_reg
 
                 # Update parameters, z
                 update = 1. / hk * gk
