@@ -201,7 +201,8 @@ def test_glmnet(distr, reg_lambda):
         glm = GLM(distr, learning_rate=learning_rate,
                   reg_lambda=reg_lambda, tol=1e-3, max_iter=5000,
                   alpha=alpha, solver=solver, score_metric=score_metric,
-                  random_state=random_state, callback=callback)
+                  random_state=random_state, callback=callback,
+                  fit_intercept=True)
         assert(repr(glm))
 
         glm.fit(X_train, y_train)
@@ -477,6 +478,9 @@ def test_api_input():
 
     with pytest.raises(ValueError, match="solver must be one of"):
         glm.fit(X, y)
+
+    with pytest.raises(ValueError, match="fit_intercept must be"):
+        glm = GLM(distr='gaussian', fit_intercept='blah')
 
     glm = GLM(distr='gaussian', max_iter=2)
     with pytest.warns(UserWarning, match='Reached max number of iterat'):
