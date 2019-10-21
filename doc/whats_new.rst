@@ -22,6 +22,7 @@ Changelog
     - Add `n_iter_` attribute to :class:`pyglmnet.GLM` by `Mainak Jas`_, `Olivier Pieters`_, `Peter Foley`_ and `Chris Rogers`_
     - Add option to fit intercept or not with a `fit_intercept` boolean by `Drew Harris`_, `Mainak Jas`_ and `Pavan Ramkumar`_
 
+
 BUG
 ~~~
 
@@ -29,7 +30,7 @@ BUG
     - Fixed incorrect usage of the random_state parameter by `Giovanni De Toni`_.
     - Fixed incorrect proximal operator for group lasso by `Yu Umegaki`_.
     - Changed stopping criteria for convergence (a threshold on the change in objective value) which
-      stopped too early. The new criteria is a threshold on the norm of the gradient, by `Pavan Ramkumar`_.
+      stopped too early. The new criteria is a threshold on the change in norm of the beta, by `Pavan Ramkumar`_.
     - Fixed `group` parameter not being passed for Group Lasso by `Beibin Li`_.
     - Fix URL paths when running on Windows by `Scott Otterson`_.
     - Made temporary file handling OS independent and usable on a cluster by `Scott Otterson`_.
