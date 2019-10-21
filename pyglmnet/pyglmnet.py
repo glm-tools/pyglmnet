@@ -2,10 +2,14 @@
 
 import warnings
 from copy import deepcopy
+from functools import partial
 
 import numpy as np
+
+from scipy import optimize
 from scipy.special import expit
 from scipy.stats import norm
+
 from .utils import logger, set_log_level, _check_params
 from .base import BaseEstimator, is_classifier, check_version
 
@@ -468,9 +472,10 @@ class GLM(BaseEstimator):
         'batch-gradient' (vanilla batch gradient descent)
         'cdfast' (Newton coordinate gradient descent).
         default: 'batch-gradient'
-    learning_rate: float
-        learning rate for gradient descent.
-        default: 2e-1
+    learning_rate : float | 'auto'
+        learning rate for gradient descent. If "auto", line
+        search is performed using scipy.optimize.line_search.
+        default: "auto"
     max_iter: int
         maximum iterations for the model.
         default: 1000
@@ -532,7 +537,7 @@ class GLM(BaseEstimator):
                  Tau=None, group=None,
                  reg_lambda=0.1,
                  solver='batch-gradient',
-                 learning_rate=2e-1, max_iter=1000,
+                 learning_rate='auto', max_iter=1000,
                  tol=1e-3, eta=2.0, score_metric='deviance',
                  fit_intercept=True,
                  random_state=0, callback=None, verbose=False):
@@ -810,6 +815,8 @@ class GLM(BaseEstimator):
             ActiveSet = np.ones_like(beta)
 
         # Iterative updates
+        L = [_loss(self.distr, alpha, self.Tau, reg_lambda,
+                   X, y, self.eta, self.group, beta, self.fit_intercept)]
         for t in range(0, self.max_iter):
             self.n_iter_ += 1
 
@@ -823,7 +830,21 @@ class GLM(BaseEstimator):
                     msg = ('\tConverged in {0:d} iterations'.format(t))
                     logger.info(msg)
                     break
-                beta = beta - self.learning_rate * grad
+
+                if self.learning_rate == 'auto':
+                    func = partial(_loss, self.distr, alpha, self.Tau,
+                                   reg_lambda, X, y, self.eta, self.group,
+                                   fit_intercept=self.fit_intercept)
+                    fprime = partial(_grad_L2loss, self.distr, alpha, self.Tau,
+                                     reg_lambda, X, y, self.eta,
+                                     fit_intercept=self.fit_intercept)
+                    step_size, _, _, _, _, _ = optimize.linesearch.line_search(
+                        func, fprime, beta, -grad, grad, L, c1=1e-4)
+                    if step_size is None:
+                        step_size = 1e-4
+                else:
+                    step_size = self.learning_rate
+                beta = beta - step_size * grad
 
             elif self.solver == 'cdfast':
                 beta_old = deepcopy(beta)
@@ -1116,7 +1137,7 @@ class GLMCV(object):
                  Tau=None, group=None,
                  reg_lambda=None, cv=10,
                  solver='batch-gradient',
-                 learning_rate=2e-1, max_iter=1000,
+                 learning_rate='auto', max_iter=1000,
                  tol=1e-3, eta=2.0, score_metric='deviance',
                  fit_intercept=True,
                  random_state=0, verbose=False):
