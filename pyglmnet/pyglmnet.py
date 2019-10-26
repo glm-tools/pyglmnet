@@ -477,7 +477,7 @@ class GLM(BaseEstimator):
     tol: float
         convergence threshold or stopping criteria.
         Optimization loop will stop when norm(gradient) is below the threshold.
-        default: 1e-3
+        default: 1e-6
     eta: float
         a threshold parameter that linearizes the exp() function above eta.
         default: 2.0
@@ -918,7 +918,7 @@ class GLM(BaseEstimator):
         Raises error otherwise.
 
         """
-        if self.distr != 'binomial':
+        if self.distr not in ['binomial', 'probit']:
             raise ValueError('This is only applicable for \
                               the binomial distribution.')
 
@@ -985,7 +985,7 @@ class GLM(BaseEstimator):
 
         y = np.asarray(y).ravel()
 
-        if self.distr == 'binomial' and self.score_metric != 'accuracy':
+        if self.distr in ['binomial', 'probit'] and self.score_metric != 'accuracy':
             yhat = self.predict_proba(X)
         else:
             yhat = self.predict(X)
@@ -1072,7 +1072,7 @@ class GLMCV(object):
     tol: float
         convergence threshold or stopping criteria.
         Optimization loop will stop when norm(gradient) is below the threshold.
-        default: 1e-3
+        default: 1e-6
     eta: float
         a threshold parameter that linearizes the exp() function above eta.
         default: 2.0
