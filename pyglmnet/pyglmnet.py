@@ -985,7 +985,8 @@ class GLM(BaseEstimator):
 
         y = np.asarray(y).ravel()
 
-        if self.distr in ['binomial', 'probit'] and self.score_metric != 'accuracy':
+        if self.distr in ['binomial', 'probit'] and \
+           self.score_metric != 'accuracy':
             yhat = self.predict_proba(X)
         else:
             yhat = self.predict(X)
