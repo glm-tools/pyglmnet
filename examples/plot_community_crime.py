@@ -53,7 +53,7 @@ y_test_hat = glm.predict(X_test)
 print("test set pseudo $R^2$ = %f" % glm.score(X_test, y_test))
 
 ########################################################
-# Now use plain grid search cv to compare
+# Now use GridSearchCV to compare
 
 import numpy as np # noqa
 from sklearn.model_selection import GridSearchCV # noqa
@@ -65,7 +65,8 @@ reg_lambda = np.logspace(np.log(0.5), np.log(0.01), 10,
                          base=np.exp(1))
 param_grid = [{'reg_lambda': reg_lambda}]
 
-glm = GLM(distr='gaussian', alpha=0.05, score_metric='pseudo_R2')
+glm = GLM(distr='gaussian', alpha=0.05, score_metric='pseudo_R2',
+          learning_rate=0.1)
 glmcv = GridSearchCV(glm, param_grid, cv=cv)
 glmcv.fit(X_train, y_train)
 
