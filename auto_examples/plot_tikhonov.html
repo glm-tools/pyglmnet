@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Tikhonov Regularization &mdash; pyglmnet 1.0.1 documentation</title>
+  <title>Tikhonov Regularization &mdash; pyglmnet 1.1 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../genindex.html"/>
         <link rel="search" title="Search" href="../search.html"/>
-    <link rel="top" title="pyglmnet 1.0.1 documentation" href="../index.html"/>
+    <link rel="top" title="pyglmnet 1.1 documentation" href="../index.html"/>
         <link rel="up" title="Examples Gallery" href="index.html"/>
         <link rel="next" title="API Documentation" href="../api.html"/>
         <link rel="prev" title="Community and Crime" href="plot_community_crime.html"/> 
@@ -67,7 +67,7 @@
             
             
               <div class="version">
-                1.0.1
+                1.1
               </div>
             
           
@@ -100,11 +100,9 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../api.html">API Documentation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../developers.html">Developer Documentation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../requests.html">Requests for pull requests</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html">Developer Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../resources.html">Resources</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../whats_new.html">Current</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../whats_new.html#version-0-1">Version 0.1</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../whats_new.html">Release notes</a></li>
 </ul>
 
             
@@ -151,56 +149,2722 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="tikhonov-regularization">
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p>Click <a class="reference internal" href="#sphx-glr-download-auto-examples-plot-tikhonov-py"><span class="std std-ref">here</span></a> to download the full example code</p>
+</div>
+<div class="sphx-glr-example-title section" id="tikhonov-regularization">
 <span id="sphx-glr-auto-examples-plot-tikhonov-py"></span><h1>Tikhonov Regularization<a class="headerlink" href="#tikhonov-regularization" title="Permalink to this headline">¶</a></h1>
 <p>Tikhonov regularization is a generalized form of L2-regularization. It allows
-us to articulate our prior knowlege about correlations between different predictors
-with a multivariate Gaussian prior. Here, we demonstrate how pyglmnet&#8217;s Tikhonov
-regularizer can be used to estimate spatiotemporal receptive fields (RFs) from
-neural data.</p>
+us to articulate our prior knowlege about correlations between
+different predictors with a multivariate Gaussian prior. Here, we demonstrate
+how pyglmnet’s Tikhonov regularizer can be used to estimate spatiotemporal
+receptive fields (RFs) from neural data.</p>
 <p>Neurons in many brain areas, including the frontal eye fields (FEF) have RFs,
 defined as regions in the visual field where visual stimuli are most likely
 to result in spiking activity.</p>
-<p>These spatial RFs need not be static, they can vary in time in a systematic way.
-We want to characterize how such spatiotemporal RFs (STRFs) remap from one
-fixation to the next. Remapping is a phenomenon where the RF of a neuron shifts
-to process visual information from the subsequent fixation, prior to the onset
-of the saccade. The dynamics of this shift from the &#8220;current&#8221; to the &#8220;future&#8221;
-RF is an active area of research.</p>
-<p>With Tikhonov regularization, we can specify a prior covariance matrix to articulate
-our belief that parameters encoding neighboring points in space and time are
-correlated.</p>
+<p>These spatial RFs need not be static, they can vary in time in a
+systematic way. We want to characterize how such spatiotemporal RFs (STRFs)
+remap from one fixation to the next. Remapping is a phenomenon where
+the RF of a neuron shifts to process visual information from the subsequent
+fixation, prior to the onset of the saccade. The dynamics of this shift
+from the “current” to the “future” RF is an active area of research.</p>
+<p>With Tikhonov regularization, we can specify a prior covariance matrix
+to articulate our belief that parameters encoding neighboring points
+in space and time are correlated.</p>
 <p>The unpublished data are courtesy of Daniel Wood and Mark Segraves,
 Department of Neurobiology, Northwestern University.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="c1"># Author: Pavan Ramkumar &lt;pavan.ramkumar@gmail.com&gt;</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Author: Pavan Ramkumar &lt;pavan.ramkumar@gmail.com&gt;</span>
 <span class="c1"># License: MIT</span>
 </pre></div>
 </div>
 <p>Imports</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os.path</span> <span class="kn">as</span> <span class="nn">op</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="kn">as</span> <span class="nn">pd</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os.path</span> <span class="k">as</span> <span class="nn">op</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 
-<span class="kn">from</span> <span class="nn">pyglmnet</span> <span class="kn">import</span> <span class="n">GLMCV</span>
-<span class="kn">from</span> <span class="nn">spykes.strf</span> <span class="kn">import</span> <span class="n">STRF</span>
+<span class="kn">from</span> <span class="nn">pyglmnet</span> <span class="k">import</span> <span class="n">GLMCV</span>
+<span class="kn">from</span> <span class="nn">spykes.ml.strf</span> <span class="k">import</span> <span class="n">STRF</span>
 
-<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">tempfile</span> <span class="k">import</span> <span class="n">TemporaryDirectory</span>
 </pre></div>
 </div>
 <p>Download and fetch data files</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pyglmnet.datasets</span> <span class="kn">import</span> <span class="n">fetch_tikhonov_data</span>
-<span class="n">dpath</span> <span class="o">=</span> <span class="n">fetch_tikhonov_data</span><span class="p">(</span><span class="n">dpath</span><span class="o">=</span><span class="s1">&#39;/tmp/glm-tools&#39;</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pyglmnet.datasets</span> <span class="k">import</span> <span class="n">fetch_tikhonov_data</span>
 
-<span class="n">fixations_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">op</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dpath</span><span class="p">,</span> <span class="s1">&#39;fixations.csv&#39;</span><span class="p">))</span>
-<span class="n">probes_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">op</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dpath</span><span class="p">,</span> <span class="s1">&#39;probes.csv&#39;</span><span class="p">))</span>
-<span class="n">probes_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">op</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dpath</span><span class="p">,</span> <span class="s1">&#39;probes.csv&#39;</span><span class="p">))</span>
-<span class="n">spikes_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">op</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dpath</span><span class="p">,</span> <span class="s1">&#39;spiketimes.csv&#39;</span><span class="p">))</span>
+<span class="k">with</span> <span class="n">TemporaryDirectory</span><span class="p">(</span><span class="n">prefix</span><span class="o">=</span><span class="s2">&quot;tmp_glm-tools&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">temp_dir</span><span class="p">:</span>
+    <span class="n">dpath</span> <span class="o">=</span> <span class="n">fetch_tikhonov_data</span><span class="p">(</span><span class="n">dpath</span><span class="o">=</span><span class="n">temp_dir</span><span class="p">)</span>
+    <span class="n">fixations_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">op</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dpath</span><span class="p">,</span> <span class="s1">&#39;fixations.csv&#39;</span><span class="p">))</span>
+    <span class="n">probes_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">op</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dpath</span><span class="p">,</span> <span class="s1">&#39;probes.csv&#39;</span><span class="p">))</span>
+    <span class="n">probes_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">op</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dpath</span><span class="p">,</span> <span class="s1">&#39;probes.csv&#39;</span><span class="p">))</span>
+    <span class="n">spikes_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">op</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dpath</span><span class="p">,</span> <span class="s1">&#39;spiketimes.csv&#39;</span><span class="p">))</span>
 
 <span class="n">spiketimes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">spikes_df</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
 </pre></div>
 </div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>...0%, 0 MB
+...0%, 0 MB
+...0%, 0 MB
+...1%, 0 MB
+...1%, 0 MB
+...1%, 0 MB
+...2%, 0 MB
+...2%, 0 MB
+...3%, 0 MB
+...3%, 0 MB
+...3%, 0 MB
+...4%, 0 MB
+...4%, 0 MB
+...5%, 0 MB
+...5%, 0 MB
+...5%, 0 MB
+...6%, 0 MB
+...6%, 0 MB
+...6%, 0 MB
+...7%, 0 MB
+...7%, 0 MB
+...8%, 0 MB
+...8%, 0 MB
+...8%, 0 MB
+...9%, 0 MB
+...9%, 0 MB
+...10%, 0 MB
+...10%, 0 MB
+...10%, 0 MB
+...11%, 0 MB
+...11%, 0 MB
+...12%, 0 MB
+...12%, 0 MB
+...12%, 0 MB
+...13%, 0 MB
+...13%, 0 MB
+...13%, 0 MB
+...14%, 0 MB
+...14%, 0 MB
+...15%, 0 MB
+...15%, 0 MB
+...15%, 0 MB
+...16%, 0 MB
+...16%, 0 MB
+...17%, 0 MB
+...17%, 0 MB
+...17%, 0 MB
+...18%, 0 MB
+...18%, 0 MB
+...18%, 0 MB
+...19%, 0 MB
+...19%, 0 MB
+...20%, 0 MB
+...20%, 0 MB
+...20%, 0 MB
+...21%, 0 MB
+...21%, 0 MB
+...22%, 0 MB
+...22%, 0 MB
+...22%, 0 MB
+...23%, 0 MB
+...23%, 0 MB
+...24%, 0 MB
+...24%, 0 MB
+...24%, 0 MB
+...25%, 0 MB
+...25%, 0 MB
+...25%, 0 MB
+...26%, 0 MB
+...26%, 0 MB
+...27%, 0 MB
+...27%, 0 MB
+...27%, 0 MB
+...28%, 0 MB
+...28%, 0 MB
+...29%, 0 MB
+...29%, 0 MB
+...29%, 0 MB
+...30%, 0 MB
+...30%, 0 MB
+...30%, 0 MB
+...31%, 0 MB
+...31%, 0 MB
+...32%, 0 MB
+...32%, 0 MB
+...32%, 0 MB
+...33%, 0 MB
+...33%, 0 MB
+...34%, 0 MB
+...34%, 0 MB
+...34%, 0 MB
+...35%, 0 MB
+...35%, 0 MB
+...36%, 0 MB
+...36%, 0 MB
+...36%, 0 MB
+...37%, 0 MB
+...37%, 0 MB
+...37%, 0 MB
+...38%, 0 MB
+...38%, 0 MB
+...39%, 0 MB
+...39%, 0 MB
+...39%, 0 MB
+...40%, 0 MB
+...40%, 0 MB
+...41%, 0 MB
+...41%, 0 MB
+...41%, 0 MB
+...42%, 0 MB
+...42%, 0 MB
+...42%, 0 MB
+...43%, 0 MB
+...43%, 0 MB
+...44%, 0 MB
+...44%, 0 MB
+...44%, 0 MB
+...45%, 0 MB
+...45%, 0 MB
+...46%, 0 MB
+...46%, 0 MB
+...46%, 0 MB
+...47%, 0 MB
+...47%, 0 MB
+...48%, 0 MB
+...48%, 0 MB
+...48%, 0 MB
+...49%, 0 MB
+...49%, 1 MB
+...49%, 1 MB
+...50%, 1 MB
+...50%, 1 MB
+...51%, 1 MB
+...51%, 1 MB
+...51%, 1 MB
+...52%, 1 MB
+...52%, 1 MB
+...53%, 1 MB
+...53%, 1 MB
+...53%, 1 MB
+...54%, 1 MB
+...54%, 1 MB
+...54%, 1 MB
+...55%, 1 MB
+...55%, 1 MB
+...56%, 1 MB
+...56%, 1 MB
+...56%, 1 MB
+...57%, 1 MB
+...57%, 1 MB
+...58%, 1 MB
+...58%, 1 MB
+...58%, 1 MB
+...59%, 1 MB
+...59%, 1 MB
+...60%, 1 MB
+...60%, 1 MB
+...60%, 1 MB
+...61%, 1 MB
+...61%, 1 MB
+...61%, 1 MB
+...62%, 1 MB
+...62%, 1 MB
+...63%, 1 MB
+...63%, 1 MB
+...63%, 1 MB
+...64%, 1 MB
+...64%, 1 MB
+...65%, 1 MB
+...65%, 1 MB
+...65%, 1 MB
+...66%, 1 MB
+...66%, 1 MB
+...66%, 1 MB
+...67%, 1 MB
+...67%, 1 MB
+...68%, 1 MB
+...68%, 1 MB
+...68%, 1 MB
+...69%, 1 MB
+...69%, 1 MB
+...70%, 1 MB
+...70%, 1 MB
+...70%, 1 MB
+...71%, 1 MB
+...71%, 1 MB
+...72%, 1 MB
+...72%, 1 MB
+...72%, 1 MB
+...73%, 1 MB
+...73%, 1 MB
+...73%, 1 MB
+...74%, 1 MB
+...74%, 1 MB
+...75%, 1 MB
+...75%, 1 MB
+...75%, 1 MB
+...76%, 1 MB
+...76%, 1 MB
+...77%, 1 MB
+...77%, 1 MB
+...77%, 1 MB
+...78%, 1 MB
+...78%, 1 MB
+...79%, 1 MB
+...79%, 1 MB
+...79%, 1 MB
+...80%, 1 MB
+...80%, 1 MB
+...80%, 1 MB
+...81%, 1 MB
+...81%, 1 MB
+...82%, 1 MB
+...82%, 1 MB
+...82%, 1 MB
+...83%, 1 MB
+...83%, 1 MB
+...84%, 1 MB
+...84%, 1 MB
+...84%, 1 MB
+...85%, 1 MB
+...85%, 1 MB
+...85%, 1 MB
+...86%, 1 MB
+...86%, 1 MB
+...87%, 1 MB
+...87%, 1 MB
+...87%, 1 MB
+...88%, 1 MB
+...88%, 1 MB
+...89%, 1 MB
+...89%, 1 MB
+...89%, 1 MB
+...90%, 1 MB
+...90%, 1 MB
+...91%, 1 MB
+...91%, 1 MB
+...91%, 1 MB
+...92%, 1 MB
+...92%, 1 MB
+...92%, 1 MB
+...93%, 1 MB
+...93%, 1 MB
+...94%, 1 MB
+...94%, 1 MB
+...94%, 1 MB
+...95%, 1 MB
+...95%, 1 MB
+...96%, 1 MB
+...96%, 1 MB
+...96%, 1 MB
+...97%, 1 MB
+...97%, 1 MB
+...97%, 1 MB
+...98%, 1 MB
+...98%, 1 MB
+...99%, 2 MB
+...99%, 2 MB
+...99%, 2 MB
+
+...100%, 2 MB
+
+...0%, 0 MB
+...0%, 0 MB
+...0%, 0 MB
+...0%, 0 MB
+...0%, 0 MB
+...0%, 0 MB
+...0%, 0 MB
+...0%, 0 MB
+...1%, 0 MB
+...1%, 0 MB
+...1%, 0 MB
+...1%, 0 MB
+...1%, 0 MB
+...1%, 0 MB
+...1%, 0 MB
+...1%, 0 MB
+...2%, 0 MB
+...2%, 0 MB
+...2%, 0 MB
+...2%, 0 MB
+...2%, 0 MB
+...2%, 0 MB
+...2%, 0 MB
+...3%, 0 MB
+...3%, 0 MB
+...3%, 0 MB
+...3%, 0 MB
+...3%, 0 MB
+...3%, 0 MB
+...3%, 0 MB
+...3%, 0 MB
+...4%, 0 MB
+...4%, 0 MB
+...4%, 0 MB
+...4%, 0 MB
+...4%, 0 MB
+...4%, 0 MB
+...4%, 0 MB
+...5%, 0 MB
+...5%, 0 MB
+...5%, 0 MB
+...5%, 0 MB
+...5%, 0 MB
+...5%, 0 MB
+...5%, 0 MB
+...5%, 0 MB
+...6%, 0 MB
+...6%, 0 MB
+...6%, 0 MB
+...6%, 0 MB
+...6%, 0 MB
+...6%, 0 MB
+...6%, 0 MB
+...7%, 0 MB
+...7%, 0 MB
+...7%, 0 MB
+...7%, 0 MB
+...7%, 0 MB
+...7%, 0 MB
+...7%, 0 MB
+...7%, 0 MB
+...8%, 0 MB
+...8%, 0 MB
+...8%, 0 MB
+...8%, 0 MB
+...8%, 0 MB
+...8%, 0 MB
+...8%, 0 MB
+...9%, 0 MB
+...9%, 0 MB
+...9%, 0 MB
+...9%, 0 MB
+...9%, 0 MB
+...9%, 0 MB
+...9%, 0 MB
+...9%, 0 MB
+...10%, 0 MB
+...10%, 0 MB
+...10%, 0 MB
+...10%, 0 MB
+...10%, 0 MB
+...10%, 0 MB
+...10%, 0 MB
+...11%, 0 MB
+...11%, 0 MB
+...11%, 0 MB
+...11%, 0 MB
+...11%, 0 MB
+...11%, 0 MB
+...11%, 0 MB
+...11%, 0 MB
+...12%, 0 MB
+...12%, 0 MB
+...12%, 0 MB
+...12%, 0 MB
+...12%, 0 MB
+...12%, 0 MB
+...12%, 0 MB
+...13%, 0 MB
+...13%, 0 MB
+...13%, 0 MB
+...13%, 0 MB
+...13%, 0 MB
+...13%, 0 MB
+...13%, 0 MB
+...13%, 0 MB
+...14%, 0 MB
+...14%, 0 MB
+...14%, 0 MB
+...14%, 0 MB
+...14%, 0 MB
+...14%, 0 MB
+...14%, 0 MB
+...15%, 0 MB
+...15%, 0 MB
+...15%, 0 MB
+...15%, 0 MB
+...15%, 0 MB
+...15%, 0 MB
+...15%, 0 MB
+...15%, 0 MB
+...16%, 0 MB
+...16%, 0 MB
+...16%, 0 MB
+...16%, 0 MB
+...16%, 0 MB
+...16%, 0 MB
+...16%, 0 MB
+...17%, 1 MB
+...17%, 1 MB
+...17%, 1 MB
+...17%, 1 MB
+...17%, 1 MB
+...17%, 1 MB
+...17%, 1 MB
+...17%, 1 MB
+...18%, 1 MB
+...18%, 1 MB
+...18%, 1 MB
+...18%, 1 MB
+...18%, 1 MB
+...18%, 1 MB
+...18%, 1 MB
+...19%, 1 MB
+...19%, 1 MB
+...19%, 1 MB
+...19%, 1 MB
+...19%, 1 MB
+...19%, 1 MB
+...19%, 1 MB
+...19%, 1 MB
+...20%, 1 MB
+...20%, 1 MB
+...20%, 1 MB
+...20%, 1 MB
+...20%, 1 MB
+...20%, 1 MB
+...20%, 1 MB
+...21%, 1 MB
+...21%, 1 MB
+...21%, 1 MB
+...21%, 1 MB
+...21%, 1 MB
+...21%, 1 MB
+...21%, 1 MB
+...21%, 1 MB
+...22%, 1 MB
+...22%, 1 MB
+...22%, 1 MB
+...22%, 1 MB
+...22%, 1 MB
+...22%, 1 MB
+...22%, 1 MB
+...23%, 1 MB
+...23%, 1 MB
+...23%, 1 MB
+...23%, 1 MB
+...23%, 1 MB
+...23%, 1 MB
+...23%, 1 MB
+...23%, 1 MB
+...24%, 1 MB
+...24%, 1 MB
+...24%, 1 MB
+...24%, 1 MB
+...24%, 1 MB
+...24%, 1 MB
+...24%, 1 MB
+...25%, 1 MB
+...25%, 1 MB
+...25%, 1 MB
+...25%, 1 MB
+...25%, 1 MB
+...25%, 1 MB
+...25%, 1 MB
+...25%, 1 MB
+...26%, 1 MB
+...26%, 1 MB
+...26%, 1 MB
+...26%, 1 MB
+...26%, 1 MB
+...26%, 1 MB
+...26%, 1 MB
+...27%, 1 MB
+...27%, 1 MB
+...27%, 1 MB
+...27%, 1 MB
+...27%, 1 MB
+...27%, 1 MB
+...27%, 1 MB
+...27%, 1 MB
+...28%, 1 MB
+...28%, 1 MB
+...28%, 1 MB
+...28%, 1 MB
+...28%, 1 MB
+...28%, 1 MB
+...28%, 1 MB
+...29%, 1 MB
+...29%, 1 MB
+...29%, 1 MB
+...29%, 1 MB
+...29%, 1 MB
+...29%, 1 MB
+...29%, 1 MB
+...29%, 1 MB
+...30%, 1 MB
+...30%, 1 MB
+...30%, 1 MB
+...30%, 1 MB
+...30%, 1 MB
+...30%, 1 MB
+...30%, 1 MB
+...31%, 1 MB
+...31%, 1 MB
+...31%, 1 MB
+...31%, 1 MB
+...31%, 1 MB
+...31%, 1 MB
+...31%, 1 MB
+...31%, 1 MB
+...32%, 1 MB
+...32%, 1 MB
+...32%, 1 MB
+...32%, 1 MB
+...32%, 1 MB
+...32%, 1 MB
+...32%, 1 MB
+...33%, 1 MB
+...33%, 1 MB
+...33%, 1 MB
+...33%, 1 MB
+...33%, 1 MB
+...33%, 1 MB
+...33%, 1 MB
+...33%, 1 MB
+...34%, 2 MB
+...34%, 2 MB
+...34%, 2 MB
+...34%, 2 MB
+...34%, 2 MB
+...34%, 2 MB
+...34%, 2 MB
+...35%, 2 MB
+...35%, 2 MB
+...35%, 2 MB
+...35%, 2 MB
+...35%, 2 MB
+...35%, 2 MB
+...35%, 2 MB
+...35%, 2 MB
+...36%, 2 MB
+...36%, 2 MB
+...36%, 2 MB
+...36%, 2 MB
+...36%, 2 MB
+...36%, 2 MB
+...36%, 2 MB
+...36%, 2 MB
+...37%, 2 MB
+...37%, 2 MB
+...37%, 2 MB
+...37%, 2 MB
+...37%, 2 MB
+...37%, 2 MB
+...37%, 2 MB
+...38%, 2 MB
+...38%, 2 MB
+...38%, 2 MB
+...38%, 2 MB
+...38%, 2 MB
+...38%, 2 MB
+...38%, 2 MB
+...38%, 2 MB
+...39%, 2 MB
+...39%, 2 MB
+...39%, 2 MB
+...39%, 2 MB
+...39%, 2 MB
+...39%, 2 MB
+...39%, 2 MB
+...40%, 2 MB
+...40%, 2 MB
+...40%, 2 MB
+...40%, 2 MB
+...40%, 2 MB
+...40%, 2 MB
+...40%, 2 MB
+...40%, 2 MB
+...41%, 2 MB
+...41%, 2 MB
+...41%, 2 MB
+...41%, 2 MB
+...41%, 2 MB
+...41%, 2 MB
+...41%, 2 MB
+...42%, 2 MB
+...42%, 2 MB
+...42%, 2 MB
+...42%, 2 MB
+...42%, 2 MB
+...42%, 2 MB
+...42%, 2 MB
+...42%, 2 MB
+...43%, 2 MB
+...43%, 2 MB
+...43%, 2 MB
+...43%, 2 MB
+...43%, 2 MB
+...43%, 2 MB
+...43%, 2 MB
+...44%, 2 MB
+...44%, 2 MB
+...44%, 2 MB
+...44%, 2 MB
+...44%, 2 MB
+...44%, 2 MB
+...44%, 2 MB
+...44%, 2 MB
+...45%, 2 MB
+...45%, 2 MB
+...45%, 2 MB
+...45%, 2 MB
+...45%, 2 MB
+...45%, 2 MB
+...45%, 2 MB
+...46%, 2 MB
+...46%, 2 MB
+...46%, 2 MB
+...46%, 2 MB
+...46%, 2 MB
+...46%, 2 MB
+...46%, 2 MB
+...46%, 2 MB
+...47%, 2 MB
+...47%, 2 MB
+...47%, 2 MB
+...47%, 2 MB
+...47%, 2 MB
+...47%, 2 MB
+...47%, 2 MB
+...48%, 2 MB
+...48%, 2 MB
+...48%, 2 MB
+...48%, 2 MB
+...48%, 2 MB
+...48%, 2 MB
+...48%, 2 MB
+...48%, 2 MB
+...49%, 2 MB
+...49%, 2 MB
+...49%, 2 MB
+...49%, 2 MB
+...49%, 2 MB
+...49%, 2 MB
+...49%, 2 MB
+...50%, 2 MB
+...50%, 2 MB
+...50%, 2 MB
+...50%, 2 MB
+...50%, 2 MB
+...50%, 2 MB
+...50%, 2 MB
+...50%, 2 MB
+...51%, 3 MB
+...51%, 3 MB
+...51%, 3 MB
+...51%, 3 MB
+...51%, 3 MB
+...51%, 3 MB
+...51%, 3 MB
+...52%, 3 MB
+...52%, 3 MB
+...52%, 3 MB
+...52%, 3 MB
+...52%, 3 MB
+...52%, 3 MB
+...52%, 3 MB
+...52%, 3 MB
+...53%, 3 MB
+...53%, 3 MB
+...53%, 3 MB
+...53%, 3 MB
+...53%, 3 MB
+...53%, 3 MB
+...53%, 3 MB
+...54%, 3 MB
+...54%, 3 MB
+...54%, 3 MB
+...54%, 3 MB
+...54%, 3 MB
+...54%, 3 MB
+...54%, 3 MB
+...54%, 3 MB
+...55%, 3 MB
+...55%, 3 MB
+...55%, 3 MB
+...55%, 3 MB
+...55%, 3 MB
+...55%, 3 MB
+...55%, 3 MB
+...56%, 3 MB
+...56%, 3 MB
+...56%, 3 MB
+...56%, 3 MB
+...56%, 3 MB
+...56%, 3 MB
+...56%, 3 MB
+...56%, 3 MB
+...57%, 3 MB
+...57%, 3 MB
+...57%, 3 MB
+...57%, 3 MB
+...57%, 3 MB
+...57%, 3 MB
+...57%, 3 MB
+...58%, 3 MB
+...58%, 3 MB
+...58%, 3 MB
+...58%, 3 MB
+...58%, 3 MB
+...58%, 3 MB
+...58%, 3 MB
+...58%, 3 MB
+...59%, 3 MB
+...59%, 3 MB
+...59%, 3 MB
+...59%, 3 MB
+...59%, 3 MB
+...59%, 3 MB
+...59%, 3 MB
+...60%, 3 MB
+...60%, 3 MB
+...60%, 3 MB
+...60%, 3 MB
+...60%, 3 MB
+...60%, 3 MB
+...60%, 3 MB
+...60%, 3 MB
+...61%, 3 MB
+...61%, 3 MB
+...61%, 3 MB
+...61%, 3 MB
+...61%, 3 MB
+...61%, 3 MB
+...61%, 3 MB
+...62%, 3 MB
+...62%, 3 MB
+...62%, 3 MB
+...62%, 3 MB
+...62%, 3 MB
+...62%, 3 MB
+...62%, 3 MB
+...62%, 3 MB
+...63%, 3 MB
+...63%, 3 MB
+...63%, 3 MB
+...63%, 3 MB
+...63%, 3 MB
+...63%, 3 MB
+...63%, 3 MB
+...64%, 3 MB
+...64%, 3 MB
+...64%, 3 MB
+...64%, 3 MB
+...64%, 3 MB
+...64%, 3 MB
+...64%, 3 MB
+...64%, 3 MB
+...65%, 3 MB
+...65%, 3 MB
+...65%, 3 MB
+...65%, 3 MB
+...65%, 3 MB
+...65%, 3 MB
+...65%, 3 MB
+...66%, 3 MB
+...66%, 3 MB
+...66%, 3 MB
+...66%, 3 MB
+...66%, 3 MB
+...66%, 3 MB
+...66%, 3 MB
+...66%, 3 MB
+...67%, 3 MB
+...67%, 3 MB
+...67%, 3 MB
+...67%, 3 MB
+...67%, 3 MB
+...67%, 3 MB
+...67%, 3 MB
+...68%, 3 MB
+...68%, 4 MB
+...68%, 4 MB
+...68%, 4 MB
+...68%, 4 MB
+...68%, 4 MB
+...68%, 4 MB
+...68%, 4 MB
+...69%, 4 MB
+...69%, 4 MB
+...69%, 4 MB
+...69%, 4 MB
+...69%, 4 MB
+...69%, 4 MB
+...69%, 4 MB
+...70%, 4 MB
+...70%, 4 MB
+...70%, 4 MB
+...70%, 4 MB
+...70%, 4 MB
+...70%, 4 MB
+...70%, 4 MB
+...70%, 4 MB
+...71%, 4 MB
+...71%, 4 MB
+...71%, 4 MB
+...71%, 4 MB
+...71%, 4 MB
+...71%, 4 MB
+...71%, 4 MB
+...72%, 4 MB
+...72%, 4 MB
+...72%, 4 MB
+...72%, 4 MB
+...72%, 4 MB
+...72%, 4 MB
+...72%, 4 MB
+...72%, 4 MB
+...73%, 4 MB
+...73%, 4 MB
+...73%, 4 MB
+...73%, 4 MB
+...73%, 4 MB
+...73%, 4 MB
+...73%, 4 MB
+...73%, 4 MB
+...74%, 4 MB
+...74%, 4 MB
+...74%, 4 MB
+...74%, 4 MB
+...74%, 4 MB
+...74%, 4 MB
+...74%, 4 MB
+...75%, 4 MB
+...75%, 4 MB
+...75%, 4 MB
+...75%, 4 MB
+...75%, 4 MB
+...75%, 4 MB
+...75%, 4 MB
+...75%, 4 MB
+...76%, 4 MB
+...76%, 4 MB
+...76%, 4 MB
+...76%, 4 MB
+...76%, 4 MB
+...76%, 4 MB
+...76%, 4 MB
+...77%, 4 MB
+...77%, 4 MB
+...77%, 4 MB
+...77%, 4 MB
+...77%, 4 MB
+...77%, 4 MB
+...77%, 4 MB
+...77%, 4 MB
+...78%, 4 MB
+...78%, 4 MB
+...78%, 4 MB
+...78%, 4 MB
+...78%, 4 MB
+...78%, 4 MB
+...78%, 4 MB
+...79%, 4 MB
+...79%, 4 MB
+...79%, 4 MB
+...79%, 4 MB
+...79%, 4 MB
+...79%, 4 MB
+...79%, 4 MB
+...79%, 4 MB
+...80%, 4 MB
+...80%, 4 MB
+...80%, 4 MB
+...80%, 4 MB
+...80%, 4 MB
+...80%, 4 MB
+...80%, 4 MB
+...81%, 4 MB
+...81%, 4 MB
+...81%, 4 MB
+...81%, 4 MB
+...81%, 4 MB
+...81%, 4 MB
+...81%, 4 MB
+...81%, 4 MB
+...82%, 4 MB
+...82%, 4 MB
+...82%, 4 MB
+...82%, 4 MB
+...82%, 4 MB
+...82%, 4 MB
+...82%, 4 MB
+...83%, 4 MB
+...83%, 4 MB
+...83%, 4 MB
+...83%, 4 MB
+...83%, 4 MB
+...83%, 4 MB
+...83%, 4 MB
+...83%, 4 MB
+...84%, 4 MB
+...84%, 4 MB
+...84%, 4 MB
+...84%, 4 MB
+...84%, 4 MB
+...84%, 4 MB
+...84%, 4 MB
+...85%, 4 MB
+...85%, 5 MB
+...85%, 5 MB
+...85%, 5 MB
+...85%, 5 MB
+...85%, 5 MB
+...85%, 5 MB
+...85%, 5 MB
+...86%, 5 MB
+...86%, 5 MB
+...86%, 5 MB
+...86%, 5 MB
+...86%, 5 MB
+...86%, 5 MB
+...86%, 5 MB
+...87%, 5 MB
+...87%, 5 MB
+...87%, 5 MB
+...87%, 5 MB
+...87%, 5 MB
+...87%, 5 MB
+...87%, 5 MB
+...87%, 5 MB
+...88%, 5 MB
+...88%, 5 MB
+...88%, 5 MB
+...88%, 5 MB
+...88%, 5 MB
+...88%, 5 MB
+...88%, 5 MB
+...89%, 5 MB
+...89%, 5 MB
+...89%, 5 MB
+...89%, 5 MB
+...89%, 5 MB
+...89%, 5 MB
+...89%, 5 MB
+...89%, 5 MB
+...90%, 5 MB
+...90%, 5 MB
+...90%, 5 MB
+...90%, 5 MB
+...90%, 5 MB
+...90%, 5 MB
+...90%, 5 MB
+...91%, 5 MB
+...91%, 5 MB
+...91%, 5 MB
+...91%, 5 MB
+...91%, 5 MB
+...91%, 5 MB
+...91%, 5 MB
+...91%, 5 MB
+...92%, 5 MB
+...92%, 5 MB
+...92%, 5 MB
+...92%, 5 MB
+...92%, 5 MB
+...92%, 5 MB
+...92%, 5 MB
+...93%, 5 MB
+...93%, 5 MB
+...93%, 5 MB
+...93%, 5 MB
+...93%, 5 MB
+...93%, 5 MB
+...93%, 5 MB
+...93%, 5 MB
+...94%, 5 MB
+...94%, 5 MB
+...94%, 5 MB
+...94%, 5 MB
+...94%, 5 MB
+...94%, 5 MB
+...94%, 5 MB
+...95%, 5 MB
+...95%, 5 MB
+...95%, 5 MB
+...95%, 5 MB
+...95%, 5 MB
+...95%, 5 MB
+...95%, 5 MB
+...95%, 5 MB
+...96%, 5 MB
+...96%, 5 MB
+...96%, 5 MB
+...96%, 5 MB
+...96%, 5 MB
+...96%, 5 MB
+...96%, 5 MB
+...97%, 5 MB
+...97%, 5 MB
+...97%, 5 MB
+...97%, 5 MB
+...97%, 5 MB
+...97%, 5 MB
+...97%, 5 MB
+...97%, 5 MB
+...98%, 5 MB
+...98%, 5 MB
+...98%, 5 MB
+...98%, 5 MB
+...98%, 5 MB
+...98%, 5 MB
+...98%, 5 MB
+...99%, 5 MB
+...99%, 5 MB
+...99%, 5 MB
+...99%, 5 MB
+...99%, 5 MB
+...99%, 5 MB
+...99%, 5 MB
+...99%, 5 MB
+
+...100%, 5 MB
+
+...0%, 0 MB
+...0%, 0 MB
+...0%, 0 MB
+...0%, 0 MB
+...0%, 0 MB
+...0%, 0 MB
+...0%, 0 MB
+...0%, 0 MB
+...0%, 0 MB
+...0%, 0 MB
+...0%, 0 MB
+...0%, 0 MB
+...0%, 0 MB
+...0%, 0 MB
+...0%, 0 MB
+...0%, 0 MB
+...0%, 0 MB
+...1%, 0 MB
+...1%, 0 MB
+...1%, 0 MB
+...1%, 0 MB
+...1%, 0 MB
+...1%, 0 MB
+...1%, 0 MB
+...1%, 0 MB
+...1%, 0 MB
+...1%, 0 MB
+...1%, 0 MB
+...1%, 0 MB
+...1%, 0 MB
+...1%, 0 MB
+...1%, 0 MB
+...1%, 0 MB
+...2%, 0 MB
+...2%, 0 MB
+...2%, 0 MB
+...2%, 0 MB
+...2%, 0 MB
+...2%, 0 MB
+...2%, 0 MB
+...2%, 0 MB
+...2%, 0 MB
+...2%, 0 MB
+...2%, 0 MB
+...2%, 0 MB
+...2%, 0 MB
+...2%, 0 MB
+...2%, 0 MB
+...2%, 0 MB
+...2%, 0 MB
+...3%, 0 MB
+...3%, 0 MB
+...3%, 0 MB
+...3%, 0 MB
+...3%, 0 MB
+...3%, 0 MB
+...3%, 0 MB
+...3%, 0 MB
+...3%, 0 MB
+...3%, 0 MB
+...3%, 0 MB
+...3%, 0 MB
+...3%, 0 MB
+...3%, 0 MB
+...3%, 0 MB
+...3%, 0 MB
+...4%, 0 MB
+...4%, 0 MB
+...4%, 0 MB
+...4%, 0 MB
+...4%, 0 MB
+...4%, 0 MB
+...4%, 0 MB
+...4%, 0 MB
+...4%, 0 MB
+...4%, 0 MB
+...4%, 0 MB
+...4%, 0 MB
+...4%, 0 MB
+...4%, 0 MB
+...4%, 0 MB
+...4%, 0 MB
+...5%, 0 MB
+...5%, 0 MB
+...5%, 0 MB
+...5%, 0 MB
+...5%, 0 MB
+...5%, 0 MB
+...5%, 0 MB
+...5%, 0 MB
+...5%, 0 MB
+...5%, 0 MB
+...5%, 0 MB
+...5%, 0 MB
+...5%, 0 MB
+...5%, 0 MB
+...5%, 0 MB
+...5%, 0 MB
+...5%, 0 MB
+...6%, 0 MB
+...6%, 0 MB
+...6%, 0 MB
+...6%, 0 MB
+...6%, 0 MB
+...6%, 0 MB
+...6%, 0 MB
+...6%, 0 MB
+...6%, 0 MB
+...6%, 0 MB
+...6%, 0 MB
+...6%, 0 MB
+...6%, 0 MB
+...6%, 0 MB
+...6%, 0 MB
+...6%, 0 MB
+...7%, 0 MB
+...7%, 0 MB
+...7%, 0 MB
+...7%, 0 MB
+...7%, 0 MB
+...7%, 0 MB
+...7%, 0 MB
+...7%, 0 MB
+...7%, 0 MB
+...7%, 0 MB
+...7%, 0 MB
+...7%, 0 MB
+...7%, 0 MB
+...7%, 1 MB
+...7%, 1 MB
+...7%, 1 MB
+...8%, 1 MB
+...8%, 1 MB
+...8%, 1 MB
+...8%, 1 MB
+...8%, 1 MB
+...8%, 1 MB
+...8%, 1 MB
+...8%, 1 MB
+...8%, 1 MB
+...8%, 1 MB
+...8%, 1 MB
+...8%, 1 MB
+...8%, 1 MB
+...8%, 1 MB
+...8%, 1 MB
+...8%, 1 MB
+...8%, 1 MB
+...9%, 1 MB
+...9%, 1 MB
+...9%, 1 MB
+...9%, 1 MB
+...9%, 1 MB
+...9%, 1 MB
+...9%, 1 MB
+...9%, 1 MB
+...9%, 1 MB
+...9%, 1 MB
+...9%, 1 MB
+...9%, 1 MB
+...9%, 1 MB
+...9%, 1 MB
+...9%, 1 MB
+...9%, 1 MB
+...10%, 1 MB
+...10%, 1 MB
+...10%, 1 MB
+...10%, 1 MB
+...10%, 1 MB
+...10%, 1 MB
+...10%, 1 MB
+...10%, 1 MB
+...10%, 1 MB
+...10%, 1 MB
+...10%, 1 MB
+...10%, 1 MB
+...10%, 1 MB
+...10%, 1 MB
+...10%, 1 MB
+...10%, 1 MB
+...10%, 1 MB
+...11%, 1 MB
+...11%, 1 MB
+...11%, 1 MB
+...11%, 1 MB
+...11%, 1 MB
+...11%, 1 MB
+...11%, 1 MB
+...11%, 1 MB
+...11%, 1 MB
+...11%, 1 MB
+...11%, 1 MB
+...11%, 1 MB
+...11%, 1 MB
+...11%, 1 MB
+...11%, 1 MB
+...11%, 1 MB
+...12%, 1 MB
+...12%, 1 MB
+...12%, 1 MB
+...12%, 1 MB
+...12%, 1 MB
+...12%, 1 MB
+...12%, 1 MB
+...12%, 1 MB
+...12%, 1 MB
+...12%, 1 MB
+...12%, 1 MB
+...12%, 1 MB
+...12%, 1 MB
+...12%, 1 MB
+...12%, 1 MB
+...12%, 1 MB
+...13%, 1 MB
+...13%, 1 MB
+...13%, 1 MB
+...13%, 1 MB
+...13%, 1 MB
+...13%, 1 MB
+...13%, 1 MB
+...13%, 1 MB
+...13%, 1 MB
+...13%, 1 MB
+...13%, 1 MB
+...13%, 1 MB
+...13%, 1 MB
+...13%, 1 MB
+...13%, 1 MB
+...13%, 1 MB
+...13%, 1 MB
+...14%, 1 MB
+...14%, 1 MB
+...14%, 1 MB
+...14%, 1 MB
+...14%, 1 MB
+...14%, 1 MB
+...14%, 1 MB
+...14%, 1 MB
+...14%, 1 MB
+...14%, 1 MB
+...14%, 1 MB
+...14%, 1 MB
+...14%, 1 MB
+...14%, 1 MB
+...14%, 1 MB
+...14%, 1 MB
+...15%, 1 MB
+...15%, 1 MB
+...15%, 1 MB
+...15%, 1 MB
+...15%, 1 MB
+...15%, 1 MB
+...15%, 1 MB
+...15%, 1 MB
+...15%, 1 MB
+...15%, 1 MB
+...15%, 2 MB
+...15%, 2 MB
+...15%, 2 MB
+...15%, 2 MB
+...15%, 2 MB
+...15%, 2 MB
+...16%, 2 MB
+...16%, 2 MB
+...16%, 2 MB
+...16%, 2 MB
+...16%, 2 MB
+...16%, 2 MB
+...16%, 2 MB
+...16%, 2 MB
+...16%, 2 MB
+...16%, 2 MB
+...16%, 2 MB
+...16%, 2 MB
+...16%, 2 MB
+...16%, 2 MB
+...16%, 2 MB
+...16%, 2 MB
+...16%, 2 MB
+...17%, 2 MB
+...17%, 2 MB
+...17%, 2 MB
+...17%, 2 MB
+...17%, 2 MB
+...17%, 2 MB
+...17%, 2 MB
+...17%, 2 MB
+...17%, 2 MB
+...17%, 2 MB
+...17%, 2 MB
+...17%, 2 MB
+...17%, 2 MB
+...17%, 2 MB
+...17%, 2 MB
+...17%, 2 MB
+...18%, 2 MB
+...18%, 2 MB
+...18%, 2 MB
+...18%, 2 MB
+...18%, 2 MB
+...18%, 2 MB
+...18%, 2 MB
+...18%, 2 MB
+...18%, 2 MB
+...18%, 2 MB
+...18%, 2 MB
+...18%, 2 MB
+...18%, 2 MB
+...18%, 2 MB
+...18%, 2 MB
+...18%, 2 MB
+...18%, 2 MB
+...19%, 2 MB
+...19%, 2 MB
+...19%, 2 MB
+...19%, 2 MB
+...19%, 2 MB
+...19%, 2 MB
+...19%, 2 MB
+...19%, 2 MB
+...19%, 2 MB
+...19%, 2 MB
+...19%, 2 MB
+...19%, 2 MB
+...19%, 2 MB
+...19%, 2 MB
+...19%, 2 MB
+...19%, 2 MB
+...20%, 2 MB
+...20%, 2 MB
+...20%, 2 MB
+...20%, 2 MB
+...20%, 2 MB
+...20%, 2 MB
+...20%, 2 MB
+...20%, 2 MB
+...20%, 2 MB
+...20%, 2 MB
+...20%, 2 MB
+...20%, 2 MB
+...20%, 2 MB
+...20%, 2 MB
+...20%, 2 MB
+...20%, 2 MB
+...21%, 2 MB
+...21%, 2 MB
+...21%, 2 MB
+...21%, 2 MB
+...21%, 2 MB
+...21%, 2 MB
+...21%, 2 MB
+...21%, 2 MB
+...21%, 2 MB
+...21%, 2 MB
+...21%, 2 MB
+...21%, 2 MB
+...21%, 2 MB
+...21%, 2 MB
+...21%, 2 MB
+...21%, 2 MB
+...21%, 2 MB
+...22%, 2 MB
+...22%, 2 MB
+...22%, 2 MB
+...22%, 2 MB
+...22%, 2 MB
+...22%, 2 MB
+...22%, 2 MB
+...22%, 2 MB
+...22%, 2 MB
+...22%, 2 MB
+...22%, 2 MB
+...22%, 2 MB
+...22%, 2 MB
+...22%, 2 MB
+...22%, 2 MB
+...22%, 2 MB
+...23%, 2 MB
+...23%, 2 MB
+...23%, 2 MB
+...23%, 2 MB
+...23%, 2 MB
+...23%, 2 MB
+...23%, 2 MB
+...23%, 3 MB
+...23%, 3 MB
+...23%, 3 MB
+...23%, 3 MB
+...23%, 3 MB
+...23%, 3 MB
+...23%, 3 MB
+...23%, 3 MB
+...23%, 3 MB
+...24%, 3 MB
+...24%, 3 MB
+...24%, 3 MB
+...24%, 3 MB
+...24%, 3 MB
+...24%, 3 MB
+...24%, 3 MB
+...24%, 3 MB
+...24%, 3 MB
+...24%, 3 MB
+...24%, 3 MB
+...24%, 3 MB
+...24%, 3 MB
+...24%, 3 MB
+...24%, 3 MB
+...24%, 3 MB
+...24%, 3 MB
+...25%, 3 MB
+...25%, 3 MB
+...25%, 3 MB
+...25%, 3 MB
+...25%, 3 MB
+...25%, 3 MB
+...25%, 3 MB
+...25%, 3 MB
+...25%, 3 MB
+...25%, 3 MB
+...25%, 3 MB
+...25%, 3 MB
+...25%, 3 MB
+...25%, 3 MB
+...25%, 3 MB
+...25%, 3 MB
+...26%, 3 MB
+...26%, 3 MB
+...26%, 3 MB
+...26%, 3 MB
+...26%, 3 MB
+...26%, 3 MB
+...26%, 3 MB
+...26%, 3 MB
+...26%, 3 MB
+...26%, 3 MB
+...26%, 3 MB
+...26%, 3 MB
+...26%, 3 MB
+...26%, 3 MB
+...26%, 3 MB
+...26%, 3 MB
+...26%, 3 MB
+...27%, 3 MB
+...27%, 3 MB
+...27%, 3 MB
+...27%, 3 MB
+...27%, 3 MB
+...27%, 3 MB
+...27%, 3 MB
+...27%, 3 MB
+...27%, 3 MB
+...27%, 3 MB
+...27%, 3 MB
+...27%, 3 MB
+...27%, 3 MB
+...27%, 3 MB
+...27%, 3 MB
+...27%, 3 MB
+...28%, 3 MB
+...28%, 3 MB
+...28%, 3 MB
+...28%, 3 MB
+...28%, 3 MB
+...28%, 3 MB
+...28%, 3 MB
+...28%, 3 MB
+...28%, 3 MB
+...28%, 3 MB
+...28%, 3 MB
+...28%, 3 MB
+...28%, 3 MB
+...28%, 3 MB
+...28%, 3 MB
+...28%, 3 MB
+...29%, 3 MB
+...29%, 3 MB
+...29%, 3 MB
+...29%, 3 MB
+...29%, 3 MB
+...29%, 3 MB
+...29%, 3 MB
+...29%, 3 MB
+...29%, 3 MB
+...29%, 3 MB
+...29%, 3 MB
+...29%, 3 MB
+...29%, 3 MB
+...29%, 3 MB
+...29%, 3 MB
+...29%, 3 MB
+...29%, 3 MB
+...30%, 3 MB
+...30%, 3 MB
+...30%, 3 MB
+...30%, 3 MB
+...30%, 3 MB
+...30%, 3 MB
+...30%, 3 MB
+...30%, 3 MB
+...30%, 3 MB
+...30%, 3 MB
+...30%, 3 MB
+...30%, 3 MB
+...30%, 3 MB
+...30%, 3 MB
+...30%, 3 MB
+...30%, 3 MB
+...31%, 3 MB
+...31%, 3 MB
+...31%, 3 MB
+...31%, 3 MB
+...31%, 4 MB
+...31%, 4 MB
+...31%, 4 MB
+...31%, 4 MB
+...31%, 4 MB
+...31%, 4 MB
+...31%, 4 MB
+...31%, 4 MB
+...31%, 4 MB
+...31%, 4 MB
+...31%, 4 MB
+...31%, 4 MB
+...32%, 4 MB
+...32%, 4 MB
+...32%, 4 MB
+...32%, 4 MB
+...32%, 4 MB
+...32%, 4 MB
+...32%, 4 MB
+...32%, 4 MB
+...32%, 4 MB
+...32%, 4 MB
+...32%, 4 MB
+...32%, 4 MB
+...32%, 4 MB
+...32%, 4 MB
+...32%, 4 MB
+...32%, 4 MB
+...32%, 4 MB
+...33%, 4 MB
+...33%, 4 MB
+...33%, 4 MB
+...33%, 4 MB
+...33%, 4 MB
+...33%, 4 MB
+...33%, 4 MB
+...33%, 4 MB
+...33%, 4 MB
+...33%, 4 MB
+...33%, 4 MB
+...33%, 4 MB
+...33%, 4 MB
+...33%, 4 MB
+...33%, 4 MB
+...33%, 4 MB
+...34%, 4 MB
+...34%, 4 MB
+...34%, 4 MB
+...34%, 4 MB
+...34%, 4 MB
+...34%, 4 MB
+...34%, 4 MB
+...34%, 4 MB
+...34%, 4 MB
+...34%, 4 MB
+...34%, 4 MB
+...34%, 4 MB
+...34%, 4 MB
+...34%, 4 MB
+...34%, 4 MB
+...34%, 4 MB
+...34%, 4 MB
+...35%, 4 MB
+...35%, 4 MB
+...35%, 4 MB
+...35%, 4 MB
+...35%, 4 MB
+...35%, 4 MB
+...35%, 4 MB
+...35%, 4 MB
+...35%, 4 MB
+...35%, 4 MB
+...35%, 4 MB
+...35%, 4 MB
+...35%, 4 MB
+...35%, 4 MB
+...35%, 4 MB
+...35%, 4 MB
+...36%, 4 MB
+...36%, 4 MB
+...36%, 4 MB
+...36%, 4 MB
+...36%, 4 MB
+...36%, 4 MB
+...36%, 4 MB
+...36%, 4 MB
+...36%, 4 MB
+...36%, 4 MB
+...36%, 4 MB
+...36%, 4 MB
+...36%, 4 MB
+...36%, 4 MB
+...36%, 4 MB
+...36%, 4 MB
+...37%, 4 MB
+...37%, 4 MB
+...37%, 4 MB
+...37%, 4 MB
+...37%, 4 MB
+...37%, 4 MB
+...37%, 4 MB
+...37%, 4 MB
+...37%, 4 MB
+...37%, 4 MB
+...37%, 4 MB
+...37%, 4 MB
+...37%, 4 MB
+...37%, 4 MB
+...37%, 4 MB
+...37%, 4 MB
+...37%, 4 MB
+...38%, 4 MB
+...38%, 4 MB
+...38%, 4 MB
+...38%, 4 MB
+...38%, 4 MB
+...38%, 4 MB
+...38%, 4 MB
+...38%, 4 MB
+...38%, 4 MB
+...38%, 4 MB
+...38%, 4 MB
+...38%, 4 MB
+...38%, 4 MB
+...38%, 4 MB
+...38%, 4 MB
+...38%, 4 MB
+...39%, 4 MB
+...39%, 5 MB
+...39%, 5 MB
+...39%, 5 MB
+...39%, 5 MB
+...39%, 5 MB
+...39%, 5 MB
+...39%, 5 MB
+...39%, 5 MB
+...39%, 5 MB
+...39%, 5 MB
+...39%, 5 MB
+...39%, 5 MB
+...39%, 5 MB
+...39%, 5 MB
+...39%, 5 MB
+...40%, 5 MB
+...40%, 5 MB
+...40%, 5 MB
+...40%, 5 MB
+...40%, 5 MB
+...40%, 5 MB
+...40%, 5 MB
+...40%, 5 MB
+...40%, 5 MB
+...40%, 5 MB
+...40%, 5 MB
+...40%, 5 MB
+...40%, 5 MB
+...40%, 5 MB
+...40%, 5 MB
+...40%, 5 MB
+...40%, 5 MB
+...41%, 5 MB
+...41%, 5 MB
+...41%, 5 MB
+...41%, 5 MB
+...41%, 5 MB
+...41%, 5 MB
+...41%, 5 MB
+...41%, 5 MB
+...41%, 5 MB
+...41%, 5 MB
+...41%, 5 MB
+...41%, 5 MB
+...41%, 5 MB
+...41%, 5 MB
+...41%, 5 MB
+...41%, 5 MB
+...42%, 5 MB
+...42%, 5 MB
+...42%, 5 MB
+...42%, 5 MB
+...42%, 5 MB
+...42%, 5 MB
+...42%, 5 MB
+...42%, 5 MB
+...42%, 5 MB
+...42%, 5 MB
+...42%, 5 MB
+...42%, 5 MB
+...42%, 5 MB
+...42%, 5 MB
+...42%, 5 MB
+...42%, 5 MB
+...42%, 5 MB
+...43%, 5 MB
+...43%, 5 MB
+...43%, 5 MB
+...43%, 5 MB
+...43%, 5 MB
+...43%, 5 MB
+...43%, 5 MB
+...43%, 5 MB
+...43%, 5 MB
+...43%, 5 MB
+...43%, 5 MB
+...43%, 5 MB
+...43%, 5 MB
+...43%, 5 MB
+...43%, 5 MB
+...43%, 5 MB
+...44%, 5 MB
+...44%, 5 MB
+...44%, 5 MB
+...44%, 5 MB
+...44%, 5 MB
+...44%, 5 MB
+...44%, 5 MB
+...44%, 5 MB
+...44%, 5 MB
+...44%, 5 MB
+...44%, 5 MB
+...44%, 5 MB
+...44%, 5 MB
+...44%, 5 MB
+...44%, 5 MB
+...44%, 5 MB
+...45%, 5 MB
+...45%, 5 MB
+...45%, 5 MB
+...45%, 5 MB
+...45%, 5 MB
+...45%, 5 MB
+...45%, 5 MB
+...45%, 5 MB
+...45%, 5 MB
+...45%, 5 MB
+...45%, 5 MB
+...45%, 5 MB
+...45%, 5 MB
+...45%, 5 MB
+...45%, 5 MB
+...45%, 5 MB
+...45%, 5 MB
+...46%, 5 MB
+...46%, 5 MB
+...46%, 5 MB
+...46%, 5 MB
+...46%, 5 MB
+...46%, 5 MB
+...46%, 5 MB
+...46%, 5 MB
+...46%, 5 MB
+...46%, 5 MB
+...46%, 5 MB
+...46%, 5 MB
+...46%, 5 MB
+...46%, 5 MB
+...46%, 6 MB
+...46%, 6 MB
+...47%, 6 MB
+...47%, 6 MB
+...47%, 6 MB
+...47%, 6 MB
+...47%, 6 MB
+...47%, 6 MB
+...47%, 6 MB
+...47%, 6 MB
+...47%, 6 MB
+...47%, 6 MB
+...47%, 6 MB
+...47%, 6 MB
+...47%, 6 MB
+...47%, 6 MB
+...47%, 6 MB
+...47%, 6 MB
+...48%, 6 MB
+...48%, 6 MB
+...48%, 6 MB
+...48%, 6 MB
+...48%, 6 MB
+...48%, 6 MB
+...48%, 6 MB
+...48%, 6 MB
+...48%, 6 MB
+...48%, 6 MB
+...48%, 6 MB
+...48%, 6 MB
+...48%, 6 MB
+...48%, 6 MB
+...48%, 6 MB
+...48%, 6 MB
+...48%, 6 MB
+...49%, 6 MB
+...49%, 6 MB
+...49%, 6 MB
+...49%, 6 MB
+...49%, 6 MB
+...49%, 6 MB
+...49%, 6 MB
+...49%, 6 MB
+...49%, 6 MB
+...49%, 6 MB
+...49%, 6 MB
+...49%, 6 MB
+...49%, 6 MB
+...49%, 6 MB
+...49%, 6 MB
+...49%, 6 MB
+...50%, 6 MB
+...50%, 6 MB
+...50%, 6 MB
+...50%, 6 MB
+...50%, 6 MB
+...50%, 6 MB
+...50%, 6 MB
+...50%, 6 MB
+...50%, 6 MB
+...50%, 6 MB
+...50%, 6 MB
+...50%, 6 MB
+...50%, 6 MB
+...50%, 6 MB
+...50%, 6 MB
+...50%, 6 MB
+...50%, 6 MB
+...51%, 6 MB
+...51%, 6 MB
+...51%, 6 MB
+...51%, 6 MB
+...51%, 6 MB
+...51%, 6 MB
+...51%, 6 MB
+...51%, 6 MB
+...51%, 6 MB
+...51%, 6 MB
+...51%, 6 MB
+...51%, 6 MB
+...51%, 6 MB
+...51%, 6 MB
+...51%, 6 MB
+...51%, 6 MB
+...52%, 6 MB
+...52%, 6 MB
+...52%, 6 MB
+...52%, 6 MB
+...52%, 6 MB
+...52%, 6 MB
+...52%, 6 MB
+...52%, 6 MB
+...52%, 6 MB
+...52%, 6 MB
+...52%, 6 MB
+...52%, 6 MB
+...52%, 6 MB
+...52%, 6 MB
+...52%, 6 MB
+...52%, 6 MB
+...53%, 6 MB
+...53%, 6 MB
+...53%, 6 MB
+...53%, 6 MB
+...53%, 6 MB
+...53%, 6 MB
+...53%, 6 MB
+...53%, 6 MB
+...53%, 6 MB
+...53%, 6 MB
+...53%, 6 MB
+...53%, 6 MB
+...53%, 6 MB
+...53%, 6 MB
+...53%, 6 MB
+...53%, 6 MB
+...53%, 6 MB
+...54%, 6 MB
+...54%, 6 MB
+...54%, 6 MB
+...54%, 6 MB
+...54%, 6 MB
+...54%, 6 MB
+...54%, 6 MB
+...54%, 6 MB
+...54%, 6 MB
+...54%, 6 MB
+...54%, 6 MB
+...54%, 7 MB
+...54%, 7 MB
+...54%, 7 MB
+...54%, 7 MB
+...54%, 7 MB
+...55%, 7 MB
+...55%, 7 MB
+...55%, 7 MB
+...55%, 7 MB
+...55%, 7 MB
+...55%, 7 MB
+...55%, 7 MB
+...55%, 7 MB
+...55%, 7 MB
+...55%, 7 MB
+...55%, 7 MB
+...55%, 7 MB
+...55%, 7 MB
+...55%, 7 MB
+...55%, 7 MB
+...55%, 7 MB
+...56%, 7 MB
+...56%, 7 MB
+...56%, 7 MB
+...56%, 7 MB
+...56%, 7 MB
+...56%, 7 MB
+...56%, 7 MB
+...56%, 7 MB
+...56%, 7 MB
+...56%, 7 MB
+...56%, 7 MB
+...56%, 7 MB
+...56%, 7 MB
+...56%, 7 MB
+...56%, 7 MB
+...56%, 7 MB
+...56%, 7 MB
+...57%, 7 MB
+...57%, 7 MB
+...57%, 7 MB
+...57%, 7 MB
+...57%, 7 MB
+...57%, 7 MB
+...57%, 7 MB
+...57%, 7 MB
+...57%, 7 MB
+...57%, 7 MB
+...57%, 7 MB
+...57%, 7 MB
+...57%, 7 MB
+...57%, 7 MB
+...57%, 7 MB
+...57%, 7 MB
+...58%, 7 MB
+...58%, 7 MB
+...58%, 7 MB
+...58%, 7 MB
+...58%, 7 MB
+...58%, 7 MB
+...58%, 7 MB
+...58%, 7 MB
+...58%, 7 MB
+...58%, 7 MB
+...58%, 7 MB
+...58%, 7 MB
+...58%, 7 MB
+...58%, 7 MB
+...58%, 7 MB
+...58%, 7 MB
+...58%, 7 MB
+...59%, 7 MB
+...59%, 7 MB
+...59%, 7 MB
+...59%, 7 MB
+...59%, 7 MB
+...59%, 7 MB
+...59%, 7 MB
+...59%, 7 MB
+...59%, 7 MB
+...59%, 7 MB
+...59%, 7 MB
+...59%, 7 MB
+...59%, 7 MB
+...59%, 7 MB
+...59%, 7 MB
+...59%, 7 MB
+...60%, 7 MB
+...60%, 7 MB
+...60%, 7 MB
+...60%, 7 MB
+...60%, 7 MB
+...60%, 7 MB
+...60%, 7 MB
+...60%, 7 MB
+...60%, 7 MB
+...60%, 7 MB
+...60%, 7 MB
+...60%, 7 MB
+...60%, 7 MB
+...60%, 7 MB
+...60%, 7 MB
+...60%, 7 MB
+...61%, 7 MB
+...61%, 7 MB
+...61%, 7 MB
+...61%, 7 MB
+...61%, 7 MB
+...61%, 7 MB
+...61%, 7 MB
+...61%, 7 MB
+...61%, 7 MB
+...61%, 7 MB
+...61%, 7 MB
+...61%, 7 MB
+...61%, 7 MB
+...61%, 7 MB
+...61%, 7 MB
+...61%, 7 MB
+...61%, 7 MB
+...62%, 7 MB
+...62%, 7 MB
+...62%, 7 MB
+...62%, 7 MB
+...62%, 7 MB
+...62%, 7 MB
+...62%, 7 MB
+...62%, 7 MB
+...62%, 8 MB
+...62%, 8 MB
+...62%, 8 MB
+...62%, 8 MB
+...62%, 8 MB
+...62%, 8 MB
+...62%, 8 MB
+...62%, 8 MB
+...63%, 8 MB
+...63%, 8 MB
+...63%, 8 MB
+...63%, 8 MB
+...63%, 8 MB
+...63%, 8 MB
+...63%, 8 MB
+...63%, 8 MB
+...63%, 8 MB
+...63%, 8 MB
+...63%, 8 MB
+...63%, 8 MB
+...63%, 8 MB
+...63%, 8 MB
+...63%, 8 MB
+...63%, 8 MB
+...64%, 8 MB
+...64%, 8 MB
+...64%, 8 MB
+...64%, 8 MB
+...64%, 8 MB
+...64%, 8 MB
+...64%, 8 MB
+...64%, 8 MB
+...64%, 8 MB
+...64%, 8 MB
+...64%, 8 MB
+...64%, 8 MB
+...64%, 8 MB
+...64%, 8 MB
+...64%, 8 MB
+...64%, 8 MB
+...64%, 8 MB
+...65%, 8 MB
+...65%, 8 MB
+...65%, 8 MB
+...65%, 8 MB
+...65%, 8 MB
+...65%, 8 MB
+...65%, 8 MB
+...65%, 8 MB
+...65%, 8 MB
+...65%, 8 MB
+...65%, 8 MB
+...65%, 8 MB
+...65%, 8 MB
+...65%, 8 MB
+...65%, 8 MB
+...65%, 8 MB
+...66%, 8 MB
+...66%, 8 MB
+...66%, 8 MB
+...66%, 8 MB
+...66%, 8 MB
+...66%, 8 MB
+...66%, 8 MB
+...66%, 8 MB
+...66%, 8 MB
+...66%, 8 MB
+...66%, 8 MB
+...66%, 8 MB
+...66%, 8 MB
+...66%, 8 MB
+...66%, 8 MB
+...66%, 8 MB
+...66%, 8 MB
+...67%, 8 MB
+...67%, 8 MB
+...67%, 8 MB
+...67%, 8 MB
+...67%, 8 MB
+...67%, 8 MB
+...67%, 8 MB
+...67%, 8 MB
+...67%, 8 MB
+...67%, 8 MB
+...67%, 8 MB
+...67%, 8 MB
+...67%, 8 MB
+...67%, 8 MB
+...67%, 8 MB
+...67%, 8 MB
+...68%, 8 MB
+...68%, 8 MB
+...68%, 8 MB
+...68%, 8 MB
+...68%, 8 MB
+...68%, 8 MB
+...68%, 8 MB
+...68%, 8 MB
+...68%, 8 MB
+...68%, 8 MB
+...68%, 8 MB
+...68%, 8 MB
+...68%, 8 MB
+...68%, 8 MB
+...68%, 8 MB
+...68%, 8 MB
+...69%, 8 MB
+...69%, 8 MB
+...69%, 8 MB
+...69%, 8 MB
+...69%, 8 MB
+...69%, 8 MB
+...69%, 8 MB
+...69%, 8 MB
+...69%, 8 MB
+...69%, 8 MB
+...69%, 8 MB
+...69%, 8 MB
+...69%, 8 MB
+...69%, 8 MB
+...69%, 8 MB
+...69%, 8 MB
+...69%, 8 MB
+...70%, 8 MB
+...70%, 8 MB
+...70%, 8 MB
+...70%, 8 MB
+...70%, 8 MB
+...70%, 9 MB
+...70%, 9 MB
+...70%, 9 MB
+...70%, 9 MB
+...70%, 9 MB
+...70%, 9 MB
+...70%, 9 MB
+...70%, 9 MB
+...70%, 9 MB
+...70%, 9 MB
+...70%, 9 MB
+...71%, 9 MB
+...71%, 9 MB
+...71%, 9 MB
+...71%, 9 MB
+...71%, 9 MB
+...71%, 9 MB
+...71%, 9 MB
+...71%, 9 MB
+...71%, 9 MB
+...71%, 9 MB
+...71%, 9 MB
+...71%, 9 MB
+...71%, 9 MB
+...71%, 9 MB
+...71%, 9 MB
+...71%, 9 MB
+...72%, 9 MB
+...72%, 9 MB
+...72%, 9 MB
+...72%, 9 MB
+...72%, 9 MB
+...72%, 9 MB
+...72%, 9 MB
+...72%, 9 MB
+...72%, 9 MB
+...72%, 9 MB
+...72%, 9 MB
+...72%, 9 MB
+...72%, 9 MB
+...72%, 9 MB
+...72%, 9 MB
+...72%, 9 MB
+...72%, 9 MB
+...73%, 9 MB
+...73%, 9 MB
+...73%, 9 MB
+...73%, 9 MB
+...73%, 9 MB
+...73%, 9 MB
+...73%, 9 MB
+...73%, 9 MB
+...73%, 9 MB
+...73%, 9 MB
+...73%, 9 MB
+...73%, 9 MB
+...73%, 9 MB
+...73%, 9 MB
+...73%, 9 MB
+...73%, 9 MB
+...74%, 9 MB
+...74%, 9 MB
+...74%, 9 MB
+...74%, 9 MB
+...74%, 9 MB
+...74%, 9 MB
+...74%, 9 MB
+...74%, 9 MB
+...74%, 9 MB
+...74%, 9 MB
+...74%, 9 MB
+...74%, 9 MB
+...74%, 9 MB
+...74%, 9 MB
+...74%, 9 MB
+...74%, 9 MB
+...74%, 9 MB
+...75%, 9 MB
+...75%, 9 MB
+...75%, 9 MB
+...75%, 9 MB
+...75%, 9 MB
+...75%, 9 MB
+...75%, 9 MB
+...75%, 9 MB
+...75%, 9 MB
+...75%, 9 MB
+...75%, 9 MB
+...75%, 9 MB
+...75%, 9 MB
+...75%, 9 MB
+...75%, 9 MB
+...75%, 9 MB
+...76%, 9 MB
+...76%, 9 MB
+...76%, 9 MB
+...76%, 9 MB
+...76%, 9 MB
+...76%, 9 MB
+...76%, 9 MB
+...76%, 9 MB
+...76%, 9 MB
+...76%, 9 MB
+...76%, 9 MB
+...76%, 9 MB
+...76%, 9 MB
+...76%, 9 MB
+...76%, 9 MB
+...76%, 9 MB
+...77%, 9 MB
+...77%, 9 MB
+...77%, 9 MB
+...77%, 9 MB
+...77%, 9 MB
+...77%, 9 MB
+...77%, 9 MB
+...77%, 9 MB
+...77%, 9 MB
+...77%, 9 MB
+...77%, 9 MB
+...77%, 9 MB
+...77%, 9 MB
+...77%, 9 MB
+...77%, 9 MB
+...77%, 9 MB
+...77%, 9 MB
+...78%, 9 MB
+...78%, 9 MB
+...78%, 10 MB
+...78%, 10 MB
+...78%, 10 MB
+...78%, 10 MB
+...78%, 10 MB
+...78%, 10 MB
+...78%, 10 MB
+...78%, 10 MB
+...78%, 10 MB
+...78%, 10 MB
+...78%, 10 MB
+...78%, 10 MB
+...78%, 10 MB
+...78%, 10 MB
+...79%, 10 MB
+...79%, 10 MB
+...79%, 10 MB
+...79%, 10 MB
+...79%, 10 MB
+...79%, 10 MB
+...79%, 10 MB
+...79%, 10 MB
+...79%, 10 MB
+...79%, 10 MB
+...79%, 10 MB
+...79%, 10 MB
+...79%, 10 MB
+...79%, 10 MB
+...79%, 10 MB
+...79%, 10 MB
+...80%, 10 MB
+...80%, 10 MB
+...80%, 10 MB
+...80%, 10 MB
+...80%, 10 MB
+...80%, 10 MB
+...80%, 10 MB
+...80%, 10 MB
+...80%, 10 MB
+...80%, 10 MB
+...80%, 10 MB
+...80%, 10 MB
+...80%, 10 MB
+...80%, 10 MB
+...80%, 10 MB
+...80%, 10 MB
+...80%, 10 MB
+...81%, 10 MB
+...81%, 10 MB
+...81%, 10 MB
+...81%, 10 MB
+...81%, 10 MB
+...81%, 10 MB
+...81%, 10 MB
+...81%, 10 MB
+...81%, 10 MB
+...81%, 10 MB
+...81%, 10 MB
+...81%, 10 MB
+...81%, 10 MB
+...81%, 10 MB
+...81%, 10 MB
+...81%, 10 MB
+...82%, 10 MB
+...82%, 10 MB
+...82%, 10 MB
+...82%, 10 MB
+...82%, 10 MB
+...82%, 10 MB
+...82%, 10 MB
+...82%, 10 MB
+...82%, 10 MB
+...82%, 10 MB
+...82%, 10 MB
+...82%, 10 MB
+...82%, 10 MB
+...82%, 10 MB
+...82%, 10 MB
+...82%, 10 MB
+...82%, 10 MB
+...83%, 10 MB
+...83%, 10 MB
+...83%, 10 MB
+...83%, 10 MB
+...83%, 10 MB
+...83%, 10 MB
+...83%, 10 MB
+...83%, 10 MB
+...83%, 10 MB
+...83%, 10 MB
+...83%, 10 MB
+...83%, 10 MB
+...83%, 10 MB
+...83%, 10 MB
+...83%, 10 MB
+...83%, 10 MB
+...84%, 10 MB
+...84%, 10 MB
+...84%, 10 MB
+...84%, 10 MB
+...84%, 10 MB
+...84%, 10 MB
+...84%, 10 MB
+...84%, 10 MB
+...84%, 10 MB
+...84%, 10 MB
+...84%, 10 MB
+...84%, 10 MB
+...84%, 10 MB
+...84%, 10 MB
+...84%, 10 MB
+...84%, 10 MB
+...85%, 10 MB
+...85%, 10 MB
+...85%, 10 MB
+...85%, 10 MB
+...85%, 10 MB
+...85%, 10 MB
+...85%, 10 MB
+...85%, 10 MB
+...85%, 10 MB
+...85%, 10 MB
+...85%, 10 MB
+...85%, 10 MB
+...85%, 10 MB
+...85%, 10 MB
+...85%, 10 MB
+...85%, 10 MB
+...85%, 11 MB
+...86%, 11 MB
+...86%, 11 MB
+...86%, 11 MB
+...86%, 11 MB
+...86%, 11 MB
+...86%, 11 MB
+...86%, 11 MB
+...86%, 11 MB
+...86%, 11 MB
+...86%, 11 MB
+...86%, 11 MB
+...86%, 11 MB
+...86%, 11 MB
+...86%, 11 MB
+...86%, 11 MB
+...86%, 11 MB
+...87%, 11 MB
+...87%, 11 MB
+...87%, 11 MB
+...87%, 11 MB
+...87%, 11 MB
+...87%, 11 MB
+...87%, 11 MB
+...87%, 11 MB
+...87%, 11 MB
+...87%, 11 MB
+...87%, 11 MB
+...87%, 11 MB
+...87%, 11 MB
+...87%, 11 MB
+...87%, 11 MB
+...87%, 11 MB
+...88%, 11 MB
+...88%, 11 MB
+...88%, 11 MB
+...88%, 11 MB
+...88%, 11 MB
+...88%, 11 MB
+...88%, 11 MB
+...88%, 11 MB
+...88%, 11 MB
+...88%, 11 MB
+...88%, 11 MB
+...88%, 11 MB
+...88%, 11 MB
+...88%, 11 MB
+...88%, 11 MB
+...88%, 11 MB
+...88%, 11 MB
+...89%, 11 MB
+...89%, 11 MB
+...89%, 11 MB
+...89%, 11 MB
+...89%, 11 MB
+...89%, 11 MB
+...89%, 11 MB
+...89%, 11 MB
+...89%, 11 MB
+...89%, 11 MB
+...89%, 11 MB
+...89%, 11 MB
+...89%, 11 MB
+...89%, 11 MB
+...89%, 11 MB
+...89%, 11 MB
+...90%, 11 MB
+...90%, 11 MB
+...90%, 11 MB
+...90%, 11 MB
+...90%, 11 MB
+...90%, 11 MB
+...90%, 11 MB
+...90%, 11 MB
+...90%, 11 MB
+...90%, 11 MB
+...90%, 11 MB
+...90%, 11 MB
+...90%, 11 MB
+...90%, 11 MB
+...90%, 11 MB
+...90%, 11 MB
+...90%, 11 MB
+...91%, 11 MB
+...91%, 11 MB
+...91%, 11 MB
+...91%, 11 MB
+...91%, 11 MB
+...91%, 11 MB
+...91%, 11 MB
+...91%, 11 MB
+...91%, 11 MB
+...91%, 11 MB
+...91%, 11 MB
+...91%, 11 MB
+...91%, 11 MB
+...91%, 11 MB
+...91%, 11 MB
+...91%, 11 MB
+...92%, 11 MB
+...92%, 11 MB
+...92%, 11 MB
+...92%, 11 MB
+...92%, 11 MB
+...92%, 11 MB
+...92%, 11 MB
+...92%, 11 MB
+...92%, 11 MB
+...92%, 11 MB
+...92%, 11 MB
+...92%, 11 MB
+...92%, 11 MB
+...92%, 11 MB
+...92%, 11 MB
+...92%, 11 MB
+...93%, 11 MB
+...93%, 11 MB
+...93%, 11 MB
+...93%, 11 MB
+...93%, 11 MB
+...93%, 11 MB
+...93%, 11 MB
+...93%, 11 MB
+...93%, 11 MB
+...93%, 11 MB
+...93%, 11 MB
+...93%, 11 MB
+...93%, 11 MB
+...93%, 12 MB
+...93%, 12 MB
+...93%, 12 MB
+...93%, 12 MB
+...94%, 12 MB
+...94%, 12 MB
+...94%, 12 MB
+...94%, 12 MB
+...94%, 12 MB
+...94%, 12 MB
+...94%, 12 MB
+...94%, 12 MB
+...94%, 12 MB
+...94%, 12 MB
+...94%, 12 MB
+...94%, 12 MB
+...94%, 12 MB
+...94%, 12 MB
+...94%, 12 MB
+...94%, 12 MB
+...95%, 12 MB
+...95%, 12 MB
+...95%, 12 MB
+...95%, 12 MB
+...95%, 12 MB
+...95%, 12 MB
+...95%, 12 MB
+...95%, 12 MB
+...95%, 12 MB
+...95%, 12 MB
+...95%, 12 MB
+...95%, 12 MB
+...95%, 12 MB
+...95%, 12 MB
+...95%, 12 MB
+...95%, 12 MB
+...96%, 12 MB
+...96%, 12 MB
+...96%, 12 MB
+...96%, 12 MB
+...96%, 12 MB
+...96%, 12 MB
+...96%, 12 MB
+...96%, 12 MB
+...96%, 12 MB
+...96%, 12 MB
+...96%, 12 MB
+...96%, 12 MB
+...96%, 12 MB
+...96%, 12 MB
+...96%, 12 MB
+...96%, 12 MB
+...96%, 12 MB
+...97%, 12 MB
+...97%, 12 MB
+...97%, 12 MB
+...97%, 12 MB
+...97%, 12 MB
+...97%, 12 MB
+...97%, 12 MB
+...97%, 12 MB
+...97%, 12 MB
+...97%, 12 MB
+...97%, 12 MB
+...97%, 12 MB
+...97%, 12 MB
+...97%, 12 MB
+...97%, 12 MB
+...97%, 12 MB
+...98%, 12 MB
+...98%, 12 MB
+...98%, 12 MB
+...98%, 12 MB
+...98%, 12 MB
+...98%, 12 MB
+...98%, 12 MB
+...98%, 12 MB
+...98%, 12 MB
+...98%, 12 MB
+...98%, 12 MB
+...98%, 12 MB
+...98%, 12 MB
+...98%, 12 MB
+...98%, 12 MB
+...98%, 12 MB
+...98%, 12 MB
+...99%, 12 MB
+...99%, 12 MB
+...99%, 12 MB
+...99%, 12 MB
+...99%, 12 MB
+...99%, 12 MB
+...99%, 12 MB
+...99%, 12 MB
+...99%, 12 MB
+...99%, 12 MB
+...99%, 12 MB
+...99%, 12 MB
+...99%, 12 MB
+...99%, 12 MB
+...99%, 12 MB
+...99%, 12 MB
+
+...100%, 12 MB
+</pre></div>
+</div>
 <p>Design spatial basis functions</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">n_spatial_basis</span> <span class="o">=</span> <span class="mi">36</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">n_spatial_basis</span> <span class="o">=</span> <span class="mi">36</span>
 <span class="n">n_temporal_basis</span> <span class="o">=</span> <span class="mi">7</span>
 <span class="n">strf_model</span> <span class="o">=</span> <span class="n">STRF</span><span class="p">(</span><span class="n">patch_size</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
                   <span class="n">n_spatial_basis</span><span class="o">=</span><span class="n">n_spatial_basis</span><span class="p">,</span>
@@ -209,20 +2873,33 @@ Department of Neurobiology, Northwestern University.</p>
 <span class="n">strf_model</span><span class="o">.</span><span class="n">visualize_gaussian_basis</span><span class="p">(</span><span class="n">spatial_basis</span><span class="p">)</span>
 </pre></div>
 </div>
-<img alt="../_images/sphx_glr_plot_tikhonov_001.png" class="align-center" src="../_images/sphx_glr_plot_tikhonov_001.png" />
+<img alt="../_images/sphx_glr_plot_tikhonov_001.png" class="sphx-glr-single-img" src="../_images/sphx_glr_plot_tikhonov_001.png" />
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/Users/mainak/anaconda3/lib/python3.7/site-packages/spykes/ml/strf.py:110: UserWarning: Matplotlib is currently using agg, which is a non-GUI backend, so cannot show the figure.
+  plt.show()
+</pre></div>
+</div>
 <p>Design temporal basis functions</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">time_points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mf">100.</span><span class="p">,</span> <span class="mf">100.</span><span class="p">,</span> <span class="mf">10.</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">time_points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mf">100.</span><span class="p">,</span> <span class="mf">100.</span><span class="p">,</span> <span class="mf">10.</span><span class="p">)</span>
 <span class="n">centers</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mf">75.</span><span class="p">,</span> <span class="o">-</span><span class="mf">50.</span><span class="p">,</span> <span class="o">-</span><span class="mf">25.</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">25.</span><span class="p">,</span> <span class="mf">50.</span><span class="p">,</span> <span class="mf">75.</span><span class="p">]</span>
-<span class="n">temporal_basis</span> <span class="o">=</span> <span class="n">strf_model</span><span class="o">.</span><span class="n">make_raised_cosine_temporal_basis</span><span class="p">(</span><span class="n">time_points</span><span class="o">=</span><span class="n">time_points</span><span class="p">,</span>
-                                                              <span class="n">centers</span><span class="o">=</span><span class="n">centers</span><span class="p">,</span>
-                                                              <span class="n">widths</span><span class="o">=</span><span class="mf">10.</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">7</span><span class="p">))</span>
+<span class="n">temporal_basis</span> <span class="o">=</span> <span class="n">strf_model</span><span class="o">.</span><span class="n">make_raised_cosine_temporal_basis</span><span class="p">(</span>
+    <span class="n">time_points</span><span class="o">=</span><span class="n">time_points</span><span class="p">,</span>
+    <span class="n">centers</span><span class="o">=</span><span class="n">centers</span><span class="p">,</span>
+    <span class="n">widths</span><span class="o">=</span><span class="mf">10.</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">7</span><span class="p">))</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">time_points</span><span class="p">,</span> <span class="n">temporal_basis</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
-<img alt="../_images/sphx_glr_plot_tikhonov_002.png" class="align-center" src="../_images/sphx_glr_plot_tikhonov_002.png" />
+<img alt="../_images/sphx_glr_plot_tikhonov_002.png" class="sphx-glr-single-img" src="../_images/sphx_glr_plot_tikhonov_002.png" />
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/Users/mainak/Documents/github_repos/pyglmnet/examples/plot_tikhonov.py:78: DeprecationWarning: object of type &lt;class &#39;float&#39;&gt; cannot be safely interpreted as an integer.
+  time_points = np.linspace(-100., 100., 10.)
+/Users/mainak/Documents/github_repos/pyglmnet/examples/plot_tikhonov.py:85: UserWarning: Matplotlib is currently using agg, which is a non-GUI backend, so cannot show the figure.
+  plt.show()
+</pre></div>
+</div>
 <p>Design parameters</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="c1"># Spatial extent</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Spatial extent</span>
 <span class="n">n_shape</span> <span class="o">=</span> <span class="mi">50</span>
 <span class="n">n_features</span> <span class="o">=</span> <span class="n">n_spatial_basis</span>
 
@@ -237,7 +2914,7 @@ Department of Neurobiology, Northwestern University.</p>
 </pre></div>
 </div>
 <p>Build design matrix</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">bin_template</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">window</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">window</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">binsize</span><span class="p">,</span> <span class="n">binsize</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">bin_template</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">window</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">window</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">binsize</span><span class="p">,</span> <span class="n">binsize</span><span class="p">)</span>
 <span class="n">n_bins</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">bin_template</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
 
 <span class="n">probetimes</span> <span class="o">=</span> <span class="n">probes_df</span><span class="p">[</span><span class="s1">&#39;t_probe&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
@@ -253,7 +2930,8 @@ Department of Neurobiology, Northwestern University.</p>
 
     <span class="n">this_fixation_spatial_features</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n_bins</span><span class="p">,</span> <span class="n">n_spatial_basis</span><span class="p">))</span>
     <span class="n">this_fixation_spikecounts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_bins</span><span class="p">)</span>
-    <span class="n">unique_fixation_id</span> <span class="o">=</span> <span class="n">fixations_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">fx</span><span class="p">][</span><span class="s1">&#39;trialNum_f&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="mf">0.01</span> <span class="o">*</span> <span class="n">fixations_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">fx</span><span class="p">][</span><span class="s1">&#39;fixNum_f&#39;</span><span class="p">]</span>
+    <span class="n">unique_fixation_id</span> <span class="o">=</span> <span class="n">fixations_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">fx</span><span class="p">][</span><span class="s1">&#39;trialNum_f&#39;</span><span class="p">]</span>
+    <span class="n">unique_fixation_id</span> <span class="o">+=</span> <span class="mf">0.01</span> <span class="o">*</span> <span class="n">fixations_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">fx</span><span class="p">][</span><span class="s1">&#39;fixNum_f&#39;</span><span class="p">]</span>
     <span class="n">this_fixation_id</span> <span class="o">=</span> <span class="n">unique_fixation_id</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">n_bins</span><span class="p">)</span>
 
     <span class="c1"># Look for probes in window of interest relative to fixation</span>
@@ -273,11 +2951,12 @@ Department of Neurobiology, Northwestern University.</p>
         <span class="k">if</span> <span class="p">((</span><span class="n">probe_row</span> <span class="o">-</span> <span class="n">fix_row</span><span class="p">)</span> <span class="o">&gt;</span> <span class="o">-</span><span class="n">n_shape</span> <span class="o">/</span> <span class="mi">2</span> <span class="ow">and</span>
             <span class="p">(</span><span class="n">probe_row</span> <span class="o">-</span> <span class="n">fix_row</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">n_shape</span> <span class="o">/</span> <span class="mi">2</span> <span class="ow">and</span>
             <span class="p">(</span><span class="n">probe_col</span> <span class="o">-</span> <span class="n">fix_col</span><span class="p">)</span> <span class="o">&gt;</span> <span class="o">-</span><span class="n">n_shape</span> <span class="o">/</span> <span class="mi">2</span> <span class="ow">and</span>
-            <span class="p">(</span><span class="n">probe_col</span> <span class="o">-</span> <span class="n">fix_col</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">n_shape</span> <span class="o">/</span> <span class="mi">2</span><span class="p">):</span>
+                <span class="p">(</span><span class="n">probe_col</span> <span class="o">-</span> <span class="n">fix_col</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">n_shape</span> <span class="o">/</span> <span class="mi">2</span><span class="p">):</span>
 
             <span class="c1"># Get probe timestamp relative to fixation</span>
             <span class="n">probe_time</span> <span class="o">=</span> <span class="n">probes_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">probe_id</span><span class="p">][</span><span class="s1">&#39;t_probe&#39;</span><span class="p">]</span>
-            <span class="n">probe_bin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">bin_template</span> <span class="o">&lt;</span> <span class="p">(</span><span class="n">probe_time</span> <span class="o">-</span> <span class="n">fixation_time</span><span class="p">))[</span><span class="mi">0</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">probe_bin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">bin_template</span> <span class="o">&lt;</span> <span class="p">(</span><span class="n">probe_time</span> <span class="o">-</span> <span class="n">fixation_time</span><span class="p">))</span>
+            <span class="n">probe_bin</span> <span class="o">=</span> <span class="n">probe_bin</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
 
             <span class="c1"># Define an image based on the relative locations</span>
             <span class="n">img</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">n_shape</span><span class="p">,</span> <span class="n">n_shape</span><span class="p">))</span>
@@ -286,7 +2965,8 @@ Department of Neurobiology, Northwestern University.</p>
             <span class="n">img</span><span class="p">[</span><span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
 
             <span class="c1"># Compute projection</span>
-            <span class="n">basis_projection</span> <span class="o">=</span> <span class="n">strf_model</span><span class="o">.</span><span class="n">project_to_spatial_basis</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">spatial_basis</span><span class="p">)</span>
+            <span class="n">basis_projection</span> <span class="o">=</span> <span class="n">strf_model</span><span class="o">.</span><span class="n">project_to_spatial_basis</span><span class="p">(</span>
+                <span class="n">img</span><span class="p">,</span> <span class="n">spatial_basis</span><span class="p">)</span>
             <span class="n">this_fixation_spatial_features</span><span class="p">[</span><span class="n">probe_bin</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">basis_projection</span>
 
     <span class="c1"># Count spikes in window of interest relative to fixation</span>
@@ -294,39 +2974,55 @@ Department of Neurobiology, Northwestern University.</p>
     <span class="n">searchsorted_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">searchsorted</span><span class="p">(</span><span class="n">spiketimes</span><span class="p">,</span>
                                        <span class="p">[</span><span class="n">fixation_time</span> <span class="o">+</span> <span class="n">window</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
                                         <span class="n">fixation_time</span> <span class="o">+</span> <span class="n">window</span><span class="p">[</span><span class="mi">1</span><span class="p">]])</span>
-    <span class="n">this_fixation_spike_counts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">histogram</span><span class="p">(</span><span class="n">spiketimes</span><span class="p">[</span><span class="n">searchsorted_idx</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
-                                                         <span class="n">searchsorted_idx</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span> <span class="n">bins</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">this_fixation_spike_counts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">histogram</span><span class="p">(</span>
+        <span class="n">spiketimes</span><span class="p">[</span><span class="n">searchsorted_idx</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span><span class="n">searchsorted_idx</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span> <span class="n">bins</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 
     <span class="c1"># Accumulate</span>
     <span class="n">fixation_id</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">fixation_id</span><span class="p">,</span> <span class="n">this_fixation_id</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-    <span class="n">spatial_features</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">spatial_features</span><span class="p">,</span> <span class="n">this_fixation_spatial_features</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-    <span class="n">spike_counts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">spike_counts</span><span class="p">,</span> <span class="n">this_fixation_spike_counts</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">spatial_features</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">spatial_features</span><span class="p">,</span>
+                                       <span class="n">this_fixation_spatial_features</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">spike_counts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">spike_counts</span><span class="p">,</span>
+                                   <span class="n">this_fixation_spike_counts</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
     <span class="c1"># Zero pad</span>
-    <span class="n">spatial_features</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">spatial_features</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n_zero_bins</span><span class="p">,</span> <span class="n">n_spatial_basis</span><span class="p">))),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-    <span class="n">fixation_id</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">fixation_id</span><span class="p">,</span> <span class="o">-</span><span class="mf">999.</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">n_zero_bins</span><span class="p">)),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">spatial_features</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span>
+        <span class="n">spatial_features</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n_zero_bins</span><span class="p">,</span> <span class="n">n_spatial_basis</span><span class="p">))))</span>
+    <span class="n">fixation_id</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">fixation_id</span><span class="p">,</span> <span class="o">-</span><span class="mf">999.</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">n_zero_bins</span><span class="p">)))</span>
 
 <span class="c1"># Convolve with temporal basis</span>
-<span class="n">features</span> <span class="o">=</span> <span class="n">strf_model</span><span class="o">.</span><span class="n">convolve_with_temporal_basis</span><span class="p">(</span><span class="n">spatial_features</span><span class="p">,</span> <span class="n">temporal_basis</span><span class="p">)</span>
+<span class="n">features</span> <span class="o">=</span> <span class="n">strf_model</span><span class="o">.</span><span class="n">convolve_with_temporal_basis</span><span class="p">(</span><span class="n">spatial_features</span><span class="p">,</span>
+                                                   <span class="n">temporal_basis</span><span class="p">)</span>
 
 <span class="c1"># Remove zeropad</span>
 <span class="n">features</span> <span class="o">=</span> <span class="n">features</span><span class="p">[</span><span class="n">fixation_id</span> <span class="o">!=</span> <span class="o">-</span><span class="mf">999.</span><span class="p">]</span>
 </pre></div>
 </div>
 <p>Visualize the distribution of spike counts</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">spike_counts</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">spike_counts</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
-<img alt="../_images/sphx_glr_plot_tikhonov_003.png" class="align-center" src="../_images/sphx_glr_plot_tikhonov_003.png" />
+<img alt="../_images/sphx_glr_plot_tikhonov_003.png" class="sphx-glr-single-img" src="../_images/sphx_glr_plot_tikhonov_003.png" />
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/Users/mainak/Documents/github_repos/pyglmnet/examples/plot_tikhonov.py:192: UserWarning: Matplotlib is currently using agg, which is a non-GUI backend, so cannot show the figure.
+  plt.show()
+</pre></div>
+</div>
 <p>Plot a few rows of the design matrix</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">features</span><span class="p">[</span><span class="mi">30</span><span class="p">:</span><span class="mi">150</span><span class="p">,:],</span> <span class="n">interpolation</span><span class="o">=</span><span class="s1">&#39;none&#39;</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">features</span><span class="p">[</span><span class="mi">30</span><span class="p">:</span><span class="mi">150</span><span class="p">,</span> <span class="p">:],</span> <span class="n">interpolation</span><span class="o">=</span><span class="s1">&#39;none&#39;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
-<img alt="../_images/sphx_glr_plot_tikhonov_004.png" class="align-center" src="../_images/sphx_glr_plot_tikhonov_004.png" />
+<img alt="../_images/sphx_glr_plot_tikhonov_004.png" class="sphx-glr-single-img" src="../_images/sphx_glr_plot_tikhonov_004.png" />
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/Users/mainak/Documents/github_repos/pyglmnet/examples/plot_tikhonov.py:198: UserWarning: Matplotlib is currently using agg, which is a non-GUI backend, so cannot show the figure.
+  plt.show()
+</pre></div>
+</div>
 <p>Design prior covariance matrix for Tikhonov regularization</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">prior_cov</span> <span class="o">=</span> <span class="n">strf_model</span><span class="o">.</span><span class="n">design_prior_covariance</span><span class="p">(</span><span class="n">sigma_temporal</span><span class="o">=</span><span class="mf">3.</span><span class="p">,</span> <span class="n">sigma_spatial</span><span class="o">=</span><span class="mf">5.</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">prior_cov</span> <span class="o">=</span> <span class="n">strf_model</span><span class="o">.</span><span class="n">design_prior_covariance</span><span class="p">(</span>
+    <span class="n">sigma_temporal</span><span class="o">=</span><span class="mf">3.</span><span class="p">,</span>
+    <span class="n">sigma_spatial</span><span class="o">=</span><span class="mf">5.</span><span class="p">)</span>
 
 <span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">prior_cov</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;Greys&#39;</span><span class="p">,</span> <span class="n">interpolation</span><span class="o">=</span><span class="s1">&#39;none&#39;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">()</span>
@@ -335,36 +3031,47 @@ Department of Neurobiology, Northwestern University.</p>
 <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">prior_cov</span><span class="p">)</span>
 </pre></div>
 </div>
-<img alt="../_images/sphx_glr_plot_tikhonov_005.png" class="align-center" src="../_images/sphx_glr_plot_tikhonov_005.png" />
-<p>Fit models</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.cross_validation</span> <span class="kn">import</span> <span class="n">train_test_split</span>
-<span class="n">Xtrain</span><span class="p">,</span> <span class="n">Xtest</span><span class="p">,</span> <span class="n">Ytrain</span><span class="p">,</span> <span class="n">Ytest</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">features</span><span class="p">,</span> <span class="n">spike_counts</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
+<img alt="../_images/sphx_glr_plot_tikhonov_005.png" class="sphx-glr-single-img" src="../_images/sphx_glr_plot_tikhonov_005.png" />
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/Users/mainak/Documents/github_repos/pyglmnet/examples/plot_tikhonov.py:208: UserWarning: Matplotlib is currently using agg, which is a non-GUI backend, so cannot show the figure.
+  plt.show()
 </pre></div>
 </div>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pyglmnet</span> <span class="kn">import</span> <span class="n">utils</span>
+<p>Fit models</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="k">import</span> <span class="n">train_test_split</span> <span class="c1"># noqa</span>
+
+<span class="n">Xtrain</span><span class="p">,</span> <span class="n">Xtest</span><span class="p">,</span> <span class="n">Ytrain</span><span class="p">,</span> <span class="n">Ytest</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span>
+    <span class="n">features</span><span class="p">,</span> <span class="n">spike_counts</span><span class="p">,</span>
+    <span class="n">test_size</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>
+    <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pyglmnet</span> <span class="k">import</span> <span class="n">utils</span> <span class="c1"># noqa</span>
+
 <span class="n">n_samples</span> <span class="o">=</span> <span class="n">Xtrain</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 <span class="n">Tau</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">tikhonov_from_prior</span><span class="p">(</span><span class="n">prior_cov</span><span class="p">,</span> <span class="n">n_samples</span><span class="p">)</span>
 
-<span class="n">glm</span> <span class="o">=</span> <span class="n">GLMCV</span><span class="p">(</span><span class="n">distr</span><span class="o">=</span><span class="s1">&#39;poisson&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span> <span class="n">Tau</span><span class="o">=</span><span class="n">Tau</span><span class="p">,</span> <span class="n">score_metric</span><span class="o">=</span><span class="s1">&#39;pseudo_R2&#39;</span><span class="p">)</span>
+<span class="n">glm</span> <span class="o">=</span> <span class="n">GLMCV</span><span class="p">(</span><span class="n">distr</span><span class="o">=</span><span class="s1">&#39;poisson&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span> <span class="n">Tau</span><span class="o">=</span><span class="n">Tau</span><span class="p">,</span> <span class="n">score_metric</span><span class="o">=</span><span class="s1">&#39;pseudo_R2&#39;</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
 <span class="n">glm</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">Xtrain</span><span class="p">,</span> <span class="n">Ytrain</span><span class="p">)</span>
-<span class="k">print</span><span class="p">(</span><span class="s2">&quot;train score: </span><span class="si">%f</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">glm</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">Xtrain</span><span class="p">,</span> <span class="n">Ytrain</span><span class="p">))</span>
-<span class="k">print</span><span class="p">(</span><span class="s2">&quot;test score: </span><span class="si">%f</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">glm</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">Xtest</span><span class="p">,</span> <span class="n">Ytest</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;train score: </span><span class="si">%f</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">glm</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">Xtrain</span><span class="p">,</span> <span class="n">Ytrain</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;test score: </span><span class="si">%f</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">glm</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">Xtest</span><span class="p">,</span> <span class="n">Ytest</span><span class="p">))</span>
 <span class="n">weights</span> <span class="o">=</span> <span class="n">glm</span><span class="o">.</span><span class="n">beta_</span>
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-default"><div class="highlight"><pre><span></span>  <span class="n">train</span> <span class="n">score</span><span class="p">:</span> <span class="n">nan</span>
-<span class="n">test</span> <span class="n">score</span><span class="p">:</span> <span class="n">nan</span>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/Users/mainak/Documents/github_repos/pyglmnet/pyglmnet/pyglmnet.py:864: UserWarning: Reached max number of iterations without convergence.
+  &quot;Reached max number of iterations without convergence.&quot;)
+train score: 0.048506
+test score: 0.015134
 </pre></div>
 </div>
 <p>Visualize</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">time_bin_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_temporal_basis</span><span class="p">):</span>
-    <span class="n">RF</span> <span class="o">=</span> <span class="n">strf_model</span><span class="o">.</span><span class="n">make_image_from_spatial_basis</span><span class="p">(</span><span class="n">spatial_basis</span><span class="p">,</span>
-                                             <span class="n">weights</span><span class="p">[</span><span class="nb">range</span><span class="p">(</span><span class="n">time_bin_</span><span class="p">,</span>
-                                                           <span class="n">n_spatial_basis</span> <span class="o">*</span> <span class="n">n_temporal_basis</span><span class="p">,</span>
-                                                           <span class="n">n_temporal_basis</span><span class="p">)])</span>
-
-    <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_temporal_basis</span><span class="p">,</span> <span class="n">time_bin_</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">time_bin_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_temporal_basis</span><span class="p">):</span>
+    <span class="n">RF</span> <span class="o">=</span> <span class="n">strf_model</span><span class="o">.</span><span class="n">make_image_from_spatial_basis</span><span class="p">(</span>
+        <span class="n">spatial_basis</span><span class="p">,</span>
+        <span class="n">weights</span><span class="p">[</span><span class="nb">range</span><span class="p">(</span><span class="n">time_bin_</span><span class="p">,</span> <span class="n">n_spatial_basis</span> <span class="o">*</span> <span class="n">n_temporal_basis</span><span class="p">,</span>
+                      <span class="n">n_temporal_basis</span><span class="p">)])</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_temporal_basis</span><span class="p">,</span> <span class="n">time_bin_</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
     <span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">RF</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;Blues&#39;</span><span class="p">,</span> <span class="n">interpolation</span><span class="o">=</span><span class="s1">&#39;none&#39;</span><span class="p">)</span>
     <span class="n">titletext</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">centers</span><span class="p">[</span><span class="n">time_bin_</span><span class="p">])</span>
     <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="n">titletext</span><span class="p">)</span>
@@ -372,13 +3079,22 @@ Department of Neurobiology, Northwestern University.</p>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
-<img alt="../_images/sphx_glr_plot_tikhonov_006.png" class="align-center" src="../_images/sphx_glr_plot_tikhonov_006.png" />
-<p><strong>Total running time of the script:</strong>
-(0 minutes 27.918 seconds)</p>
+<img alt="../_images/sphx_glr_plot_tikhonov_006.png" class="sphx-glr-single-img" src="../_images/sphx_glr_plot_tikhonov_006.png" />
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/Users/mainak/Documents/github_repos/pyglmnet/examples/plot_tikhonov.py:246: UserWarning: Matplotlib is currently using agg, which is a non-GUI backend, so cannot show the figure.
+  plt.show()
+</pre></div>
+</div>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 6 minutes  12.349 seconds)</p>
+<div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-examples-plot-tikhonov-py">
 <div class="sphx-glr-download docutils container">
-<strong>Download Python source code:</strong> <a class="reference download internal" href="../_downloads/plot_tikhonov.py" download=""><code class="xref download docutils literal"><span class="pre">plot_tikhonov.py</span></code></a></div>
+<p><a class="reference download internal" download="" href="../_downloads/b9d4d4b52eb113752d329d28f043a341/plot_tikhonov.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_tikhonov.py</span></code></a></p>
+</div>
 <div class="sphx-glr-download docutils container">
-<strong>Download IPython notebook:</strong> <a class="reference download internal" href="../_downloads/plot_tikhonov.ipynb" download=""><code class="xref download docutils literal"><span class="pre">plot_tikhonov.ipynb</span></code></a></div>
+<p><a class="reference download internal" download="" href="../_downloads/041aa0da5178deb73584c29f2ae0aecb/plot_tikhonov.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_tikhonov.ipynb</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
 </div>
 
 
@@ -400,7 +3116,7 @@ Department of Neurobiology, Northwestern University.</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2016, Pavan Ramkumar.
+        &copy; Copyright 2016-2019, Pavan Ramkumar.
 
     </p>
   </div>
@@ -422,7 +3138,7 @@ Department of Neurobiology, Northwestern University.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'1.0.1',
+            VERSION:'1.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true
@@ -431,7 +3147,8 @@ Department of Neurobiology, Northwestern University.</p>
       <script type="text/javascript" src="../_static/jquery.js"></script>
       <script type="text/javascript" src="../_static/underscore.js"></script>
       <script type="text/javascript" src="../_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script type="text/javascript" src="../_static/language_data.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   
 

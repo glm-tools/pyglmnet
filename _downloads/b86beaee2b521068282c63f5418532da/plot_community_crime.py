@@ -24,13 +24,13 @@ missing values.
 # Imports
 
 import matplotlib.pyplot as plt
-from sklearn.cross_validation import train_test_split
+from sklearn.model_selection import train_test_split
 from pyglmnet import GLM, GLMCV, datasets
 
 ########################################################
 # Download and preprocess data files
 
-X, y = datasets.fetch_community_crime_data('/tmp/glm-tools')
+X, y = datasets.fetch_community_crime_data()
 n_samples, n_features = X.shape
 
 ########################################################
@@ -40,36 +40,38 @@ X_train, X_test, y_train, y_test = \
     train_test_split(X, y, test_size=0.33, random_state=0)
 
 ########################################################
-# Fit a gaussian distributed GLM with elastic net regularization
+# Fit a binomial distributed GLM with elastic net regularization
 
 # use the default value for reg_lambda
-glm = GLMCV(distr='gaussian', alpha=0.05, score_metric='pseudo_R2')
+glm = GLMCV(distr='binomial', alpha=0.05, score_metric='pseudo_R2', cv=3,
+            tol=1e-4)
 
 # fit model
 glm.fit(X_train, y_train)
 
 # score the test set prediction
-y_test_hat = glm.predict(X_test)
-print ("test set pseudo $R^2$ = %f" % glm.score(X_test, y_test))
+y_test_hat = glm.predict_proba(X_test)
+print("test set pseudo $R^2$ = %f" % glm.score(X_test, y_test))
 
 ########################################################
-# Now use plain grid search cv to compare
+# Now use GridSearchCV to compare
 
 import numpy as np # noqa
 from sklearn.model_selection import GridSearchCV # noqa
-from sklearn.cross_validation import StratifiedKFold # noqa
+from sklearn.model_selection import KFold # noqa
 
-cv = StratifiedKFold(y_train, 3)
+cv = KFold(3)
 
 reg_lambda = np.logspace(np.log(0.5), np.log(0.01), 10,
                          base=np.exp(1))
 param_grid = [{'reg_lambda': reg_lambda}]
 
-glm = GLM(distr='gaussian', alpha=0.05, score_metric='pseudo_R2')
+glm = GLM(distr='binomial', alpha=0.05, score_metric='pseudo_R2',
+          learning_rate=0.1, tol=1e-4, verbose=True)
 glmcv = GridSearchCV(glm, param_grid, cv=cv)
 glmcv.fit(X_train, y_train)
 
-print ("test set pseudo $R^2$ = %f" % glmcv.score(X_test, y_test))
+print("test set pseudo $R^2$ = %f" % glmcv.score(X_test, y_test))
 
 ########################################################
 # Plot the true and predicted test set target values

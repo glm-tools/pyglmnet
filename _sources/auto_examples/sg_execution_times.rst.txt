@@ -1,0 +1,12 @@
+
+:orphan:
+
+.. _sphx_glr_auto_examples_sg_execution_times:
+
+Computation times
+=================
+**06:12.349** total execution time for **auto_examples** files:
+
+- **06:12.349**: :ref:`sphx_glr_auto_examples_plot_tikhonov.py` (``plot_tikhonov.py``)
+- **00:00.000**: :ref:`sphx_glr_auto_examples_plot_community_crime.py` (``plot_community_crime.py``)
+- **00:00.000**: :ref:`sphx_glr_auto_examples_plot_group_lasso.py` (``plot_group_lasso.py``)

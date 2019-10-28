@@ -7,7 +7,7 @@ We will go through the math to setup the penalized negative log-likelihood
 loss function and the coordinate descent algorithm for optimization.
 
 Here are some other resources from a
-`recent talk <https:github.com/pavanramkumar/pydata-chicago-2016>`_.
+`PyData 2016 talk <https:github.com/pavanramkumar/pydata-chicago-2016>`_.
 
 At present this tutorial does not cover Tikhonov regularization or group lasso,
 but we look forward to adding more material shortly.
@@ -33,22 +33,22 @@ GLM with elastic net penalty
 ----------------------------
 
 In the elastic net regularized generalized Linear Model (GLM), we
-want to solve the following problem.
+want to solve the following convex optimization problem.
 
 .. math::
 
-    \min_{\beta_0, \beta} \frac{1}{N} \sum_{i = 1}^N \ell (y_i, \beta_0 + \beta^T x_i)
-    + \lambda [0.5(1 - \alpha)\| \beta \|_2^2 + \alpha \| \beta \|_1]
+    \min_{\beta_0, \beta} \frac{1}{N} \sum_{i = 1}^N \mathcal{L} (y_i, \beta_0 + \beta^T x_i)
+    + \lambda [\frac{1}{2}(1 - \alpha)\| \beta \|_2^2 + \alpha \| \beta \|_1]
 
-where :math:`\ell (y_i, \beta_0 + \beta^T x_i)` is the negative log-likelihood of
-an observation :math:`i`. Here, we will go through the softplus link function case
-and show how we can optimize this cost function
+where :math:`\mathcal{L} (y_i, \beta_0 + \beta^T x_i)` is the negative log-likelihood of
+observation :math:`i`. We will go through the softplus link function case
+and show how we optimize the cost function.
 
 Poisson-like GLM
 ----------------
-The `pyglmnet` implementation comes with `poisson`, `binomial`,
-`gaussian`, and `multinomial` distributions, but for illustration,
-we will walk you through a particular adaptation of the canonical
+The `pyglmnet` implementation comes with `gaussian`, `binomial`, `probit`
+`gamma`, `poisson` and `softplus` distributions, but for illustration,
+we will walk you through `softplus`: a particular adaptation of the canonical
 Poisson generalized linear model (GLM).
 
 For the Poisson GLM, :math:`\lambda_i` is the rate parameter of an
@@ -61,24 +61,24 @@ where :math:`x_i \in \mathcal{R}^{p \times 1}, i = \{1, 2, \dots, n\}` are
 the observed independent variables (predictors),
 :math:`\beta_0 \in \mathcal{R}^{1 \times 1}`,
 :math:`\beta \in \mathcal{R}^{p \times 1}`
-are linear coefficients. :math:`\lambda_i` is also known as the conditional
-intensity function, conditioned on :math:`(\beta_0, \beta)` and
+are linear coefficients. The rate parameter :math:`\lambda_i` is also known as
+the conditional intensity function, conditioned on :math:`(\beta_0, \beta)` and
 :math:`q(z) = \exp(z)` is the nonlinearity.
 
 For numerical reasons, let's adopt a stabilizing non-linearity, known as the
-`softplus` or the smooth rectifier `Dugas et al., 2001
-<http://papers.nips.cc/paper/1920-incorporating-second-order-functional-knowledge-for-better-option-pricing.pdf>`_,
-and adopted by Jonathan Pillow's and Liam Paninski's groups for neural data
+`softplus` or the smooth rectifier (see `Dugas et al., 2001
+<http://papers.nips.cc/paper/1920-incorporating-second-order-functional-knowledge-for-better-option-pricing.pdf>`_),
+that has been adopted by Jonathan Pillow's and Liam Paninski's groups for neural data
 analysis.
-See for instance: `Park et al., 2014
+See for instance `Park et al., 2014
 <http://www.nature.com/neuro/journal/v17/n10/abs/nn.3800.html>`_.
 
 .. math::    q(z) = \log(1+\exp(z))
 
-The softplus prevents :math:`\lambda` in the canonical inverse link function
+The `softplus` prevents :math:`\lambda` in the canonical inverse link function
 from exploding when the argument to the exponent is large. In this
 modification, the formulation is no longer an exact LNP, nor an exact GLM,
-but :math:\pm\mathcal{L}(\beta_0, \beta)` is still concave (convex) and we
+but :math:`\mathcal{L}(\beta_0, \beta)` is still concave (convex) and we
 can use gradient ascent (descent) to optimize it.
 
 .. math::    \lambda_i = q(\beta_0 + \beta^T x_i) = \log(1 + \exp(\beta_0 +
@@ -93,7 +93,7 @@ can use gradient ascent (descent) to optimize it.
    def lmb(self, beta0, beta, X):
       """Conditional intensity function."""
       z = beta0 + np.dot(X, beta)
-      l = self.qu(z)
+      l = qu(z)
       return l
 
 
@@ -102,14 +102,14 @@ Poisson Log-likelihood
 The likelihood of observing the spike count :math:`y_i` under the Poisson
 likelihood function with inhomogeneous rate :math:`\lambda_i` is given by:
 
-.. math::    \prod_i P(y = y_i) = \prod_i \frac{e^{-\lambda_i} \lambda_i^{y_i}}{y_i!}
+.. math::    \prod_i P(y = y_i | X) = \prod_i \frac{e^{-\lambda_i} \lambda_i^{y_i}}{y_i!}
 
 The log-likelihood is given by:
 
 .. math::    \mathcal{L} = \sum_i \bigg\{y_i \log(\lambda_i) - \lambda_i
-                           - log(y_i!)\bigg\}
+                           - \log(y_i!)\bigg\}
 
-However, we are interested in maximizing the log-likelihood as a function of
+However, we are interested in maximizing the log-likelihood with respect to
 :math:`\beta_0` and :math:`\beta`. Thus, we can drop the factorial term:
 
 .. math::    \mathcal{L}(\beta_0, \beta) = \sum_i \bigg\{y_i \log(\lambda_i)
@@ -123,16 +123,16 @@ prevent overfitting. The elastic net penalty is given by:
 .. math::    \mathcal{P}_\alpha(\beta) = (1-\alpha)\frac{1}{2} \|\beta\|^2_{\mathcal{l}_2} + \alpha\|\beta\|_{\mathcal{l}_1}
 
 The elastic net interpolates between two extremes.
-:math:`\alpha = 0` is known as ridge regression and :math:`\alpha = 1`
-is known as LASSO. Note that we do not penalize the baseline term
-:math:`\beta_0`.
+When :math:`\alpha = 0` the penalized model is known as ridge regression and
+when :math:`\alpha = 1` it is known as LASSO. Note that we do not penalize the
+baseline term :math:`\beta_0`.
 
 
 .. code-block:: python
 
    def penalty(alpha, beta):
       """the penalty term"""
-      P = 0.5 * (1 - alpha) * np.linalg.norm(beta, 2) + \
+      P = 0.5 * (1 - alpha) * np.linalg.norm(beta, 2) ** 2 + \
             alpha * np.linalg.norm(beta, 1)
       return P
 
@@ -156,7 +156,7 @@ where :math:`\mathcal{L}(\beta_0, \beta)` is the Poisson log-likelihood and
       L = logL(beta0, beta, X, y)
       P = penalty(beta)
       J = -L + reg_lambda * P
-         return J
+      return J
 
 
 Gradient descent
@@ -175,7 +175,7 @@ To calculate the gradients of the cost function with respect to :math:`\beta_0` 
      \end{eqnarray}
 
 
-Since we will apply co-ordinate descent, let's rewrite this cost in terms of each
+Since we will apply coordinate descent, let's rewrite this cost in terms of each
 scalar parameter :math:`\beta_j`
 
 .. math::
@@ -208,13 +208,13 @@ For the nonlinearity in the second term :math:`y = \log(q(z)) = \log(\log(1+e^{z
      & = \frac{\sigma(z)}{q(z)}\frac{\partial z}{\partial \theta}
      \end{eqnarray}
 
-where :math:`\dot q(z)` happens to be be the sigmoid function,
+where :math:`\dot q(z)` happens to be be the sigmoid function
 
 .. math::
 
-     \sigma(z) = \frac{e^z}{1+e^z}
+     \sigma(z) = \frac{e^z}{1+e^z}.
 
-Putting it all together, we have,
+Putting it all together we have:
 
 .. math::
 
@@ -225,7 +225,7 @@ Putting it all together, we have,
      \frac{\partial J}{\partial \beta_j} = \sum_i \sigma(z_i) x_{ij} - \sum_i y_i \frac{\sigma(z_i)}{q(z_i)}x_{ij}
      + \lambda(1-\alpha)\beta_j + \lambda\alpha \text{sgn}(\beta_j)
 
-Let's define these gradients
+Let's define these gradients:
 
 .. code-block:: python
 
@@ -240,8 +240,8 @@ Let's define these gradients
         return grad_beta0, grad_beta
 
 
-Note that this is all we need for a classic batch gradient descent implementation.
-(for the ``'batch-gradient'`` solver).
+Note that this is all we need for a classic batch gradient descent implementation,
+implemented in the ``'batch-gradient'`` solver.
 
 However, let's also derive the Hessian terms that will be useful for second-order
 optimization methods implemented in the ``'cdfast'`` solver.
@@ -252,7 +252,7 @@ Hessian terms
 Second-order derivatives can accelerate convergence to local minima by providing
 optimal step sizes. However, they are expensive to compute.
 
-This is where co-ordinate descent shines. Since we update only one parameter
+This is where coordinate descent shines. Since we update only one parameter
 :math:`\beta_j` per step, we can simply use the :math:`j^{th}` diagonal term in
 the Hessian matrix to perform an approximate Newton update as:
 
@@ -266,7 +266,7 @@ Let's use calculus again to compute these diagonal terms. Recall that:
 
      \begin{eqnarray}
      \dot q(z) & = \sigma(z)\\
-     \dot\sigma(z) = \sigma(z)(1-\sigma(z))
+     \dot\sigma(z) & = \sigma(z)(1-\sigma(z))
      \end{eqnarray}
 
 Using these, and applying the product rule
@@ -303,21 +303,23 @@ Plugging all these in, we get
                     + reg_lambda * (1-alpha)
         return hess_beta0, hess_beta
 
-Also see the `cheatsheet <https://glm-tools.github.io/>`_ for calculus required
+
+Also see the `cheatsheet <http://glm-tools.github.io/pyglmnet/cheatsheet.html>`_ for the calculus required
 to derive gradients and Hessians for other distributions.
 
-Cyclical co-ordinate descent
-----------------------------
+
+Cyclical coordinate descent
+---------------------------
 
 **Parameter update step**
 
-In cylical coordinate descent with elastic net, we store an active set,
-:math:`\mathcal{K}`, of parameter indices that we update. Since the :math:`\mathcal{l}_1`
+In cylical coordinate descent with elastic net, we store an active set
+:math:`\mathcal{K}` of parameter indices that we update. Since the :math:`\mathcal{l}_1`
 terms :math:`|\beta_j|` are not differentiable at zero, we use the gradient without
 the :math:`\lambda\alpha \text{sgn}(\beta_j)` term to update :math:`\beta_j`.
 Let's call these gradient terms :math:`\tilde{g}_k`.
 
-We start by initializing :math:`\mathcal{K}` to contain all parameter indices
+We start by initializing :math:`\mathcal{K}` to contain all parameter indices.
 Let's say only the :math:`k^{th}` parameter is updated at time step :math:`t`.
 
 .. math::
@@ -328,7 +330,7 @@ Let's say only the :math:`k^{th}` parameter is updated at time step :math:`t`.
      \end{eqnarray}
 
 
-Next, we apply a soft thresholding step for :math:`k \neq 0` after every update iteration, as follows.
+Next we apply a soft thresholding step for :math:`k \neq 0` after every update iteration, as follows.
 :math:`\beta_k^{t} = \mathcal{S}_{\lambda\alpha}(\beta_k^{t})`
 
 where
@@ -357,9 +359,9 @@ If :math:`\beta_k^{t}` has been zero-ed out, we remove :math:`k` from the active
 
 **Caching the z update step**
 
-Next, we want to update :math:`\beta_{k+1}` at the next time step :math:`t+1`.
+Next we want to update :math:`\beta_{k+1}` at the next time step :math:`t+1`.
 For this we need the gradient and Hessian terms, :math:`\tilde{g}_{k+1}` and
-:math`h_{k+1}`. If we update them instead of recalculating them, we can save on
+:math:`h_{k+1}`. If we update them instead of recalculating them, we can save on
 a lot of multiplications and additions. This is possible because we only update
 one parameter at a time. Let's calculate how to make these updates.
 
@@ -443,7 +445,7 @@ Regularization paths and warm restarts
 --------------------------------------
 
 We often find the optimal regularization parameter :math:`\lambda` through cross-validation.
-Thus, in practice, we fit the model several times over a range of :math:`\lambda`'s
+In practice we therefore often fit the model several times over a range of :math:`\lambda`'s
 :math:`\{ \lambda_{max} \geq \dots \geq \lambda_0\}`.
 
 Instead of re-fitting the model each time, we can solve the problem for the

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>API Documentation &mdash; pyglmnet 1.0.1 documentation</title>
+  <title>API Documentation &mdash; pyglmnet 1.1 documentation</title>
   
 
   
@@ -35,8 +35,8 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="pyglmnet 1.0.1 documentation" href="index.html"/>
-        <link rel="next" title="Developer Documentation" href="developers.html"/>
+    <link rel="top" title="pyglmnet 1.1 documentation" href="index.html"/>
+        <link rel="next" title="Developer Documentation" href="contributing.html"/>
         <link rel="prev" title="Tikhonov Regularization" href="auto_examples/plot_tikhonov.html"/> 
 
   
@@ -66,7 +66,7 @@
             
             
               <div class="version">
-                1.0.1
+                1.1
               </div>
             
           
@@ -97,11 +97,9 @@
 <li class="toctree-l2"><a class="reference internal" href="#classes">Classes</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="developers.html">Developer Documentation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="requests.html">Requests for pull requests</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Developer Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="resources.html">Resources</a></li>
-<li class="toctree-l1"><a class="reference internal" href="whats_new.html">Current</a></li>
-<li class="toctree-l1"><a class="reference internal" href="whats_new.html#version-0-1">Version 0.1</a></li>
+<li class="toctree-l1"><a class="reference internal" href="whats_new.html">Release notes</a></li>
 </ul>
 
             
@@ -152,270 +150,488 @@
 <h2>Classes<a class="headerlink" href="#classes" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="pyglmnet.GLM">
-<em class="property">class </em><code class="descclassname">pyglmnet.</code><code class="descname">GLM</code><span class="sig-paren">(</span><em>distr='poisson'</em>, <em>alpha=0.5</em>, <em>Tau=None</em>, <em>group=None</em>, <em>reg_lambda=0.1</em>, <em>solver='batch-gradient'</em>, <em>learning_rate=0.2</em>, <em>max_iter=1000</em>, <em>tol=0.001</em>, <em>eta=2.0</em>, <em>score_metric='deviance'</em>, <em>random_state=0</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyglmnet/pyglmnet.html#GLM"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyglmnet.GLM" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">pyglmnet.</code><code class="sig-name descname">GLM</code><span class="sig-paren">(</span><em class="sig-param">distr='poisson'</em>, <em class="sig-param">alpha=0.5</em>, <em class="sig-param">Tau=None</em>, <em class="sig-param">group=None</em>, <em class="sig-param">reg_lambda=0.1</em>, <em class="sig-param">solver='batch-gradient'</em>, <em class="sig-param">learning_rate=0.2</em>, <em class="sig-param">max_iter=1000</em>, <em class="sig-param">tol=1e-06</em>, <em class="sig-param">eta=2.0</em>, <em class="sig-param">score_metric='deviance'</em>, <em class="sig-param">fit_intercept=True</em>, <em class="sig-param">random_state=0</em>, <em class="sig-param">callback=None</em>, <em class="sig-param">verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyglmnet/pyglmnet.html#GLM"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyglmnet.GLM" title="Permalink to this definition">¶</a></dt>
 <dd><p>Class for estimating regularized generalized linear models (GLM).
 The regularized GLM minimizes the penalized negative log likelihood:</p>
-<div class="math">
+<div class="math notranslate nohighlight">
 \[\min_{\beta_0, \beta} \frac{1}{N}
 \sum_{i = 1}^N \mathcal{L} (y_i, \beta_0 + \beta^T x_i)
 + \lambda [ \frac{1}{2}(1 - \alpha) \mathcal{P}_2 +
             \alpha \mathcal{P}_1 ]\]</div>
-<p>where <span class="math">\(\mathcal{P}_2\)</span> and <span class="math">\(\mathcal{P}_1\)</span> are the generalized
+<p>where <span class="math notranslate nohighlight">\(\mathcal{P}_2\)</span> and <span class="math notranslate nohighlight">\(\mathcal{P}_1\)</span> are the generalized
 L2 (Tikhonov) and generalized L1 (Group Lasso) penalties, given by:</p>
-<div class="math">
+<div class="math notranslate nohighlight">
 \[\mathcal{P}_2 = \|\Gamma \beta \|_2^2 \
 \mathcal{P}_1 = \sum_g \|\beta_{j,g}\|_2\]</div>
-<p>where <span class="math">\(\Gamma\)</span> is the Tikhonov matrix: a square factorization
-of the inverse covariance matrix and <span class="math">\(\beta_{j,g}\)</span> is the
-<span class="math">\(j\)</span> th coefficient of group <span class="math">\(g\)</span>.</p>
+<p>where <span class="math notranslate nohighlight">\(\Gamma\)</span> is the Tikhonov matrix: a square factorization
+of the inverse covariance matrix and <span class="math notranslate nohighlight">\(\beta_{j,g}\)</span> is the
+<span class="math notranslate nohighlight">\(j\)</span> th coefficient of group <span class="math notranslate nohighlight">\(g\)</span>.</p>
 <p>The generalized L2 penalty defaults to the ridge penalty when
-<span class="math">\(\Gamma\)</span> is identity.</p>
+<span class="math notranslate nohighlight">\(\Gamma\)</span> is identity.</p>
 <p>The generalized L1 penalty defaults to the lasso penalty when each
-<span class="math">\(\beta\)</span> belongs to its own group.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first last docutils">
-<dt><strong>distr</strong> <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
-<dd><p class="first last">distribution family can be one of the following
-&#8216;gaussian&#8217; | &#8216;binomial&#8217; | &#8216;poisson&#8217; | &#8216;softplus&#8217;
-default: &#8216;poisson&#8217;.</p>
+<span class="math notranslate nohighlight">\(\beta\)</span> belongs to its own group.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>distr: str</strong></dt><dd><p>distribution family can be one of the following
+‘gaussian’ | ‘binomial’ | ‘poisson’ | ‘softplus’ | ‘probit’ | ‘gamma’
+default: ‘poisson’.</p>
 </dd>
-<dt><strong>alpha</strong> <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
-<dd><p class="first last">the weighting between L1 penalty and L2 penalty term
+<dt><strong>alpha: float</strong></dt><dd><p>the weighting between L1 penalty and L2 penalty term
 of the loss function.
 default: 0.5</p>
 </dd>
-<dt><strong>Tau</strong> <span class="classifier-delimiter">:</span> <span class="classifier">array | None</span></dt>
-<dd><p class="first last">the (n_features, n_features) Tikhonov matrix.
+<dt><strong>Tau: array | None</strong></dt><dd><p>the (n_features, n_features) Tikhonov matrix.
 default: None, in which case Tau is identity
 and the L2 penalty is ridge-like</p>
 </dd>
-<dt><strong>group</strong> <span class="classifier-delimiter">:</span> <span class="classifier">array | list | None</span></dt>
-<dd><p class="first last">the (n_features, )
-list or array of group identities for each parameter <span class="math">\(\beta\)</span>.
+<dt><strong>group: array | list | None</strong></dt><dd><p>the (n_features, )
+list or array of group identities for each parameter <span class="math notranslate nohighlight">\(\beta\)</span>.
 Each entry of the list/ array should contain an int from 1 to n_groups
 that specify group membership for each parameter
-(except <span class="math">\(\beta_0\)</span>).
+(except <span class="math notranslate nohighlight">\(\beta_0\)</span>).
 If you do not want to specify a group for a specific parameter,
 set it to zero.
 default: None, in which case it defaults to L1 regularization</p>
 </dd>
-<dt><strong>reg_lambda</strong> <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
-<dd><p class="first last">regularization parameter <span class="math">\(\lambda\)</span> of penalty term.
+<dt><strong>reg_lambda: float</strong></dt><dd><p>regularization parameter <span class="math notranslate nohighlight">\(\lambda\)</span> of penalty term.
 default: 0.1</p>
 </dd>
-<dt><strong>solver</strong> <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
-<dd><p class="first last">optimization method, can be one of the following
-&#8216;batch-gradient&#8217; (vanilla batch gradient descent)
-&#8216;cdfast&#8217; (Newton coordinate gradient descent).
-default: &#8216;batch-gradient&#8217;</p>
+<dt><strong>solver: str</strong></dt><dd><p>optimization method, can be one of the following
+‘batch-gradient’ (vanilla batch gradient descent)
+‘cdfast’ (Newton coordinate gradient descent).
+default: ‘batch-gradient’</p>
 </dd>
-<dt><strong>learning_rate</strong> <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
-<dd><p class="first last">learning rate for gradient descent.
+<dt><strong>learning_rate: float</strong></dt><dd><p>learning rate for gradient descent.
 default: 2e-1</p>
 </dd>
-<dt><strong>max_iter</strong> <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
-<dd><p class="first last">maximum iterations for the model.
+<dt><strong>max_iter: int</strong></dt><dd><p>maximum iterations for the model.
 default: 1000</p>
 </dd>
-<dt><strong>tol</strong> <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
-<dd><p class="first last">convergence threshold or stopping criteria.
-Optimization loop will stop below setting threshold.
-default: 1e-3</p>
+<dt><strong>tol: float</strong></dt><dd><p>convergence threshold or stopping criteria.
+Optimization loop will stop when norm(gradient) is below the threshold.
+default: 1e-6</p>
 </dd>
-<dt><strong>eta</strong> <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
-<dd><p class="first last">a threshold parameter that linearizes the exp() function above eta.
+<dt><strong>eta: float</strong></dt><dd><p>a threshold parameter that linearizes the exp() function above eta.
 default: 2.0</p>
 </dd>
-<dt><strong>score_metric</strong> <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
-<dd><p class="first last">specifies the scoring metric.
-one of either &#8216;deviance&#8217; or &#8216;pseudo_R2&#8217;.
-default: &#8216;deviance&#8217;</p>
+<dt><strong>score_metric: str</strong></dt><dd><p>specifies the scoring metric.
+one of either ‘deviance’ or ‘pseudo_R2’.
+default: ‘deviance’</p>
 </dd>
-<dt><strong>random_state</strong> <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
-<dd><p class="first last">seed of the random number generator used to initialize the solution.
+<dt><strong>fit_intercept: boolean</strong></dt><dd><p>specifies if a constant (a.k.a. bias or intercept) should be
+added to the decision function.
+default: True</p>
+</dd>
+<dt><strong>random_state</strong><span class="classifier">int</span></dt><dd><p>seed of the random number generator used to initialize the solution.
 default: 0</p>
 </dd>
-<dt><strong>verbose</strong> <span class="classifier-delimiter">:</span> <span class="classifier">boolean or int</span></dt>
-<dd><p class="first last">default: False</p>
+<dt><strong>verbose: boolean or int</strong></dt><dd><p>default: False</p>
 </dd>
 </dl>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">random_state</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">n_samples</span><span class="p">,</span> <span class="n">n_features</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">4</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">RandomState</span><span class="p">(</span><span class="n">random_state</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">X</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="p">(</span><span class="n">n_samples</span><span class="p">,</span> <span class="n">n_features</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="mf">2.2</span> <span class="o">*</span> <span class="n">X</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">-</span><span class="mf">1.0</span> <span class="o">*</span> <span class="n">X</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mf">0.3</span> <span class="o">*</span> <span class="n">X</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">+</span> <span class="mf">1.0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">glm</span> <span class="o">=</span> <span class="n">GLM</span><span class="p">(</span><span class="n">distr</span><span class="o">=</span><span class="s1">&#39;gaussian&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="n">random_state</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">glm</span> <span class="o">=</span> <span class="n">glm</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">glm</span><span class="o">.</span><span class="n">beta0_</span> <span class="c1"># The intercept</span>
+<span class="go">1.005380485553247</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">glm</span><span class="o">.</span><span class="n">beta_</span> <span class="c1"># The coefficients</span>
+<span class="go">array([ 1.90216711, -0.78782533, -0.        ,  0.03227455])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y_pred</span> <span class="o">=</span> <span class="n">glm</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Attributes</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>beta0_: int</strong></dt><dd><p>The intercept</p>
+</dd>
+<dt><strong>beta_: array, (n_features)</strong></dt><dd><p>The learned betas</p>
+</dd>
+<dt><strong>n_iter_: int</strong></dt><dd><p>The number of iterations</p>
+</dd>
+</dl>
+</dd>
+</dl>
 <dl class="method">
 <dt id="pyglmnet.GLM.copy">
-<code class="descname">copy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyglmnet/pyglmnet.html#GLM.copy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyglmnet.GLM.copy" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">copy</code><span class="sig-paren">(</span><em class="sig-param">self</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyglmnet/pyglmnet.html#GLM.copy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyglmnet.GLM.copy" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return a copy of the object.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
-<dt><strong>none:</strong></dt>
-<dd></dd>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>none</strong></dt><dd></dd>
 </dl>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first last docutils">
-<dt><strong>self: instance of GLM</strong></dt>
-<dd><p class="first last">A copy of the GLM instance.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt>self: instance of GLM</dt><dd><p>A copy of the GLM instance.</p>
 </dd>
 </dl>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="pyglmnet.GLM.fit">
-<code class="descname">fit</code><span class="sig-paren">(</span><em>X</em>, <em>y</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyglmnet/pyglmnet.html#GLM.fit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyglmnet.GLM.fit" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">fit</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">X</em>, <em class="sig-param">y</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyglmnet/pyglmnet.html#GLM.fit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyglmnet.GLM.fit" title="Permalink to this definition">¶</a></dt>
 <dd><p>The fit function.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
-<dt><strong>X</strong> <span class="classifier-delimiter">:</span> <span class="classifier">array</span></dt>
-<dd><p class="first last">The input data of shape (n_samples, n_features)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>X: array</strong></dt><dd><p>The 2D input data of shape (n_samples, n_features)</p>
 </dd>
-<dt><strong>y</strong> <span class="classifier-delimiter">:</span> <span class="classifier">array</span></dt>
-<dd><p class="first last">The target data</p>
+<dt><strong>y: array</strong></dt><dd><p>The 1D target data of shape (n_samples,)</p>
 </dd>
 </dl>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first last docutils">
-<dt><strong>self</strong> <span class="classifier-delimiter">:</span> <span class="classifier">instance of GLM</span></dt>
-<dd><p class="first last">The fitted model.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt>self: instance of GLM</dt><dd><p>The fitted model.</p>
 </dd>
 </dl>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="pyglmnet.GLM.fit_predict">
-<code class="descname">fit_predict</code><span class="sig-paren">(</span><em>X</em>, <em>y</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyglmnet/pyglmnet.html#GLM.fit_predict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyglmnet.GLM.fit_predict" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">fit_predict</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">X</em>, <em class="sig-param">y</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyglmnet/pyglmnet.html#GLM.fit_predict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyglmnet.GLM.fit_predict" title="Permalink to this definition">¶</a></dt>
 <dd><p>Fit the model and predict on the same data.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
-<dt><strong>X</strong> <span class="classifier-delimiter">:</span> <span class="classifier">array</span></dt>
-<dd><p class="first last">The input data to fit and predict,
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>X: array</strong></dt><dd><p>The input data to fit and predict,
 of shape (n_samples, n_features)</p>
 </dd>
 </dl>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first last docutils">
-<dt><strong>yhat</strong> <span class="classifier-delimiter">:</span> <span class="classifier">array</span></dt>
-<dd><p class="first last">The predicted targets of shape (n_samples,).</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt>yhat: array</dt><dd><p>The predicted targets of shape (n_samples,).</p>
 </dd>
 </dl>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="pyglmnet.GLM.predict">
-<code class="descname">predict</code><span class="sig-paren">(</span><em>X</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyglmnet/pyglmnet.html#GLM.predict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyglmnet.GLM.predict" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">predict</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">X</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyglmnet/pyglmnet.html#GLM.predict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyglmnet.GLM.predict" title="Permalink to this definition">¶</a></dt>
 <dd><p>Predict targets.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
-<dt><strong>X</strong> <span class="classifier-delimiter">:</span> <span class="classifier">array</span></dt>
-<dd><p class="first last">Input data for prediction, of shape (n_samples, n_features)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>X: array</strong></dt><dd><p>Input data for prediction, of shape (n_samples, n_features)</p>
 </dd>
 </dl>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first last docutils">
-<dt><strong>yhat</strong> <span class="classifier-delimiter">:</span> <span class="classifier">array</span></dt>
-<dd><p class="first last">The predicted targets of shape (n_samples,)</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt>yhat: array</dt><dd><p>The predicted targets of shape (n_samples,)</p>
 </dd>
 </dl>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="pyglmnet.GLM.predict_proba">
-<code class="descname">predict_proba</code><span class="sig-paren">(</span><em>X</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyglmnet/pyglmnet.html#GLM.predict_proba"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyglmnet.GLM.predict_proba" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">predict_proba</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">X</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyglmnet/pyglmnet.html#GLM.predict_proba"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyglmnet.GLM.predict_proba" title="Permalink to this definition">¶</a></dt>
 <dd><p>Predict class probability for binomial.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
-<dt><strong>X</strong> <span class="classifier-delimiter">:</span> <span class="classifier">array</span></dt>
-<dd><p class="first last">Input data for prediction, of shape (n_samples, n_features)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>X: array</strong></dt><dd><p>Input data for prediction, of shape (n_samples, n_features)</p>
 </dd>
 </dl>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first docutils">
-<dt><strong>yhat</strong> <span class="classifier-delimiter">:</span> <span class="classifier">array</span></dt>
-<dd><p class="first last">The predicted targets of shape (n_samples,).</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt>yhat: array</dt><dd><p>The predicted targets of shape (n_samples,).</p>
 </dd>
 </dl>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><dl class="first last docutils">
-<dt><strong>Works only for the binomial distribution.</strong></dt>
-<dd></dd>
-<dt><strong>Raises error otherwise.</strong></dt>
-<dd></dd>
+</dd>
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><dl class="simple">
+<dt>Works only for the binomial distribution.</dt><dd></dd>
+<dt>Raises error otherwise.</dt><dd></dd>
 </dl>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="pyglmnet.GLM.score">
-<code class="descname">score</code><span class="sig-paren">(</span><em>X</em>, <em>y</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyglmnet/pyglmnet.html#GLM.score"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyglmnet.GLM.score" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">score</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">X</em>, <em class="sig-param">y</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyglmnet/pyglmnet.html#GLM.score"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyglmnet.GLM.score" title="Permalink to this definition">¶</a></dt>
 <dd><p>Score the model.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
-<dt><strong>X</strong> <span class="classifier-delimiter">:</span> <span class="classifier">array</span></dt>
-<dd><p class="first last">The input data whose prediction will be scored,
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>X: array</strong></dt><dd><p>The input data whose prediction will be scored,
 of shape (n_samples, n_features).</p>
 </dd>
-<dt><strong>y</strong> <span class="classifier-delimiter">:</span> <span class="classifier">array</span></dt>
-<dd><p class="first last">The true targets against which to score the predicted targets,
+<dt><strong>y: array</strong></dt><dd><p>The true targets against which to score the predicted targets,
 of shape (n_samples,).</p>
 </dd>
 </dl>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first last docutils">
-<dt><strong>score: float</strong></dt>
-<dd><p class="first last">The score metric</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt>score: float</dt><dd><p>The score metric</p>
 </dd>
 </dl>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pyglmnet.GLMCV">
+<em class="property">class </em><code class="sig-prename descclassname">pyglmnet.</code><code class="sig-name descname">GLMCV</code><span class="sig-paren">(</span><em class="sig-param">distr='poisson'</em>, <em class="sig-param">alpha=0.5</em>, <em class="sig-param">Tau=None</em>, <em class="sig-param">group=None</em>, <em class="sig-param">reg_lambda=None</em>, <em class="sig-param">cv=10</em>, <em class="sig-param">solver='batch-gradient'</em>, <em class="sig-param">learning_rate=0.2</em>, <em class="sig-param">max_iter=1000</em>, <em class="sig-param">tol=1e-06</em>, <em class="sig-param">eta=2.0</em>, <em class="sig-param">score_metric='deviance'</em>, <em class="sig-param">fit_intercept=True</em>, <em class="sig-param">random_state=0</em>, <em class="sig-param">verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyglmnet/pyglmnet.html#GLMCV"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyglmnet.GLMCV" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class for estimating regularized generalized linear models (GLM)
+along a regularization path with warm restarts.</p>
+<p>The regularized GLM minimizes the penalized negative log likelihood:</p>
+<div class="math notranslate nohighlight">
+\[\min_{\beta_0, \beta} \frac{1}{N}
+\sum_{i = 1}^N \mathcal{L} (y_i, \beta_0 + \beta^T x_i)
++ \lambda [ \frac{1}{2}(1 - \alpha) \mathcal{P}_2 +
+            \alpha \mathcal{P}_1 ]\]</div>
+<p>where <span class="math notranslate nohighlight">\(\mathcal{P}_2\)</span> and <span class="math notranslate nohighlight">\(\mathcal{P}_1\)</span> are the generalized
+L2 (Tikhonov) and generalized L1 (Group Lasso) penalties, given by:</p>
+<div class="math notranslate nohighlight">
+\[\mathcal{P}_2 = \|\Gamma \beta \|_2^2 \
+\mathcal{P}_1 = \sum_g \|\beta_{j,g}\|_2\]</div>
+<p>where <span class="math notranslate nohighlight">\(\Gamma\)</span> is the Tikhonov matrix: a square factorization
+of the inverse covariance matrix and <span class="math notranslate nohighlight">\(\beta_{j,g}\)</span> is the
+<span class="math notranslate nohighlight">\(j\)</span> th coefficient of group <span class="math notranslate nohighlight">\(g\)</span>.</p>
+<p>The generalized L2 penalty defaults to the ridge penalty when
+<span class="math notranslate nohighlight">\(\Gamma\)</span> is identity.</p>
+<p>The generalized L1 penalty defaults to the lasso penalty when each
+<span class="math notranslate nohighlight">\(\beta\)</span> belongs to its own group.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>distr: str</strong></dt><dd><p>distribution family can be one of the following
+‘gaussian’ | ‘binomial’ | ‘poisson’ | ‘softplus’ | ‘probit’ | ‘gamma’
+default: ‘poisson’.</p>
+</dd>
+<dt><strong>alpha: float</strong></dt><dd><p>the weighting between L1 penalty and L2 penalty term
+of the loss function.
+default: 0.5</p>
+</dd>
+<dt><strong>Tau: array | None</strong></dt><dd><p>the (n_features, n_features) Tikhonov matrix.
+default: None, in which case Tau is identity
+and the L2 penalty is ridge-like</p>
+</dd>
+<dt><strong>group: array | list | None</strong></dt><dd><p>the (n_features, )
+list or array of group identities for each parameter <span class="math notranslate nohighlight">\(\beta\)</span>.
+Each entry of the list/ array should contain an int from 1 to n_groups
+that specify group membership for each parameter
+(except <span class="math notranslate nohighlight">\(\beta_0\)</span>).
+If you do not want to specify a group for a specific parameter,
+set it to zero.
+default: None, in which case it defaults to L1 regularization</p>
+</dd>
+<dt><strong>reg_lambda: array | list | None</strong></dt><dd><p>array of regularized parameters <span class="math notranslate nohighlight">\(\lambda\)</span> of penalty term.
+default: None, a list of 10 floats spaced logarithmically (base e)
+between 0.5 and 0.01.</p>
+</dd>
+<dt><strong>cv: cross validation object (default 10)</strong></dt><dd><p>Iterator for doing cross validation</p>
+</dd>
+<dt><strong>solver: str</strong></dt><dd><p>optimization method, can be one of the following
+‘batch-gradient’ (vanilla batch gradient descent)
+‘cdfast’ (Newton coordinate gradient descent).
+default: ‘batch-gradient’</p>
+</dd>
+<dt><strong>learning_rate: float</strong></dt><dd><p>learning rate for gradient descent.
+default: 2e-1</p>
+</dd>
+<dt><strong>max_iter: int</strong></dt><dd><p>maximum iterations for the model.
+default: 1000</p>
+</dd>
+<dt><strong>tol: float</strong></dt><dd><p>convergence threshold or stopping criteria.
+Optimization loop will stop when norm(gradient) is below the threshold.
+default: 1e-6</p>
+</dd>
+<dt><strong>eta: float</strong></dt><dd><p>a threshold parameter that linearizes the exp() function above eta.
+default: 2.0</p>
+</dd>
+<dt><strong>score_metric: str</strong></dt><dd><p>specifies the scoring metric.
+one of either ‘deviance’ or ‘pseudo_R2’.
+default: ‘deviance’</p>
+</dd>
+<dt><strong>fit_intercept: boolean</strong></dt><dd><p>specifies if a constant (a.k.a. bias or intercept) should be
+added to the decision function.
+default: True</p>
+</dd>
+<dt><strong>random_state</strong><span class="classifier">int</span></dt><dd><p>seed of the random number generator used to initialize the solution.
+default: 0</p>
+</dd>
+<dt><strong>verbose: boolean or int</strong></dt><dd><p>default: False</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>To select subset of fitted glm models, you can simply do:</p>
+<p>glm = glm[1:3]
+glm[2].predict(X_test)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Attributes</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>beta0_: int</strong></dt><dd><p>The intercept</p>
+</dd>
+<dt><strong>beta_: array, (n_features)</strong></dt><dd><p>The learned betas</p>
+</dd>
+<dt><strong>glm_: instance of GLM</strong></dt><dd><p>The GLM object with best score</p>
+</dd>
+<dt><strong>reg_lambda_opt_: float</strong></dt><dd><p>The reg_lambda parameter for best GLM object</p>
+</dd>
+<dt><strong>n_iter_: int</strong></dt><dd><p>The number of iterations</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<dl class="method">
+<dt id="pyglmnet.GLMCV.copy">
+<code class="sig-name descname">copy</code><span class="sig-paren">(</span><em class="sig-param">self</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyglmnet/pyglmnet.html#GLMCV.copy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyglmnet.GLMCV.copy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a copy of the object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>none</strong></dt><dd></dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt>self: instance of GLM</dt><dd><p>A copy of the GLM instance.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyglmnet.GLMCV.fit">
+<code class="sig-name descname">fit</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">X</em>, <em class="sig-param">y</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyglmnet/pyglmnet.html#GLMCV.fit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyglmnet.GLMCV.fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>The fit function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>X: array</strong></dt><dd><p>The input data of shape (n_samples, n_features)</p>
+</dd>
+<dt><strong>y: array</strong></dt><dd><p>The target data</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt>self: instance of GLM</dt><dd><p>The fitted model.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyglmnet.GLMCV.fit_predict">
+<code class="sig-name descname">fit_predict</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">X</em>, <em class="sig-param">y</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyglmnet/pyglmnet.html#GLMCV.fit_predict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyglmnet.GLMCV.fit_predict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fit the model and predict on the same data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>X: array</strong></dt><dd><p>The input data to fit and predict,
+of shape (n_samples, n_features)</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt>yhat: array</dt><dd><p>The predicted targets of shape based on the model with optimal
+reg_lambda (n_samples,)</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyglmnet.GLMCV.predict">
+<code class="sig-name descname">predict</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">X</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyglmnet/pyglmnet.html#GLMCV.predict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyglmnet.GLMCV.predict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Predict targets.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>X: array</strong></dt><dd><p>Input data for prediction, of shape (n_samples, n_features)</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt>yhat: array</dt><dd><p>The predicted targets of shape based on the model with optimal
+reg_lambda (n_samples,)</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyglmnet.GLMCV.predict_proba">
+<code class="sig-name descname">predict_proba</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">X</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyglmnet/pyglmnet.html#GLMCV.predict_proba"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyglmnet.GLMCV.predict_proba" title="Permalink to this definition">¶</a></dt>
+<dd><p>Predict class probability for binomial.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>X: array</strong></dt><dd><p>Input data for prediction, of shape (n_samples, n_features)</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt>yhat: array</dt><dd><p>The predicted targets of shape (n_samples, ).</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><dl class="simple">
+<dt>Works only for the binomial distribution.</dt><dd></dd>
+<dt>Raises error otherwise.</dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyglmnet.GLMCV.score">
+<code class="sig-name descname">score</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">X</em>, <em class="sig-param">y</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyglmnet/pyglmnet.html#GLMCV.score"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyglmnet.GLMCV.score" title="Permalink to this definition">¶</a></dt>
+<dd><p>Score the model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>X: array</strong></dt><dd><p>The input data whose prediction will be scored,
+of shape (n_samples, n_features).</p>
+</dd>
+<dt><strong>y: array</strong></dt><dd><p>The true targets against which to score the predicted targets,
+of shape (n_samples,).</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt>score: float</dt><dd><p>The score metric for the optimal reg_lambda</p>
+</dd>
+</dl>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
@@ -430,7 +646,7 @@ of shape (n_samples,).</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="developers.html" class="btn btn-neutral float-right" title="Developer Documentation" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="contributing.html" class="btn btn-neutral float-right" title="Developer Documentation" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="auto_examples/plot_tikhonov.html" class="btn btn-neutral" title="Tikhonov Regularization" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
@@ -442,7 +658,7 @@ of shape (n_samples,).</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2016, Pavan Ramkumar.
+        &copy; Copyright 2016-2019, Pavan Ramkumar.
 
     </p>
   </div>
@@ -464,7 +680,7 @@ of shape (n_samples,).</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.0.1',
+            VERSION:'1.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true
@@ -473,7 +689,8 @@ of shape (n_samples,).</p>
       <script type="text/javascript" src="_static/jquery.js"></script>
       <script type="text/javascript" src="_static/underscore.js"></script>
       <script type="text/javascript" src="_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script type="text/javascript" src="_static/language_data.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   
 

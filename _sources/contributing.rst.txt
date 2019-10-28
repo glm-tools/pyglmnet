@@ -5,7 +5,7 @@ Developer Documentation
 We could use help with a number of ongoing issues. If you'd like to help,
 check the `issue tree <https://github.com/glm-tools/pyglmnet/issues>`_
 as well as our
-`requests for pull requests <https://glm-tools.github.io/requests.html>`_.
+`requests for pull requests <https://glm-tools.github.io/pyglmnet/requests.html>`_.
 
 If you've decided to make a pull request, here is an outline of the
 development workflow that we have successfully adopted.
@@ -14,44 +14,44 @@ Setting up
 ----------
 
 Fork the `repository <https://github.com/glm-tools/pyglmnet>`_
-to your own account (e.g. user).
+to your own account (i.e. github user).
 
 Clone or pull your forked repository locally. If you are doing it for the
 first time:
 
 .. code:: bash
 
-  git clone https://github.com/user/pyglmnet
+  git clone https://github.com/<your-user-name>/pyglmnet
 
-Or if you have an already existing local clone:
+Or if you have already cloned the repository:
 
 .. code:: bash
 
   git pull origin master
 
-Setup a remote to point to the main repository.
+Setup a remote to point to the main upstream repository.
 
 .. code:: bash
 
-  git remote add main https://github.com/glm-tools/pyglmnet
+  git remote add upstream https://github.com/glm-tools/pyglmnet
   git remote -v
 
 You should see this:
 
 .. code:: console
 
-  main	  https://github.com/glm-tools/pyglmnet.git (fetch)
-  main	  https://github.com/glm-tools/pyglmnet.git (push)
-  origin	http://github.com/user/pyglmnet.git (fetch)
-  origin	http://github.com/user/pyglmnet.git (push)
+  upstream	  https://github.com/glm-tools/pyglmnet.git (fetch)
+  upstream	  https://github.com/glm-tools/pyglmnet.git (push)
+  origin	http://github.com/<your-user-name>/pyglmnet.git (fetch)
+  origin	http://github.com/<your-user-name>/pyglmnet.git (push)
 
 Before you start developing a feature, make sure that your local master is
-up to date. This will save you a lot of merge conflicts later.
+up to date. This can save you from a lot of merge conflicts later.
 
 .. code:: bash
 
   git checkout master
-  git pull main master
+  git pull upstream master
 
 In case your own fork is behind the main repo, update your fork:
 
@@ -64,7 +64,7 @@ developing.
 
 Develop
 -------
-Make sure you develop each feature on a new branch
+Make sure you develop each feature on a new branch:
 
 .. code:: bash
 
@@ -77,14 +77,24 @@ First if it is a major feature, consider writing a test. You can do this by
 editing ``tests/test_pyglmnet.py``.
 
 Second, once you have written your tests, run them locally.
-We test with ``nosetests``:
+Install ``pytest`` and ``pytest-cov``:
 
 .. code:: bash
 
-  nosetests . --with-coverage
+  pip install pytest pytest-cov
+
+
+.. code:: bash
+
+  py.test --cov=pyglmnet tests/
 
 If you don't see error messages, go ahead and test with a pep8 style checker.
-We use flake8
+We use flake8.  Install ``flake8``:
+
+.. code:: bash
+
+  pip install flake8
+  
 
 .. code:: bash
 
@@ -92,7 +102,7 @@ We use flake8
 
 If you don't see any errors, you are good to add and commit.
 
-Add all the files changed and commit them with short and meaningful message.
+Add all the files changed and commit them with a short and meaningful message.
 We recommend one commit per conceptual change since it helps us keep track
 of what happened more easily.
 
@@ -111,7 +121,7 @@ Once committed, push your local branch to a branch in your fork.
 
 Make pull request
 -----------------
-From the ``feat`` branch of your fork: https://github.com/user/pyglmnet
+From the ``feat`` branch of your fork: https://github.com/<your-user-name>/pyglmnet
 you can create a pull request on to the main repo. Give the PR a meaningful
 name. We recommend prefixing it with a ``[WIP]`` if the feature is being built.
 If you think it is ready to merge, prefix with ``[MRG]``.
@@ -124,7 +134,7 @@ in addition to concisely describing the most salient changes made.
 Once your PR is made, the tests will run. If there are errors, they will
 be reported on the PR's page.
 
-Major PRs are followed by a process of peer review by one of the core developers
+Major PRs are followed by a process of peer review by one of the maintainers
 commenting on the code and suggesting changes.
 
 For making changes to the PR, make changes to your local ``feat`` branch
@@ -142,7 +152,7 @@ before it can be merged.
 Once the PR is merged, you can optionally delete the ``feat`` branch both
 locally and on your fork.
 
-Build documenation
+Build documentation
 ------------------
 The following should be installed in order to build the documentation.
 

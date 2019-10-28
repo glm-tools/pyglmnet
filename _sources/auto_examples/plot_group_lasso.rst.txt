@@ -1,4 +1,8 @@
+.. note::
+    :class: sphx-glr-download-link-note
 
+    Click :ref:`here <sphx_glr_download_auto_examples_plot_group_lasso.py>` to download the full example code
+.. rst-class:: sphx-glr-example-title
 
 .. _sphx_glr_auto_examples_plot_group_lasso.py:
 
@@ -12,8 +16,7 @@ typical in regression problems where it is reasonable to impose penalties
 to model parameters in a group-wise fashion based on domain knowledge.
 
 
-
-.. code-block:: python
+.. code-block:: default
 
 
     # Author: Matthew Antalek <matthew.antalek@northwestern.edu>
@@ -26,13 +29,12 @@ to model parameters in a group-wise fashion based on domain knowledge.
 
 
 
-.. code-block:: python
+.. code-block:: default
 
 
     from pyglmnet import GLMCV
     from pyglmnet.datasets import fetch_group_lasso_datasets
     import matplotlib.pyplot as plt
-
 
 
 
@@ -52,7 +54,7 @@ site or not.
 Read and preprocess data
 
 
-.. code-block:: python
+.. code-block:: default
 
 
     df, group_idxs = fetch_group_lasso_datasets()
@@ -64,32 +66,32 @@ Read and preprocess data
 
 .. rst-class:: sphx-glr-script-out
 
- Out::
+ Out:
 
-      0    1    2    3    4    5    6    7    8    9  ...    930  931  932  \
-    0  1.0  1.0  0.0  1.0  0.0  1.0  0.0  0.0  0.0  0.0  ...    0.0  0.0  0.0   
-    1  1.0  0.0  0.0  0.0  1.0  1.0  0.0  0.0  0.0  1.0  ...    0.0  0.0  0.0   
-    2  1.0  1.0  0.0  1.0  0.0  1.0  0.0  0.0  0.0  0.0  ...    0.0  0.0  0.0   
-    3  1.0  1.0  1.0  0.0  0.0  1.0  1.0  0.0  0.0  0.0  ...    0.0  0.0  0.0   
-    4  1.0  0.0  0.0  0.0  1.0  0.0  1.0  1.0  0.0  0.0  ...    0.0  0.0  0.0   
+ .. code-block:: none
 
-       933  934  935  936  937  938  Label  
-    0  0.0  0.0  0.0  0.0  0.0  0.0    1.0  
-    1  0.0  0.0  0.0  0.0  0.0  0.0    1.0  
-    2  0.0  0.0  0.0  0.0  0.0  0.0    1.0  
-    3  0.0  0.0  0.0  0.0  0.0  0.0    1.0  
-    4  0.0  0.0  0.0  0.0  0.0  0.0    1.0  
+
+    ...0%, 0 MB    ...8%, 0 MB    ...16%, 0 MB    ...24%, 0 MB    ...32%, 0 MB    ...40%, 0 MB    ...48%, 0 MB    ...56%, 0 MB    ...64%, 0 MB    ...73%, 0 MB    ...81%, 0 MB    ...89%, 0 MB    ...97%, 0 MB
+    ...100%, 0 MB
+    ...0%, 0 MB    ...0%, 0 MB    ...0%, 0 MB    ...1%, 0 MB    ...1%, 0 MB    ...1%, 0 MB    ...2%, 0 MB    ...2%, 0 MB    ...3%, 0 MB    ...3%, 0 MB    ...3%, 0 MB    ...4%, 0 MB    ...4%, 0 MB    ...4%, 0 MB    ...5%, 0 MB    ...5%, 0 MB    ...6%, 0 MB    ...6%, 0 MB    ...6%, 0 MB    ...7%, 0 MB    ...7%, 0 MB    ...7%, 0 MB    ...8%, 0 MB    ...8%, 0 MB    ...9%, 0 MB    ...9%, 0 MB    ...9%, 0 MB    ...10%, 0 MB    ...10%, 0 MB    ...11%, 0 MB    ...11%, 0 MB    ...11%, 0 MB    ...12%, 0 MB    ...12%, 0 MB    ...12%, 0 MB    ...13%, 0 MB    ...13%, 0 MB    ...14%, 0 MB    ...14%, 0 MB    ...14%, 0 MB    ...15%, 0 MB    ...15%, 0 MB    ...15%, 0 MB    ...16%, 0 MB    ...16%, 0 MB    ...17%, 0 MB    ...17%, 0 MB    ...17%, 0 MB    ...18%, 0 MB    ...18%, 0 MB    ...19%, 0 MB    ...19%, 0 MB    ...19%, 0 MB    ...20%, 0 MB    ...20%, 0 MB    ...20%, 0 MB    ...21%, 0 MB    ...21%, 0 MB    ...22%, 0 MB    ...22%, 0 MB    ...22%, 0 MB    ...23%, 0 MB    ...23%, 0 MB    ...23%, 0 MB    ...24%, 0 MB    ...24%, 0 MB    ...25%, 0 MB    ...25%, 0 MB    ...25%, 0 MB    ...26%, 0 MB    ...26%, 0 MB    ...27%, 0 MB    ...27%, 0 MB    ...27%, 0 MB    ...28%, 0 MB    ...28%, 0 MB    ...28%, 0 MB    ...29%, 0 MB    ...29%, 0 MB    ...30%, 0 MB    ...30%, 0 MB    ...30%, 0 MB    ...31%, 0 MB    ...31%, 0 MB    ...31%, 0 MB    ...32%, 0 MB    ...32%, 0 MB    ...33%, 0 MB    ...33%, 0 MB    ...33%, 0 MB    ...34%, 0 MB    ...34%, 0 MB    ...35%, 0 MB    ...35%, 0 MB    ...35%, 0 MB    ...36%, 0 MB    ...36%, 0 MB    ...36%, 0 MB    ...37%, 0 MB    ...37%, 0 MB    ...38%, 0 MB    ...38%, 0 MB    ...38%, 0 MB    ...39%, 0 MB    ...39%, 0 MB    ...39%, 0 MB    ...40%, 0 MB    ...40%, 0 MB    ...41%, 0 MB    ...41%, 0 MB    ...41%, 0 MB    ...42%, 0 MB    ...42%, 0 MB    ...42%, 0 MB    ...43%, 0 MB    ...43%, 0 MB    ...44%, 0 MB    ...44%, 0 MB    ...44%, 0 MB    ...45%, 0 MB    ...45%, 0 MB    ...46%, 0 MB    ...46%, 0 MB    ...46%, 0 MB    ...47%, 0 MB    ...47%, 0 MB    ...47%, 0 MB    ...48%, 0 MB    ...48%, 1 MB    ...49%, 1 MB    ...49%, 1 MB    ...49%, 1 MB    ...50%, 1 MB    ...50%, 1 MB    ...50%, 1 MB    ...51%, 1 MB    ...51%, 1 MB    ...52%, 1 MB    ...52%, 1 MB    ...52%, 1 MB    ...53%, 1 MB    ...53%, 1 MB    ...54%, 1 MB    ...54%, 1 MB    ...54%, 1 MB    ...55%, 1 MB    ...55%, 1 MB    ...55%, 1 MB    ...56%, 1 MB    ...56%, 1 MB    ...57%, 1 MB    ...57%, 1 MB    ...57%, 1 MB    ...58%, 1 MB    ...58%, 1 MB    ...58%, 1 MB    ...59%, 1 MB    ...59%, 1 MB    ...60%, 1 MB    ...60%, 1 MB    ...60%, 1 MB    ...61%, 1 MB    ...61%, 1 MB    ...62%, 1 MB    ...62%, 1 MB    ...62%, 1 MB    ...63%, 1 MB    ...63%, 1 MB    ...63%, 1 MB    ...64%, 1 MB    ...64%, 1 MB    ...65%, 1 MB    ...65%, 1 MB    ...65%, 1 MB    ...66%, 1 MB    ...66%, 1 MB    ...66%, 1 MB    ...67%, 1 MB    ...67%, 1 MB    ...68%, 1 MB    ...68%, 1 MB    ...68%, 1 MB    ...69%, 1 MB    ...69%, 1 MB    ...70%, 1 MB    ...70%, 1 MB    ...70%, 1 MB    ...71%, 1 MB    ...71%, 1 MB    ...71%, 1 MB    ...72%, 1 MB    ...72%, 1 MB    ...73%, 1 MB    ...73%, 1 MB    ...73%, 1 MB    ...74%, 1 MB    ...74%, 1 MB    ...74%, 1 MB    ...75%, 1 MB    ...75%, 1 MB    ...76%, 1 MB    ...76%, 1 MB    ...76%, 1 MB    ...77%, 1 MB    ...77%, 1 MB    ...77%, 1 MB    ...78%, 1 MB    ...78%, 1 MB    ...79%, 1 MB    ...79%, 1 MB    ...79%, 1 MB    ...80%, 1 MB    ...80%, 1 MB    ...81%, 1 MB    ...81%, 1 MB    ...81%, 1 MB    ...82%, 1 MB    ...82%, 1 MB    ...82%, 1 MB    ...83%, 1 MB    ...83%, 1 MB    ...84%, 1 MB    ...84%, 1 MB    ...84%, 1 MB    ...85%, 1 MB    ...85%, 1 MB    ...85%, 1 MB    ...86%, 1 MB    ...86%, 1 MB    ...87%, 1 MB    ...87%, 1 MB    ...87%, 1 MB    ...88%, 1 MB    ...88%, 1 MB    ...89%, 1 MB    ...89%, 1 MB    ...89%, 1 MB    ...90%, 1 MB    ...90%, 1 MB    ...90%, 1 MB    ...91%, 1 MB    ...91%, 1 MB    ...92%, 1 MB    ...92%, 1 MB    ...92%, 1 MB    ...93%, 1 MB    ...93%, 1 MB    ...93%, 1 MB    ...94%, 1 MB    ...94%, 1 MB    ...95%, 1 MB    ...95%, 1 MB    ...95%, 1 MB    ...96%, 1 MB    ...96%, 1 MB    ...97%, 1 MB    ...97%, 2 MB    ...97%, 2 MB    ...98%, 2 MB    ...98%, 2 MB    ...98%, 2 MB    ...99%, 2 MB    ...99%, 2 MB
+    ...100%, 2 MB     0    1    2    3    4    5    6    7    8    9  ...  930  931  932  933  934  935  936  937  938  Label
+    0  1.0  1.0  0.0  1.0  0.0  1.0  0.0  0.0  0.0  0.0  ...  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0    1.0
+    1  1.0  0.0  0.0  0.0  1.0  1.0  0.0  0.0  0.0  1.0  ...  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0    1.0
+    2  1.0  1.0  0.0  1.0  0.0  1.0  0.0  0.0  0.0  0.0  ...  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0    1.0
+    3  1.0  1.0  1.0  0.0  0.0  1.0  1.0  0.0  0.0  0.0  ...  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0    1.0
+    4  1.0  0.0  0.0  0.0  1.0  0.0  1.0  1.0  0.0  0.0  ...  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0    1.0
 
     [5 rows x 940 columns]
+
 
 
 Set up the training and testing sets
 
 
-.. code-block:: python
+.. code-block:: default
 
 
-    from sklearn.cross_validation import train_test_split # noqa
+    from sklearn.model_selection import train_test_split # noqa
 
     X = df[df.columns.difference(["Label"])].values
     y = df.loc[:, "Label"].values
@@ -106,18 +108,19 @@ Set up the training and testing sets
 Setup the models
 
 
-.. code-block:: python
+.. code-block:: default
 
 
     # set up the group lasso GLM model
-    gl_glm = GLMCV(distr="binomial", tol=1e-2,
+    gl_glm = GLMCV(distr="binomial", tol=1e-3,
                    group=group_idxs, score_metric="pseudo_R2",
-                   alpha=1.0)
+                   alpha=1.0, learning_rate=3, max_iter=100, cv=3, verbose=True)
 
 
     # set up the lasso model
-    glm = GLMCV(distr="binomial", tol=1e-2,
-                score_metric="pseudo_R2", alpha=1.0)
+    glm = GLMCV(distr="binomial", tol=1e-3,
+                score_metric="pseudo_R2",
+                alpha=1.0, learning_rate=3, max_iter=100, cv=3, verbose=True)
 
     print("gl_glm: ", gl_glm)
     print("glm: ", glm)
@@ -128,26 +131,29 @@ Setup the models
 
 .. rst-class:: sphx-glr-script-out
 
- Out::
+ Out:
 
-      gl_glm:  <
+ .. code-block:: none
+
+    gl_glm:  <
     Distribution | binomial
     alpha | 1.00
-    max_iter | 1000.00
+    max_iter | 100.00
     lambda: 0.50 to 0.01
     >
     glm:  <
     Distribution | binomial
     alpha | 1.00
-    max_iter | 1000.00
+    max_iter | 100.00
     lambda: 0.50 to 0.01
     >
+
 
 
 Fit models
 
 
-.. code-block:: python
+.. code-block:: default
 
 
     gl_glm.fit(Xtrain, ytrain)
@@ -157,12 +163,21 @@ Fit models
 
 
 
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    /Users/mainak/Documents/github_repos/pyglmnet/pyglmnet/pyglmnet.py:864: UserWarning: Reached max number of iterations without convergence.
+      "Reached max number of iterations without convergence.")
+
 
 
 Visualize model scores on test set
 
 
-.. code-block:: python
+.. code-block:: default
 
 
     plt.figure()
@@ -183,21 +198,49 @@ Visualize model scores on test set
 
 
 .. image:: /auto_examples/images/sphx_glr_plot_group_lasso_001.png
-    :align: center
+    :class: sphx-glr-single-img
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    /Users/mainak/Documents/github_repos/pyglmnet/examples/plot_group_lasso.py:89: UserWarning: Matplotlib is currently using agg, which is a non-GUI backend, so cannot show the figure.
+      plt.show()
 
 
 
 
-**Total running time of the script:**
-(0 minutes 37.153 seconds)
+.. rst-class:: sphx-glr-timing
+
+   **Total running time of the script:** ( 3 minutes  21.727 seconds)
+
+
+.. _sphx_glr_download_auto_examples_plot_group_lasso.py:
+
+
+.. only :: html
+
+ .. container:: sphx-glr-footer
+    :class: sphx-glr-footer-example
 
 
 
-.. container:: sphx-glr-download
+  .. container:: sphx-glr-download
 
-    **Download Python source code:** :download:`plot_group_lasso.py <plot_group_lasso.py>`
+     :download:`Download Python source code: plot_group_lasso.py <plot_group_lasso.py>`
 
 
-.. container:: sphx-glr-download
 
-    **Download IPython notebook:** :download:`plot_group_lasso.ipynb <plot_group_lasso.ipynb>`
+  .. container:: sphx-glr-download
+
+     :download:`Download Jupyter notebook: plot_group_lasso.ipynb <plot_group_lasso.ipynb>`
+
+
+.. only:: html
+
+ .. rst-class:: sphx-glr-signature
+
+    `Gallery generated by Sphinx-Gallery <https://sphinx-gallery.github.io>`_

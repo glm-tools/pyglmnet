@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Python implementation of regularized generalized linear models &mdash; pyglmnet 1.0.1 documentation</title>
+  <title>Python implementation of regularized generalized linear models &mdash; pyglmnet 1.1 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="pyglmnet 1.0.1 documentation" href="#"/>
+    <link rel="top" title="pyglmnet 1.1 documentation" href="#"/>
         <link rel="next" title="Installation" href="install.html"/> 
 
   
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                1.0.1
+                1.1
               </div>
             
           
@@ -93,11 +93,9 @@
 <li class="toctree-l1"><a class="reference internal" href="cheatsheet.html">Cheatsheet</a></li>
 <li class="toctree-l1"><a class="reference internal" href="auto_examples/index.html">Examples Gallery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api.html">API Documentation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="developers.html">Developer Documentation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="requests.html">Requests for pull requests</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Developer Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="resources.html">Resources</a></li>
-<li class="toctree-l1"><a class="reference internal" href="whats_new.html">Current</a></li>
-<li class="toctree-l1"><a class="reference internal" href="whats_new.html#version-0-1">Version 0.1</a></li>
+<li class="toctree-l1"><a class="reference internal" href="whats_new.html">Release notes</a></li>
 </ul>
 
             
@@ -144,38 +142,39 @@
             
   <div class="section" id="python-implementation-of-regularized-generalized-linear-models">
 <h1>Python implementation of regularized generalized linear models<a class="headerlink" href="#python-implementation-of-regularized-generalized-linear-models" title="Permalink to this headline">¶</a></h1>
-<p>Pyglmnet is a Python library implementing generalized linear models (GLMs)
+<p>Pyglmnet is a Python 3.5+ library implementing generalized linear models (GLMs)
 with advanced regularization options. It provides a wide range of noise models
-(with paired canonical link functions) including gaussian, binomial, multinomial,
-poisson, and softplus. It supports a wide range of regularizers: ridge, lasso,
+(with paired canonical link functions) including gaussian, binomial, probit,
+gamma, poisson, and softplus. It supports a wide range of regularizers: ridge, lasso,
 elastic net, group lasso, and Tikhonov regularization.</p>
 <p>[<a class="reference external" href="https://github.com/glm-tools/pyglmnet">Repository</a>]
-[<a class="reference external" href="http://glm-tools.github.io/pyglmnet">Documentation</a>]</p>
+[<a class="reference external" href="http://glm-tools.github.io/pyglmnet">Documentation (stable release)</a>]
+[<a class="reference external" href="https://circleci.com/api/v1.1/project/github/glm-tools/pyglmnet/latest/artifacts/0/html/index.html?branch=master">Documentation (development version)</a>]</p>
 <div class="section" id="a-brief-introduction-to-glms">
 <h2>A brief introduction to GLMs<a class="headerlink" href="#a-brief-introduction-to-glms" title="Permalink to this headline">¶</a></h2>
-<p>Linear models are estimated as</p>
-<div class="math">
-\[y = \beta_0 + X\beta + \epsilon\]</div>
-<p>The parameters <span class="math">\(\beta_0, \beta\)</span> are estimated using ordinary least squares, under the
-implicit assumption the <span class="math">\(y\)</span> is normally distributed.</p>
+<p>For linear models specified as</p>
+<div class="math notranslate nohighlight">
+\[y = \beta_0 + X\beta + \epsilon.\]</div>
+<p>The parameters <span class="math notranslate nohighlight">\(\beta_0, \beta\)</span> are estimated using ordinary least squares, under the
+implicit assumption that <span class="math notranslate nohighlight">\(y\)</span> is normally distributed.</p>
 <p>Generalized linear models allow us to generalize this approach to point-wise
-nonlinearities <span class="math">\(q(.)\)</span> and a family of exponential distributions for <span class="math">\(y\)</span>.</p>
-<div class="math">
+nonlinearities <span class="math notranslate nohighlight">\(q(\cdot)\)</span> and corresponding exponential family noise distributions for <span class="math notranslate nohighlight">\(\epsilon\)</span>.</p>
+<div class="math notranslate nohighlight">
 \[y = q(\beta_0 + X\beta) + \epsilon\]</div>
 <p>Regularized GLMs are estimated by minimizing a loss function specified by
 the penalized negative log-likelihood. The elastic net penalty interpolates
-between L2 and L1 norm. Thus, we solve the following optimization problem:</p>
-<div class="math">
+between the L2 and L1 norm. We solve the following optimization problem:</p>
+<div class="math notranslate nohighlight">
 \[\min_{\beta_0, \beta} \frac{1}{N} \sum_{i = 1}^N \mathcal{L} (y_i, \beta_0 + \beta^T x_i)
 + \lambda [ \frac{1}{2}(1 - \alpha) \mathcal{P}_2 + \alpha \mathcal{P}_1 ]\]</div>
-<p>where <span class="math">\(\mathcal{P}_2\)</span> and <span class="math">\(\mathcal{P}_1\)</span> are the generalized
+<p>where <span class="math notranslate nohighlight">\(\mathcal{P}_2\)</span> and <span class="math notranslate nohighlight">\(\mathcal{P}_1\)</span> are the generalized
 L2 (Tikhonov) and generalized L1 (Group Lasso) penalties, given by:</p>
-<div class="math">
+<div class="math notranslate nohighlight">
 \[\begin{split}\mathcal{P}_2 &amp; = &amp; \|\Gamma \beta \|_2^2 \\
 \mathcal{P}_1 &amp; = &amp; \sum_g \|\beta_{j,g}\|_2\end{split}\]</div>
-<p>where <span class="math">\(\Gamma\)</span> is the Tikhonov matrix: a square factorization of the inverse
-covariance matrix and <span class="math">\(\beta_{j,g}\)</span> is the <span class="math">\(j\)</span> th coefficient of
-group <span class="math">\(g\)</span>.</p>
+<p>where <span class="math notranslate nohighlight">\(\Gamma\)</span> is the Tikhonov matrix: a square factorization of the inverse
+covariance matrix and <span class="math notranslate nohighlight">\(\beta_{j,g}\)</span> is the <span class="math notranslate nohighlight">\(j\)</span> th coefficient of
+group <span class="math notranslate nohighlight">\(g\)</span>.</p>
 </div>
 <div class="section" id="contents">
 <h2>Contents<a class="headerlink" href="#contents" title="Permalink to this headline">¶</a></h2>
@@ -187,19 +186,17 @@ group <span class="math">\(g\)</span>.</p>
 <li class="toctree-l1"><a class="reference internal" href="cheatsheet.html">Cheatsheet</a></li>
 <li class="toctree-l1"><a class="reference internal" href="auto_examples/index.html">Examples Gallery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api.html">API Documentation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="developers.html">Developer Documentation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="requests.html">Requests for pull requests</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Developer Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="resources.html">Resources</a></li>
-<li class="toctree-l1"><a class="reference internal" href="whats_new.html">Current</a></li>
-<li class="toctree-l1"><a class="reference internal" href="whats_new.html#version-0-1">Version 0.1</a></li>
+<li class="toctree-l1"><a class="reference internal" href="whats_new.html">Release notes</a></li>
 </ul>
 </div>
 </div>
 <div class="section" id="questions-errors-bugs">
 <h2>Questions / Errors / Bugs<a class="headerlink" href="#questions-errors-bugs" title="Permalink to this headline">¶</a></h2>
-<p>If you have a question about the code or find errors or bugs,
+<p>If you have questions about the code or find errors or bugs,
 please <a class="reference external" href="https://github.com/glm-tools/pyglmnet/issues">report it here</a>.
-For more specific question, feel free to email us directly.</p>
+For more specific questions, feel free to email us directly.</p>
 </div>
 </div>
 
@@ -220,7 +217,7 @@ For more specific question, feel free to email us directly.</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2016, Pavan Ramkumar.
+        &copy; Copyright 2016-2019, Pavan Ramkumar.
 
     </p>
   </div>
@@ -242,7 +239,7 @@ For more specific question, feel free to email us directly.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.0.1',
+            VERSION:'1.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true
@@ -251,7 +248,8 @@ For more specific question, feel free to email us directly.</p>
       <script type="text/javascript" src="_static/jquery.js"></script>
       <script type="text/javascript" src="_static/underscore.js"></script>
       <script type="text/javascript" src="_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script type="text/javascript" src="_static/language_data.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   
 

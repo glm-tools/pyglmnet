@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Community and Crime &mdash; pyglmnet 1.0.1 documentation</title>
+  <title>Community and Crime &mdash; pyglmnet 1.1 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../genindex.html"/>
         <link rel="search" title="Search" href="../search.html"/>
-    <link rel="top" title="pyglmnet 1.0.1 documentation" href="../index.html"/>
+    <link rel="top" title="pyglmnet 1.1 documentation" href="../index.html"/>
         <link rel="up" title="Examples Gallery" href="index.html"/>
         <link rel="next" title="Tikhonov Regularization" href="plot_tikhonov.html"/>
         <link rel="prev" title="Group Lasso Regularization" href="plot_group_lasso.html"/> 
@@ -67,7 +67,7 @@
             
             
               <div class="version">
-                1.0.1
+                1.1
               </div>
             
           
@@ -100,11 +100,9 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../api.html">API Documentation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../developers.html">Developer Documentation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../requests.html">Requests for pull requests</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html">Developer Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../resources.html">Resources</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../whats_new.html">Current</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../whats_new.html#version-0-1">Version 0.1</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../whats_new.html">Release notes</a></li>
 </ul>
 
             
@@ -151,7 +149,11 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="community-and-crime">
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p>Click <a class="reference internal" href="#sphx-glr-download-auto-examples-plot-community-crime-py"><span class="std std-ref">here</span></a> to download the full example code</p>
+</div>
+<div class="sphx-glr-example-title section" id="community-and-crime">
 <span id="sphx-glr-auto-examples-plot-community-crime-py"></span><h1>Community and Crime<a class="headerlink" href="#community-and-crime" title="Permalink to this headline">¶</a></h1>
 <p>This is a real dataset of per capita violent crime, with demographic
 data comprising 128 attributes from 1994 counties in the US.</p>
@@ -160,88 +162,269 @@ data comprising 128 attributes from 1994 counties in the US.</p>
 <p>The target variables (per capita violent crime) are normalized to lie in
 a [0, 1] range. We preprocessed this dataset to exclude attributes with
 missing values.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="c1"># Author: Vinicius Marques &lt;vini.type@gmail.com&gt;</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Author: Vinicius Marques &lt;vini.type@gmail.com&gt;</span>
 <span class="c1"># License: MIT</span>
 </pre></div>
 </div>
 <p>Imports</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
-<span class="kn">from</span> <span class="nn">sklearn.cross_validation</span> <span class="kn">import</span> <span class="n">train_test_split</span>
-<span class="kn">from</span> <span class="nn">pyglmnet</span> <span class="kn">import</span> <span class="n">GLM</span><span class="p">,</span> <span class="n">GLMCV</span><span class="p">,</span> <span class="n">datasets</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="k">import</span> <span class="n">train_test_split</span>
+<span class="kn">from</span> <span class="nn">pyglmnet</span> <span class="k">import</span> <span class="n">GLM</span><span class="p">,</span> <span class="n">GLMCV</span><span class="p">,</span> <span class="n">datasets</span>
 </pre></div>
 </div>
 <p>Download and preprocess data files</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">datasets</span><span class="o">.</span><span class="n">fetch_community_crime_data</span><span class="p">(</span><span class="s1">&#39;/tmp/glm-tools&#39;</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">datasets</span><span class="o">.</span><span class="n">fetch_community_crime_data</span><span class="p">()</span>
 <span class="n">n_samples</span><span class="p">,</span> <span class="n">n_features</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span>
 </pre></div>
 </div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>...0%, 0 MB
+...0%, 0 MB
+...1%, 0 MB
+...2%, 0 MB
+...2%, 0 MB
+...3%, 0 MB
+...4%, 0 MB
+...5%, 0 MB
+...5%, 0 MB
+...6%, 0 MB
+...7%, 0 MB
+...8%, 0 MB
+...8%, 0 MB
+...9%, 0 MB
+...10%, 0 MB
+...11%, 0 MB
+...11%, 0 MB
+...12%, 0 MB
+...13%, 0 MB
+...14%, 0 MB
+...14%, 0 MB
+...15%, 0 MB
+...16%, 0 MB
+...17%, 0 MB
+...17%, 0 MB
+...18%, 0 MB
+...19%, 0 MB
+...20%, 0 MB
+...20%, 0 MB
+...21%, 0 MB
+...22%, 0 MB
+...23%, 0 MB
+...23%, 0 MB
+...24%, 0 MB
+...25%, 0 MB
+...25%, 0 MB
+...26%, 0 MB
+...27%, 0 MB
+...28%, 0 MB
+...28%, 0 MB
+...29%, 0 MB
+...30%, 0 MB
+...31%, 0 MB
+...31%, 0 MB
+...32%, 0 MB
+...33%, 0 MB
+...34%, 0 MB
+...34%, 0 MB
+...35%, 0 MB
+...36%, 0 MB
+...37%, 0 MB
+...37%, 0 MB
+...38%, 0 MB
+...39%, 0 MB
+...40%, 0 MB
+...40%, 0 MB
+...41%, 0 MB
+...42%, 0 MB
+...43%, 0 MB
+...43%, 0 MB
+...44%, 0 MB
+...45%, 0 MB
+...46%, 0 MB
+...46%, 0 MB
+...47%, 0 MB
+...48%, 0 MB
+...49%, 0 MB
+...49%, 0 MB
+...50%, 0 MB
+...51%, 0 MB
+...51%, 0 MB
+...52%, 0 MB
+...53%, 0 MB
+...54%, 0 MB
+...54%, 0 MB
+...55%, 0 MB
+...56%, 0 MB
+...57%, 0 MB
+...57%, 0 MB
+...58%, 0 MB
+...59%, 0 MB
+...60%, 0 MB
+...60%, 0 MB
+...61%, 0 MB
+...62%, 0 MB
+...63%, 0 MB
+...63%, 0 MB
+...64%, 0 MB
+...65%, 0 MB
+...66%, 0 MB
+...66%, 0 MB
+...67%, 0 MB
+...68%, 0 MB
+...69%, 0 MB
+...69%, 0 MB
+...70%, 0 MB
+...71%, 0 MB
+...72%, 0 MB
+...72%, 0 MB
+...73%, 0 MB
+...74%, 0 MB
+...75%, 0 MB
+...75%, 0 MB
+...76%, 0 MB
+...77%, 0 MB
+...77%, 0 MB
+...78%, 0 MB
+...79%, 0 MB
+...80%, 0 MB
+...80%, 0 MB
+...81%, 0 MB
+...82%, 0 MB
+...83%, 0 MB
+...83%, 0 MB
+...84%, 0 MB
+...85%, 0 MB
+...86%, 0 MB
+...86%, 0 MB
+...87%, 0 MB
+...88%, 0 MB
+...89%, 0 MB
+...89%, 0 MB
+...90%, 0 MB
+...91%, 0 MB
+...92%, 0 MB
+...92%, 0 MB
+...93%, 0 MB
+...94%, 0 MB
+...95%, 1 MB
+...95%, 1 MB
+...96%, 1 MB
+...97%, 1 MB
+...98%, 1 MB
+...98%, 1 MB
+...99%, 1 MB
+
+...100%, 1 MB
+</pre></div>
+</div>
 <p>Split the data into training and test sets</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> \
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> \
     <span class="n">train_test_split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.33</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Fit a gaussian distributed GLM with elastic net regularization</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="c1"># use the default value for reg_lambda</span>
-<span class="n">glm</span> <span class="o">=</span> <span class="n">GLMCV</span><span class="p">(</span><span class="n">distr</span><span class="o">=</span><span class="s1">&#39;gaussian&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">score_metric</span><span class="o">=</span><span class="s1">&#39;pseudo_R2&#39;</span><span class="p">)</span>
+<p>Fit a binomial distributed GLM with elastic net regularization</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># use the default value for reg_lambda</span>
+<span class="n">glm</span> <span class="o">=</span> <span class="n">GLMCV</span><span class="p">(</span><span class="n">distr</span><span class="o">=</span><span class="s1">&#39;binomial&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">score_metric</span><span class="o">=</span><span class="s1">&#39;pseudo_R2&#39;</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+            <span class="n">tol</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">)</span>
 
 <span class="c1"># fit model</span>
 <span class="n">glm</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
 
 <span class="c1"># score the test set prediction</span>
-<span class="n">y_test_hat</span> <span class="o">=</span> <span class="n">glm</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
-<span class="k">print</span> <span class="p">(</span><span class="s2">&quot;test set pseudo $R^2$ = </span><span class="si">%f</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">glm</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">))</span>
+<span class="n">y_test_hat</span> <span class="o">=</span> <span class="n">glm</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;test set pseudo $R^2$ = </span><span class="si">%f</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">glm</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">))</span>
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-default"><div class="highlight"><pre><span></span>test set pseudo $R^2$ = 0.629176
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>test set pseudo $R^2$ = 0.161891
 </pre></div>
 </div>
-<p>Now use plain grid search cv to compare</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span> <span class="c1"># noqa</span>
-<span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">GridSearchCV</span> <span class="c1"># noqa</span>
-<span class="kn">from</span> <span class="nn">sklearn.cross_validation</span> <span class="kn">import</span> <span class="n">StratifiedKFold</span> <span class="c1"># noqa</span>
+<p>Now use GridSearchCV to compare</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span> <span class="c1"># noqa</span>
+<span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="k">import</span> <span class="n">GridSearchCV</span> <span class="c1"># noqa</span>
+<span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="k">import</span> <span class="n">KFold</span> <span class="c1"># noqa</span>
 
-<span class="n">cv</span> <span class="o">=</span> <span class="n">StratifiedKFold</span><span class="p">(</span><span class="n">y_train</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+<span class="n">cv</span> <span class="o">=</span> <span class="n">KFold</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
 
 <span class="n">reg_lambda</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logspace</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mf">0.5</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mf">0.01</span><span class="p">),</span> <span class="mi">10</span><span class="p">,</span>
                          <span class="n">base</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
 <span class="n">param_grid</span> <span class="o">=</span> <span class="p">[{</span><span class="s1">&#39;reg_lambda&#39;</span><span class="p">:</span> <span class="n">reg_lambda</span><span class="p">}]</span>
 
-<span class="n">glm</span> <span class="o">=</span> <span class="n">GLM</span><span class="p">(</span><span class="n">distr</span><span class="o">=</span><span class="s1">&#39;gaussian&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">score_metric</span><span class="o">=</span><span class="s1">&#39;pseudo_R2&#39;</span><span class="p">)</span>
+<span class="n">glm</span> <span class="o">=</span> <span class="n">GLM</span><span class="p">(</span><span class="n">distr</span><span class="o">=</span><span class="s1">&#39;binomial&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">score_metric</span><span class="o">=</span><span class="s1">&#39;pseudo_R2&#39;</span><span class="p">,</span>
+          <span class="n">learning_rate</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="n">glmcv</span> <span class="o">=</span> <span class="n">GridSearchCV</span><span class="p">(</span><span class="n">glm</span><span class="p">,</span> <span class="n">param_grid</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="n">cv</span><span class="p">)</span>
 <span class="n">glmcv</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
 
-<span class="k">print</span> <span class="p">(</span><span class="s2">&quot;test set pseudo $R^2$ = </span><span class="si">%f</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">glmcv</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;test set pseudo $R^2$ = </span><span class="si">%f</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">glmcv</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">))</span>
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-default"><div class="highlight"><pre><span></span>test set pseudo $R^2$ = 0.000456
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/Users/mainak/Documents/github_repos/pyglmnet/pyglmnet/pyglmnet.py:864: UserWarning: Reached max number of iterations without convergence.
+  &quot;Reached max number of iterations without convergence.&quot;)
+/Users/mainak/Documents/github_repos/pyglmnet/pyglmnet/pyglmnet.py:864: UserWarning: Reached max number of iterations without convergence.
+  &quot;Reached max number of iterations without convergence.&quot;)
+/Users/mainak/Documents/github_repos/pyglmnet/pyglmnet/pyglmnet.py:864: UserWarning: Reached max number of iterations without convergence.
+  &quot;Reached max number of iterations without convergence.&quot;)
+/Users/mainak/Documents/github_repos/pyglmnet/pyglmnet/pyglmnet.py:864: UserWarning: Reached max number of iterations without convergence.
+  &quot;Reached max number of iterations without convergence.&quot;)
+/Users/mainak/Documents/github_repos/pyglmnet/pyglmnet/pyglmnet.py:864: UserWarning: Reached max number of iterations without convergence.
+  &quot;Reached max number of iterations without convergence.&quot;)
+/Users/mainak/Documents/github_repos/pyglmnet/pyglmnet/pyglmnet.py:864: UserWarning: Reached max number of iterations without convergence.
+  &quot;Reached max number of iterations without convergence.&quot;)
+/Users/mainak/Documents/github_repos/pyglmnet/pyglmnet/pyglmnet.py:864: UserWarning: Reached max number of iterations without convergence.
+  &quot;Reached max number of iterations without convergence.&quot;)
+/Users/mainak/Documents/github_repos/pyglmnet/pyglmnet/pyglmnet.py:864: UserWarning: Reached max number of iterations without convergence.
+  &quot;Reached max number of iterations without convergence.&quot;)
+/Users/mainak/Documents/github_repos/pyglmnet/pyglmnet/pyglmnet.py:864: UserWarning: Reached max number of iterations without convergence.
+  &quot;Reached max number of iterations without convergence.&quot;)
+/Users/mainak/Documents/github_repos/pyglmnet/pyglmnet/pyglmnet.py:864: UserWarning: Reached max number of iterations without convergence.
+  &quot;Reached max number of iterations without convergence.&quot;)
+/Users/mainak/Documents/github_repos/pyglmnet/pyglmnet/pyglmnet.py:864: UserWarning: Reached max number of iterations without convergence.
+  &quot;Reached max number of iterations without convergence.&quot;)
+/Users/mainak/Documents/github_repos/pyglmnet/pyglmnet/pyglmnet.py:864: UserWarning: Reached max number of iterations without convergence.
+  &quot;Reached max number of iterations without convergence.&quot;)
+/Users/mainak/Documents/github_repos/pyglmnet/pyglmnet/pyglmnet.py:864: UserWarning: Reached max number of iterations without convergence.
+  &quot;Reached max number of iterations without convergence.&quot;)
+/Users/mainak/Documents/github_repos/pyglmnet/pyglmnet/pyglmnet.py:864: UserWarning: Reached max number of iterations without convergence.
+  &quot;Reached max number of iterations without convergence.&quot;)
+/Users/mainak/Documents/github_repos/pyglmnet/pyglmnet/pyglmnet.py:864: UserWarning: Reached max number of iterations without convergence.
+  &quot;Reached max number of iterations without convergence.&quot;)
+/Users/mainak/Documents/github_repos/pyglmnet/pyglmnet/pyglmnet.py:864: UserWarning: Reached max number of iterations without convergence.
+  &quot;Reached max number of iterations without convergence.&quot;)
+test set pseudo $R^2$ = 0.153298
 </pre></div>
 </div>
 <p>Plot the true and predicted test set target values</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">y_test</span><span class="p">[:</span><span class="mi">50</span><span class="p">],</span> <span class="s1">&#39;ko-&#39;</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">y_test</span><span class="p">[:</span><span class="mi">50</span><span class="p">],</span> <span class="s1">&#39;ko-&#39;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">y_test_hat</span><span class="p">[:</span><span class="mi">50</span><span class="p">],</span> <span class="s1">&#39;ro-&#39;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">([</span><span class="s1">&#39;true&#39;</span><span class="p">,</span> <span class="s1">&#39;pred&#39;</span><span class="p">],</span> <span class="n">frameon</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">([</span><span class="s1">&#39;true&#39;</span><span class="p">,</span> <span class="s1">&#39;pred&#39;</span><span class="p">],</span> <span class="n">frameon</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Counties&#39;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Per capita violent crime&#39;</span><span class="p">)</span>
 
 <span class="n">plt</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="n">right</span><span class="o">=</span><span class="s1">&#39;off&#39;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">top</span><span class="o">=</span><span class="s1">&#39;off&#39;</span><span class="p">)</span>
 <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="s1">&#39;top&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="s1">&#39;right&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="s1">&#39;top&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="s1">&#39;right&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
-<img alt="../_images/sphx_glr_plot_community_crime_001.png" class="align-center" src="../_images/sphx_glr_plot_community_crime_001.png" />
-<p><strong>Total running time of the script:</strong> ( 0 minutes  24.189 seconds)</p>
-<div class="sphx-glr-footer docutils container">
-<div class="sphx-glr-download docutils container">
-<a class="reference download internal" href="../_downloads/plot_community_crime.py" download=""><code class="xref download docutils literal"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_community_crime.py</span></code></a></div>
-<div class="sphx-glr-download docutils container">
-<a class="reference download internal" href="../_downloads/plot_community_crime.ipynb" download=""><code class="xref download docutils literal"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_community_crime.ipynb</span></code></a></div>
+<img alt="../_images/sphx_glr_plot_community_crime_001.png" class="sphx-glr-single-img" src="../_images/sphx_glr_plot_community_crime_001.png" />
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/Users/mainak/Documents/github_repos/pyglmnet/examples/plot_community_crime.py:90: UserWarning: Matplotlib is currently using agg, which is a non-GUI backend, so cannot show the figure.
+  plt.show()
+</pre></div>
 </div>
-<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.readthedocs.io">Generated by Sphinx-Gallery</a></p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  13.932 seconds)</p>
+<div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-examples-plot-community-crime-py">
+<div class="sphx-glr-download docutils container">
+<p><a class="reference download internal" download="" href="../_downloads/b86beaee2b521068282c63f5418532da/plot_community_crime.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_community_crime.py</span></code></a></p>
+</div>
+<div class="sphx-glr-download docutils container">
+<p><a class="reference download internal" download="" href="../_downloads/210165b04144331bdfcde83b07b6c7bd/plot_community_crime.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_community_crime.ipynb</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
 </div>
 
 
@@ -263,7 +446,7 @@ missing values.</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2016, Pavan Ramkumar.
+        &copy; Copyright 2016-2019, Pavan Ramkumar.
 
     </p>
   </div>
@@ -285,7 +468,7 @@ missing values.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'1.0.1',
+            VERSION:'1.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true
@@ -294,7 +477,8 @@ missing values.</p>
       <script type="text/javascript" src="../_static/jquery.js"></script>
       <script type="text/javascript" src="../_static/underscore.js"></script>
       <script type="text/javascript" src="../_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script type="text/javascript" src="../_static/language_data.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   
 

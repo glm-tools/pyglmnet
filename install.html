@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Installation &mdash; pyglmnet 1.0.1 documentation</title>
+  <title>Installation &mdash; pyglmnet 1.1 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="pyglmnet 1.0.1 documentation" href="index.html"/>
+    <link rel="top" title="pyglmnet 1.1 documentation" href="index.html"/>
         <link rel="next" title="Getting Started" href="start.html"/>
         <link rel="prev" title="Python implementation of regularized generalized linear models" href="index.html"/> 
 
@@ -66,7 +66,7 @@
             
             
               <div class="version">
-                1.0.1
+                1.1
               </div>
             
           
@@ -98,11 +98,9 @@
 <li class="toctree-l1"><a class="reference internal" href="cheatsheet.html">Cheatsheet</a></li>
 <li class="toctree-l1"><a class="reference internal" href="auto_examples/index.html">Examples Gallery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api.html">API Documentation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="developers.html">Developer Documentation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="requests.html">Requests for pull requests</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Developer Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="resources.html">Resources</a></li>
-<li class="toctree-l1"><a class="reference internal" href="whats_new.html">Current</a></li>
-<li class="toctree-l1"><a class="reference internal" href="whats_new.html#version-0-1">Version 0.1</a></li>
+<li class="toctree-l1"><a class="reference internal" href="whats_new.html">Release notes</a></li>
 </ul>
 
             
@@ -151,36 +149,29 @@
 <h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="check-dependencies">
 <h2>Check dependencies<a class="headerlink" href="#check-dependencies" title="Permalink to this headline">¶</a></h2>
-<p>You only need <code class="docutils literal"><span class="pre">NumPy</span></code>, <code class="docutils literal"><span class="pre">SciPy</span></code> for the package and additionally <code class="docutils literal"><span class="pre">scikit-learn</span></code>
-if you would like to run the examples. We recommend
-<code class="docutils literal"><span class="pre">Python</span> <span class="pre">&gt;=</span> <span class="pre">2.6</span></code>,
-<code class="docutils literal"><span class="pre">scikit-learn</span> <span class="pre">&gt;=</span> <span class="pre">0.17</span></code>,
-<code class="docutils literal"><span class="pre">NumPy</span> <span class="pre">&gt;=</span> <span class="pre">1.6.1</span></code> and <code class="docutils literal"><span class="pre">SciPy</span> <span class="pre">&gt;=</span> <span class="pre">0.14</span></code>.</p>
+<p>We currently support <code class="docutils literal notranslate"><span class="pre">Python</span> <span class="pre">3.5+</span></code>.</p>
+<p>For the package: <code class="docutils literal notranslate"><span class="pre">numpy&gt;=1.11</span></code>, <code class="docutils literal notranslate"><span class="pre">scipy&gt;=0.17</span></code>, <code class="docutils literal notranslate"><span class="pre">scikit-learn&gt;=0.18</span></code></p>
+<p>Additionally, for examples: <code class="docutils literal notranslate"><span class="pre">pandas&gt;=0.20</span></code></p>
 <p>Both <a class="reference external" href="https://www.enthought.com/products/canopy/">Canopy</a>
 and <a class="reference external" href="https://www.continuum.io/downloads">Anaconda</a>
 ship with a recent version of all these packages.</p>
+<p>Additionally, for development, tests and coverage: <code class="docutils literal notranslate"><span class="pre">pytest</span></code>, <code class="docutils literal notranslate"><span class="pre">pytest-cov</span></code>, <code class="docutils literal notranslate"><span class="pre">coverage</span></code>, <code class="docutils literal notranslate"><span class="pre">flake8</span></code></p>
+<p>Additionally, for building documentation: <code class="docutils literal notranslate"><span class="pre">sphinx</span></code>, <code class="docutils literal notranslate"><span class="pre">sphinx-gallery</span></code>, <code class="docutils literal notranslate"><span class="pre">pillow</span></code>, <code class="docutils literal notranslate"><span class="pre">numpydoc</span></code>, <code class="docutils literal notranslate"><span class="pre">matplotlib</span></code></p>
 <p>In case you have other distributions of Python, you can install
-<code class="docutils literal"><span class="pre">NumPy</span></code> and <code class="docutils literal"><span class="pre">SciPy</span></code> using <code class="docutils literal"><span class="pre">pip</span></code>.</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>pip install numpy
-pip install scipy
+the dependencies using <code class="docutils literal notranslate"><span class="pre">pip</span></code>.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install numpy scipy
+pip install -U scikit-learn
 </pre></div>
 </div>
-<p>To install <code class="docutils literal"><span class="pre">scikit-learn</span></code> follow these
-<a class="reference external" href="http://scikit-learn.org/stable/install.html">installation instructions</a>.</p>
 </div>
 <div class="section" id="get-pyglmnet">
 <h2>Get pyglmnet<a class="headerlink" href="#get-pyglmnet" title="Permalink to this headline">¶</a></h2>
 <p>If you would like to install the latest stable release:</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>pip install pyglmnet
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install pyglmnet
 </pre></div>
 </div>
-<p>To install the development version of <code class="docutils literal"><span class="pre">pyglmnet</span></code>, first clone the repository</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>git clone http://github.com/glm-tools/pyglmnet
-</pre></div>
-</div>
-<p>Then run <code class="docutils literal"><span class="pre">setup.py</span></code> to install the library</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="nb">cd</span> pyglmnet
-python setup.py develop install
+<p>To install the development version of <code class="docutils literal notranslate"><span class="pre">pyglmnet</span></code>, first clone the repository</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install https://api.github.com/repos/glm-tools/pyglmnet/zipball/master
 </pre></div>
 </div>
 </div>
@@ -205,7 +196,7 @@ python setup.py develop install
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2016, Pavan Ramkumar.
+        &copy; Copyright 2016-2019, Pavan Ramkumar.
 
     </p>
   </div>
@@ -227,7 +218,7 @@ python setup.py develop install
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.0.1',
+            VERSION:'1.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true
@@ -236,7 +227,8 @@ python setup.py develop install
       <script type="text/javascript" src="_static/jquery.js"></script>
       <script type="text/javascript" src="_static/underscore.js"></script>
       <script type="text/javascript" src="_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script type="text/javascript" src="_static/language_data.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   
 

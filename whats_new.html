@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Current &mdash; pyglmnet 1.0.1 documentation</title>
+  <title>Release notes &mdash; pyglmnet 1.1 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="pyglmnet 1.0.1 documentation" href="index.html"/>
+    <link rel="top" title="pyglmnet 1.1 documentation" href="index.html"/>
         <link rel="prev" title="Resources" href="resources.html"/> 
 
   
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                1.0.1
+                1.1
               </div>
             
           
@@ -93,17 +93,21 @@
 <li class="toctree-l1"><a class="reference internal" href="cheatsheet.html">Cheatsheet</a></li>
 <li class="toctree-l1"><a class="reference internal" href="auto_examples/index.html">Examples Gallery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api.html">API Documentation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="developers.html">Developer Documentation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="requests.html">Requests for pull requests</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Developer Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="resources.html">Resources</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Current</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#changelog">Changelog</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#bug">BUG</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#api">API</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Release notes</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#version-1-1">Version 1.1</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#changelog">Changelog</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#bug">BUG</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#api">API</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#authors">Authors</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="#version-0-1">Version 0.1</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#id2">Changelog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#version-1-0">Version 1.0</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id2">Changelog</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id3">Authors</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -136,7 +140,7 @@
   <ul class="wy-breadcrumbs">
     <li><a href="index.html">Docs</a> &raquo;</li>
       
-    <li>Current</li>
+    <li>Release notes</li>
     <li class="wy-breadcrumbs-aside">
       
         
@@ -150,47 +154,101 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="current">
-<span id="whats-new"></span><span id="id1"></span><h1>Current<a class="headerlink" href="#current" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="release-notes">
+<span id="whats-new"></span><h1>Release notes<a class="headerlink" href="#release-notes" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="version-1-1">
+<span id="id1"></span><h2>Version 1.1<a class="headerlink" href="#version-1-1" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="changelog">
-<h2>Changelog<a class="headerlink" href="#changelog" title="Permalink to this headline">¶</a></h2>
+<h3>Changelog<a class="headerlink" href="#changelog" title="Permalink to this headline">¶</a></h3>
 <blockquote>
 <div><ul class="simple">
-<li>Add <cite>&#8216;gamma&#8217;</cite> distribution with log link by <a class="reference external" href="https://perso.telecom-paristech.fr/mjas/">Mainak Jas</a>.</li>
+<li><p>Add option for fitting <cite>‘probit’</cite> distribution by <a class="reference external" href="https://github.com/ravigarg27">Ravi Garg</a>.</p></li>
+<li><p>Add option for fitting <cite>‘gamma’</cite> distribution with log link by <a class="reference external" href="https://perso.telecom-paristech.fr/mjas/">Mainak Jas</a>.</p></li>
+<li><p>Add support for running <code class="xref py py-class docutils literal notranslate"><span class="pre">sklearn.model_selection.GridSearchCV</span></code> on <a class="reference internal" href="api.html#pyglmnet.GLM" title="pyglmnet.GLM"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyglmnet.GLM</span></code></a> objects by <a class="reference external" href="https://perso.telecom-paristech.fr/mjas/">Mainak Jas</a>.</p></li>
+<li><p>Improved testing of gradients for optimization by <a class="reference external" href="https://perso.telecom-paristech.fr/mjas/">Mainak Jas</a> and <a class="reference external" href="https://github.com/pavanramkumar">Pavan Ramkumar</a>.</p></li>
+<li><p>Improved testing of estimated coefficients at convergence by <a class="reference external" href="https://perso.telecom-paristech.fr/mjas/">Mainak Jas</a> and <a class="reference external" href="https://github.com/pavanramkumar">Pavan Ramkumar</a></p></li>
+<li><p>Add <code class="docutils literal notranslate"><span class="pre">n_iter_</span></code> attribute to <a class="reference internal" href="api.html#pyglmnet.GLM" title="pyglmnet.GLM"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyglmnet.GLM</span></code></a> by <a class="reference external" href="https://perso.telecom-paristech.fr/mjas/">Mainak Jas</a>, <a class="reference external" href="https://olivierpieters.be/">Olivier Pieters</a>, <a class="reference external" href="https://github.com/peterfoley">Peter Foley</a> and <a class="reference external" href="https://github.com/cxrodgers">Chris Rogers</a></p></li>
+<li><p>Add option to fit intercept or not with a <code class="docutils literal notranslate"><span class="pre">fit_intercept</span></code> boolean by <a class="reference external" href="https://github.com/DreHar">Drew Harris</a>, <a class="reference external" href="https://perso.telecom-paristech.fr/mjas/">Mainak Jas</a> and <a class="reference external" href="https://github.com/pavanramkumar">Pavan Ramkumar</a></p></li>
 </ul>
 </div></blockquote>
 </div>
 <div class="section" id="bug">
-<h2>BUG<a class="headerlink" href="#bug" title="Permalink to this headline">¶</a></h2>
+<h3>BUG<a class="headerlink" href="#bug" title="Permalink to this headline">¶</a></h3>
 <blockquote>
 <div><ul class="simple">
-<li>...</li>
+<li><p>Fixed z cache inconsistency in cdfast when <code class="docutils literal notranslate"><span class="pre">alpha</span></code> and <code class="docutils literal notranslate"><span class="pre">reg_lambda</span></code> are nonzero by <a class="reference external" href="https://github.com/peterfoley">Peter Foley</a>.</p></li>
+<li><p>Fixed incorrect usage of the <code class="docutils literal notranslate"><span class="pre">random_state</span></code> parameter by <a class="reference external" href="https://github.com/geektoni">Giovanni De Toni</a>.</p></li>
+<li><p>Fixed incorrect proximal operator for group lasso by <a class="reference external" href="https://github.com/AnchorBlues">Yu Umegaki</a>.</p></li>
+<li><p>Changed stopping criteria for convergence (a threshold on the change in objective value) which
+stopped too early. The new criteria is a threshold on the change in norm of the beta, by <a class="reference external" href="https://github.com/pavanramkumar">Pavan Ramkumar</a>.</p></li>
+<li><p>Fixed <code class="docutils literal notranslate"><span class="pre">group</span></code> parameter not being passed for Group Lasso by <a class="reference external" href="https://github.com/BeibinLi">Beibin Li</a>.</p></li>
+<li><p>Fix URL paths when running on Windows by <a class="reference external" href="https://github.com/notuntoward">Scott Otterson</a>.</p></li>
+<li><p>Made temporary file handling OS independent and usable on a cluster by <a class="reference external" href="https://github.com/notuntoward">Scott Otterson</a>.</p></li>
+<li><p>Replace <code class="docutils literal notranslate"><span class="pre">StratifiedKFold()</span></code> with <code class="docutils literal notranslate"><span class="pre">KFold()</span></code>, as <code class="docutils literal notranslate"><span class="pre">StratifiedKFold()</span></code> doesn’t work for continuous values by <a class="reference external" href="https://github.com/notuntoward">Scott Otterson</a>.</p></li>
+<li><p><code class="xref py py-func docutils literal notranslate"><span class="pre">pyglmnet.simulate_glm()</span></code> accepts <code class="docutils literal notranslate"><span class="pre">beta0</span></code> as float and <code class="docutils literal notranslate"><span class="pre">beta</span></code> of shape <cite>(n_features,)</cite> only, by <a class="reference external" href="https://perso.telecom-paristech.fr/mjas/">Mainak Jas</a></p></li>
 </ul>
 </div></blockquote>
 </div>
 <div class="section" id="api">
-<h2>API<a class="headerlink" href="#api" title="Permalink to this headline">¶</a></h2>
+<h3>API<a class="headerlink" href="#api" title="Permalink to this headline">¶</a></h3>
 <blockquote>
 <div><ul class="simple">
-<li>...</li>
+<li><p>Refactored <cite>GLM</cite> class into two classes: <a class="reference internal" href="api.html#pyglmnet.GLM" title="pyglmnet.GLM"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyglmnet.GLM</span></code></a> for fitting a single regularization parameter,
+and <a class="reference internal" href="api.html#pyglmnet.GLMCV" title="pyglmnet.GLMCV"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyglmnet.GLMCV</span></code></a> for fitting along a regularization path with cross-validation and selection of best
+regularization parameter by <a class="reference external" href="https://github.com/pavanramkumar">Pavan Ramkumar</a> and <a class="reference external" href="https://perso.telecom-paristech.fr/mjas/">Mainak Jas</a>.</p></li>
+<li><p>Removed support for fitting <cite>‘multinomial’</cite> distribution by <a class="reference external" href="https://github.com/pavanramkumar">Pavan Ramkumar</a>. This option will
+be restored in a future release.</p></li>
 </ul>
 </div></blockquote>
 </div>
+<div class="section" id="authors">
+<h3>Authors<a class="headerlink" href="#authors" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Beibin Li</p></li>
+<li><p>Chris Rodgers</p></li>
+<li><p>Drew Harris</p></li>
+<li><p>Giovanni De Toni</p></li>
+<li><p>Mainak Jas</p></li>
+<li><p>Mayank Agarawal</p></li>
+<li><p>Olivier Pieters</p></li>
+<li><p>Pavan Ramkumar</p></li>
+<li><p>Peter Foley</p></li>
+<li><p>Ravi Prakash Garg</p></li>
+<li><p>Scott Otterson</p></li>
+<li><p>Tommy Odland</p></li>
+<li><p>Yu Umegaki</p></li>
+</ul>
 </div>
-<div class="section" id="version-0-1">
-<span id="changes-0-14"></span><h1>Version 0.1<a class="headerlink" href="#version-0-1" title="Permalink to this headline">¶</a></h1>
+</div>
+<div class="section" id="version-1-0">
+<span id="changes-1-0"></span><h2>Version 1.0<a class="headerlink" href="#version-1-0" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="id2">
-<h2>Changelog<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
+<h3>Changelog<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
 <blockquote>
 <div><ul class="simple">
-<li>Add GLM class by <a class="reference external" href="http://klab.smpp.northwestern.edu/wiki/index.php5/Pavan_Ramkumar">Pavan Ramkumar</a></li>
-<li>Add Tikhonov regularization by <a class="reference external" href="http://klab.smpp.northwestern.edu/wiki/index.php5/Pavan_Ramkumar">Pavan Ramkumar</a></li>
-<li>Add group lasso by <a class="reference external" href="&lt;http:/github.com/evadyer">Eva Dyer</a></li>
-<li>Add group lass example by <a class="reference external" href="&lt;https://github.com/themantalope">Matt Antalek</a></li>
-<li>Add multinomial link function by <a class="reference external" href="http://klab.smpp.northwestern.edu/wiki/index.php5/Daniel_Acuna">Daniel Acuna</a></li>
-<li>Add benchmarks by <a href="#id3"><span class="problematic" id="id4">`Vincinius Marques`_</span></a></li>
+<li><p>Add GLM class by <a class="reference external" href="https://github.com/pavanramkumar">Pavan Ramkumar</a></p></li>
+<li><p>Add Tikhonov regularization by <a class="reference external" href="https://github.com/pavanramkumar">Pavan Ramkumar</a></p></li>
+<li><p>Add group lasso by <a class="reference external" href="http://evadyer.github.io/">Eva Dyer</a></p></li>
+<li><p>Add group lass example by <a class="reference external" href="https://github.com/themantalope">Matt Antalek</a></p></li>
+<li><p>Add multinomial link function by <a class="reference external" href="https://acuna.io/">Daniel Acuna</a></p></li>
+<li><p>Add benchmarks by <a class="reference external" href="https://github.com/marquesVF">Vinicius Marques</a></p></li>
 </ul>
 </div></blockquote>
+</div>
+<div class="section" id="id3">
+<h3>Authors<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Aid Idrizović</p></li>
+<li><p>Daniel Acuna</p></li>
+<li><p>Eva Dyer</p></li>
+<li><p>Hugo Fernandes</p></li>
+<li><p>Mainak Jas</p></li>
+<li><p>Matt Antalek</p></li>
+<li><p>Pavan Ramkumar</p></li>
+<li><p>Titipat Achakulvisut</p></li>
+<li><p>Vinicius Marques</p></li>
+</ul>
+</div>
 </div>
 </div>
 
@@ -211,7 +269,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2016, Pavan Ramkumar.
+        &copy; Copyright 2016-2019, Pavan Ramkumar.
 
     </p>
   </div>
@@ -233,7 +291,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.0.1',
+            VERSION:'1.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true
@@ -242,7 +300,8 @@
       <script type="text/javascript" src="_static/jquery.js"></script>
       <script type="text/javascript" src="_static/underscore.js"></script>
       <script type="text/javascript" src="_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script type="text/javascript" src="_static/language_data.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   
 
