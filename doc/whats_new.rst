@@ -8,6 +8,18 @@
 Release notes
 =============
 
+Current
+-------
+
+Changelog
+~~~~~~~~~
+
+BUG
+~~~
+
+API
+~~~
+
 .. _1_0_1:
 
 Version 1.1
