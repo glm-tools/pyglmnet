@@ -23,6 +23,7 @@ DESCRIPTION = descr
 MAINTAINER = "Pavan Ramkumar"
 MAINTAINER_EMAIL = "pavan.ramkumar@gmail.com"
 LICENSE = "MIT"
+URL = 'http://glm-tools.github.io/pyglmnet/'
 DOWNLOAD_URL = "https://github.com/glm-tools/pyglmnet.git"
 VERSION = get_version()  # Get version without importing
 
@@ -33,9 +34,11 @@ if __name__ == "__main__":
         maintainer_email=MAINTAINER_EMAIL,
         description=DESCRIPTION,
         license=LICENSE,
+        url=URL,
         version=VERSION,
         download_url=DOWNLOAD_URL,
         long_description=open("README.rst").read(),
+        long_description_content_type='text/x-rst',
         classifiers=[
             "Intended Audience :: Science/Research",
             "Intended Audience :: Developers",
@@ -56,4 +59,9 @@ if __name__ == "__main__":
         ],
         platforms="any",
         packages=["pyglmnet"],
+        project_urls={
+            'Documentation': 'http://glm-tools.github.io/pyglmnet/',
+            'Bug Reports': 'https://github.com/glm-tools/pyglmnet/issues',
+            'Source': 'https://github.com/glm-tools/pyglmnet',
+        },
     )
