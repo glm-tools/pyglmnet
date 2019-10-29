@@ -16,8 +16,11 @@ install:
     - source activate testenv
     - conda install --yes --file requirements.txt
     - python setup.py develop
+    - python setup.py sdist bdist_wheel
 
 script:
+    - # Checks whether your distribution’s long description will render correctly on PyPI.
+    - twine check dist/*
     - # Run tests, show verbose output and print the top 10 slowest running tests
     - py.test --cov=pyglmnet tests/ --verbose --durations=10
     - # Run doctests
