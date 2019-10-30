@@ -134,7 +134,7 @@ coverage:
 
 install:
 	rm -rf _build/doctrees _build/pyglmnet.github.io
-	# first clone the pavanramkumar/pyglmnet.github.io repo because it may ask
+	# first clone the glm-tools/pyglmnet repo because it may ask
 	# for password and we don't want to delay this long build in
 	# the middle of it
 	# --no-checkout just fetches the root folder without content
