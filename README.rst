@@ -147,7 +147,7 @@ How to contribute?
 ~~~~~~~~~~~~~~~~~~
 
 We welcome pull requests. Please see our `developer documentation
-page <http://glm-tools.github.io/pyglmnet/developers.html>`__ for more
+page <https://glm-tools.github.io/pyglmnet/contributing.html>`__ for more
 details.
 
 Acknowledgments
