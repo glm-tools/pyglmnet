@@ -8,8 +8,7 @@ A python implementation of elastic-net regularized generalized linear models
 
 `[Documentation (stable version)]`_ `[Documentation (development version)]`_
 
-.. image:: https://raw.githubusercontent.com/glm-tools/pyglmnet/master/pyglmnet-logo.png
-   :height: 400px
+.. image:: https://user-images.githubusercontent.com/15852194/67919367-70482600-fb76-11e9-9b86-891969bd2bee.jpg
 
 `Generalized linear
 models <https://en.wikipedia.org/wiki/Generalized_linear_model>`__ are
