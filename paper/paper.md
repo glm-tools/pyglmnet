@@ -11,7 +11,7 @@ authors:
     orcid: 0000-0003-0872-7098
     affiliation: "1, 2"
   - name: Hugo Fernandes
-    affiliation: 10
+    affiliation: 3
   - name: Daniel Acuna
     affiliation: 6
   - name: Ravi Garg
@@ -56,7 +56,7 @@ affiliations:
  - name: Georgia Tech
    index: 9
  - name: Rockets of Awesome
-   index: 10
+   index: 3
  - name: 605
    index: 11
  - name: University of Washington
@@ -99,7 +99,7 @@ the Python data science eco-system are highly fragmented. More
 specifically,
 
 -  [statsmodels] provides a wide range of link functions but no regularization.
--  [scikit-learn] provides elastic net regularization but only for linear models.
+-  [scikit-learn] provides elastic net regularization but only limited noise distribution options.
 -  [lightning] provides elastic net and group lasso regularization, but only for
    linear and logistic regression.
 
@@ -121,8 +121,7 @@ specifically,
 | tikhonov           |    x       |                |               |                 |               |         |                 |
 
 Pyglmnet implements the same algorithm described in [Friedman, J., Hastie, T., & Tibshirani, R. (2010)](https://core.ac.uk/download/files/153/6287975.pdf>) and the accompanying widely popular R package [glmnet].
-
-As opposed to other implementations which are wrappers around this package, it is written in pure Python and runs on Python 3.5+. The implementation is compatible with the existing data science ecosystem.
+As opposed to [glmnet-python] which is a wrapper around this package, Pyglmnet is written in pure Python and runs on Python 3.5+. The implementation is compatible with the existing data science ecosystem.
 Pyglmnet's API is designed to be compatible with scikit-learn, thus it is possible to do::
 
 
@@ -131,10 +130,8 @@ Pyglmnet's API is designed to be compatible with scikit-learn, thus it is possib
            glm.predict(X)
 ```
 
-As a result of this compatibility, ``scikit-learn`` tools for building pipelines, cross-validation and grid search can be reused by Pyglmnet users. Pyglmnet has already been used in a number of published research investigations
-`[@bertran2018active; @rybakken2019decoding; @hofling2019probing; @benjamin2017modern]`
-
-It is unit tested and includes documentation in the form of tutorials, docstrings and
+As a result of this compatibility, ``scikit-learn`` tools for building pipelines, cross-validation and grid search can be reused by Pyglmnet users. Pyglmnet has already been used in published work
+`[@bertran2018active; @rybakken2019decoding; @hofling2019probing; @benjamin2017modern]`. It is unit tested and includes documentation in the form of tutorials, docstrings and
 examples that are run through continuous integration.
 
 # Acknowledgements
@@ -150,3 +147,4 @@ examples that are run through continuous integration.
 [Matlab]: https://www.mathworks.com/help/stats/glmfit.html
 [pyglmnet]: http://github.com/glm-tools/pyglmnet/
 [glmnet]: https://web.stanford.edu/~hastie/glmnet/glmnet_alpha.html
+[glmnet-python]: https://github.com/civisanalytics/python-glmnet
