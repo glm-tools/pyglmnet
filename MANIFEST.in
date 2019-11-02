@@ -24,4 +24,5 @@ recursive-exclude pyglmnet *.pyc
 
 recursive-exclude doc *
 recursive-exclude tests *.py
+recursive-exclude paper *
 exclude tests
