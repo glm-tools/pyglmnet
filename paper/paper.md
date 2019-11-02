@@ -10,14 +10,12 @@ authors:
   - name: Mainak Jas
     orcid: 0000-0003-0872-7098
     affiliation: "1, 2"
-  - name: Pavan Ramkumar
-    affiliation: 3
   - name: Hugo Fernandes
     affiliation: 10
   - name: Daniel Acuna
     affiliation: 6
   - name: Ravi Garg
-    affiliation: 5
+    affiliation: 15
   - name: Aid Idrizović
     affiliation: 4
   - name: Vinicius Marques
@@ -38,12 +36,14 @@ authors:
     affiliation: "1, 2"
   - name: Konrad Kording
     affiliation: 5
+  - name: Pavan Ramkumar
+    affiliation: 3
 affiliations:
  - name: Massachusetts General Hospital
    index: 1
  - name: Harvard Medical School
    index: 2
- - name: Balbix
+ - name: System1 Biosciences Inc
    index: 3
  - name: Unknown
    index: 4
@@ -65,6 +65,8 @@ affiliations:
    index: 13
  - name: University of Trento
    index: 14
+ - name: Kellogg School of Business, Northwestern University
+   index: 15
 
 date: 6 September 2019
 bibliography: paper.bib
@@ -118,7 +120,7 @@ specifically,
 | group lasso        |    x       |                |               |       x         |               |         |  x              |
 | tikhonov           |    x       |                |               |                 |               |         |                 |
 
-Pyglmnet follows the same approach as in the [Friedman, J., Hastie, T., & Tibshirani, R. (2010)](https://core.ac.uk/download/files/153/6287975.pdf>) and the accompanying widely popular R package [glmnet].
+Pyglmnet implements the same algorithm described in [Friedman, J., Hastie, T., & Tibshirani, R. (2010)](https://core.ac.uk/download/files/153/6287975.pdf>) and the accompanying widely popular R package [glmnet].
 
 As opposed to other implementations which are wrappers around this package, it is written in pure Python and runs on Python 3.5+. The implementation is compatible with the existing data science ecosystem.
 Pyglmnet's API is designed to be compatible with scikit-learn, thus it is possible to do::
@@ -126,10 +128,10 @@ Pyglmnet's API is designed to be compatible with scikit-learn, thus it is possib
 
 ```py
            glm.fit(X, y)
-           glm.predict(y)
+           glm.predict(X)
 ```
 
-As a result of this compatibility, ``scikit-learn`` tools for building pipelines, cross-validation and grid search can be reused by users. Pyglmnet has already been used in a number of published research investigations
+As a result of this compatibility, ``scikit-learn`` tools for building pipelines, cross-validation and grid search can be reused by Pyglmnet users. Pyglmnet has already been used in a number of published research investigations
 `[@bertran2018active; @rybakken2019decoding; @hofling2019probing; @benjamin2017modern]`
 
 It is unit tested and includes documentation in the form of tutorials, docstrings and
