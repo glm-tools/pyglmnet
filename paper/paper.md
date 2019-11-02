@@ -45,7 +45,7 @@ affiliations:
    index: 2
  - name: System1 Biosciences Inc
    index: 3
- - name: Unknown
+ - name: Loyola University
    index: 4
  - name: University of Pennsylvania
    index: 5
