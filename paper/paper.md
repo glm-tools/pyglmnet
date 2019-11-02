@@ -101,7 +101,7 @@ specifically,
 -  [lightning] provides elastic net and group lasso regularization, but only for
    linear and logistic regression.
 
-[Pyglmnet] is a response to this fragmentation. Here are is a comparison with existing toolboxes.
+[Pyglmnet] is a response to this fragmentation. Here are is a comparison of Pyglmnet with existing toolboxes.
 
 |                    | [pyglmnet] | [scikit-learn] | [statsmodels] |   [lightning]   |   [py-glm]    | [Matlab]|   [glmnet] in R |
 |--------------------|:----------:|:--------------:|:-------------:|:---------------:|:-------------:|:-------:|:---------------:|
@@ -118,7 +118,9 @@ specifically,
 | group lasso        |    x       |                |               |       x         |               |         |  x              |
 | tikhonov           |    x       |                |               |                 |               |         |                 |
 
-It runs on Python 3.5+. The implementation is compatible with the existing data science ecosystem.
+Pyglmnet follows the same approach as in the [Friedman, J., Hastie, T., & Tibshirani, R. (2010)](https://core.ac.uk/download/files/153/6287975.pdf>) and the accompanying widely popular R package [glmnet].
+
+As opposed to other implementations which are wrappers around this package, it is written in pure Python and runs on Python 3.5+. The implementation is compatible with the existing data science ecosystem.
 Pyglmnet's API is designed to be compatible with scikit-learn, thus it is possible to do::
 
 
@@ -127,10 +129,7 @@ Pyglmnet's API is designed to be compatible with scikit-learn, thus it is possib
            glm.predict(y)
 ```
 
-As a result of this compatibility, we do not reinvent the wheel and scikit-learn tools
-for building pipelines, cross-validation and grid search can be reused.
-
-Pyglmnet has already been used in a number of published research investigations
+As a result of this compatibility, ``scikit-learn`` tools for building pipelines, cross-validation and grid search can be reused by users. Pyglmnet has already been used in a number of published research investigations
 `[@bertran2018active; @rybakken2019decoding; @hofling2019probing; @benjamin2017modern]`
 
 It is unit tested and includes documentation in the form of tutorials, docstrings and

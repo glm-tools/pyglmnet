@@ -20,12 +20,6 @@ A python implementation of elastic-net regularized generalized linear models
    and `Tikhonov
    regularization <https://en.wikipedia.org/wiki/Tikhonov_regularization>`__.
 
--  We follow the same approach and notations as in `Friedman, J.,
-   Hastie, T., & Tibshirani, R.
-   (2010) <https://core.ac.uk/download/files/153/6287975.pdf>`__ and the
-   accompanying widely popular `R
-   package <https://web.stanford.edu/~hastie/glmnet/glmnet_alpha.html>`__.
-
 -  We have implemented a cyclical coordinate descent optimizer with
    Newton update, active sets, update caching, and warm restarts. This
    optimization approach is identical to the one used in R package.
