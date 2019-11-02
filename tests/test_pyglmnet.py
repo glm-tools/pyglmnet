@@ -388,6 +388,7 @@ def test_cdfast(distr):
     ActiveSet = np.ones(n_features + 1)
     beta_ret = glm._cdfast(X, y, ActiveSet, beta_, glm.reg_lambda)
     assert(beta_ret.shape == beta_.shape)
+    assert(True not in np.isnan(beta_ret))
 
 
 def test_fetch_datasets():
