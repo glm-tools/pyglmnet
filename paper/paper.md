@@ -131,7 +131,7 @@ As a result of this compatibility, we do not reinvent the wheel and scikit-learn
 for building pipelines, cross-validation and grid search can be reused.
 
 Pyglmnet has already been used in a number of published research investigations
-`[bertran2018active; rybakken2019decoding; hofling2019probing; benjamin2017modern]`
+`[@bertran2018active; @rybakken2019decoding; @hofling2019probing; @benjamin2017modern]`
 
 It is unit tested and includes documentation in the form of tutorials, docstrings and
 examples that are run through continuous integration.
