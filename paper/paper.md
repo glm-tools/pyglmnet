@@ -81,10 +81,10 @@ uniquely identifiable due to their convex loss and easy to interpret due
 to their point-wise non-linearities and well-defined noise models. Mathematically,
 we want to solve problems of the form:
 
-$$\min_{\beta_0, \beta} \frac{1}{N} \sum_{i = 1}^N \ell (y_i, \beta_0 + \beta^T x_i)
+$$\min_{\beta_0, \beta} \frac{1}{N} \sum_{i = 1}^N \mathcal{L} (y_i, \beta_0 + \beta^T x_i)
 + \lambda \mathcal{P}(\beta)$$
 
-where $\ell (y_i, \beta_0 + \beta^T x_i)$ is the negative log-likelihood of an 
+where $\mathcal{L} (y_i, \beta_0 + \beta^T x_i)$ is the negative log-likelihood of an
 observation $i$. and $\mathcal{P}(\cdot)$ is the penalty that regularizes the solution.
 
 In the era of exploratory data analyses with a large number of predictor
