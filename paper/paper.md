@@ -137,7 +137,7 @@ examples that are run through continuous integration.
 
 # Acknowledgements
 
-...
+``Pyglmnet`` development is partly supported by NIH NINDS R01-NS104585.
 
 [Generalized linear models]: https://en.wikipedia.org/wiki/Generalized_linear_model>`__
 [statsmodel]: https://www.statsmodels.org/
