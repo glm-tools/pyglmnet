@@ -6,92 +6,93 @@ tags:
   - machine-learning
   - lasso
   - elastic-net
+  - group-lasso
 authors:
   - name: Mainak Jas
     orcid: 0000-0003-0872-7098
     affiliation: "1, 2"
   - name: Titipat Achakulvisut
-    affiliation: 5
+    affiliation: 3
   - name: Aid Idrizović
     affiliation: 4
   - name: Daniel Acuna
-    affiliation: 6
+    affiliation: 5
   - name: Matthew Antalek
-    affiliation: 15
+    affiliation: 6
   - name: Vinicius Marques
     affiliation: 4
   - name: Tommy Odland
-    affiliation: 13
+    affiliation: 7
   - name: Ravi Prakash Garg
-    affiliation: 15
+    affiliation: 6
   - name: Mayank Agrawal
-    affiliation: 16
-  - name: Yu Umegaki
-    affiliation: 19
-  - name: Peter Foley
-    affiliation: 11
-  - name: Hugo Fernandes
-    affiliation: 3
-  - name: Drew Harris
-    affiliation: 17
-  - name: Beibin Li
-    affiliation: 12
-  - name: Olivier Pieters
-    affiliation: 18
-  - name: Scott Otterson
-    affiliation: 20
-  - name: Giovanni De Toni
-    affiliation: 14
-  - name: Chris Rodgers
     affiliation: 8
-  - name: Eva Dyer
+  - name: Yu Umegaki
     affiliation: 9
+  - name: Peter Foley
+    affiliation: 10
+  - name: Hugo Fernandes
+    affiliation: 11
+  - name: Drew Harris
+    affiliation: 12
+  - name: Beibin Li
+    affiliation: 13
+  - name: Olivier Pieters
+    affiliation: 14
+  - name: Scott Otterson
+    affiliation: 15
+  - name: Giovanni De Toni
+    affiliation: 16
+  - name: Chris Rodgers
+    affiliation: 17
+  - name: Eva Dyer
+    affiliation: 18
   - name: Matti Hamalainen
     affiliation: "1, 2"
   - name: Konrad Kording
-    affiliation: 5
+    affiliation: 3
   - name: Pavan Ramkumar
     orcid: 0000-0001-7450-0727
-    affiliation: 3
+    affiliation: 19
 affiliations:
  - name: Massachusetts General Hospital
    index: 1
  - name: Harvard Medical School
    index: 2
- - name: System1 Biosciences Inc
+ - name: University of Pennsylvania
    index: 3
  - name: Loyola University
    index: 4
- - name: University of Pennsylvania
-   index: 5
  - name: University of Syracuse
-   index: 6
- - name: Columbia University
-   index: 8
- - name: Georgia Tech
-   index: 9
- - name: Rockets of Awesome
-   index: 3
- - name: 605
-   index: 11
- - name: University of Washington
-   index: 12
- - name: Sonat Consulting
-   index: 13
- - name: University of Trento
-   index: 14
+   index: 5
  - name: Northwestern University
-   index: 15
+   index: 6
+ - name: Sonat Consulting
+   index: 7
  - name: Princeton University
-   index: 16
- - name: Epoch Capital
-   index: 17
- - name: Ghent University
-   index: 18
+   index: 8
  - name: NTT DATA Mathematical Systems Inc
-   index: 19
+   index: 9
+ - name: 605
+   index: 10
+ - name: Rockets of Awesome
+   index: 11
+ - name: Epoch Capital
+   index: 12
+ - name: University of Washington
+   index: 13
+ - name: Ghent University
+   index: 14
  - name: Clean Power Research
-   index: 20
+   index: 15
+ - name: University of Trento
+   index: 16
+ - name: Columbia University
+   index: 17
+ - name: Georgia Tech
+   index: 18
+ - name: System1 Biosciences Inc
+   index: 19
 
 date: 6 September 2019
 bibliography: paper.bib
