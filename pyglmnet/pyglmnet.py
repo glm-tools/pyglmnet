@@ -361,7 +361,7 @@ def _gradhess_logloss_1d(distr, xk, y, z, eta, fit_intercept=True):
     elif distr == 'neg-binomial':
 
         r = 15.
-        mu = _mu(distr, z, eta)
+        mu = _mu(distr, z, eta, fit_intercept)
         grad_mu = _grad_mu(distr, z, eta)
         hess_mu = np.exp(-z)*expit(z)**2
 
