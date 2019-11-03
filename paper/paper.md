@@ -10,26 +10,40 @@ authors:
   - name: Mainak Jas
     orcid: 0000-0003-0872-7098
     affiliation: "1, 2"
-  - name: Hugo Fernandes
-    affiliation: 3
-  - name: Daniel Acuna
-    affiliation: 6
-  - name: Ravi Garg
-    affiliation: 15
+  - name: Titipat Achakulvisut
+    affiliation: 5
   - name: Aid Idrizović
     affiliation: 4
+  - name: Daniel Acuna
+    affiliation: 6
+  - name: Matthew Antalek
+    affiliation: 15
   - name: Vinicius Marques
     affiliation: 4
   - name: Tommy Odland
     affiliation: 13
-  - name: Giovanni De Toni
-    affiliation: 14
+  - name: Ravi Prakash Garg
+    affiliation: 15
+  - name: Mayank Agrawal
+    affiliation: 16
+  - name: Yu Umegaki
+    affiliation: 19
   - name: Peter Foley
     affiliation: 11
-  - name: Chris Rodgers
-    affiliation: 8
+  - name: Hugo Fernandes
+    affiliation: 3
+  - name: Drew Harris
+    affiliation: 17
   - name: Beibin Li
     affiliation: 12
+  - name: Olivier Pieters
+    affiliation: 18
+  - name: Scott Otterson
+    affiliation: 20
+  - name: Giovanni De Toni
+    affiliation: 14
+  - name: Chris Rodgers
+    affiliation: 8
   - name: Eva Dyer
     affiliation: 9
   - name: Matti Hamalainen
@@ -37,6 +51,7 @@ authors:
   - name: Konrad Kording
     affiliation: 5
   - name: Pavan Ramkumar
+    orcid: 0000-0001-7450-0727
     affiliation: 3
 affiliations:
  - name: Massachusetts General Hospital
@@ -65,8 +80,18 @@ affiliations:
    index: 13
  - name: University of Trento
    index: 14
- - name: Kellogg School of Business, Northwestern University
+ - name: Northwestern University
    index: 15
+ - name: Princeton University
+   index: 16
+ - name: Epoch Capital
+   index: 17
+ - name: Ghent University
+   index: 18
+ - name: NTT DATA Mathematical Systems Inc
+   index: 19
+ - name: Clean Power Research
+   index: 20
 
 date: 6 September 2019
 bibliography: paper.bib
