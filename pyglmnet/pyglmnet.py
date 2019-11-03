@@ -472,12 +472,17 @@ class GLM(BaseEstimator):
         learning rate for gradient descent.
         default: 2e-1
     max_iter: int
-        maximum iterations for the model.
+        maximum number of iterations for the solver.
         default: 1000
     tol: float
         convergence threshold or stopping criteria.
-        Optimization loop will stop when norm(gradient) is below the threshold.
+        Optimization loop will stop when relative change
+        in parameter norm is below the threshold.
         default: 1e-6
+    htol: float
+        tolerance for Hessian term. if the Hessian is below this value
+        the learning rate will be used as step size.
+        default: 1e-3
     eta: float
         a threshold parameter that linearizes the exp() function above eta.
         default: 2.0
@@ -533,7 +538,7 @@ class GLM(BaseEstimator):
                  reg_lambda=0.1,
                  solver='batch-gradient',
                  learning_rate=2e-1, max_iter=1000,
-                 tol=1e-6, eta=2.0, score_metric='deviance',
+                 tol=1e-6, htol=1e-3, eta=2.0, score_metric='deviance',
                  fit_intercept=True,
                  random_state=0, callback=None, verbose=False):
 
@@ -553,6 +558,7 @@ class GLM(BaseEstimator):
         self.ynull_ = None
         self.n_iter_ = 0
         self.tol = tol
+        self.htol = htol
         self.eta = eta
         self.score_metric = score_metric
         self.fit_intercept = fit_intercept
@@ -731,7 +737,7 @@ class GLM(BaseEstimator):
                 hk += reg_scale * hk_reg
 
                 # Ensure that update does not blow up if Hessian is small
-                if hk < 1e-3:
+                if hk < self.htol:
                     update = self.learning_rate * gk
                 else:
                     update = 1. / hk * gk
@@ -1062,8 +1068,9 @@ class GLMCV(object):
         array of regularized parameters :math:`\\lambda` of penalty term.
         default: None, a list of 10 floats spaced logarithmically (base e)
         between 0.5 and 0.01.
-    cv: cross validation object (default 10)
-        Iterator for doing cross validation
+    cv: int
+        number of cross validation repeats
+        default: 10
     solver: str
         optimization method, can be one of the following
         'batch-gradient' (vanilla batch gradient descent)
@@ -1073,12 +1080,17 @@ class GLMCV(object):
         learning rate for gradient descent.
         default: 2e-1
     max_iter: int
-        maximum iterations for the model.
+        maximum number of iterations for the solver.
         default: 1000
     tol: float
         convergence threshold or stopping criteria.
-        Optimization loop will stop when norm(gradient) is below the threshold.
+        Optimization loop will stop when relative change
+        in parameter norm is below the threshold.
         default: 1e-6
+    htol: float
+        tolerance for Hessian term. if the Hessian is below this value
+        the learning rate will be used as step size.
+        default: 1e-3
     eta: float
         a threshold parameter that linearizes the exp() function above eta.
         default: 2.0
@@ -1128,7 +1140,7 @@ class GLMCV(object):
                  reg_lambda=None, cv=10,
                  solver='batch-gradient',
                  learning_rate=2e-1, max_iter=1000,
-                 tol=1e-6, eta=2.0, score_metric='deviance',
+                 tol=1e-6, htol=1e-3, eta=2.0, score_metric='deviance',
                  fit_intercept=True,
                  random_state=0, verbose=False):
 
@@ -1157,6 +1169,7 @@ class GLMCV(object):
         self.scores_ = None
         self.ynull_ = None
         self.tol = tol
+        self.htol = htol
         self.eta = eta
         self.score_metric = score_metric
         self.fit_intercept = fit_intercept
