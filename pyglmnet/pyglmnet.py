@@ -6,13 +6,13 @@ from copy import deepcopy
 import numpy as np
 from scipy.special import expit
 from scipy.stats import norm
+
 from .utils import logger, set_log_level, _check_params
 from .base import BaseEstimator, is_classifier, check_version
 
 
 ALLOWED_DISTRS = ['gaussian', 'binomial', 'softplus', 'poisson',
                   'probit', 'gamma']
-HESSIAN_TOLERANCE = 1e-3
 
 
 def _probit_g1(z, pdfz, cdfz, thresh=5):
@@ -733,10 +733,7 @@ class GLM(BaseEstimator):
                 hk += reg_scale * hk_reg
 
                 # Ensure that update does not blow up if Hessian is small
-                if hk < HESSIAN_TOLERANCE:
-                    update = self.learning_rate * gk
-                else:
-                    update = 1. / hk * gk
+                update = 1. / (1 + hk) * gk
 
                 # Update parameters, z
                 beta[k], z = beta[k] - update, z - update * xk
