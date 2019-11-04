@@ -30,6 +30,7 @@ authors:
   - name: Yu Umegaki
     affiliation: 9
   - name: Peter Foley
+  - orcid: 0000-0002-0304-7213
     affiliation: 10
   - name: Hugo Fernandes
     affiliation: 11
