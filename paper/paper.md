@@ -103,9 +103,12 @@ bibliography: paper.bib
 [Generalized linear models](GLMs) are
 well-established tools for regression and classification and are widely
 applied across the sciences, economics, business, and finance. They are
-uniquely identifiable due to their convex loss and easy to interpret due
-to their point-wise non-linearities and well-defined noise models. Mathematically,
-we want to solve problems of the form:
+especially useful because their loss functions are convex, meaning they are
+easy and efficient to fit. Moreover, they are are relatively easy to interpret
+because their noise terms are well defined, and the non-linearities they contain
+are point-wise.
+
+Mathematically, a GLM is defined as follows:
 
 $$\min_{\beta_0, \beta} \frac{1}{N} \sum_{i = 1}^N \mathcal{L} (y_i, \beta_0 + \beta^T x_i)
 + \lambda \mathcal{P}(\beta)$$
@@ -113,23 +116,24 @@ $$\min_{\beta_0, \beta} \frac{1}{N} \sum_{i = 1}^N \mathcal{L} (y_i, \beta_0 + \
 where $\mathcal{L} (y_i, \beta_0 + \beta^T x_i)$ is the negative log-likelihood of an
 observation $i$. and $\mathcal{P}(\cdot)$ is the penalty that regularizes the solution.
 
-In the era of exploratory data analyses with a large number of predictor
-variables, it is important to regularize. Regularization prevents
-overfitting by penalizing the negative log likelihood and can be used to
-articulate prior knowledge about the parameters in a structured form. In Pyglmnet, we offer
+Modern datasets can contain an enormous number of predictor variables, and
+data analysis is often exploratory. Under these conditions it is critically
+important to regularize the model to avoid overfitting the data.
+Regularization works by adding penalty terms that penalize the model parameters in
+a variety of different ways. This can be used to incorporate prior knowledge 
+about the parameters in a structured form. In Pyglmnet, we offer
 users the ability to combine different types of regularization with different noise
 distributions in the GLMs.
 
 Despite the attractiveness of regularized GLMs, the available tools in
-the Python data science eco-system are highly fragmented. More
-specifically,
+the Python data science eco-system are highly fragmented. Specifically:
 
 -  [statsmodels] provides a wide range of link functions but no regularization.
 -  [scikit-learn] provides elastic net regularization but only limited noise distribution options.
 -  [lightning] provides elastic net and group lasso regularization, but only for
    linear and logistic regression.
 
-[Pyglmnet] is a response to this fragmentation. Here are is a comparison of Pyglmnet with existing toolboxes.
+[Pyglmnet] is a response to this fragmentation. Here is a comparison of Pyglmnet with existing toolboxes.
 
 |                    | [pyglmnet] | [scikit-learn] | [statsmodels] |   [lightning]   |   [py-glm]    | [Matlab]|   [glmnet] in R |
 |--------------------|:----------:|:--------------:|:-------------:|:---------------:|:-------------:|:-------:|:---------------:|
@@ -148,7 +152,7 @@ specifically,
 
 Pyglmnet implements the same algorithm described in [Friedman, J., Hastie, T., & Tibshirani, R. (2010)](https://core.ac.uk/download/files/153/6287975.pdf>) and the accompanying widely popular R package [glmnet].
 As opposed to [glmnet-python] which is a wrapper around this package, Pyglmnet is written in pure Python and runs on Python 3.5+. The implementation is compatible with the existing data science ecosystem.
-Pyglmnet's API is designed to be compatible with scikit-learn, thus it is possible to do::
+Pyglmnet's API is designed to be compatible with scikit-learn. Thus, it is possible to do::
 
 
 ```py
