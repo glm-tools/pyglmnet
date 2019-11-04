@@ -14,10 +14,10 @@ Current
 Changelog
 ~~~~~~~~~
 
-    - Graceful handling of small Hessian term in coordinate descent solver by `Pavan Ramkumar`_.
-
 BUG
 ~~~
+
+    - Graceful handling of small Hessian term in coordinate descent solver that led to exploding update term by `Pavan Ramkumar`_.
 
 API
 ~~~
