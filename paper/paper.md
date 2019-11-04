@@ -161,12 +161,14 @@ Pyglmnet's API is designed to be compatible with scikit-learn. Thus, it is possi
 ```
 
 As a result of this compatibility, ``scikit-learn`` tools for building pipelines, cross-validation and grid search can be reused by Pyglmnet users. Pyglmnet has already been used in published work
-`[@bertran2018active; @rybakken2019decoding; @hofling2019probing; @benjamin2017modern]`. It is unit tested and includes documentation in the form of tutorials, docstrings and
+[@bertran2018active; @rybakken2019decoding; @hofling2019probing; @benjamin2017modern]. It is unit tested and includes documentation in the form of tutorials, docstrings and
 examples that are run through continuous integration.
 
 # Acknowledgements
 
 ``Pyglmnet`` development is partly supported by NIH NINDS R01-NS104585.
+
+# References
 
 [Generalized linear models]: https://en.wikipedia.org/wiki/Generalized_linear_model>`__
 [statsmodel]: https://www.statsmodels.org/
