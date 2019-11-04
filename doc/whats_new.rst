@@ -14,6 +14,8 @@ Current
 Changelog
 ~~~~~~~~~
 
+    - Graceful handling of small Hessian term in coordinate descent solver by `Pavan Ramkumar`_.
+
 BUG
 ~~~
 

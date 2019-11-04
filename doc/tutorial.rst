@@ -329,6 +329,8 @@ Let's say only the :math:`k^{th}` parameter is updated at time step :math:`t`.
          \beta_j^{t} & = \beta_j^{t-1}, \forall j \neq k
      \end{eqnarray}
 
+In practice, while implementing the update step, we check to see
+if :math:`h_k^{t-1}` is above a tolerance so that its inverse does not explode.
 
 Next we apply a soft thresholding step for :math:`k \neq 0` after every update iteration, as follows.
 :math:`\beta_k^{t} = \mathcal{S}_{\lambda\alpha}(\beta_k^{t})`
