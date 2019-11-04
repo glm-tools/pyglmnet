@@ -733,7 +733,7 @@ class GLM(BaseEstimator):
                 hk += reg_scale * hk_reg
 
                 # Ensure that update does not blow up if Hessian is small
-                update = 1. / (1 + hk) * gk
+                update = 1. / hk * gk if hk > 1. else self.learning_rate * gk
 
                 # Update parameters, z
                 beta[k], z = beta[k] - update, z - update * xk
