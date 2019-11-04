@@ -43,6 +43,7 @@ authors:
   - name: Scott Otterson
     affiliation: 15
   - name: Giovanni De Toni
+  - orcid: 0000-0002-8387-9983
     affiliation: 16
   - name: Chris Rodgers
     affiliation: 17
