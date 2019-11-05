@@ -9,7 +9,7 @@ tags:
   - group-lasso
 authors:
   - name: Mainak Jas
-    orcid: 0000-0003-0872-7098
+    orcid: 0000-0002-3199-9027
     affiliation: "1, 2"
   - name: Titipat Achakulvisut
     affiliation: 3
@@ -30,7 +30,7 @@ authors:
   - name: Yu Umegaki
     affiliation: 9
   - name: Peter Foley
-  - orcid: 0000-0002-0304-7213
+    orcid: 0000-0002-0304-7213
     affiliation: 10
   - name: Hugo Fernandes
     affiliation: 11
@@ -43,9 +43,10 @@ authors:
   - name: Scott Otterson
     affiliation: 15
   - name: Giovanni De Toni
-  - orcid: 0000-0002-8387-9983
+    orcid: 0000-0002-8387-9983
     affiliation: 16
   - name: Chris Rodgers
+    orcid: 0000-0003-1762-3450
     affiliation: 17
   - name: Eva Dyer
     affiliation: 18
