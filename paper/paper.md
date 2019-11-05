@@ -117,12 +117,13 @@ $$\min_{\beta_0, \beta} \frac{1}{N} \sum_{i = 1}^N \mathcal{L} (y_i, \beta_0 + \
 + \lambda \mathcal{P}(\beta)$$
 
 where $\mathcal{L} (y_i, \beta_0 + \beta^T x_i)$ is the negative log-likelihood of an
-observation $i$. and $\mathcal{P}(\cdot)$ is the penalty that regularizes the solution.
+observation $i$, and \lambda $\mathcal{P}(\cdot)$ is the penalty that regularizes the solution, 
+where \lambda is a constant that controls the amount of regularization.
 
 Modern datasets can contain an enormous number of predictor variables, and
 data analysis is often exploratory. Under these conditions it is critically
 important to regularize the model to avoid overfitting the data.
-Regularization works by adding penalty terms that penalize the model parameters in
+Regularization works by adding penalty terms that penalizes the model parameters in
 a variety of different ways. This can be used to incorporate prior knowledge 
 about the parameters in a structured form. In Pyglmnet, we offer
 users the ability to combine different types of regularization with different noise
@@ -154,7 +155,7 @@ the Python data science eco-system are highly fragmented. Specifically:
 | tikhonov           |    x       |                |               |                 |               |         |                 |
 
 Pyglmnet implements the same algorithm described in [Friedman, J., Hastie, T., & Tibshirani, R. (2010)](https://core.ac.uk/download/files/153/6287975.pdf>) and the accompanying widely popular R package [glmnet].
-As opposed to [glmnet-python] which is a wrapper around this package, Pyglmnet is written in pure Python and runs on Python 3.5+. The implementation is compatible with the existing data science ecosystem.
+As opposed to [glmnet-python], which is a wrapper around this package, Pyglmnet is written in pure Python and runs on Python 3.5+. The implementation is compatible with the existing data science ecosystem.
 Pyglmnet's API is designed to be compatible with scikit-learn. Thus, it is possible to do::
 
 
