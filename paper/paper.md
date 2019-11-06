@@ -117,8 +117,8 @@ $$\min_{\beta_0, \beta} \frac{1}{N} \sum_{i = 1}^N \mathcal{L} (y_i, \beta_0 + \
 + \lambda \mathcal{P}(\beta)$$
 
 where $\mathcal{L} (y_i, \beta_0 + \beta^T x_i)$ is the negative log-likelihood of an
-observation $i$, and \lambda $\mathcal{P}(\cdot)$ is the penalty that regularizes the solution, 
-where \lambda is a constant that controls the amount of regularization.
+observation $x_i$, and $\lambda \mathcal{P}(\cdot)$ is the penalty that regularizes the solution,
+with $\lambda$ being a constant that controls the amount of regularization.
 
 Modern datasets can contain an enormous number of predictor variables, and
 data analysis is often exploratory. Under these conditions it is critically
@@ -141,18 +141,18 @@ the Python data science eco-system are highly fragmented. Specifically:
 
 |                    | [pyglmnet] | [scikit-learn] | [statsmodels] |   [lightning]   |   [py-glm]    | [Matlab]|   [glmnet] in R |
 |--------------------|:----------:|:--------------:|:-------------:|:---------------:|:-------------:|:-------:|:---------------:|
-| **distributions**  |            |                |               |                 |               |         |                 |
-| gaussian           |    x       |      x         |      x        |       x         |      x        |    x    |  x              |
-| binomial           |    x       |      x         |      x        |       x         |      x        |    x    |  x              |
-| poisson            |    x       |                |      x        |                 |      x        |    x    |  x              |
-| softplus           |    x       |                |               |                 |               |         |                 |
-| probit             |    x       |                |               |                 |               |         |                 |
-| gamma              |    x       |                |               |                 |               |    x    |                 |
-| **regularization** |            |                |               |                 |               |         |                 |
+| **Distributions**  |            |                |               |                 |               |         |                 |
+| Gaussian           |    x       |      x         |      x        |       x         |      x        |    x    |  x              |
+| Binomial           |    x       |      x         |      x        |       x         |      x        |    x    |  x              |
+| Poisson            |    x       |                |      x        |                 |      x        |    x    |  x              |
+| Poisson (softplus)           |    x       |                |               |                 |               |         |                 |
+| Probit             |    x       |                |               |                 |               |         |                 |
+| Gamma              |    x       |                |               |                 |               |    x    |                 |
+| **Regularization** |            |                |               |                 |               |         |                 |
 | l2                 |    x       |      x         |               |       x         |               |         |                 |
-| lasso              |    x       |      x         |               |       x         |               |         |  x              |
-| group lasso        |    x       |                |               |       x         |               |         |  x              |
-| tikhonov           |    x       |                |               |                 |               |         |                 |
+| Lasso              |    x       |      x         |               |       x         |               |         |  x              |
+| Group lasso        |    x       |                |               |       x         |               |         |  x              |
+| Tikhonov           |    x       |                |               |                 |               |         |                 |
 
 Pyglmnet implements the same algorithm described in [Friedman, J., Hastie, T., & Tibshirani, R. (2010)](https://core.ac.uk/download/files/153/6287975.pdf>) and the accompanying widely popular R package [glmnet].
 As opposed to [glmnet-python], which is a wrapper around this package, Pyglmnet is written in pure Python and runs on Python 3.5+. The implementation is compatible with the existing data science ecosystem.
