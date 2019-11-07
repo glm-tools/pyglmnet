@@ -40,7 +40,8 @@ authors:
   - name: Beibin Li
     affiliation: 13
   - name: Olivier Pieters
-    affiliation: 14
+    orcid: 0000-0002-5473-4849
+    affiliation: 14, 20
   - name: Scott Otterson
     affiliation: 15
   - name: Giovanni De Toni
@@ -85,7 +86,7 @@ affiliations:
    index: 12
  - name: University of Washington
    index: 13
- - name: Ghent University
+ - name: IDLab-AIRO -- Ghent University -- imec
    index: 14
  - name: Clean Power Research
    index: 15
@@ -97,6 +98,8 @@ affiliations:
    index: 18
  - name: System1 Biosciences Inc
    index: 19
+ - name: Research Institute for Agriculture, Fisheries and Food
+   index: 20
 
 date: 6 September 2019
 bibliography: paper.bib
@@ -138,7 +141,7 @@ the Python data science eco-system are highly fragmented. Specifically:
 -  [lightning] provides elastic net and group lasso regularization, but only for
    linear and logistic regression.
 
-[Pyglmnet] is a response to this fragmentation. Here is a comparison of Pyglmnet with existing toolboxes.
+[Pyglmnet] is a response to this fragmentation. The table below compares Pyglmnet with existing toolboxes.
 
 |                    | [pyglmnet] | [scikit-learn] | [statsmodels] |   [lightning]   |   [py-glm]    | [Matlab]|   [glmnet] in R |
 |--------------------|:----------:|:--------------:|:-------------:|:---------------:|:-------------:|:-------:|:---------------:|
@@ -150,7 +153,7 @@ the Python data science eco-system are highly fragmented. Specifically:
 | Probit             |    x       |                |               |                 |               |         |                 |
 | Gamma              |    x       |                |               |                 |               |    x    |                 |
 | **Regularization** |            |                |               |                 |               |         |                 |
-| l2                 |    x       |      x         |               |       x         |               |         |                 |
+| L2                 |    x       |      x         |               |       x         |               |         |                 |
 | Lasso              |    x       |      x         |               |       x         |               |         |  x              |
 | Group lasso        |    x       |                |               |       x         |               |         |  x              |
 | Tikhonov           |    x       |                |               |                 |               |         |                 |
@@ -171,7 +174,7 @@ examples that are run through continuous integration.
 
 # Acknowledgements
 
-``Pyglmnet`` development is partly supported by NIH NINDS R01-NS104585.
+``Pyglmnet`` development is partly supported by NIH NINDS R01-NS104585 and the Special Research Fund (B.O.F.) of Ghent University.
 
 # References
 
