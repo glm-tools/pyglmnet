@@ -108,7 +108,7 @@ bibliography: paper.bib
 well-established tools for regression and classification and are widely
 applied across the sciences, economics, business, and finance. They are
 especially useful because their loss functions are convex, meaning they are
-easy and efficient to fit. Moreover, they are are relatively easy to interpret
+easy and efficient to fit. Moreover, they are relatively easy to interpret
 because their noise terms are well defined, and the non-linearities they contain
 are point-wise.
 
