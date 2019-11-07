@@ -121,7 +121,7 @@ $$\min_{\beta_0, \beta} \frac{1}{N} \sum_{i = 1}^N \mathcal{L} (y_i, \beta_0 + \
 + \lambda \mathcal{P}(\beta)$$
 
 where $\mathcal{L} (y_i, \beta_0 + \beta^T x_i)$ is the negative log-likelihood of an
-observation $x_i$, and $\lambda \mathcal{P}(\cdot)$ is the penalty that regularizes the solution,
+observation ($x_i$, $y_i$), and $\lambda \mathcal{P}(\cdot)$ is the penalty that regularizes the solution,
 with $\lambda$ being a constant that controls the amount of regularization.
 
 Modern datasets can contain an enormous number of predictor variables, and
