@@ -124,7 +124,7 @@ with $\lambda$ being a constant that controls the amount of regularization.
 Modern datasets can contain an enormous number of predictor variables, and
 data analysis is often exploratory. Under these conditions it is critically
 important to regularize the model to avoid overfitting the data.
-Regularization works by adding penalty terms that penalizes the model parameters in
+Regularization works by adding penalty terms that penalize the model parameters in
 a variety of different ways. This can be used to incorporate prior knowledge 
 about the parameters in a structured form. In Pyglmnet, we offer
 users the ability to combine different types of regularization with different noise
