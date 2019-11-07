@@ -157,7 +157,7 @@ the Python data science eco-system are highly fragmented. Specifically:
 
 Pyglmnet implements the same algorithm described in [Friedman, J., Hastie, T., & Tibshirani, R. (2010)](https://core.ac.uk/download/files/153/6287975.pdf>) and the accompanying widely popular R package [glmnet].
 As opposed to [glmnet-python], which is a wrapper around this package, Pyglmnet is written in pure Python and runs on Python 3.5+. The implementation is compatible with the existing data science ecosystem.
-Pyglmnet's API is designed to be compatible with scikit-learn. Thus, it is possible to do::
+Pyglmnet's API is designed to be compatible with scikit-learn. Thus, it is possible to do:
 
 
 ```py
