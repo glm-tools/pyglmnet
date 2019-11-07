@@ -33,6 +33,7 @@ authors:
     orcid: 0000-0002-0304-7213
     affiliation: 10
   - name: Hugo Fernandes
+    orcid: 0000-0002-0168-4104
     affiliation: 11
   - name: Drew Harris
     affiliation: 12
