@@ -152,9 +152,9 @@ def _logL(distr, y, y_hat, z=None):
         nu = 1.  # shape parameter, exponential for now
         logL = np.sum(nu * (-y / y_hat - np.log(y_hat)))
     elif distr == 'neg-binomial':
-        r = 15.
-        logL =  np.sum(loggamma(y + r) + r * np.log(r) + y * np.log(y_hat) - loggamma(y + 1) -
-                   loggamma(r) - np.log(y_hat + r) * (y + r))
+        theta = 15.
+        logL= np.sum(loggamma(y+theta)-loggamma(y)-loggamma(theta+1)+y*np.log(theta)
+                     +theta*np.log(y_hat)-(theta+y)*np.log(y_hat+theta))
     return logL
 
 
@@ -279,8 +279,8 @@ def _grad_L2loss(distr, alpha, Tau, reg_lambda, X, y, eta, beta,
         grad_beta = -nu * np.dot(grad_logl.T, X).T
 
     elif distr == 'neg-binomial':
-        r = 15.
-        partial_beta_0 = grad_mu * ((r+y)/(r+mu)-y/mu)
+        theta = 15.
+        partial_beta_0 = -grad_mu * (theta/mu - (theta+y)/(mu+theta))
         grad_beta0 = np.sum(partial_beta_0)
         grad_beta = np.dot(partial_beta_0.T, X)
 
@@ -363,14 +363,14 @@ def _gradhess_logloss_1d(distr, xk, y, z, eta, fit_intercept=True):
 
     elif distr == 'neg-binomial':
 
-        r = 15.
+        theta = 15.
         mu = _mu(distr, z, eta, fit_intercept)
         grad_mu = _grad_mu(distr, z, eta)
         hess_mu = np.exp(-z)*expit(z)**2
 
-        partial_beta_0_1 = hess_mu*((r+y)/(r+mu)-(y/mu))
-        partial_beta_0_2 = grad_mu**2 * (y/mu**2 - (r+y)/(r+mu)**2)
-        partial_beta_0 = partial_beta_0_1+partial_beta_0_2
+        partial_beta_0_1 = hess_mu*(theta/mu - (y+theta)/(mu+theta))
+        partial_beta_0_2 = grad_mu**2 * ((y+theta)/(mu+theta)**2 -theta/mu**2)
+        partial_beta_0 = -partial_beta_0_1+partial_beta_0_2
         gk = np.sum(partial_beta_0)
         hk = np.dot(partial_beta_0.T, xk**2)
 
@@ -432,10 +432,11 @@ def simulate_glm(distr, beta0, beta, X, eta=2.0, random_state=None,
         mu = _lmb(distr, beta0, beta, X, eta)
         y = np.exp(mu)
     if distr == 'neg-binomial':
+        trials = X.shape[0]
         mu = _lmb(distr, beta0, beta, X, eta)
-        r = 15.
-        p = mu / (mu + r)
-        y = np.random.negative_binomial(r, p)
+        theta = 15. # Number of failures
+        p = theta / (theta + mu) # Probability of success
+        y = random_state.negative_binomial(trials, p)
     return y
 
 
