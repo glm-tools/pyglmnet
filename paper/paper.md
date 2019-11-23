@@ -114,7 +114,7 @@ Owing to their convex loss, they are easy and efficient to fit.
 Moreover, they are relatively easy to interpret because of their well-defined
 noise distributions and point-wise nonlinearities.
 
-Mathematically, a GLM is defined as follows:
+Mathematically, a GLM is estimated as follows:
 
 $$\min_{\beta_0, \beta} \frac{1}{N} \sum_{i = 1}^N \mathcal{L} (y_i, \beta_0 + \beta^T x_i)
 + \lambda \mathcal{P}(\beta)$$
