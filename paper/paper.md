@@ -109,11 +109,10 @@ bibliography: paper.bib
 
 [Generalized linear models](GLMs) are
 well-established tools for regression and classification and are widely
-applied across the sciences, economics, business, and finance. They are
-especially useful because their loss functions are convex, meaning they are
-easy and efficient to fit. Moreover, they are relatively easy to interpret
-because their noise terms are well defined, and the non-linearities they contain
-are point-wise.
+applied across the sciences, economics, business, and finance.
+Owing to their convex loss, they are easy and efficient to fit.
+Moreover, they are relatively easy to interpret because of their well-defined
+noise distributions and point-wise nonlinearities.
 
 Mathematically, a GLM is defined as follows:
 
@@ -128,8 +127,8 @@ Modern datasets can contain an enormous number of predictor variables, and
 data analysis is often exploratory. Under these conditions it is critically
 important to regularize the model to avoid overfitting the data.
 Regularization works by adding penalty terms that penalize the model parameters in
-a variety of different ways. This can be used to incorporate prior knowledge 
-about the parameters in a structured form. In Pyglmnet, we offer
+a variety of different ways. This can be used to incorporate prior knowledge
+about the parameters in a structured form. In pyglmnet, we offer
 users the ability to combine different types of regularization with different noise
 distributions in the GLMs.
 
@@ -141,7 +140,7 @@ the Python data science eco-system are highly fragmented. Specifically:
 -  [lightning] provides elastic net and group lasso regularization, but only for
    linear and logistic regression.
 
-[Pyglmnet] is a response to this fragmentation. The table below compares Pyglmnet with existing libraries.
+[Pyglmnet] is a response to this fragmentation. The table below compares pyglmnet with existing libraries.
 
 |                    | [pyglmnet] | [scikit-learn] | [statsmodels] |   [lightning]   |   [py-glm]    | [Matlab]|   [glmnet] in R |
 |--------------------|:----------:|:--------------:|:-------------:|:---------------:|:-------------:|:-------:|:---------------:|
@@ -158,8 +157,8 @@ the Python data science eco-system are highly fragmented. Specifically:
 | Group lasso        |    x       |                |               |       x         |               |         |  x              |
 | Tikhonov           |    x       |                |               |                 |               |         |                 |
 
-Pyglmnet implements the same algorithm described in [Friedman, J., Hastie, T., & Tibshirani, R. (2010)](https://web.stanford.edu/~hastie/Papers/ESLII.pdf) and the accompanying widely popular R package [glmnet].
-As opposed to [glmnet-python] or [glmnet_python], which are wrappers around this package, Pyglmnet is written in pure Python and runs on Python 3.5+. The implementation is compatible with the existing data science ecosystem.
+Pyglmnet implements the algorithm described in [Friedman, J., Hastie, T., & Tibshirani, R. (2010)](https://web.stanford.edu/~hastie/Papers/ESLII.pdf) and the accompanying widely popular R package [glmnet].
+As opposed to [glmnet-python] or [glmnet_python], which are wrappers around this package, pyglmnet is written in pure Python and runs on Python 3.5+. The implementation is compatible with the existing data science ecosystem.
 Pyglmnet's API is designed to be compatible with scikit-learn [@sklearn_api]. Thus, it is possible to do:
 
 
@@ -168,7 +167,7 @@ Pyglmnet's API is designed to be compatible with scikit-learn [@sklearn_api]. Th
            glm.predict(X)
 ```
 
-As a result of this compatibility, ``scikit-learn`` tools for building pipelines, cross-validation and grid search can be reused by Pyglmnet users. Pyglmnet has already been used in published work
+As a result of this compatibility, ``scikit-learn`` tools for building pipelines, cross-validation and grid search can be reused by pyglmnet users. Pyglmnet has already been used in published work
 [@bertran2018active; @rybakken2019decoding; @hofling2019probing; @benjamin2017modern]. It contains unit tests and includes documentation in the form of tutorials, docstrings and
 examples that are run through continuous integration.
 
