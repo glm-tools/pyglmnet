@@ -140,7 +140,8 @@ the Python data science eco-system are highly fragmented. Specifically:
 -  [lightning] provides elastic net and group lasso regularization, but only for
    linear and logistic regression.
 
-[Pyglmnet] is a response to this fragmentation. The table below compares pyglmnet with existing libraries.
+[Pyglmnet] is a response to this fragmentation.
+The table below compares pyglmnet with existing libraries as of this writing.
 
 |                    | [pyglmnet] | [scikit-learn] | [statsmodels] |   [lightning]   |   [py-glm]    | [Matlab]|   [glmnet] in R |
 |--------------------|:----------:|:--------------:|:-------------:|:---------------:|:-------------:|:-------:|:---------------:|
