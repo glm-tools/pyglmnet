@@ -150,7 +150,7 @@ the Python data science eco-system are highly fragmented. Specifically:
 | Poisson            |    x       |                |      x        |                 |      x        |    x    |  x              |
 | Poisson (softplus)           |    x       |                |               |                 |               |         |                 |
 | Probit             |    x       |                |               |                 |               |         |                 |
-| Gamma              |    x       |                |               |                 |               |    x    |                 |
+| Gamma              |    x       |                |      x        |                 |               |    x    |                 |
 | **Regularization** |            |                |               |                 |               |         |                 |
 | L2                 |    x       |      x         |               |       x         |               |         |                 |
 | Lasso              |    x       |      x         |               |       x         |               |         |  x              |
