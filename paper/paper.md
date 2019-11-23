@@ -158,7 +158,7 @@ the Python data science eco-system are highly fragmented. Specifically:
 | Group lasso        |    x       |                |               |       x         |               |         |  x              |
 | Tikhonov           |    x       |                |               |                 |               |         |                 |
 
-Pyglmnet implements the same algorithm described in [Friedman, J., Hastie, T., & Tibshirani, R. (2010)](https://core.ac.uk/download/files/153/6287975.pdf>) and the accompanying widely popular R package [glmnet].
+Pyglmnet implements the same algorithm described in [Friedman, J., Hastie, T., & Tibshirani, R. (2010)](https://web.stanford.edu/~hastie/Papers/ESLII.pdf) and the accompanying widely popular R package [glmnet].
 As opposed to [glmnet-python] or [glmnet_python], which are wrappers around this package, Pyglmnet is written in pure Python and runs on Python 3.5+. The implementation is compatible with the existing data science ecosystem.
 Pyglmnet's API is designed to be compatible with scikit-learn [@sklearn_api]. Thus, it is possible to do:
 
