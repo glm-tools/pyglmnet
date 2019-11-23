@@ -141,7 +141,7 @@ the Python data science eco-system are highly fragmented. Specifically:
 -  [lightning] provides elastic net and group lasso regularization, but only for
    linear and logistic regression.
 
-[Pyglmnet] is a response to this fragmentation. The table below compares Pyglmnet with existing toolboxes.
+[Pyglmnet] is a response to this fragmentation. The table below compares Pyglmnet with existing libraries.
 
 |                    | [pyglmnet] | [scikit-learn] | [statsmodels] |   [lightning]   |   [py-glm]    | [Matlab]|   [glmnet] in R |
 |--------------------|:----------:|:--------------:|:-------------:|:---------------:|:-------------:|:-------:|:---------------:|
@@ -159,7 +159,7 @@ the Python data science eco-system are highly fragmented. Specifically:
 | Tikhonov           |    x       |                |               |                 |               |         |                 |
 
 Pyglmnet implements the same algorithm described in [Friedman, J., Hastie, T., & Tibshirani, R. (2010)](https://core.ac.uk/download/files/153/6287975.pdf>) and the accompanying widely popular R package [glmnet].
-As opposed to [glmnet-python], which is a wrapper around this package, Pyglmnet is written in pure Python and runs on Python 3.5+. The implementation is compatible with the existing data science ecosystem.
+As opposed to [glmnet-python] or [glmnet_python], which are wrappers around this package, Pyglmnet is written in pure Python and runs on Python 3.5+. The implementation is compatible with the existing data science ecosystem.
 Pyglmnet's API is designed to be compatible with scikit-learn [@sklearn_api]. Thus, it is possible to do:
 
 
@@ -169,7 +169,7 @@ Pyglmnet's API is designed to be compatible with scikit-learn [@sklearn_api]. Th
 ```
 
 As a result of this compatibility, ``scikit-learn`` tools for building pipelines, cross-validation and grid search can be reused by Pyglmnet users. Pyglmnet has already been used in published work
-[@bertran2018active; @rybakken2019decoding; @hofling2019probing; @benjamin2017modern]. It is unit tested and includes documentation in the form of tutorials, docstrings and
+[@bertran2018active; @rybakken2019decoding; @hofling2019probing; @benjamin2017modern]. It contains unit tests and includes documentation in the form of tutorials, docstrings and
 examples that are run through continuous integration.
 
 # Acknowledgements
@@ -188,3 +188,4 @@ examples that are run through continuous integration.
 [pyglmnet]: http://github.com/glm-tools/pyglmnet/
 [glmnet]: https://web.stanford.edu/~hastie/glmnet/glmnet_alpha.html
 [glmnet-python]: https://github.com/civisanalytics/python-glmnet
+[glmnet_python]: https://github.com/bbalasub1/glmnet_python
