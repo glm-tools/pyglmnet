@@ -308,7 +308,7 @@ Negative Binomial
 .. math::
 
     \mathcal{L} &= \sum_{i=1}^N  \log(\Gamma(y_i+\theta))-\log(\Gamma(y_i+1))\\
-    &-\log(\Gamma(\theta))+\theta\log(\theta))-(\log(\mu_i +\theta)(y_i+\theta))+y\log(\mu_i)
+    &-\log(\Gamma(\theta))+\y_i\log(y_i))-(\log(\mu_i +y_i)(y_i+\theta))+y_i\log(\mu_i)
 
 
 **L2-penalized loss function**
@@ -316,7 +316,7 @@ Negative Binomial
 .. math::
 
     J &= -\frac{1}{N}\sum_{i=1}^N \log(\Gamma(y_i+\theta))-\log(\Gamma(y_i+1))\\
-    &-\log(\Gamma(\theta))+\theta\log(\theta))-(\log(\mu_i +\theta)(y_i+\theta))+y\log(\mu_i)\\
+    &-\log(\Gamma(\theta))+\y_i\log(\y_i))-(\log(\mu_i +y_i)(y_i+\theta))+y_i\log(\mu_i)\\
     &+ \lambda (1 - \alpha) \frac{1}{2}\sum_j \beta_j^2\\
 
 
@@ -324,8 +324,8 @@ Negative Binomial
 
 .. math::
 
-    \frac{\partial J}{\partial \beta_0} &=\frac{1}{N}\sum_{i=0}^{N} \mu_i' \left( \frac{\theta + y_i}{\theta + \mu_i} -\frac{y_i}{\mu_i} \right)\\
-    \frac{\partial J}{\partial \beta_j} &=\frac{1}{N}\sum_{i=0}^{N} \mu_i' x_{ij} \left( \frac{\theta + y_i}{\theta + \mu_i} -\frac{y_i}{\mu_i} \right)
+    \frac{\partial J}{\partial \beta_0} &=\frac{1}{N}\sum_{i=0}^{N} \mu_i' \left( \frac{\theta + y_i}{\mu_i+y_i} -\frac{y_i}{\mu_i} \right)\\
+    \frac{\partial J}{\partial \beta_j} &=\frac{1}{N}\sum_{i=0}^{N} \mu_i' x_{ij} \left( \frac{\theta + y_i}{\mu_i+y_i} -\frac{y_i}{\mu_i} \right)
 
 where :math:`\mu_i' = \frac{1}{1 + \exp(-z_i)}`.
 
@@ -333,9 +333,9 @@ where :math:`\mu_i' = \frac{1}{1 + \exp(-z_i)}`.
 
 .. math::
 
-    \frac{\partial^2 J}{\partial \beta_0^2} &= \frac{1}{N}\sum_{i=0}^{N} \mu_i'' \left( \frac{\theta + y_i}{\theta + \mu_i} -\frac{y_i}{\mu_i} \right)
-    +(\mu_i')^2 \left(+\frac{y_i}{\mu_i^2} - \frac{\theta + y_i}{(\theta + \mu_i)^2} \right)\\
-    \frac{\partial^2 J}{\partial \beta_j^2} &= \frac{1}{N}\sum_{i=0}^{N} x_{ij}^2\mu_i'' \left( \frac{\theta + y_i}{\theta + \mu_i} -\frac{y_i}{\mu_i} \right)
-    +x_{ij}^2(\mu_i')^2 \left(+\frac{y_i}{\mu_i^2} - \frac{\theta + y_i}{(\theta + \mu_i)^2} \right)
+    \frac{\partial^2 J}{\partial \beta_0^2} &= \frac{1}{N}\sum_{i=0}^{N} \mu_i'' \left( \frac{\theta + y_i}{\y_i + \mu_i} -\frac{y_i}{\mu_i} \right)
+    +(\mu_i')^2 \left(+\frac{y_i}{\mu_i^2} - \frac{\theta + y_i}{(y_i + \mu_i)^2} \right)\\
+    \frac{\partial^2 J}{\partial \beta_j^2} &= \frac{1}{N}\sum_{i=0}^{N} x_{ij}^2\mu_i'' \left( \frac{\theta + y_i}{y_i + \mu_i} -\frac{y_i}{\mu_i} \right)
+    +x_{ij}^2(\mu_i')^2 \left(+\frac{y_i}{\mu_i^2} - \frac{\theta + y_i}{(y_i + \mu_i)^2} \right)
 
 where :math:`\mu_i'' = \frac{\exp(-z_i)}{(1+\exp(-z_i))^{2}}`.
