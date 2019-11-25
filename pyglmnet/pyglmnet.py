@@ -390,11 +390,11 @@ def _gradhess_logloss_1d(distr, xk, y, z, eta, fit_intercept=True, theta=1):
         theta = 15.
         mu = _mu(distr, z, eta, fit_intercept)
         grad_mu = _grad_mu(distr, z, eta)
-        hess_mu = np.exp(-z)*expit(z)**2
+        hess_mu = np.exp(-z) * expit(z)**2
 
-        partial_beta_0_1 = hess_mu*(theta/mu - (y+theta)/(mu+theta))
-        partial_beta_0_2 = grad_mu**2 * ((y+theta)/(mu+theta)**2 -theta/mu**2)
-        partial_beta_0 = -partial_beta_0_1+partial_beta_0_2
+        partial_beta_0_1 = hess_mu * (y / mu - (y + theta) / (mu + y))
+        partial_beta_0_2 = grad_mu**2 * ((y + theta) / (mu + y)**2 - y / mu**2)
+        partial_beta_0 = -partial_beta_0_1 + partial_beta_0_2
         gk = np.sum(partial_beta_0)
         hk = np.dot(partial_beta_0.T, xk**2)
 
