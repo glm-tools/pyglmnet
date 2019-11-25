@@ -17,6 +17,7 @@ from .externals.sklearn.utils.validation import check_is_fitted
 ALLOWED_DISTRS = ['gaussian', 'binomial', 'softplus', 'poisson',
                   'probit', 'gamma', 'neg-binomial']
 
+
 def _probit_g1(z, pdfz, cdfz, thresh=5):
     res = np.zeros_like(z)
     res[z < -thresh] = np.log(-pdfz[z < -thresh] / z[z < -thresh])
@@ -152,9 +153,10 @@ def _logL(distr, y, y_hat, z=None):
         nu = 1.  # shape parameter, exponential for now
         logL = np.sum(nu * (-y / y_hat - np.log(y_hat)))
     elif distr == 'neg-binomial':
-        theta = 15.
-        logL= np.sum(loggamma(y+theta)-loggamma(y)-loggamma(theta+1)+y*np.log(theta)
-                     +theta*np.log(y_hat)-(theta+y)*np.log(y_hat+theta))
+        theta = y
+        logL = np.sum(loggamma(y + theta) - loggamma(theta) - loggamma(y + 1) +
+                      y * np.log(y) + y * np.log(y_hat) - (theta + y) *
+                      np.log(y_hat + y))
     return logL
 
 
@@ -279,8 +281,8 @@ def _grad_L2loss(distr, alpha, Tau, reg_lambda, X, y, eta, beta,
         grad_beta = -nu * np.dot(grad_logl.T, X).T
 
     elif distr == 'neg-binomial':
-        theta = 15.
-        partial_beta_0 = -grad_mu * (theta/mu - (theta+y)/(mu+theta))
+        theta = y
+        partial_beta_0 = -grad_mu * (y / mu - (theta + y) / (mu + y))
         grad_beta0 = np.sum(partial_beta_0)
         grad_beta = np.dot(partial_beta_0.T, X)
 
@@ -362,15 +364,14 @@ def _gradhess_logloss_1d(distr, xk, y, z, eta, fit_intercept=True):
                      (1 - y) * _probit_g6(z, pdfz, cdfz)) * (xk * xk))
 
     elif distr == 'neg-binomial':
-
-        theta = 15.
+        theta = y
         mu = _mu(distr, z, eta, fit_intercept)
         grad_mu = _grad_mu(distr, z, eta)
-        hess_mu = np.exp(-z)*expit(z)**2
+        hess_mu = np.exp(-z) * expit(z)**2
 
-        partial_beta_0_1 = hess_mu*(theta/mu - (y+theta)/(mu+theta))
-        partial_beta_0_2 = grad_mu**2 * ((y+theta)/(mu+theta)**2 -theta/mu**2)
-        partial_beta_0 = -partial_beta_0_1+partial_beta_0_2
+        partial_beta_0_1 = hess_mu * (y / mu - (y + theta) / (mu + y))
+        partial_beta_0_2 = grad_mu**2 * ((y + theta) / (mu + y)**2 - y / mu**2)
+        partial_beta_0 = -partial_beta_0_1 + partial_beta_0_2
         gk = np.sum(partial_beta_0)
         hk = np.dot(partial_beta_0.T, xk**2)
 
@@ -432,11 +433,12 @@ def simulate_glm(distr, beta0, beta, X, eta=2.0, random_state=None,
         mu = _lmb(distr, beta0, beta, X, eta)
         y = np.exp(mu)
     if distr == 'neg-binomial':
-        trials = X.shape[0]
         mu = _lmb(distr, beta0, beta, X, eta)
-        theta = 15. # Number of failures
-        p = theta / (theta + mu) # Probability of success
-        y = random_state.negative_binomial(trials, p)
+        trials = X.shape[0]
+        theta = trials / 2  # Number of negative cases
+        p = theta / (theta + mu)  # Probability of success
+        n = trials - theta  # Number of positive cases
+        y = _random_state.negative_binomial(n, p)
     return y
 
 
