@@ -166,7 +166,8 @@ def test_group_lasso():
 @pytest.mark.parametrize("distr", ALLOWED_DISTRS)
 @pytest.mark.parametrize("reg_lambda", [0.0, 0.1])
 @pytest.mark.parametrize("fit_intercept", [True, False])
-def test_glmnet(distr, reg_lambda, fit_intercept):
+@pytest.mark.parametrize("solver", ['batch-gradient', 'cdfast'])
+def test_glmnet(distr, reg_lambda, fit_intercept, solver):
     """Test glmnet."""
     raises(ValueError, GLM, distr='blah')
     raises(ValueError, GLM, distr='gaussian', max_iter=1.8)
@@ -181,17 +182,13 @@ def test_glmnet(distr, reg_lambda, fit_intercept):
     beta = 1. / (np.float(n_features) + int(fit_intercept)) * \
         np.random.normal(0.0, 1.0, (n_features,))
 
-    solvers = ['batch-gradient', 'cdfast']
-
     score_metric = 'pseudo_R2'
     learning_rate = 2e-1
     random_state = 0
 
     betas_ = list()
-    for solver in solvers:
 
-        if distr == 'gamma' and solver == 'cdfast':
-            continue
+    if not (distr == 'gamma' and solver == 'cdfast'):
 
         np.random.seed(random_state)
 
@@ -238,19 +235,21 @@ def test_glmnet(distr, reg_lambda, fit_intercept):
         y_pred = glm.predict(X_train)
         assert(y_pred.shape[0] == X_train.shape[0])
 
-    # compare all solvers pairwise to make sure they're close
-    for i, first_beta in enumerate(betas_[:-1]):
-        for second_beta in betas_[i + 1:]:
-            assert_allclose(first_beta, second_beta, rtol=0.05, atol=1e-2)
+        # compare all solvers pairwise to make sure they're close
+        for i, first_beta in enumerate(betas_[:-1]):
+            for second_beta in betas_[i + 1:]:
+                assert_allclose(first_beta, second_beta, rtol=0.05, atol=1e-2)
 
-    # test fit_predict
-    glm_poisson = GLM(distr='softplus')
-    glm_poisson.fit_predict(X_train, y_train)
-    raises(ValueError, glm_poisson.fit_predict, X_train[None, ...], y_train)
+        # test fit_predict
+        glm_poisson = GLM(distr='softplus')
+        glm_poisson.fit_predict(X_train, y_train)
+        raises(ValueError, glm_poisson.fit_predict,
+               X_train[None, ...], y_train)
 
 
 @pytest.mark.parametrize("distr", ALLOWED_DISTRS)
-def test_glmcv(distr):
+@pytest.mark.parametrize("solver", ['batch-gradient', 'cdfast'])
+def test_glmcv(distr, solver):
     """Test GLMCV class."""
     raises(ValueError, GLM, distr='blah')
     raises(ValueError, GLM, distr='gaussian', max_iter=1.8)
@@ -264,14 +263,10 @@ def test_glmcv(distr):
     beta = 1. / (np.float(n_features) + 1.) * \
         np.random.normal(0.0, 1.0, (n_features,))
 
-    solvers = ['batch-gradient', 'cdfast']
     score_metric = 'pseudo_R2'
     learning_rate = 2e-1
 
-    for solver in solvers:
-
-        if distr == 'gamma' and solver == 'cdfast':
-            continue
+    if not (distr == 'gamma' and solver == 'cdfast'):
 
         glm = GLMCV(distr, learning_rate=learning_rate,
                     solver=solver, score_metric=score_metric, cv=2)
@@ -291,9 +286,9 @@ def test_glmcv(distr):
         y_pred = glm.predict(scaler.transform(X_train))
         assert(y_pred.shape[0] == X_train.shape[0])
 
-    # test picky score_metric check within fit().
-    glm.score_metric = 'bad_score_metric'  # reuse last glm
-    raises(ValueError, glm.fit, X_train, y_train)
+        # test picky score_metric check within fit().
+        glm.score_metric = 'bad_score_metric'  # reuse last glm
+        raises(ValueError, glm.fit, X_train, y_train)
 
 
 def test_cv():
