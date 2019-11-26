@@ -178,7 +178,7 @@ examples that are run through continuous integration.
 
 # References
 
-[Generalized linear models]: https://en.wikipedia.org/wiki/Generalized_linear_model>`__
+[Generalized linear models]: https://en.wikipedia.org/wiki/Generalized_linear_model
 [statsmodel]: https://www.statsmodels.org/
 [py-glm]: https://github.com/madrury/py-glm/
 [scikit-learn]: https://scikit-learn.org/stable/
