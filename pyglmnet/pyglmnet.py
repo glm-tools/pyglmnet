@@ -369,7 +369,7 @@ def _gradhess_logloss_1d(distr, xk, y, z, eta, fit_intercept=True):
         gradient_beta_j = -grad_mu * (y / mu - (theta + y) / (mu + y))
         partial_beta_0_1 = hess_mu * (y / mu - (y + theta) / (mu + y))
         partial_beta_0_2 = grad_mu**2 * ((y + theta) / (mu + y)**2 - y / mu**2)
-        partial_beta_0 = -(partial_beta_0_1  + partial_beta_0_2)
+        partial_beta_0 = -(partial_beta_0_1 + partial_beta_0_2)
         gk = np.dot(gradient_beta_j.T, xk)
         hk = np.dot(partial_beta_0.T, xk**2)
 
