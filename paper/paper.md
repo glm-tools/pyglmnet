@@ -159,7 +159,7 @@ The table below compares pyglmnet with existing libraries as of this writing.
 | Tikhonov           |    x       |                |               |                 |               |         |                 |
 
 Pyglmnet implements the algorithm described in [Friedman, J., Hastie, T., & Tibshirani, R. (2010)](https://web.stanford.edu/~hastie/Papers/ESLII.pdf) and the accompanying popular R package [glmnet].
-As opposed to [glmnet-python] or [glmnet_python], which are wrappers around this package, pyglmnet is written in pure Python and runs on Python 3.5+. The implementation is compatible with the existing data science ecosystem.
+As opposed to [python-glmnet] or [glmnet_python], which are wrappers around this package, pyglmnet is written in pure Python and runs on Python 3.5+. The implementation is compatible with the existing data science ecosystem.
 Pyglmnet's API is designed to be compatible with scikit-learn [@sklearn_api]. Thus, it is possible to do:
 
 
@@ -187,5 +187,5 @@ examples that are run through continuous integration.
 [Matlab]: https://www.mathworks.com/help/stats/glmfit.html
 [pyglmnet]: http://github.com/glm-tools/pyglmnet/
 [glmnet]: https://web.stanford.edu/~hastie/glmnet/glmnet_alpha.html
-[glmnet-python]: https://github.com/civisanalytics/python-glmnet
+[python-glmnet]: https://github.com/civisanalytics/python-glmnet
 [glmnet_python]: https://github.com/bbalasub1/glmnet_python
