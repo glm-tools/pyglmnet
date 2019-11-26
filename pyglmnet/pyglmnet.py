@@ -158,6 +158,7 @@ def _logL(distr, y, y_hat, z=None, theta=1):
         nu = 1.  # shape parameter, exponential for now
         logL = np.sum(nu * (-y / y_hat - np.log(y_hat)))
     elif distr == 'neg-binomial':
+        theta = y.mean()
         logL = np.sum(loggamma(y + theta) - loggamma(theta) - loggamma(y + 1) +
                       theta * np.log(theta) + y * np.log(y_hat) - (theta + y) *
                       np.log(y_hat + theta))
