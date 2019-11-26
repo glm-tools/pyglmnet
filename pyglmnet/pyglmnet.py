@@ -150,7 +150,7 @@ def _logL(distr, y, y_hat, z=None):
         nu = 1.  # shape parameter, exponential for now
         logL = np.sum(nu * (-y / y_hat - np.log(y_hat)))
     elif distr == 'neg-binomial':
-        theta = y
+        theta = y.mean()
         logL = np.sum(loggamma(y + theta) - loggamma(theta) - loggamma(y + 1) +
                       y * np.log(y) + y * np.log(y_hat) - (theta + y) *
                       np.log(y_hat + y))
@@ -278,7 +278,7 @@ def _grad_L2loss(distr, alpha, Tau, reg_lambda, X, y, eta, beta,
         grad_beta = -nu * np.dot(grad_logl.T, X).T
 
     elif distr == 'neg-binomial':
-        theta = y
+        theta = y.mean()
         partial_beta_0 = -grad_mu * (y / mu - (theta + y) / (mu + y))
         grad_beta0 = np.sum(partial_beta_0)
         grad_beta = np.dot(partial_beta_0.T, X)
@@ -361,7 +361,7 @@ def _gradhess_logloss_1d(distr, xk, y, z, eta, fit_intercept=True):
                      (1 - y) * _probit_g6(z, pdfz, cdfz)) * (xk * xk))
 
     elif distr == 'neg-binomial':
-        theta = y
+        theta = y.mean()
         mu = _mu(distr, z, eta, fit_intercept)
         grad_mu = _grad_mu(distr, z, eta)
         hess_mu = np.exp(-z) * expit(z)**2
