@@ -107,7 +107,7 @@ bibliography: paper.bib
 
 # Summary
 
-[Generalized linear models](GLMs) are
+[Generalized linear models] (GLMs) are
 well-established tools for regression and classification and are widely
 applied across the sciences, economics, business, and finance.
 Owing to their convex loss, they are easy and efficient to fit.
@@ -123,7 +123,7 @@ where $\mathcal{L} (y_i, \beta_0 + \beta^T x_i)$ is the negative log-likelihood 
 observation ($x_i$, $y_i$), and $\lambda \mathcal{P}(\cdot)$ is the penalty that regularizes the solution,
 with $\lambda$ being a constant that controls the amount of regularization.
 
-Modern datasets can contain number of predictor variables, and
+Modern datasets can contain a number of predictor variables, and
 data analysis is often exploratory. Under these conditions it is critically
 important to regularize the model to avoid overfitting the data.
 Regularization works by adding penalty terms that penalize the model parameters in
