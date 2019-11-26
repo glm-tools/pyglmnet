@@ -123,11 +123,11 @@ where $\mathcal{L} (y_i, \beta_0 + \beta^T x_i)$ is the negative log-likelihood 
 observation ($x_i$, $y_i$), and $\lambda \mathcal{P}(\cdot)$ is the penalty that regularizes the solution,
 with $\lambda$ being a constant that controls the amount of regularization.
 
-Modern datasets can contain an enormous number of predictor variables, and
+Modern datasets can contain number of predictor variables, and
 data analysis is often exploratory. Under these conditions it is critically
 important to regularize the model to avoid overfitting the data.
 Regularization works by adding penalty terms that penalize the model parameters in
-a variety of different ways. This can be used to incorporate prior knowledge
+a variety of ways. This can be used to incorporate prior knowledge
 about the parameters in a structured form. In pyglmnet, we offer
 users the ability to combine different types of regularization with different noise
 distributions in the GLMs.
@@ -158,7 +158,7 @@ The table below compares pyglmnet with existing libraries as of this writing.
 | Group lasso        |    x       |                |               |       x         |               |         |  x              |
 | Tikhonov           |    x       |                |               |                 |               |         |                 |
 
-Pyglmnet implements the algorithm described in [Friedman, J., Hastie, T., & Tibshirani, R. (2010)](https://web.stanford.edu/~hastie/Papers/ESLII.pdf) and the accompanying widely popular R package [glmnet].
+Pyglmnet implements the algorithm described in [Friedman, J., Hastie, T., & Tibshirani, R. (2010)](https://web.stanford.edu/~hastie/Papers/ESLII.pdf) and the accompanying popular R package [glmnet].
 As opposed to [glmnet-python] or [glmnet_python], which are wrappers around this package, pyglmnet is written in pure Python and runs on Python 3.5+. The implementation is compatible with the existing data science ecosystem.
 Pyglmnet's API is designed to be compatible with scikit-learn [@sklearn_api]. Thus, it is possible to do:
 
@@ -168,7 +168,7 @@ Pyglmnet's API is designed to be compatible with scikit-learn [@sklearn_api]. Th
            glm.predict(X)
 ```
 
-As a result of this compatibility, ``scikit-learn`` tools for building pipelines, cross-validation and grid search can be reused by pyglmnet users. Pyglmnet has already been used in published work
+As a result of this compatibility, ``scikit-learn`` tools for building pipelines, cross-validation and grid search can be employed by pyglmnet users. Pyglmnet has already been used in published work
 [@bertran2018active; @rybakken2019decoding; @hofling2019probing; @benjamin2017modern]. It contains unit tests and includes documentation in the form of tutorials, docstrings and
 examples that are run through continuous integration.
 
