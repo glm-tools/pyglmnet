@@ -123,14 +123,7 @@ where $\mathcal{L} (y_i, \beta_0 + \beta^T x_i)$ is the negative log-likelihood 
 observation ($x_i$, $y_i$), and $\lambda \mathcal{P}(\cdot)$ is the penalty that regularizes the solution,
 with $\lambda$ being a constant that controls the amount of regularization.
 
-Modern datasets can contain a number of predictor variables, and
-data analysis is often exploratory. Under these conditions it is critically
-important to regularize the model to avoid overfitting the data.
-Regularization works by adding penalty terms that penalize the model parameters in
-a variety of ways. This can be used to incorporate prior knowledge
-about the parameters in a structured form. In pyglmnet, we offer
-users the ability to combine different types of regularization with different noise
-distributions in the GLMs.
+Modern datasets can contain a number of predictor variables, and data analysis is often exploratory. Under these conditions it is critically important to regularize the model to avoid overfitting the data. Regularization works by adding penalty terms that penalize the model parameters in a variety of ways and can be used to incorporate prior knowledge about the parameters in a structured form.
 
 Despite the attractiveness of regularized GLMs, the available tools in
 the Python data science eco-system are highly fragmented. Specifically:
@@ -141,7 +134,9 @@ the Python data science eco-system are highly fragmented. Specifically:
    linear and logistic regression.
 
 [Pyglmnet] is a response to this fragmentation.
-The table below compares pyglmnet with existing libraries as of this writing.
+More specifically, we offer
+users the ability to combine different types of regularization with different noise
+distributions in the GLMs. Particularly noteworthy is the implementation of a generalized form of elastic net regularization that include generalized L2 and L1 penalties (Tikhonov regularization and Group Lasso, respectively). The table below compares Pyglmnet with existing libraries as of release version 1.1.
 
 |                    | [pyglmnet] | [scikit-learn] | [statsmodels] |   [lightning]   |   [py-glm]    | [Matlab]|   [glmnet] in R |
 |--------------------|:----------:|:--------------:|:-------------:|:---------------:|:-------------:|:-------:|:---------------:|
@@ -169,14 +164,11 @@ Pyglmnet's API is designed to be compatible with scikit-learn [@sklearn_api]. Th
 ```
 
 As a result of this compatibility, ``scikit-learn`` tools for building pipelines, cross-validation and grid search can be employed by pyglmnet users. Pyglmnet has already been used in published work
-[@bertran2018active; @rybakken2019decoding; @hofling2019probing; @benjamin2017modern]. It contains unit tests and includes documentation in the form of tutorials, docstrings and
-examples that are run through continuous integration.
+[@bertran2018active; @rybakken2019decoding; @hofling2019probing; @benjamin2017modern]. It contains unit tests and includes documentation in the form of tutorials, docstrings and examples that are run through continuous integration.
 
 # Example Usage
-We present now how to use pyglmnet on a real-world problem. We show how to apply our
-library to the Community and Crime dataset [@Dua:2019]. We predict the per capita violent
-crimes by employing demographic data comprising 128 attributes and by using a binomial
-distributed GLM with elastic net regularization.
+Here we apply pyglmnet to a real-world example. We aim to predict per-capita violent crime across US counties
+from the Community and Crime dataset [@Dua:2019]. The predictors are 128 demographic attributes, and the target variable is normalized to lie in $[0, 1]$. We demonstrate the usage of a binomial-distributed GLM with elastic net regularization.
 
 ```py
 from sklearn.model_selection import train_test_split
@@ -186,7 +178,7 @@ from pyglmnet import GLMCV, simulate_glm, datasets
 X, y = datasets.fetch_community_crime_data()
 Xtrain, Xtest, ytrain, ytest = train_test_split(X, y, test_size=0.33)
 
-# Generate a binomial distributed GLM with elastic net regularization
+# Instantiate a binomial-distributed GLM with elastic net regularization
 glm = GLMCV(distr='binomial', alpha=0.05, score_metric='pseudo_R2', cv=3)
 
 # Fit the model and then predict
