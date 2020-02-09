@@ -19,6 +19,7 @@ jobs:
                     conda create -n testenv --yes python=3.7
                     source activate testenv
                     pip install --upgrade pip -q
+                    pip install numpy==1.17
                     pip install sphinx matplotlib coverage Pillow -q
                     pip install sphinx-gallery -q
                     pip install scipy scikit-learn pandas -q
