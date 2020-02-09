@@ -121,7 +121,7 @@ $$\min_{\beta_0, \beta} \frac{1}{N} \sum_{i = 1}^N \mathcal{L} (y_i, \beta_0 + \
 
 where $\mathcal{L} (y_i, \beta_0 + \beta^T x_i)$ is the negative log-likelihood of an
 observation ($x_i$, $y_i$), and $\lambda \mathcal{P}(\cdot)$ is the penalty that regularizes the solution,
-with $\lambda$ being a constant that controls the amount of regularization.
+with $\lambda$ being a hyperparameter that controls the amount of regularization.
 
 Modern datasets can contain a number of predictor variables, and data analysis is often exploratory. Under these conditions it is critically important to regularize the model to avoid overfitting the data. Regularization works by adding penalty terms that penalize the model parameters in a variety of ways and can be used to incorporate prior knowledge about the parameters in a structured form.
 
@@ -132,9 +132,10 @@ the Python data science eco-system are highly fragmented. Specifically:
 -  [scikit-learn] provides elastic net regularization but only limited noise distribution options.
 -  [lightning] provides elastic net and group lasso regularization, but only for linear (Gaussian) and logistic (binomial) regression.
 
-[Pyglmnet] is a response to this fragmentation.
-More specifically, it offers the ability to combine different types of regularization with different GLM noise
-distributions. Particularly noteworthy is the implementation of a broader form of elastic net regularization that include generalized L2 and L1 penalties (Tikhonov regularization and Group Lasso, respectively). The table below compares Pyglmnet with existing libraries as of release version 1.1.
+## Pyglmnet is a response to a fragmented ecosystem
+
+Pyglmnet offers the ability to combine different types of regularization with different GLM noise
+distributions. In particular, it implements a broader form of elastic net regularization that include generalized L2 and L1 penalties (Tikhonov regularization and Group Lasso, respectively) with Gaussian, Binomial, Poisson, Probit, and Gamma distributions. The table below compares pyglmnet with existing libraries as of release version 1.1.
 
 |                    | [pyglmnet] | [scikit-learn] | [statsmodels] |   [lightning]   |   [py-glm]    | [Matlab]|   [glmnet] in R |
 |--------------------|:----------:|:--------------:|:-------------:|:---------------:|:-------------:|:-------:|:---------------:|
@@ -151,15 +152,19 @@ distributions. Particularly noteworthy is the implementation of a broader form o
 | Generalized L1 (Group Lasso)        |    x       |                |               |       x         |               |         |  x              |
 | Generalized L2 (Tikhonov)           |    x       |                |               |                 |               |         |                 |
 
+## Pyglmnet is an extensible pure Python implementation
+
 Pyglmnet implements the algorithm described in [Friedman, J., Hastie, T., & Tibshirani, R. (2010)](https://web.stanford.edu/~hastie/Papers/ESLII.pdf) and the accompanying popular R package [glmnet].
-As opposed to [python-glmnet] or [glmnet_python], which are wrappers around this package, pyglmnet is written in pure Python for Python 3.5+ and is compatible with the existing data science ecosystem.
+As opposed to [python-glmnet] or [glmnet_python], which are wrappers around this package, pyglmnet is written in pure Python for Python 3.5+. Therefore it is easier to extend and more compatible with the existing data science ecosystem.
+
+## Pyglmnet is unit-tested and documented with examples
 
 Pyglmnet has already been used in published work
 [@bertran2018active; @rybakken2019decoding; @hofling2019probing; @benjamin2017modern]. It contains unit tests and includes [documentation] in the form of tutorials, docstrings and examples that are run through continuous integration.
 
 # Example Usage
-Here we apply pyglmnet to a real-world example. We aim to predict per-capita violent crime across US counties
-from the Community and Crime dataset [@Dua:2019]. The predictors are 128 demographic attributes, and the target variable is normalized to lie in $[0, 1]$. We demonstrate the usage of a binomial-distributed GLM with elastic net regularization.
+
+Here we apply pyglmnet to a real-world example. The Community and Crime dataset, one of 400+ datasets curated by the UC Irvine Machine Learning Repository [@Dua:2019] provides a highly curated set of 128 demographic attributes of US counties that may be used to predict incidence of violent crime. The target variable (violent crime per capita) is normalized to lie in $[0, 1]$. Below, we demonstrate the usage of a binomial-distributed GLM with elastic net regularization.
 
 ```py
 from sklearn.model_selection import train_test_split
@@ -177,7 +182,7 @@ glm.fit(Xtrain, ytrain)
 yhat = glm.predict_proba(Xtest)
 ```
 
-As illustrated above, Pyglmnet's API is designed to be compatible with scikit-learn [@sklearn_api]. Thus, it is possible to use standard idioms such as:
+As illustrated above, pyglmnet's API is designed to be compatible with scikit-learn [@sklearn_api]. Thus, it is possible to use standard idioms such as:
 
 ```py
            glm.fit(X, y)
