@@ -19,13 +19,12 @@ jobs:
                     conda create -n testenv --yes python=3.7
                     source activate testenv
                     pip install --upgrade pip -q
-                    pip install numpy==1.17
                     pip install sphinx matplotlib coverage Pillow -q
                     pip install sphinx-gallery -q
                     pip install scipy scikit-learn pandas -q
                     pip install -e .
                     pip install sphinx_bootstrap_theme numpydoc -q
-                    pip install -e git+http://github.com/KordingLab/spykes.git#egg=spykes
+                    pip install pip install https://api.github.com/repos/jasmainak/spykes/zipball/n_tiles_int
                     python --version
                     pip list
             - run:
