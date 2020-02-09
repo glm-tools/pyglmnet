@@ -128,15 +128,13 @@ Modern datasets can contain a number of predictor variables, and data analysis i
 Despite the attractiveness of regularized GLMs, the available tools in
 the Python data science eco-system are highly fragmented. Specifically:
 
--  [statsmodels] provides a wide range of link functions but no regularization.
+-  [statsmodels] provides a wide range of noise distributions but no regularization.
 -  [scikit-learn] provides elastic net regularization but only limited noise distribution options.
--  [lightning] provides elastic net and group lasso regularization, but only for
-   linear and logistic regression.
+-  [lightning] provides elastic net and group lasso regularization, but only for linear (Gaussian) and logistic (binomial) regression.
 
 [Pyglmnet] is a response to this fragmentation.
-More specifically, we offer
-users the ability to combine different types of regularization with different noise
-distributions in the GLMs. Particularly noteworthy is the implementation of a generalized form of elastic net regularization that include generalized L2 and L1 penalties (Tikhonov regularization and Group Lasso, respectively). The table below compares Pyglmnet with existing libraries as of release version 1.1.
+More specifically, it offers the ability to combine different types of regularization with different GLM noise
+distributions. Particularly noteworthy is the implementation of a broader form of elastic net regularization that include generalized L2 and L1 penalties (Tikhonov regularization and Group Lasso, respectively). The table below compares Pyglmnet with existing libraries as of release version 1.1.
 
 |                    | [pyglmnet] | [scikit-learn] | [statsmodels] |   [lightning]   |   [py-glm]    | [Matlab]|   [glmnet] in R |
 |--------------------|:----------:|:--------------:|:-------------:|:---------------:|:-------------:|:-------:|:---------------:|
@@ -149,22 +147,15 @@ distributions in the GLMs. Particularly noteworthy is the implementation of a ge
 | Gamma              |    x       |                |      x        |                 |               |    x    |                 |
 | **Regularization** |            |                |               |                 |               |         |                 |
 | L2                 |    x       |      x         |               |       x         |               |         |                 |
-| Lasso              |    x       |      x         |               |       x         |               |         |  x              |
-| Group lasso        |    x       |                |               |       x         |               |         |  x              |
-| Tikhonov           |    x       |                |               |                 |               |         |                 |
+| L1 (Lasso)              |    x       |      x         |               |       x         |               |         |  x              |
+| Generalized L1 (Group Lasso)        |    x       |                |               |       x         |               |         |  x              |
+| Generalized L2 (Tikhonov)           |    x       |                |               |                 |               |         |                 |
 
 Pyglmnet implements the algorithm described in [Friedman, J., Hastie, T., & Tibshirani, R. (2010)](https://web.stanford.edu/~hastie/Papers/ESLII.pdf) and the accompanying popular R package [glmnet].
-As opposed to [python-glmnet] or [glmnet_python], which are wrappers around this package, pyglmnet is written in pure Python and runs on Python 3.5+. The implementation is compatible with the existing data science ecosystem.
-Pyglmnet's API is designed to be compatible with scikit-learn [@sklearn_api]. Thus, it is possible to do:
+As opposed to [python-glmnet] or [glmnet_python], which are wrappers around this package, pyglmnet is written in pure Python for Python 3.5+ and is compatible with the existing data science ecosystem.
 
-
-```py
-           glm.fit(X, y)
-           glm.predict(X)
-```
-
-As a result of this compatibility, ``scikit-learn`` tools for building pipelines, cross-validation and grid search can be employed by pyglmnet users. Pyglmnet has already been used in published work
-[@bertran2018active; @rybakken2019decoding; @hofling2019probing; @benjamin2017modern]. It contains unit tests and includes documentation in the form of tutorials, docstrings and examples that are run through continuous integration.
+Pyglmnet has already been used in published work
+[@bertran2018active; @rybakken2019decoding; @hofling2019probing; @benjamin2017modern]. It contains unit tests and includes [documentation] in the form of tutorials, docstrings and examples that are run through continuous integration.
 
 # Example Usage
 Here we apply pyglmnet to a real-world example. We aim to predict per-capita violent crime across US counties
@@ -186,6 +177,15 @@ glm.fit(Xtrain, ytrain)
 yhat = glm.predict_proba(Xtest)
 ```
 
+As illustrated above, Pyglmnet's API is designed to be compatible with scikit-learn [@sklearn_api]. Thus, it is possible to use standard idioms such as:
+
+```py
+           glm.fit(X, y)
+           glm.predict(X)
+```
+
+Further, as a result of this compatibility, ``scikit-learn`` tools for building pipelines, cross-validation and grid search can be employed by pyglmnet users.
+
 # Acknowledgements
 
 ``Pyglmnet`` development is partly supported by NIH NINDS R01-NS104585 and the Special Research Fund (B.O.F.) of Ghent University.
@@ -203,3 +203,4 @@ yhat = glm.predict_proba(Xtest)
 [glmnet]: https://web.stanford.edu/~hastie/glmnet/glmnet_alpha.html
 [python-glmnet]: https://github.com/civisanalytics/python-glmnet
 [glmnet_python]: https://github.com/bbalasub1/glmnet_python
+[documentation]: https://glm-tools.github.io/pyglmnet/
