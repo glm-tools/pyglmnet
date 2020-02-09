@@ -24,7 +24,7 @@ jobs:
                     pip install scipy scikit-learn pandas -q
                     pip install -e .
                     pip install sphinx_bootstrap_theme numpydoc -q
-                    pip install https://api.github.com/repos/jasmainak/spykes/zipball/n_tiles_int
+                    pip install -e git+http://github.com/KordingLab/spykes.git#egg=spykes
                     python --version
                     pip list
             - run:
