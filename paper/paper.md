@@ -175,8 +175,8 @@ examples that are run through continuous integration.
 # Example Usage
 We present now how to use pyglmnet on a real-world problem. We show how to apply our
 library to the Community and Crime dataset [@Dua:2019]. We predict the per capita violent
-crimes by employing demographic data comprising 128 attributes and by using a Binomial
-Distributed GLM with Elastic-Net regularization.
+crimes by employing demographic data comprising 128 attributes and by using a binomial
+distributed GLM with elastic net regularization.
 
 ```py
 from sklearn.model_selection import train_test_split
@@ -186,7 +186,7 @@ from pyglmnet import GLMCV, simulate_glm, datasets
 X, y = datasets.fetch_community_crime_data()
 Xtrain, Xtest, ytrain, ytest = train_test_split(X, y, test_size=0.33)
 
-# Generate a binomial distributed GLM with elastic-net regularization
+# Generate a binomial distributed GLM with elastic net regularization
 glm = GLMCV(distr='binomial', alpha=0.05, score_metric='pseudo_R2', cv=3)
 
 # Fit the model and then predict
