@@ -124,10 +124,10 @@ where $\mathcal{L} (y_i, \beta_0 + \beta^T x_i)$ is the negative log-likelihood 
 observation ($x_i$, $y_i$), and $\lambda \mathcal{P}(\cdot)$ is the penalty that regularizes the solution,
 with $\lambda$ being a hyperparameter that controls the amount of regularization.
 
-Modern datasets can contain a number of predictor variables, and data analysis is often exploratory. Due to these conditions, it is critically important to regularize the model to avoid overfitting of the data. Regularization works by adding penalty terms that penalize the model parameters in a variety of ways. It can be used to incorporate our prior knowledge about the parameters' distribution in a structured form.
+Modern datasets can contain a number of predictor variables, and data analysis is often exploratory. To avoid overfitting of the data under these circumstances, it is critically important to regularize the model. Regularization works by adding penalty terms that penalize the model parameters in a variety of ways. It can be used to incorporate our prior knowledge about the parameters' distribution in a structured form.
 
 Despite the attractiveness and importance of regularized GLMs, the available tools in
-the Python data science eco-system do not serve all of the functionalities. Specifically:
+the Python data science eco-system do not serve all common functionalities. Specifically:
 
 - [statsmodels] provides a wide range of noise distributions but no regularization.
 - [scikit-learn] provides elastic net regularization but only limited noise distribution options.
@@ -164,7 +164,7 @@ Pyglmnet has already been used in published work [@bertran2018active; @rybakken2
 
 # Example Usage
 
-Here, we apply pyglmnet to predict incidence of violent crime from the Community and Crime dataset. It is one of 400+ datasets curated by the UC Irvine Machine Learning Repository [@Dua:2019] provides a highly curated set of 128 demographic attributes of US counties. The target variable (violent crime per capita) is normalized to the range of $[0, 1]$. Below, we demonstrate the usage of a pyglmnet's binomial-distributed GLM with elastic net regularization.
+Here, we apply pyglmnet to predict incidence of violent crime from the Community and Crime dataset, one of 400+ datasets curated by the UC Irvine Machine Learning Repository [@Dua:2019] provides a highly curated set of 128 demographic attributes of US counties. The target variable (violent crime per capita) is normalized to the range of $[0, 1]$. Below, we demonstrate the usage of a pyglmnet's binomial-distributed GLM with elastic net regularization.
 
 ```py
 from sklearn.model_selection import train_test_split
@@ -189,7 +189,7 @@ As illustrated above, pyglmnet's API is designed to be compatible with ``scikit-
            glm.predict(X)
 ```
 
-Cross-validation and grid search cross-valiation from ``scikit-learn`` tools can also be employed with pyglmnet according to this compatibility.
+Owing to this compatibility, tools from the ``scikit-learn`` ecosystem for building pipelines, applying cross-validation, and performing grid search over hyperparameters can also be employed with pyglmnet's estimators.
 
 # Acknowledgements
 
