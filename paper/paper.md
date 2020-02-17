@@ -12,6 +12,7 @@ authors:
     orcid: 0000-0002-3199-9027
     affiliation: "1, 2"
   - name: Titipat Achakulvisut
+    orcid: 0000-0002-2124-2979
     affiliation: 3
   - name: Aid Idrizović
     affiliation: 4
@@ -155,12 +156,11 @@ distributions. In particular, it implements a broader form of elastic net regula
 ## Pyglmnet is an extensible pure Python implementation
 
 Pyglmnet implements the algorithm described in [Friedman, J., Hastie, T., & Tibshirani, R. (2010)](https://web.stanford.edu/~hastie/Papers/ESLII.pdf) and the accompanying popular R package [glmnet].
-As opposed to [python-glmnet] or [glmnet_python], which are wrappers around this package, pyglmnet is written in pure Python for Python 3.5+. Therefore it is easier to extend and more compatible with the existing data science ecosystem.
+As opposed to [python-glmnet] or [glmnet_python], which are wrappers around this R package, pyglmnet is written in pure Python for Python 3.5+. Therefore, it is easier to extend and more compatible with the existing data science ecosystem.
 
 ## Pyglmnet is unit-tested and documented with examples
 
-Pyglmnet has already been used in published work
-[@bertran2018active; @rybakken2019decoding; @hofling2019probing; @benjamin2017modern]. It contains unit tests and includes [documentation] in the form of tutorials, docstrings and examples that are run through continuous integration.
+Pyglmnet has already been used in published work [@bertran2018active; @rybakken2019decoding; @hofling2019probing; @benjamin2017modern]. It contains unit tests and includes [documentation] in the form of tutorials, docstrings and examples that are run through continuous integration.
 
 # Example Usage
 
@@ -189,7 +189,7 @@ As illustrated above, pyglmnet's API is designed to be compatible with ``scikit-
            glm.predict(X)
 ```
 
-Cross-validation and grid search from ``scikit-learn`` tools can also be employed using pyglmnet according to our compatibility.
+Cross-validation and grid search cross-valiation from ``scikit-learn`` tools can also be employed with pyglmnet according to this compatibility.
 
 # Acknowledgements
 
