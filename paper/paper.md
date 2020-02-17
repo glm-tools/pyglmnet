@@ -128,9 +128,9 @@ Modern datasets can contain a number of predictor variables, and data analysis i
 Despite the attractiveness of regularized GLMs, the available tools in
 the Python data science eco-system are highly fragmented. Specifically:
 
--  [statsmodels] provides a wide range of noise distributions but no regularization.
--  [scikit-learn] provides elastic net regularization but only limited noise distribution options.
--  [lightning] provides elastic net and group lasso regularization, but only for linear (Gaussian) and logistic (binomial) regression.
+- [statsmodels] provides a wide range of noise distributions but no regularization.
+- [scikit-learn] provides elastic net regularization but only limited noise distribution options.
+- [lightning] provides elastic net and group lasso regularization, but only for linear (Gaussian) and logistic (binomial) regression.
 
 ## Pyglmnet is a response to a fragmented ecosystem
 
@@ -164,7 +164,7 @@ Pyglmnet has already been used in published work
 
 # Example Usage
 
-Here we apply pyglmnet to a real-world example. The Community and Crime dataset, one of 400+ datasets curated by the UC Irvine Machine Learning Repository [@Dua:2019] provides a highly curated set of 128 demographic attributes of US counties that may be used to predict incidence of violent crime. The target variable (violent crime per capita) is normalized to lie in $[0, 1]$. Below, we demonstrate the usage of a binomial-distributed GLM with elastic net regularization.
+Here, we apply pyglmnet to predict incidence of violent crime from the Community and Crime dataset. It is one of 400+ datasets curated by the UC Irvine Machine Learning Repository [@Dua:2019] provides a highly curated set of 128 demographic attributes of US counties. The target variable (violent crime per capita) is normalized to the range of $[0, 1]$. Below, we demonstrate the usage of a pyglmnet's binomial-distributed GLM with elastic net regularization.
 
 ```py
 from sklearn.model_selection import train_test_split
@@ -182,14 +182,14 @@ glm.fit(Xtrain, ytrain)
 yhat = glm.predict_proba(Xtest)
 ```
 
-As illustrated above, pyglmnet's API is designed to be compatible with scikit-learn [@sklearn_api]. Thus, it is possible to use standard idioms such as:
+As illustrated above, pyglmnet's API is designed to be compatible with ``scikit-learn`` [@sklearn_api]. Thus, it is possible to use standard idioms such as:
 
 ```py
            glm.fit(X, y)
            glm.predict(X)
 ```
 
-Further, as a result of this compatibility, ``scikit-learn`` tools for building pipelines, cross-validation and grid search can be employed by pyglmnet users.
+Cross-validation and grid search from ``scikit-learn`` tools can also be employed using pyglmnet according to our compatibility.
 
 # Acknowledgements
 

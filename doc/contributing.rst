@@ -128,7 +128,7 @@ If you think it is ready to merge, prefix with ``[MRG]``.
 
 If it's a complicated feature that can evolve better with feedback, we highly
 recommend making the PR when it's a work in progress (WIP). In the PR message box,
-it's typically good to associate it with an issue (.e.g. "address #253")
+it's typically good to associate it with an issue (e.g. "address #253")
 in addition to concisely describing the most salient changes made.
 
 Once your PR is made, the tests will run. If there are errors, they will
