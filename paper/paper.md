@@ -124,10 +124,10 @@ where $\mathcal{L} (y_i, \beta_0 + \beta^T x_i)$ is the negative log-likelihood 
 observation ($x_i$, $y_i$), and $\lambda \mathcal{P}(\cdot)$ is the penalty that regularizes the solution,
 with $\lambda$ being a hyperparameter that controls the amount of regularization.
 
-Modern datasets can contain a number of predictor variables, and data analysis is often exploratory. Under these conditions it is critically important to regularize the model to avoid overfitting the data. Regularization works by adding penalty terms that penalize the model parameters in a variety of ways and can be used to incorporate prior knowledge about the parameters in a structured form.
+Modern datasets can contain a number of predictor variables, and data analysis is often exploratory. Due to these conditions, it is critically important to regularize the model to avoid overfitting of the data. Regularization works by adding penalty terms that penalize the model parameters in a variety of ways. It can be used to incorporate our prior knowledge about the parameters' distribution in a structured form.
 
-Despite the attractiveness of regularized GLMs, the available tools in
-the Python data science eco-system are highly fragmented. Specifically:
+Despite the attractiveness and importance of regularized GLMs, the available tools in
+the Python data science eco-system do not serve all of the functionalities. Specifically:
 
 - [statsmodels] provides a wide range of noise distributions but no regularization.
 - [scikit-learn] provides elastic net regularization but only limited noise distribution options.
