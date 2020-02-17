@@ -1,6 +1,6 @@
 # pyglmnet documentation
 
-See full documentation page [here](http://pavanramkumar.github.io/pyglmnet/).
+Please see full documentation page [here](http://glm-tools.github.io/pyglmnet/).
 
 We use `sphinx` to generate documentation page.
 
