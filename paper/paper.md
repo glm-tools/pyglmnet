@@ -155,7 +155,7 @@ distributions. In particular, it implements a broader form of elastic net regula
 
 ## Pyglmnet is an extensible pure Python implementation
 
-Pyglmnet implements the algorithm described in [Friedman, J., Hastie, T., & Tibshirani, R. (2010)](https://web.stanford.edu/~hastie/Papers/ESLII.pdf) and the accompanying popular R package [glmnet].
+Pyglmnet implements the algorithm described in [Friedman, J., Hastie, T., & Tibshirani, R. (2010)](https://web.stanford.edu/~hastie/Papers/ESLII.pdf) and its accompanying popular R package [glmnet].
 As opposed to [python-glmnet] or [glmnet_python], which are wrappers around this R package, pyglmnet is written in pure Python for Python 3.5+. Therefore, it is easier to extend and more compatible with the existing data science ecosystem.
 
 ## Pyglmnet is unit-tested and documented with examples
@@ -164,7 +164,7 @@ Pyglmnet has already been used in published work [@bertran2018active; @rybakken2
 
 # Example Usage
 
-Here, we apply pyglmnet to predict incidence of violent crime from the Community and Crime dataset, one of 400+ datasets curated by the UC Irvine Machine Learning Repository [@Dua:2019] provides a highly curated set of 128 demographic attributes of US counties. The target variable (violent crime per capita) is normalized to the range of $[0, 1]$. Below, we demonstrate the usage of a pyglmnet's binomial-distributed GLM with elastic net regularization.
+Here, we apply pyglmnet to predict incidence of violent crime from the Community and Crime dataset, one of 400+ datasets curated by the UC Irvine Machine Learning Repository [@Dua:2019] which provides a highly curated set of 128 demographic attributes of US counties. The target variable (violent crime per capita) is normalized to the range of $[0, 1]$. Below, we demonstrate the usage of a pyglmnet's binomial-distributed GLM with elastic net regularization.
 
 ```py
 from sklearn.model_selection import train_test_split
