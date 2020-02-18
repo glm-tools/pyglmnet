@@ -951,22 +951,21 @@ class GLM(BaseEstimator):
         yhat = np.asarray(yhat)
         return yhat
 
-    # def fit_predict(self, X, y):
-    #     """Fit the model and predict on the same data.
+    def fit_predict(self, X, y):
+        """Fit the model and predict on the same data.
 
-    #     Parameters
-    #     ----------
-    #     X: array
-    #         The input data to fit and predict,
-    #         of shape (n_samples, n_features)
+        Parameters
+        ----------
+        X: array
+            The input data to fit and predict,
+            of shape (n_samples, n_features)
 
-
-    #     Returns
-    #     -------
-    #     yhat: array
-    #         The predicted targets of shape (n_samples,).
-    #     """
-    #     return self.fit(X, y).predict(X)
+        Returns
+        -------
+        yhat: array
+            The predicted targets of shape (n_samples,).
+        """
+        return self.fit(X, y).predict(X)
 
     def score(self, X, y):
         """Score the model.
