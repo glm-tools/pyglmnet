@@ -885,7 +885,7 @@ class GLM(BaseEstimator):
             self.beta0_ = 0
             self.beta_ = beta
         self.ynull_ = np.mean(y)
-        # self._allow_refit = False
+        self._allow_refit = False
         return self
 
     def predict(self, X):
