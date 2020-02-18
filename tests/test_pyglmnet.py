@@ -14,9 +14,16 @@ from sklearn.datasets import make_regression
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import GridSearchCV, cross_val_score, KFold
 from sklearn.linear_model import ElasticNet
+from sklearn.utils.estimator_checks import check_estimator
 
 from pyglmnet import (GLM, GLMCV, _grad_L2loss, _L2loss, simulate_glm,
                       _gradhess_logloss_1d, _loss, datasets, ALLOWED_DISTRS)
+
+
+def test_glm_estimator():
+    """Test GLM class using scikit learn check_estimator"""
+    check_estimator(GLM)
+    # check_estimator(GLMCV)
 
 
 @pytest.mark.parametrize("distr", ALLOWED_DISTRS)
