@@ -530,7 +530,7 @@ class GLM(BaseEstimator):
         https://core.ac.uk/download/files/153/6287975.pdf
     """
 
-    def __init__(self, distr='poisson', alpha=0.5,
+    def __init__(self, distr='binomial', alpha=0.5,
                  Tau=None, group=None,
                  reg_lambda=0.1,
                  solver='batch-gradient',
@@ -550,16 +550,16 @@ class GLM(BaseEstimator):
         self.solver = solver
         self.learning_rate = learning_rate
         self.max_iter = max_iter
-        self.beta0_ = None
-        self.beta_ = None
-        self.ynull_ = None
-        self.n_iter_ = 0
+        # self.beta0_ = None
+        # self.beta_ = None
+        # self.ynull_ = None
+        # self.n_iter_ = 0
         self.tol = tol
         self.eta = eta
         self.score_metric = score_metric
         self.fit_intercept = fit_intercept
         self.random_state = random_state
-        self.rng = np.random.RandomState(self.random_state)
+        # self.rng = np.random.RandomState(self.random_state)
         self.callback = callback
         self.verbose = verbose
         set_log_level(verbose)
@@ -699,7 +699,6 @@ class GLM(BaseEstimator):
         n_samples, n_features = X.shape
         reg_scale = rl * (1 - self.alpha)
         z = _z(beta[0], beta[1:], X, fit_intercept)
-
         for k in range(0, n_features + int(fit_intercept)):
             # Only update parameters in active set
             if ActiveSet[k] != 0:
@@ -755,6 +754,12 @@ class GLM(BaseEstimator):
         self: instance of GLM
             The fitted model.
         """
+        self.beta0_ = None
+        self.beta_ = None
+        self.ynull_ = None
+        self.n_iter_ = 0
+        self.rng = np.random.RandomState(self.random_state)
+
         # checks for group
         if self.group is not None:
             self.group = np.array(self.group)
@@ -935,22 +940,22 @@ class GLM(BaseEstimator):
         yhat = np.asarray(yhat)
         return yhat
 
-    def fit_predict(self, X, y):
-        """Fit the model and predict on the same data.
+    # def fit_predict(self, X, y):
+    #     """Fit the model and predict on the same data.
 
-        Parameters
-        ----------
-        X: array
-            The input data to fit and predict,
-            of shape (n_samples, n_features)
+    #     Parameters
+    #     ----------
+    #     X: array
+    #         The input data to fit and predict,
+    #         of shape (n_samples, n_features)
 
 
-        Returns
-        -------
-        yhat: array
-            The predicted targets of shape (n_samples,).
-        """
-        return self.fit(X, y).predict(X)
+    #     Returns
+    #     -------
+    #     yhat: array
+    #         The predicted targets of shape (n_samples,).
+    #     """
+    #     return self.fit(X, y).predict(X)
 
     def score(self, X, y):
         """Score the model.
