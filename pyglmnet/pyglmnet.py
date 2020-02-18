@@ -756,7 +756,7 @@ class GLM(BaseEstimator):
         self: instance of GLM
             The fitted model.
         """
-        X, y = check_X_y(X, y, accept_sparse=True)
+        X, y = check_X_y(X, y, accept_sparse=False)
         self.is_fitted_ = True
 
         self.beta0_ = None
@@ -885,7 +885,7 @@ class GLM(BaseEstimator):
             self.beta0_ = 0
             self.beta_ = beta
         self.ynull_ = np.mean(y)
-        self._allow_refit = False
+        # self._allow_refit = False
         return self
 
     def predict(self, X):
@@ -901,7 +901,7 @@ class GLM(BaseEstimator):
         yhat: array
             The predicted targets of shape (n_samples,)
         """
-        X = check_array(X, accept_sparse=True)
+        X = check_array(X, accept_sparse=False)
         check_is_fitted(self, 'is_fitted_')
 
         if not isinstance(X, np.ndarray):
@@ -935,6 +935,9 @@ class GLM(BaseEstimator):
         Raises error otherwise.
 
         """
+        X = check_array(X, accept_sparse=False)
+        check_is_fitted(self, 'is_fitted_')
+
         if self.distr not in ['binomial', 'probit']:
             raise ValueError('This is only applicable for \
                               the binomial distribution.')
