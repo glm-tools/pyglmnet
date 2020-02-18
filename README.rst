@@ -90,10 +90,8 @@ Here is an example on how to use the ``GLM`` estimator.
     print('Pseudo R^2 is %.3f' % pseudo_R2)
 
     # plot the true coefficients and the estimated ones
-    plt.stem(beta, markerfmt='r.', label='True coefficients',
-             use_line_collection=True)
-    plt.stem(glm.beta_, markerfmt='b.', label='Estimated coefficients',
-             use_line_collection=True)
+    plt.stem(beta, markerfmt='r.', label='True coefficients')
+    plt.stem(glm.beta_, markerfmt='b.', label='Estimated coefficients')
     plt.ylabel(r'$\beta$')
     plt.legend(loc='upper right')
 
