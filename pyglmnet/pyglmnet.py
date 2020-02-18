@@ -764,7 +764,7 @@ class GLM(BaseEstimator):
         self.beta_ = None
         self.ynull_ = None
         self.n_iter_ = 0
-        self.rng_ = check_random_state(self.random_state)
+        self.random_state_ = check_random_state(self.random_state)
 
         # checks for group
         if self.group is not None:
@@ -805,16 +805,16 @@ class GLM(BaseEstimator):
         if self.fit_intercept:
             if self.beta0_ is None and self.beta_ is None:
                 beta[0] = 1 / (n_features + 1) * \
-                    self.rng_.normal(0.0, 1.0, 1)
+                    self.random_state_.normal(0.0, 1.0, 1)
                 beta[1:] = 1 / (n_features + 1) * \
-                    self.rng_.normal(0.0, 1.0, (n_features, ))
+                    self.random_state_.normal(0.0, 1.0, (n_features, ))
             else:
                 beta[0] = self.beta0_
                 beta[1:] = self.beta_
         else:
             if self.beta0_ is None and self.beta_ is None:
                 beta = 1 / (n_features + 1) * \
-                    self.rng_.normal(0.0, 1.0, (n_features, ))
+                    self.random_state_.normal(0.0, 1.0, (n_features, ))
             else:
                 beta = self.beta_
 
