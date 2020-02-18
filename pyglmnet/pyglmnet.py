@@ -12,6 +12,7 @@ from .base import is_classifier, check_version
 
 from sklearn.base import BaseEstimator
 from sklearn.utils.validation import check_X_y, check_array, check_is_fitted
+from sklearn.utils import check_random_state
 
 ALLOWED_DISTRS = ['gaussian', 'binomial', 'softplus', 'poisson',
                   'probit', 'gamma']
@@ -398,7 +399,7 @@ def simulate_glm(distr, beta0, beta, X, eta=2.0, random_state=None,
     if not sample:
         return _lmb(distr, beta0, beta, X, eta)
 
-    _random_state = np.random.RandomState(random_state)
+    _random_state = check_random_state(random_state)
     if distr == 'softplus' or distr == 'poisson':
         y = _random_state.poisson(_lmb(distr, beta0, beta, X, eta))
     if distr == 'gaussian':
@@ -763,7 +764,7 @@ class GLM(BaseEstimator):
         self.beta_ = None
         self.ynull_ = None
         self.n_iter_ = 0
-        self.rng_ = np.random.RandomState(self.random_state)
+        self.rng_ = check_random_state(self.random_state)
 
         # checks for group
         if self.group is not None:
