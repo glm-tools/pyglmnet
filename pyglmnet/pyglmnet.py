@@ -10,6 +10,7 @@ from scipy.stats import norm
 from .utils import logger, set_log_level, _check_params
 from .base import BaseEstimator, is_classifier, check_version
 
+from sklearn.utils.validation import check_X_y, check_array, check_is_fitted
 
 ALLOWED_DISTRS = ['gaussian', 'binomial', 'softplus', 'poisson',
                   'probit', 'gamma']
@@ -754,6 +755,9 @@ class GLM(BaseEstimator):
         self: instance of GLM
             The fitted model.
         """
+        X, y = check_X_y(X, y, accept_sparse=True)
+        self.is_fitted_ = True
+
         self.beta0_ = None
         self.beta_ = None
         self.ynull_ = None
@@ -896,6 +900,9 @@ class GLM(BaseEstimator):
         yhat: array
             The predicted targets of shape (n_samples,)
         """
+        X = check_array(X, accept_sparse=True)
+        check_is_fitted(self, 'is_fitted_')
+
         if not isinstance(X, np.ndarray):
             raise ValueError('Input data should be of type ndarray (got %s).'
                              % type(X))
