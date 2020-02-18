@@ -175,7 +175,8 @@ X, y = datasets.fetch_community_crime_data()
 Xtrain, Xtest, ytrain, ytest = train_test_split(X, y, test_size=0.33)
 
 # Instantiate a binomial-distributed GLM with elastic net regularization
-glm = GLMCV(distr='binomial', alpha=0.05, score_metric='pseudo_R2', cv=3)
+glm = GLMCV(distr='binomial', alpha=0.05, score_metric='pseudo_R2', cv=3,
+            tol=1e-4)
 
 # Fit the model and then predict
 glm.fit(Xtrain, ytrain)
