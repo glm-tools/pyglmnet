@@ -535,7 +535,7 @@ class GLM(BaseEstimator):
         https://core.ac.uk/download/files/153/6287975.pdf
     """
 
-    def __init__(self, distr='binomial', alpha=0.5,
+    def __init__(self, distr='poisson', alpha=0.5,
                  Tau=None, group=None,
                  reg_lambda=0.1,
                  solver='batch-gradient',
@@ -985,7 +985,7 @@ class GLM(BaseEstimator):
                              ",".join(valid_metrics))
 
         # If the model has not been fit it cannot be scored
-        if self.ynull_ is None:
+        if not hasattr(self, 'ynull_'):
             raise ValueError('Model must be fit before ' +
                              'prediction can be scored')
 
