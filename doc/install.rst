@@ -16,7 +16,7 @@ ship with a recent version of all these packages.
 
 Additionally, for development, tests and coverage: ``pytest``, ``pytest-cov``, ``coverage``, ``flake8``
 
-Additionally, for building documentation: ``sphinx``, ``sphinx-gallery``, ``pillow``, ``numpydoc``, ``matplotlib``
+Additionally, for building documentation: ``sphinx``, ``sphinx-gallery``, ``sphinx_bootstrap_theme``, ``pillow``, ``numpydoc``, ``matplotlib``, ``spykes``
 
 In case you have other distributions of Python, you can install
 the dependencies using ``pip``.
