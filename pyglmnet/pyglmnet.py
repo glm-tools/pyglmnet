@@ -1270,9 +1270,6 @@ class GLMCV(object):
             glm.fit(X, y)
             glms.append(glm)
 
-        for glm in glms:
-            glm.is_fitted_ = False
-
         # Update the estimated variables
         if self.score_metric == 'deviance':
             opt = np.array(scores).argmin()
