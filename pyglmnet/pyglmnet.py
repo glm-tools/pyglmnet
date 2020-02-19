@@ -11,8 +11,8 @@ from .utils import logger, set_log_level, _check_params
 from .base import is_classifier, check_version
 
 from sklearn.base import BaseEstimator
-from sklearn.utils.validation import check_X_y, check_array, check_is_fitted
 from sklearn.utils import check_random_state
+from sklearn.utils.validation import check_X_y, check_array, check_is_fitted
 
 ALLOWED_DISTRS = ['gaussian', 'binomial', 'softplus', 'poisson',
                   'probit', 'gamma']
@@ -508,6 +508,8 @@ class GLM(BaseEstimator):
         The learned betas
     n_iter_: int
         The number of iterations
+    is_fitted_: bool
+        if True, the model is previously fitted
 
     Examples
     --------
@@ -553,16 +555,11 @@ class GLM(BaseEstimator):
         self.solver = solver
         self.learning_rate = learning_rate
         self.max_iter = max_iter
-        # self.beta0_ = None
-        # self.beta_ = None
-        # self.ynull_ = None
-        # self.n_iter_ = 0
         self.tol = tol
         self.eta = eta
         self.score_metric = score_metric
         self.fit_intercept = fit_intercept
         self.random_state = random_state
-        # self.rng = np.random.RandomState(self.random_state)
         self.callback = callback
         self.verbose = verbose
         set_log_level(verbose)
@@ -758,7 +755,6 @@ class GLM(BaseEstimator):
             The fitted model.
         """
         X, y = check_X_y(X, y, accept_sparse=False)
-        self.is_fitted_ = True
 
         self.beta0_ = None
         self.beta_ = None
@@ -788,10 +784,6 @@ class GLM(BaseEstimator):
 
         if y.ndim != 1:
             raise ValueError("y must be 1D, got %sD" % y.ndim)
-
-        if hasattr(self, '_allow_refit') and self._allow_refit is False:
-            raise ValueError("This glm object has already been fit before."
-                             "A refit is not allowed")
 
         n_observations, n_features = X.shape
 
@@ -886,7 +878,7 @@ class GLM(BaseEstimator):
             self.beta0_ = 0
             self.beta_ = beta
         self.ynull_ = np.mean(y)
-        # self._allow_refit = False
+        self.is_fitted_ = True
         return self
 
     def predict(self, X):
@@ -985,6 +977,7 @@ class GLM(BaseEstimator):
         score: float
             The score metric
         """
+        check_is_fitted(self, 'is_fitted_')
         from . import metrics
         valid_metrics = ['deviance', 'pseudo_R2', 'accuracy']
         if self.score_metric not in valid_metrics:
@@ -1265,7 +1258,6 @@ class GLMCV(object):
 
                 glm.n_iter_ = 0
                 glm.fit(X[train], y[train])
-                glm._allow_refit = True
                 scores_fold.append(glm.score(X[val], y[val]))
             scores.append(np.mean(scores_fold))
 
@@ -1279,7 +1271,7 @@ class GLMCV(object):
             glms.append(glm)
 
         for glm in glms:
-            glm._allow_refit = False
+            glm.is_fitted_ = False
 
         # Update the estimated variables
         if self.score_metric == 'deviance':
