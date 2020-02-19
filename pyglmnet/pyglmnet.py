@@ -535,7 +535,7 @@ class GLM(BaseEstimator):
         https://core.ac.uk/download/files/153/6287975.pdf
     """
 
-    def __init__(self, distr='poisson', alpha=0.5,
+    def __init__(self, distr='binomial', alpha=0.5,
                  Tau=None, group=None,
                  reg_lambda=0.1,
                  solver='batch-gradient',
@@ -1133,7 +1133,7 @@ class GLMCV(object):
     glm[2].predict(X_test)
     """
 
-    def __init__(self, distr='poisson', alpha=0.5,
+    def __init__(self, distr='binomial', alpha=0.5,
                  Tau=None, group=None,
                  reg_lambda=None, cv=10,
                  solver='batch-gradient',
