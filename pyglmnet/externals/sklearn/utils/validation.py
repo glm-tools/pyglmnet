@@ -644,3 +644,4 @@ def check_is_fitted(estimator, attributes=None, msg=None, all_or_any=all):
 
     if not attrs:
         raise NotFittedError(msg % {'name': type(estimator).__name__})
+    
