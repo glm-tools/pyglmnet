@@ -41,5 +41,5 @@ Here is a brief example of how to use the ``GLM()`` class.
     deviance = glm.score(Xtest, ytest)
 
 ``GLM()`` class is also designed to be compatible with ``scikit-learn``. 
-This means that you can apply cross-validation or performing grid search over 
+This means that you can apply cross-validation or perform grid search over 
 hyperparameters using scikit-learn's ``KFold`` or ``GridSearchCV``.
