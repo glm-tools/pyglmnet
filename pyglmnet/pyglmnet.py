@@ -908,8 +908,35 @@ class GLM(BaseEstimator):
         yhat = np.asarray(yhat)
         return yhat
 
+    def _predict_proba(self, X):
+        """Predict class probability for a binomial or probit distribution.
+
+        Parameters
+        ----------
+        X: array
+            Input data for prediction, of shape (n_samples, n_features)
+
+        Returns
+        -------
+        yhat: array
+            The predicted targets of shape (n_samples,).
+
+        """
+        if self.distr not in ['binomial', 'probit']:
+            raise ValueError('This is only applicable for \
+                              the binomial distribution.')
+
+        if not isinstance(X, np.ndarray):
+            raise ValueError('Input data should be of type ndarray (got %s).'
+                             % type(X))
+
+        yhat = _lmb(self.distr, self.beta0_, self.beta_, X, self.eta,
+                    fit_intercept=True)
+        yhat = np.asarray(yhat)
+        return yhat
+
     def predict_proba(self, X):
-        """Predict class probability for binomial.
+        """Predict class probability for a binomial or probit distribution.
 
         Parameters
         ----------
@@ -924,24 +951,19 @@ class GLM(BaseEstimator):
         Raises
         ------
         Works only for the binomial distribution.
-        Raises error otherwise.
+        Warn the output otherwise.
 
         """
         X = check_array(X, accept_sparse=False)
         check_is_fitted(self, 'is_fitted_')
 
-        if self.distr not in ['binomial', 'probit']:
-            raise ValueError('This is only applicable for \
-                              the binomial distribution.')
-
-        if not isinstance(X, np.ndarray):
-            raise ValueError('Input data should be of type ndarray (got %s).'
-                             % type(X))
-
-        yhat = _lmb(self.distr, self.beta0_, self.beta_, X, self.eta,
-                    fit_intercept=True)
-        yhat = np.asarray(yhat)
-        return yhat
+        if self.distr in ['binomial', 'probit']:
+            return self._predict_proba(X)
+        else:
+            warnings.warn('This is only applicable for \
+                           the binomial distribution. \
+                           We returns predict as an output here.')
+            return self.predict(X)
 
     def fit_predict(self, X, y):
         """Fit the model and predict on the same data.
