@@ -11,10 +11,7 @@ Extended math utilities.
 #          Giorgio Patrini
 # License: BSD 3 clause
 
-import warnings
-
 import numpy as np
-from scipy import linalg, sparse
 
 
 # Use at least float64 for the accumulating functions to avoid precision issue
