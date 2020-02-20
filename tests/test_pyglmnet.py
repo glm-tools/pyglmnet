@@ -420,9 +420,6 @@ def test_random_state_consistency():
     ypred_a = glm_a.fit_predict(Xtrain, ytrain)
     glm_b = GLM(distr="gaussian", random_state=1)
     ypred_b = glm_b.fit_predict(Xtrain, ytrain)
-    match = "This glm object has already been fit"
-    # with pytest.raises(ValueError, match=match):
-    #     ypred_c = glm_b.fit_predict(Xtrain, ytrain)
 
     # Consistency between two different models
     assert_array_equal(ypred_a, ypred_b)
@@ -496,7 +493,7 @@ def test_api_input():
     glm = GLM(distr='gaussian', max_iter=2)
     with pytest.warns(UserWarning, match='Reached max number of iterat'):
         glm.fit(X, y)
-    
+
 
 def test_intro_example():
     """Test that the intro example works."""
