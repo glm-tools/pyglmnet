@@ -11,6 +11,7 @@ at which the fixe is no longer needed.
 
 import numpy as np
 
+
 def _parse_version(version_string):
     version = []
     for x in version_string.split('.'):
