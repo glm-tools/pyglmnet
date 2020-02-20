@@ -960,9 +960,9 @@ class GLM(BaseEstimator):
         if self.distr in ['binomial', 'probit']:
             return self._predict_proba(X)
         else:
-            UserWarning('This is only applicable for \
-                         the binomial distribution. \
-                         We returns predict as an output here.')
+            warnings.warn('This is only applicable for \
+                           the binomial distribution. \
+                           We returns predict as an output here.')
             return self.predict(X)
 
     def fit_predict(self, X, y):
