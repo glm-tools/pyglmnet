@@ -22,6 +22,8 @@ BUG
 API
 ~~~
 
+    - Refactored `GLM` class so that it is fully support by `scikit-learn` by `Titipat Achakulvisut`_.
+
 .. _1_0_1:
 
 Version 1.1
@@ -56,7 +58,6 @@ BUG
 API
 ~~~
 
-    - Refactored `GLM` class so that it is fully support by `scikit-learn` by `Titipat Achakulvisut`_.
     - Refactored `GLM` class into two classes: :class:`pyglmnet.GLM` for fitting a single regularization parameter,
       and :class:`pyglmnet.GLMCV` for fitting along a regularization path with cross-validation and selection of best
       regularization parameter by `Pavan Ramkumar`_ and `Mainak Jas`_.
