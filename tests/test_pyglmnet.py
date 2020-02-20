@@ -20,8 +20,6 @@ from pyglmnet import (GLM, GLMCV, _grad_L2loss, _L2loss, simulate_glm,
                       _gradhess_logloss_1d, _loss, datasets, ALLOWED_DISTRS)
 
 
-public_modules = ['pyglmnet', 'pyglmnet.externals']
-
 def test_glm_estimator():
     """Test GLM class using scikit-learn's check_estimator."""
     check_estimator(GLM)
