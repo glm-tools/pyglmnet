@@ -22,6 +22,8 @@ from pyglmnet import (GLM, GLMCV, _grad_L2loss, _L2loss, simulate_glm,
                       _gradhess_logloss_1d, _loss, datasets, ALLOWED_DISTRS)
 
 
+public_modules = ['pyglmnet', 'pyglmnet.externals']
+
 def test_glm_estimator():
     """Test GLM class using scikit-learn's check_estimator."""
     check_estimator(GLM)
@@ -498,22 +500,6 @@ def test_api_input():
     glm = GLM(distr='gaussian', max_iter=2)
     with pytest.warns(UserWarning, match='Reached max number of iterat'):
         glm.fit(X, y)
-
-
-def test_score_before_fitting():
-    """Test thaat score function cannot be applied before fitting the model."""
-
-    random_state = 1
-    state = np.random.RandomState(random_state)
-    n_samples, n_features = 100, 5
-
-    X = state.normal(0, 1, (n_samples, n_features))
-    y = state.normal(0, 1, (n_samples, ))
-
-    glm = GLM(distr='gaussian')
-    
-    with assert_raises(NotFittedError, match="Cannot apply score before fitting"):
-        glm.score(X, y)
     
 
 def test_intro_example():

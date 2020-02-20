@@ -8,11 +8,10 @@ from scipy.special import expit
 from scipy.stats import norm
 
 from .utils import logger, set_log_level, _check_params
-from .base import is_classifier, check_version
+from .base import BaseEstimator, is_classifier, check_version
 
-from sklearn.base import BaseEstimator
-from sklearn.utils import check_random_state
-from sklearn.utils.validation import check_X_y, check_array, check_is_fitted
+from .externals.sklearn.utils import check_random_state, check_array, check_X_y
+from .externals.sklearn.utils.validation import check_is_fitted
 
 ALLOWED_DISTRS = ['gaussian', 'binomial', 'softplus', 'poisson',
                   'probit', 'gamma']
