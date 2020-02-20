@@ -15,8 +15,6 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import GridSearchCV, cross_val_score, KFold
 from sklearn.linear_model import ElasticNet
 from sklearn.utils.estimator_checks import check_estimator
-from sklearn.utils.testing import assert_raises
-from sklearn.utils.validation import NotFittedError
 
 from pyglmnet import (GLM, GLMCV, _grad_L2loss, _L2loss, simulate_glm,
                       _gradhess_logloss_1d, _loss, datasets, ALLOWED_DISTRS)
