@@ -15,13 +15,15 @@ import numbers
 
 import numpy as np
 import scipy.sparse as sp
-from inspect import signature, isclass, Parameter
+from inspect import isclass
 
 from numpy.core.numeric import ComplexWarning
 
 from .fixes import _object_dtype_isnan
 from .config import get_config as _get_config
-from ..exceptions import NotFittedError, NonBLASDotWarning
+from ..exceptions import NonBLASDotWarning
+from ..exceptions import NotFittedError
+from ..exceptions import DataConversionWarning
 
 # Silenced by default to reduce verbosity. Turn on at runtime for
 # performance profiling.
@@ -48,10 +50,8 @@ def _assert_all_finite(X, allow_nan=False, msg_dtype=None):
         if (allow_nan and np.isinf(X).any() or
                 not allow_nan and not np.isfinite(X).all()):
             type_err = 'infinity' if allow_nan else 'NaN, infinity'
-            raise ValueError(
-                    msg_err.format
-                    (type_err,
-                     msg_dtype if msg_dtype is not None else X.dtype)
+            raise ValueError(msg_err.format(
+                type_err, msg_dtype if msg_dtype is not None else X.dtype)
             )
     # for object dtype data, we only check for NaNs (GH-13254)
     elif X.dtype == np.dtype('object') and not allow_nan:
@@ -120,7 +120,6 @@ def check_consistent_length(*arrays):
     if len(uniques) > 1:
         raise ValueError("Found input variables with inconsistent numbers of"
                          " samples: %r" % [int(l) for l in lengths])
-
 
 
 def _ensure_sparse_format(spmatrix, accept_sparse, dtype, copy,
@@ -297,13 +296,6 @@ def check_array(array, accept_sparse=False, accept_large_sparse=True,
     dtypes_orig = None
     if hasattr(array, "dtypes") and hasattr(array.dtypes, '__array__'):
         # throw warning if pandas dataframe is sparse
-        with suppress(ImportError):
-            from pandas.api.types import is_sparse
-            if array.dtypes.apply(is_sparse).any():
-                warnings.warn(
-                    "pandas.DataFrame with sparse columns found."
-                    "It will be converted to a dense numpy array."
-                )
 
         dtypes_orig = list(array.dtypes)
         # pandas boolean dtype __array__ interface coerces bools to objects
@@ -644,4 +636,3 @@ def check_is_fitted(estimator, attributes=None, msg=None, all_or_any=all):
 
     if not attrs:
         raise NotFittedError(msg % {'name': type(estimator).__name__})
-    
