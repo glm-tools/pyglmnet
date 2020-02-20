@@ -16,7 +16,7 @@
 # Dev branch marker is: 'X.Y.devN' where N is an integer.
 #
 
-__version__ = '1.2.dev0'
+__version__ = '1.1.1'
 
 
 from .pyglmnet import GLM, GLMCV, _grad_L2loss, _L2loss, simulate_glm, _gradhess_logloss_1d, _loss, ALLOWED_DISTRS
