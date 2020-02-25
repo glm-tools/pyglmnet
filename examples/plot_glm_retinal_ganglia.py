@@ -115,7 +115,7 @@ plt.ylabel('Spikes (0 or 1)')
 plt.show()
 
 ########################################################
-# 
+#
 # Next, we can bin the spikes according to the stimulation.
 # Then, we can create a so-called 'Design Matrix'
 # where each row contains the relevant stimulus chunk.
@@ -269,7 +269,7 @@ spikes_pred_poissonGLM = glm_poisson.predict(Xdsgn)
 
 #############################################################################
 # **Putting all together**
-# 
+#
 # We are plotting the prediction of spike counts from linear Gaussian GLM, 
 # linear Gaussian GLM with offset and poisson prediction for one second.
 
@@ -298,6 +298,69 @@ print('Training perf (R^2): lin-gauss GLM, no offset: {:.2f}'.format(1 - mse_lgG
 print('Training perf (R^2): lin-gauss GLM, w/ offset: {:.2f}'.format(1 - mse_lgGLM_offset / rss))
 print('Training perf (R^2): poisson GLM {:.2f}'.format(1 - mse_poissonGLM / rss))
 print('Training perf using Pyglmnet score {:.2f}'.format(glm_poisson.score(Xdsgn, spikes_binned)))
+
+#############################################################################
+# **Using Spikes history for predicting spike counts**
+#
+# We can even further predict the spikes by using the spikes history.
+# Below, we show how to do it. **Note** the spike-history portion of the design
+# matrix had better be shifted so that we aren't allowed to use the spike
+# count on this time bin to predict itself!
+
+n_t_filt = 25 # same as before, stimulation history
+n_t_hist = 20 # spikes history
+
+# using both stimulation history and spikes history
+stim_padded = np.pad(stim, (n_t_filt - 1, 0))
+spikes_padded = np.pad(spikes_binned, (n_t_hist - 1, 0))
+
+Xstim = hankel(stim_padded[:-n_t_filt +1], stim[-n_t_filt:])
+Xspikes = hankel(spikes_padded[:-n_t_hist +1], stim[-n_t_hist:])
+
+# design matrix with spikes history
+Xdsgn = np.hstack((Xstim, Xspikes))
+
+plt.imshow(Xdsgn[:50, :],
+           cmap='binary',
+           aspect='auto',
+           interpolation='nearest')
+plt.xlabel('lags before spike time', fontsize=12)
+plt.ylabel('time bin of response', fontsize=12)
+plt.title('Sample first 50 rows of design matrix', fontsize=12)
+plt.colorbar()
+plt.show()
+
+#############################################################################
+#
+# Now, we are ready to fit Poisson GLM with spikes history.
+
+# create possion GLM instance
+glm_poisson_hist = GLM(distr='poisson',
+                       verbose=False, alpha=0.05,
+                       max_iter=1000, learning_rate=0.2,
+                       score_metric='pseudo_R2',
+                       reg_lambda=1e-7, eta=4.0)
+
+# fitting to a design matrix with spikes history
+glm_poisson_hist.fit(Xdsgn, spikes_binned)
+
+# predict spike counts
+spikes_pred_poissonGLM_hist = glm_poisson_hist.predict(Xdsgn)
+
+# plot
+markerline, _, _ = plt.stem(t_sample, spikes_binned[sample_index])
+markerline.set_markerfacecolor('none')
+plt.plot(t_sample, spikes_pred_poissonGLM[sample_index],
+         color='green', linewidth=2, label='poissonGLM')
+plt.plot(t_sample, spikes_pred_poissonGLM_hist[sample_index],
+         color='orange', linewidth=2, label='poissonGLM_hist')
+
+plt.xlim([t_sample.min(), t_sample.max()])
+plt.title('Spike count prediction using linear-Gaussian GLM')
+plt.ylabel('Binned Spike Counts')
+plt.legend()
+plt.show()
+print('Training perf using Pyglmnet score {:.2f}'.format(glm_poisson_hist.score(Xdsgn, spikes_binned)))
 
 #############################################################################
 #
