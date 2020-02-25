@@ -283,7 +283,7 @@ plt.plot(t_sample, spikes_pred_poissonGLM[sample_index],
          color='green', linewidth=2, label='poissonGLM')
 
 plt.xlim([t_sample.min(), t_sample.max()])
-plt.title('Spike count prediction using linear-Gaussian GLM')
+plt.title('Spike count prediction using various GLM predictions')
 plt.ylabel('Binned Spike Counts')
 plt.legend()
 plt.show()
@@ -300,7 +300,7 @@ print('Training perf (R^2): poisson GLM {:.2f}'.format(1 - mse_poissonGLM / rss)
 print('Training perf using Pyglmnet score {:.2f}'.format(glm_poisson.score(Xdsgn, spikes_binned)))
 
 #############################################################################
-# **Using Spikes history for predicting spike counts**
+# **Using spikes history for predicting spike counts**
 #
 # We can even further predict the spikes by using the spikes history.
 # Below, we show how to do it. **Note** the spike-history portion of the design
@@ -356,11 +356,57 @@ plt.plot(t_sample, spikes_pred_poissonGLM_hist[sample_index],
          color='orange', linewidth=2, label='poissonGLM_hist')
 
 plt.xlim([t_sample.min(), t_sample.max()])
-plt.title('Spike count prediction using linear-Gaussian GLM')
+plt.title('Spike counts prediction with spikes history using Poisson GLM')
 plt.ylabel('Binned Spike Counts')
 plt.legend()
 plt.show()
 print('Training perf using Pyglmnet score {:.2f}'.format(glm_poisson_hist.score(Xdsgn, spikes_binned)))
+
+#############################################################################
+# **Using both spikes history and spikes-coupled for predicting spike counts**
+
+n_t_filt = 25 # same as before, stimulation history
+n_t_hist = 20 # spikes history
+
+Xdsgn_coupled = [Xstim]
+for cell_num in range(n_cells):
+    spike_time_cell = spike_times[cell_num]
+    spikes_binned_cell, _ = np.histogram(spike_time_cell, t_bins)
+    spikes_padded = np.pad(spikes_binned_cell, (n_t_hist - 1, 0))
+    Xspikes = hankel(spikes_padded[:-n_t_hist +1], stim[-n_t_hist:])
+    Xdsgn_coupled.append(Xspikes)
+# this design matrix should have a width of
+# n_t_filt + (n_cells * n_t_hist) = 25 + (20 * 4) = 105
+Xdsgn_coupled = np.hstack(Xdsgn_coupled)
+
+# create possion GLM instance
+glm_poisson_coupled = GLM(distr='poisson',
+                          verbose=False, alpha=0.05,
+                          max_iter=1000, learning_rate=0.2,
+                          score_metric='pseudo_R2',
+                          reg_lambda=1e-7, eta=4.0)
+
+# fitting to a design matrix with spikes history
+glm_poisson_coupled.fit(Xdsgn_coupled, spikes_binned)
+
+# predict spike counts
+spikes_pred_poissonGLM_couple = glm_poisson_coupled.predict(Xdsgn_coupled)
+
+# plot
+markerline, _, _ = plt.stem(t_sample, spikes_binned[sample_index])
+markerline.set_markerfacecolor('none')
+plt.plot(t_sample, spikes_pred_poissonGLM[sample_index],
+         color='green', linewidth=2, label='poissonGLM')
+plt.plot(t_sample, spikes_pred_poissonGLM_hist[sample_index],
+         color='orange', linewidth=2, label='poissonGLM_hist')
+
+plt.xlim([t_sample.min(), t_sample.max()])
+plt.title('Spike counts prediction with spikes couple using Poisson GLM')
+plt.ylabel('Binned Spike Counts')
+plt.legend()
+plt.show()
+print('Training perf using Pyglmnet score {:.2f}'.\
+      format(glm_poisson_coupled.score(Xdsgn_coupled, spikes_binned)))
 
 #############################################################################
 #
@@ -368,8 +414,8 @@ print('Training perf using Pyglmnet score {:.2f}'.format(glm_poisson_hist.score(
 #
 # References
 # """"""""""
-# 
+#
 # Please cite the following publications if you use the source code based on this tutorials.
-# 
+#
 # * Uzzell, V. J., and E. J. Chichilnisky. `Precision of spike trains in primate retinal ganglion cells.` Journal of Neurophysiology 92.2 (2004)
 # * Pillow, Jonathan W., et al. `Prediction and decoding of retinal ganglion cell responses with a probabilistic spiking model.` Journal of Neuroscience 25.47 (2005)
