@@ -64,6 +64,7 @@ developing.
 
 Develop
 -------
+
 Make sure you develop each feature on a new branch:
 
 .. code:: bash
@@ -121,6 +122,7 @@ Once committed, push your local branch to a branch in your fork.
 
 Make pull request
 -----------------
+
 From the ``feat`` branch of your fork: https://github.com/<your-user-name>/pyglmnet
 you can create a pull request on to the main repo. Give the PR a meaningful
 name. We recommend prefixing it with a ``[WIP]`` if the feature is being built.
@@ -153,7 +155,8 @@ Once the PR is merged, you can optionally delete the ``feat`` branch both
 locally and on your fork.
 
 Build documentation
-------------------
+-------------------
+
 The following should be installed in order to build the documentation.
 
 *    `sphinx <https://github.com/sphinx-doc/sphinx/>`_

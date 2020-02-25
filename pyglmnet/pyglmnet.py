@@ -1054,6 +1054,7 @@ class GLMCV(object):
 
         \\mathcal{P}_2 = \\|\\Gamma \\beta \\|_2^2 \\
         \\mathcal{P}_1 = \\sum_g \\|\\beta_{j,g}\\|_2
+    
     where :math:`\\Gamma` is the Tikhonov matrix: a square factorization
     of the inverse covariance matrix and :math:`\\beta_{j,g}` is the
     :math:`j` th coefficient of group :math:`g`.
