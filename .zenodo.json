@@ -5,16 +5,16 @@
     {
       "affiliation": "Martinos Center of Biomedical Imaging",
       "name": "Mainak Jas",
-      "orcid": 0000-0002-3199-9027
+      "orcid": "0000-0002-3199-9027"
     },
     {
       "affiliation": "University of Pennsylvania",
       "name": "Titipat Achakulvisut",
-      "orcid": 0000-0002-2124-2979
+      "orcid": "0000-0002-2124-2979"
     },
     {
       "affiliation": "Loyola University",
-      "name": "Aid Idrizovi\u0107",
+      "name": "Aid Idrizović"
     },
     {
       "affiliation": "Syracuse University",
@@ -47,12 +47,12 @@
     {
       "affiliation": "605",
       "name": "Peter Foley",
-      "orcid": 0000-0002-0304-7213
+      "orcid": "0000-0002-0304-7213"
     },
     {
       "affiliation": "Rockets of Awesome",
       "name": "Hugo L Fernandes",
-      "orcid": 0000-0002-0168-4104
+      "orcid": "0000-0002-0168-4104"
     },
     {
       "affiliation": "Epoch Capital",
@@ -65,7 +65,7 @@
     {
       "affiliation": "Ghent University, Research Institute for Agriculture Fisheries and Food",
       "name": "Olivier Pieters",
-      "orcid": 0000-0002-5473-4849
+      "orcid": "0000-0002-5473-4849"
     },
     {
       "affiliation": "Clean Power Research",
@@ -74,12 +74,12 @@
     {
       "affiliation": "University of Trento",
       "name": "Giovanni De Toni",
-      "orcid": 0000-0002-8387-9983
+      "orcid": "0000-0002-8387-9983"
     },
     {
       "affiliation": "Columbia University",
       "name": "Chris Rodgers",
-      "orcid": 0000-0003-1762-3450
+      "orcid": "0000-0003-1762-3450"
     },
     {
       "affiliation": "Georgia Institute of Technology",
@@ -96,15 +96,15 @@
     {
       "affiliation": "System1 Biosciences Inc",
       "name": "Pavan Ramkumar",
-      "orcid": 0000-0001-7450-0727
+      "orcid": "0000-0001-7450-0727"
     }
   ],
   "keywords": [
-    "Python"
-    "glm"
-    "machine-learning"
-    "lasso"
-    "elastic-net"
+    "Python",
+    "glm",
+    "machine-learning",
+    "lasso",
+    "elastic-net",
     "group-lasso"
   ],
   "license": "MIT",
