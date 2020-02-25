@@ -390,15 +390,15 @@ glm_poisson_coupled = GLM(distr='poisson',
 glm_poisson_coupled.fit(Xdsgn_coupled, spikes_binned)
 
 # predict spike counts
-spikes_pred_poissonGLM_couple = glm_poisson_coupled.predict(Xdsgn_coupled)
+spikes_pred_poissonGLM_coupled = glm_poisson_coupled.predict(Xdsgn_coupled)
 
 # plot
 markerline, _, _ = plt.stem(t_sample, spikes_binned[sample_index])
 markerline.set_markerfacecolor('none')
 plt.plot(t_sample, spikes_pred_poissonGLM[sample_index],
          color='green', linewidth=2, label='poissonGLM')
-plt.plot(t_sample, spikes_pred_poissonGLM_hist[sample_index],
-         color='orange', linewidth=2, label='poissonGLM_hist')
+plt.plot(t_sample, spikes_pred_poissonGLM_coupled[sample_index],
+         color='pink', linewidth=2, label='poissonGLM_couple')
 
 plt.xlim([t_sample.min(), t_sample.max()])
 plt.title('Spike counts prediction with spikes couple using Poisson GLM')
