@@ -39,7 +39,6 @@ which can be used for computing the spike-triggered average
 #
 # First, we can import all the relevance libraries.
 
-import os
 import os.path as op
 import json
 
@@ -83,8 +82,8 @@ f = 1 / dt # frequency of the stimulation
 
 ########################################################
 #
-# Now, you can pick a cell to work with and visualize the spikes for one second.
-# In this case, we will pick cell number 2 (ON cell) to work with.
+# You can pick a cell to work with and visualize the spikes for one second.
+# In this case, we will pick cell number 2 (ON cell).
 
 cell_num = 2 # pick cell number 2 (ON cell)
 spike_time = spike_times[cell_num] # pick spike time for cell_num
@@ -114,7 +113,6 @@ plt.ylim([0, 2])
 plt.xlabel('Time (s)')
 plt.ylabel('Spikes (0 or 1)')
 plt.show()
-
 
 ########################################################
 # 
@@ -218,6 +216,7 @@ plt.show()
 
 # calculate whitened STA, we should expect it to be similar
 # to the STA due to the white noise stimulation
+
 wsta = (inv(Xdsgn.T @ Xdsgn) @ sta) * n_spikes
 spikes_pred_lgGLM = Xdsgn @ wsta
 
@@ -252,7 +251,7 @@ spikes_pred_lgGLM_offset = const + Xdsgn @ wsta_offset
 # :math:`y \sim \text{Poiss}(\vec{\theta} \cdot \vec{x})`.
 # We call :math:`f^{-1}` a "link function"
 #
-# Here, we can use Pyglmnet's `GLM` to predict such parameters
+# Here, we can use Pyglmnet's `GLM` to predict the parameters
 
 # create possion GLM instance
 glm_poisson = GLM(distr='poisson',
@@ -264,15 +263,15 @@ glm_poisson = GLM(distr='poisson',
 # fitting to a design matrix
 glm_poisson.fit(Xdsgn, spikes_binned)
 
-# predict spike counts
+# predict spike counts using Poisson GLM
 # alternatively, you can also use np.exp(glm_poisson.beta0_ + X.dot(glm_poisson.beta_))
 spikes_pred_poissonGLM = glm_poisson.predict(Xdsgn)
 
 #############################################################################
 # **Putting all together**
 # 
-# plotting prediction of linear Gaussian GLM, linear Gaussian GLM with offset
-# and poisson prediction of spike counts for one second.
+# We are plotting the prediction of spike counts from linear Gaussian GLM, 
+# linear Gaussian GLM with offset and poisson prediction for one second.
 
 markerline, _, _ = plt.stem(t_sample, spikes_binned[sample_index])
 markerline.set_markerfacecolor('none')
@@ -289,7 +288,7 @@ plt.ylabel('Binned Spike Counts')
 plt.legend()
 plt.show()
 
-# performance of the fitted model
+# performance of the fitted models
 mse_lgGLM = np.mean((spikes_binned - spikes_pred_lgGLM)**2) # mean squared error, GLM no offset
 mse_lgGLM_offset = np.mean((spikes_binned - spikes_pred_lgGLM_offset)**2)  # mean squared error, with offset
 mse_poissonGLM = np.mean((spikes_binned - spikes_pred_poissonGLM)**2) # mean squared error, poissonGLM
