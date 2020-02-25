@@ -101,6 +101,38 @@ def fetch_community_crime_data():
     return X, y
 
 
+def fetch_RGCs_data(dpath):
+    """
+    Downloads data for spike trains prediction in retinal ganglia cells.
+    Please see https://github.com/glm-tools/datasets/RGCs/ for permission
+    to use the dataset
+
+    Parameters
+    ----------
+    dpath: str
+        specifies path to which the data files should be downloaded.
+
+    Returns
+    -------
+    dpath : str
+        The data path
+    """
+
+    if os.path.exists(dpath):
+        shutil.rmtree(dpath)
+    os.mkdir(dpath)
+
+    base_url = "https://raw.githubusercontent.com/glm-tools/datasets/master"
+    fnames = ['data_RGCs.json']
+
+    for fname in fnames:
+        url = base_url + "/RGCs/" + fname
+        fname = os.path.join(dpath, fname)
+        urlretrieve(url, fname, _reporthook)
+
+    return dpath
+
+
 def fetch_group_lasso_datasets():
     """
     Downloads and formats data needed for the group lasso example.
