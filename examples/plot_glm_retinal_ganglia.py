@@ -312,10 +312,10 @@ n_t_hist = 20 # spikes history
 
 # using both stimulation history and spikes history
 stim_padded = np.pad(stim, (n_t_filt - 1, 0))
-spikes_padded = np.pad(spikes_binned, (n_t_hist - 1, 0))
+spikes_padded = np.pad(spikes_binned, (n_t_hist, 0))
 
 Xstim = hankel(stim_padded[:-n_t_filt +1], stim[-n_t_filt:])
-Xspikes = hankel(spikes_padded[:-n_t_hist +1], stim[-n_t_hist:])
+Xspikes = hankel(spikes_padded[:-n_t_hist], stim[-n_t_hist:])
 
 # design matrix with spikes history
 Xdsgn = np.hstack((Xstim, Xspikes))
@@ -372,8 +372,8 @@ Xdsgn_coupled = [Xstim]
 for cell_num in range(n_cells):
     spike_time_cell = spike_times[cell_num]
     spikes_binned_cell, _ = np.histogram(spike_time_cell, t_bins)
-    spikes_padded = np.pad(spikes_binned_cell, (n_t_hist - 1, 0))
-    Xspikes = hankel(spikes_padded[:-n_t_hist +1], stim[-n_t_hist:])
+    spikes_padded = np.pad(spikes_binned_cell, (n_t_hist, 0))
+    Xspikes = hankel(spikes_padded[:-n_t_hist], stim[-n_t_hist:])
     Xdsgn_coupled.append(Xspikes)
 # this design matrix should have a width of
 # n_t_filt + (n_cells * n_t_hist) = 25 + (20 * 4) = 105
