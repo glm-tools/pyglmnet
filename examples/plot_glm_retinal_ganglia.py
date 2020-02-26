@@ -56,7 +56,7 @@ from tempfile import TemporaryDirectory
 
 ########################################################
 #
-# Download JSON file of the dataset. The JSON file has the 
+# Fetch the dataset. The JSON file contains the 
 # following keys:  ``stim`` (binary stochastic stimulation),
 # ``stim_times`` (time of the stimulation), and
 # ``spike_times`` (recorded time of the spikes)
@@ -104,7 +104,8 @@ t_sample = dt * sample_index
 
 plt.subplot(2, 1, 1)
 plt.step(t_sample, stim[sample_index])
-plt.title('Raw Stimulus (full field flicker) and corresponding spike times')
+plt.title('Raw Stimulus (full field flicker) \
+           and corresponding spike times')
 plt.ylabel('Stimulation Intensity')
 
 plt.subplot(2, 1, 2)
@@ -130,10 +131,10 @@ plt.imshow(Xdsgn[:50, :],
            cmap='binary',
            aspect='auto',
            interpolation='nearest')
-plt.xlabel('lags before spike time', fontsize=12)
-plt.ylabel('time bin of response', fontsize=12)
-plt.title('Sample first 50 rows of design matrix created using Hankel',
-          fontsize=12)
+plt.xlabel('lags before spike time')
+plt.ylabel('time bin of response')
+plt.title('Sample first 50 rows of design \
+           matrix created using Hankel')
 plt.colorbar()
 plt.show()
 
@@ -156,8 +157,8 @@ sta = Xdsgn.T.dot(spikes_binned) / n_spikes
 t_lag = dt * np.arange(-n_t_filt + 1, 1) # time bins for STA (in seconds)
 plt.plot(t_lag, t_lag * 0, 'k--')
 plt.plot(t_lag, sta, 'bo-')
-plt.title('Spike-Triggered Average (STA)', fontsize=15)
-plt.xlabel('Time before spike (sec)', fontsize=15)
+plt.title('Spike-Triggered Average (STA)')
+plt.xlabel('Time before spike (sec)')
 plt.xlim([t_lag.min(), t_lag.max()])
 plt.show()
 
@@ -182,7 +183,8 @@ const, wsta_offset = wsta_offset[0], wsta_offset[1:]
 spikes_pred_lgGLM_offset = const + (Xdsgn @ wsta_offset)
 
 ########################################################
-#
+# **Fitting and predicting with a Poisson GLM**
+# 
 # We can also assume that their is a non-linear function governing
 # the underlying the firing patterns. Concreately, we can write down as
 # :math:`y = f(\vec{\theta} \cdot \vec{x}) + \epsilon`, and
@@ -251,7 +253,9 @@ plt.plot(t_sample, spikes_pred_poissonGLM[sample_index],
 plt.plot(t_sample, spikes_pred_poissonGLM_hist[sample_index],
          color='orange', linewidth=2, label='poissonGLM_hist')
 plt.xlim([t_sample.min(), t_sample.max()])
-plt.title('Spike count prediction using Linear Gaussin GLM and Poisson GLM predictions')
+plt.title('Spike count prediction using Linear Gaussin \
+           GLM and Poisson GLM predictions')
+plt.xlabel('Time (sec)')
 plt.ylabel('Binned Spike Counts')
 plt.legend()
 plt.show()
