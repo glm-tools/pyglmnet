@@ -18,17 +18,18 @@ License
 This tutorial dataset (RGC spikes data) is granted by
 original authors (E.J. Chichilnisky and Jonathan Pillow).
 The dataset ramains a property of the original authors.
-Its use and transfer outside tutorial, e.g. for research purposes, 
+Its use and transfer outside tutorial, e.g. for research purposes,
 is prohibited without written consent to the original authors.
 
 If you reference this dataset in your publications, please:
-    1) acknowledge its authors: E.J. Chichilnisky and Jonathan Pillow
-    2) cite thier publications as indicated on the tutorial:
+    1) acknowledge the authors: E.J. Chichilnisky and Jonathan Pillow
+    2) cite thier publications as indicated on the tutorial
 
 If you want to use it beyond the educational
 purposes or have further questions, please contact
 Jonathan Pillow (pillow@princeton.edu).
 """
+
 
 def _reporthook(count, block_size, total_size):
     """Report download percentage."""
@@ -140,13 +141,15 @@ def fetch_RGCs_data(dpath, accept_rgcs_license=False):
         answer = input('%s\nAgree (y/[n])? ' % _rgcs_license_text)
     if answer.lower() != 'y':
         raise RuntimeError('You must agree to the license to use this '
-                            'dataset')
+                           'dataset')
 
     if os.path.exists(dpath):
         shutil.rmtree(dpath)
     os.mkdir(dpath)
 
-    base_url = "https://raw.githubusercontent.com/titipata/datasets/rgcs_dataset"
+    base_url = (
+        "https://raw.githubusercontent.com/titipata/datasets/rgcs_dataset"
+    )
     fnames = ['data_RGCs.json']
 
     for fname in fnames:
