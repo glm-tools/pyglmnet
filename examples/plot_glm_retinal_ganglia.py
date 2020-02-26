@@ -65,7 +65,8 @@ from pyglmnet.datasets import fetch_RGCs_data
 
 with TemporaryDirectory(prefix="tmp_glm-tools") as temp_dir:
     dpath = fetch_RGCs_data(dpath=temp_dir, accept_rgcs_license=True)
-    rgcs_dataset = json.loads(open(op.join(dpath, 'data_RGCs.json'), 'r'))
+    with open(op.join(dpath, 'data_RGCs.json'), 'r') as f:
+        rgcs_dataset = json.loads(f.read())
 
 stim = np.array(rgcs_dataset['stim'])
 stim_times = np.array(rgcs_dataset['stim_times'])
@@ -121,7 +122,9 @@ plt.show()
 #
 # We can use ``scipy``'s function ``hankel`` to make our design matrix.
 
-Xdsgn = hankel(stim_padded[:-n_t_filt +1], stim[-n_t_filt:])
+n_t_filt = 25 # tweak this to see different results
+stim_padded = np.pad(stim, (n_t_filt - 1, 0))
+Xdsgn = hankel(stim_padded[0:-n_t_filt +1], stim[-n_t_filt:])
 
 plt.imshow(Xdsgn[:50, :],
            cmap='binary',
@@ -146,6 +149,8 @@ plt.show()
 # this may indicate that we have a problem (e.g., a mismatch between the
 # design matrix and binned spike counts.
 
+t_bins = np.arange(n_t + 1) * dt
+spikes_binned, _ = np.histogram(spike_time, t_bins)
 sta = Xdsgn.T.dot(spikes_binned) / n_spikes
 
 t_lag = dt * np.arange(-n_t_filt + 1, 1) # time bins for STA (in seconds)
@@ -200,33 +205,6 @@ glm_poisson.fit(Xdsgn, spikes_binned)
 spikes_pred_poissonGLM = glm_poisson.predict(Xdsgn)
 
 #############################################################################
-# **Putting all together**
-#
-# We are plotting the prediction of spike counts from linear Gaussian GLM, 
-# linear Gaussian GLM with offset and poisson prediction for one second.
-
-markerline, _, _ = plt.stem(t_sample, spikes_binned[sample_index])
-markerline.set_markerfacecolor('none')
-plt.plot(t_sample, spikes_pred_lgGLM_offset[sample_index],
-         color='gold', linewidth=2, label='lgGLM with offset')
-plt.plot(t_sample, spikes_pred_poissonGLM[sample_index],
-         color='green', linewidth=2, label='poissonGLM')
-plt.xlim([t_sample.min(), t_sample.max()])
-plt.title('Spike count prediction using Linear Gaussin GLM and Poisson GLM predictions')
-plt.ylabel('Binned Spike Counts')
-plt.legend()
-plt.show()
-
-# performance of the fitted models
-mse_lgGLM_offset = np.mean((spikes_binned - spikes_pred_lgGLM_offset)**2)  # mean squared error, with offset
-mse_poissonGLM = np.mean((spikes_binned - spikes_pred_poissonGLM)**2) # mean squared error, poissonGLM
-rss = np.mean((spikes_binned - np.mean(spikes_binned))**2) # squared error of spike train
-
-print('Training perf (R^2): lin-gauss GLM, w/ offset: {:.2f}'.format(1 - mse_lgGLM_offset / rss))
-print('Training perf (R^2): poisson GLM {:.2f}'.format(1 - mse_poissonGLM / rss))
-print('Training perf (R^2): Pyglmnet possion GLM {:.2f}'.format(glm_poisson.score(Xdsgn, spikes_binned)))
-
-#############################################################################
 # **Adding spikes history for predicting spike counts**
 #
 # We can even further predict the spikes by using the spikes history.
@@ -238,13 +216,11 @@ n_t_filt = 25 # same as before, stimulation history
 n_t_hist = 20 # spikes history
 
 # using both stimulation history and spikes history
-stim_padded = np.pad(stim, (n_t_filt - 1, 0))
 spikes_padded = np.pad(spikes_binned, (n_t_hist, 0))
 
 Xstim = hankel(stim_padded[:-n_t_filt +1], stim[-n_t_filt:])
 Xspikes = hankel(spikes_padded[:-n_t_hist], stim[-n_t_hist:])
-
-Xdsgn = np.hstack((Xstim, Xspikes)) # design matrix with spikes history
+Xdsgn_hist = np.hstack((Xstim, Xspikes)) # design matrix with spikes history
 
 # Now, we are ready to fit Poisson GLM with spikes history.
 # create possion GLM instance
@@ -255,8 +231,39 @@ glm_poisson_hist = GLM(distr='poisson',
                        reg_lambda=1e-7, eta=4.0)
 
 # fitting to a design matrix with spikes history
-glm_poisson_hist.fit(Xdsgn, spikes_binned)
+glm_poisson_hist.fit(Xdsgn_hist, spikes_binned)
 
 # predict spike counts
-spikes_pred_poissonGLM_hist = glm_poisson_hist.predict(Xdsgn)
-print('Training perf (R^2): Pyglmnet poisson GLM {:.2f}'.format(glm_poisson_hist.score(Xdsgn, spikes_binned)))
+spikes_pred_poissonGLM_hist = glm_poisson_hist.predict(Xdsgn_hist)
+
+#############################################################################
+# **Putting all together**
+#
+# We are plotting the prediction of spike counts from linear Gaussian GLM, 
+# linear Gaussian GLM with offset and poisson prediction for one second.
+
+markerline, _, _ = plt.stem(t_sample, spikes_binned[sample_index])
+markerline.set_markerfacecolor('none')
+plt.plot(t_sample, spikes_pred_lgGLM_offset[sample_index],
+         color='gold', linewidth=2, label='lgGLM with offset')
+plt.plot(t_sample, spikes_pred_poissonGLM[sample_index],
+         color='green', linewidth=2, label='poissonGLM')
+plt.plot(t_sample, spikes_pred_poissonGLM_hist[sample_index],
+         color='orange', linewidth=2, label='poissonGLM_hist')
+plt.xlim([t_sample.min(), t_sample.max()])
+plt.title('Spike count prediction using Linear Gaussin GLM and Poisson GLM predictions')
+plt.ylabel('Binned Spike Counts')
+plt.legend()
+plt.show()
+
+# performance of the fitted models
+mse_lgGLM_offset = np.mean((spikes_binned - spikes_pred_lgGLM_offset)**2)  # mean squared error, with offset
+mse_poissonGLM = np.mean((spikes_binned - spikes_pred_poissonGLM)**2) # mean squared error, poissonGLM
+mse_poissonGLM_hist = np.mean((spikes_binned - spikes_pred_poissonGLM_hist)**2) # mean squared error, poissonGLM
+rss = np.mean((spikes_binned - np.mean(spikes_binned))**2) # squared error of spike train
+
+print('Training perf (R^2): lin-gauss GLM, w/ offset: {:.2f}'.format(1 - mse_lgGLM_offset / rss))
+print('Training perf (R^2): poisson GLM {:.2f}'.format(1 - mse_poissonGLM / rss))
+print('Training perf (R^2): poisson GLM w/ spikes history {:.2f}'.format(1 - mse_poissonGLM_hist / rss))
+print('Training perf (R^2): Pyglmnet possion GLM {:.2f}'.format(glm_poisson.score(Xdsgn, spikes_binned)))
+print('Training perf (R^2): Pyglmnet poisson GLM w/ spikes history {:.2f}'.format(glm_poisson_hist.score(Xdsgn_hist, spikes_binned)))
