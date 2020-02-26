@@ -6,7 +6,7 @@ GLM for Spike Trains Prediction in Primate Retinal Ganglion Cells
 
 * Original tutorial adapted from Johnathan Pillow, Princeton University
 * Dataset provided by E.J. Chichilnisky, Stanford University
-* The dataset is granted by the original authors for only educational use
+* The dataset is granted by the original authors for educational use only
 * Please contact ``pillow@princeton.edu`` if using beyond its purposes
 
 First of all, we would like to thank Professor Johnathan Pillow
@@ -15,7 +15,7 @@ The original MATLAB and Python tutorial can be found from
 https://github.com/pillowlab/GLMspiketraintutorial.
 
 These data were collected by Valerie Uzzell in the lab of
-E.J. Chichilnisky at the Salk Institute.  For full information see
+E.J. Chichilnisky at the Salk Institute. For full information see
 Uzzell et al. (J Neurophys 04) [1]_, or Pillow et al. (J Neurosci 2005) [2]_.
 
 In this tutorial, we will demonstrate how to fit linear GLM and
@@ -249,8 +249,9 @@ spikes_pred_poissonGLM_hist = glm_poisson_hist.predict(Xdsgn_hist)
 #############################################################################
 # **Putting all together**
 #
-# We are plotting the prediction of spike counts from linear Gaussian GLM,
-# linear Gaussian GLM with offset and poisson prediction for one second.
+# We are plotting the prediction of spike counts using
+# linear Gaussian GLM with offset, Poisson GLM, and
+# Poisson GLM with spikes history for one second.
 
 markerline, _, _ = plt.stem(t_sample, spikes_binned[sample_index])
 markerline.set_markerfacecolor('none')
