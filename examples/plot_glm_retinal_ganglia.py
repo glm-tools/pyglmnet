@@ -15,7 +15,7 @@ https://github.com/pillowlab/GLMspiketraintutorial.
 
 These data were collected by Valerie Uzzell in the lab of
 E.J. Chichilnisky at the Salk Institute.  For full information see
-Uzzell et al. (J Neurophys 04), or Pillow et al. (J Neurosci 2005).
+Uzzell et al. (J Neurophys 04) [1]_, or Pillow et al. (J Neurosci 2005) [2]_.
 
 In this tutorial, we will demonstrate how to fit linear GLM and linear-nonlinear GLM 
 (a.k.a Poisson GLM) to predict the spike counts recorded from primate retinal ganglion cells.
@@ -30,8 +30,8 @@ References
 ----------
 .. [1] Uzzell, V. J., and E. J. Chichilnisky. "Precision of spike trains in primate
    retinal ganglion cells." Journal of Neurophysiology 92.2 (2004)
-.. [2] Pillow, Jonathan W., et al. `Prediction and decoding of retinal ganglion cell
-   responses with a probabilistic spiking model.` Journal of Neuroscience 25.47 (2005)
+.. [2] Pillow, Jonathan W., et al. "Prediction and decoding of retinal ganglion cell
+   responses with a probabilistic spiking model." Journal of Neuroscience 25.47 (2005)
 
 """
 
