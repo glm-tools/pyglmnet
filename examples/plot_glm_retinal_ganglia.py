@@ -9,8 +9,6 @@ GLM for Spike Trains Prediction in Primate Retinal Ganglion Cells
 * The dataset is granted by the original authors for educational use only
 * Please contact ``pillow@princeton.edu`` if using beyond its purposes
 
-First of all, we would like to thank Professor Johnathan Pillow
-and Professor E.J. Chichilnisky for sharing their tutorial dataset.
 The original MATLAB and Python tutorial can be found from
 https://github.com/pillowlab/GLMspiketraintutorial.
 
@@ -39,7 +37,7 @@ References
 
 """
 
-# Authors: Titipat Achakulvisut <my.titipat@gmail.com>
+# Authors: Jonathan Pillow <pillow@princeton.edu>
 # License: MIT
 
 ########################################################
