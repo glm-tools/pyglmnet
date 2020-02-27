@@ -23,7 +23,7 @@ is prohibited without written consent to the original authors.
 
 If you reference this dataset in your publications, please:
     1) acknowledge the authors: E.J. Chichilnisky and Jonathan Pillow
-    2) cite thier publications as indicated on the tutorial
+    2) cite the publications as indicated in the tutorial
 
 If you want to use it beyond the educational
 purposes or have further questions, please contact
