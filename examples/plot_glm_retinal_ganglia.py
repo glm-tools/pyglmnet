@@ -137,7 +137,9 @@ plt.show()
 ########################################################
 #
 # We can use ``scipy``'s function ``hankel`` to make our design matrix.
-# Design matrix can be created using the stimulation.
+# Design matrix :math:`X` can be created using the stimulation and its history.
+# Later in the tutorial, we will also incorporate spikes history into our
+# design matrix.
 
 n_t_filt = 25  # tweak this to see different results
 stim_padded = np.pad(stim, (n_t_filt - 1, 0))
@@ -160,7 +162,8 @@ plt.show()
 # thought of an underlying parameter
 # :math:`\beta_0, \beta` that control the spiking:
 # :math:`y = (\beta_0 + X \beta) \ + \epsilon` and
-# :math:`y \sim \text{Poiss}(\beta_0 + X \beta)`
+# :math:`y \sim \text{Poiss}(\beta_0 + X \beta)` where
+# :math:`X` is the stimulation and history of stimulation
 #
 # We can add an offset or a "constant" to our design matrix.
 # This can be done by concatenating a column of 1 to
@@ -203,7 +206,7 @@ spikes_pred_poissonGLM = glm_poisson.predict(Xdsgn)
 #############################################################################
 # **Adding spikes history for predicting spike counts**
 #
-# We can even further predict the spikes by using the spikes history.
+# We can even further predict the spikes by concatenating the spikes history.
 # **Note** the spike-history portion of the design
 # matrix had better be shifted so that we aren't allowed to use the spike
 # count on this time bin to predict itself!
