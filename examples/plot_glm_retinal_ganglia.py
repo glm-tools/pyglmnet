@@ -17,7 +17,7 @@ E.J. Chichilnisky at the Salk Institute. For full information see
 Uzzell et al. (J Neurophys 04) [1]_, or Pillow et al. (J Neurosci 2005) [2]_.
 
 In this tutorial, we will demonstrate how to fit linear GLM and
-linear-nonlinear GLM (a.k.a Poisson GLM) to predict the spike counts
+Poisson GLM to predict the spike counts
 recorded from primate retinal ganglion cells.
 The dataset contains spike responses from 2 ON and 2 OFF parasol
 retinal ganglion cells (RGCs) in primate retina, stimulated with
@@ -84,7 +84,7 @@ spike_times = [
 n_cells = len(spike_times)  # total number of cells
 dt = stim_times[1] - stim_times[0]  # time between the stimulation
 n_t = len(stim)  # total number of the stimulation
-f = 1. / dt  # frequency of the stimulation
+sfreq = 1. / dt  # frequency of the stimulation
 
 ########################################################
 #
@@ -94,6 +94,10 @@ f = 1. / dt  # frequency of the stimulation
 cell_idx = 2  # pick cell number 2 (ON cell)
 spike_time = spike_times[cell_idx]  # pick spike time to work with
 n_spikes = len(spike_time)  # number of spikes
+
+# bin the spikes
+t_bins = np.arange(n_t + 1) * dt
+spikes_binned, _ = np.histogram(spike_time, t_bins)
 
 print('Loaded RGC data: cell {}'.format(cell_idx))
 print('Number of stim frames: {:d} ({:.1f} minutes)'.
@@ -106,26 +110,34 @@ print('Number of spikes: {} (mean rate = {:.1f} Hz)\n'.
 sample_index = np.arange(120)
 t_sample = dt * sample_index
 
-plt.subplot(2, 1, 1)
+plt.subplot(3, 1, 1)
 plt.step(t_sample, stim[sample_index])
-plt.title('Raw Stimulus (full field flicker)'
-          ' and corresponding spike times')
+plt.xlim([t_sample.min(), t_sample.max()])
+plt.title('Raw Stimulus, spikes, and'
+          ' spike counts')
 plt.ylabel('Stimulation Intensity')
 
-plt.subplot(2, 1, 2)
+plt.subplot(3, 1, 2)
 tspplot = spike_time[(spike_time >= t_sample.min()) &
                      (spike_time < t_sample.max())]
 plt.stem(spike_time[sample_index],
          [1] * len(spike_time[sample_index]))
 plt.xlim([t_sample.min(), t_sample.max()])
 plt.ylim([0, 2])
+plt.ylabel('Spikes')
+
+plt.subplot(3, 1, 3)
+markerline, _, _ = plt.stem(t_sample, spikes_binned[sample_index])
+markerline.set_markerfacecolor('none')
+plt.xlim([t_sample.min(), t_sample.max()])
 plt.xlabel('Time (s)')
-plt.ylabel('Spikes (0 or 1)')
+plt.ylabel('Binned Spike counts')
 plt.show()
 
 ########################################################
 #
 # We can use ``scipy``'s function ``hankel`` to make our design matrix.
+# Design matrix can be created using the stimulation.
 
 n_t_filt = 25  # tweak this to see different results
 stim_padded = np.pad(stim, (n_t_filt - 1, 0))
@@ -139,31 +151,6 @@ plt.xlabel('lags before spike time')
 plt.ylabel('time bin of response')
 plt.title('Sample first 50 rows of design'
           ' matrix created using Hankel')
-plt.colorbar()
-plt.show()
-
-########################################################
-# **Compute Spike-Triggered Average (STA)**
-#
-# When the stimulus is Gaussian white noise, the STA provides an unbiased
-# estimator for the filter in a GLM / LNP model (as long as the nonlinearity
-# results in an STA whose expectation is not zero)
-#
-# It's useful to visualize the STA (even if your stimuli are
-# not white noise), just because if we don't see any kind of structure then
-# this may indicate that we have a problem (e.g., a mismatch between the
-# design matrix and binned spike counts.
-
-t_bins = np.arange(n_t + 1) * dt
-spikes_binned, _ = np.histogram(spike_time, t_bins)
-sta = Xdsgn.T.dot(spikes_binned) / n_spikes
-
-t_lag = dt * np.arange(-n_t_filt + 1, 1)  # time bins for STA (in seconds)
-plt.plot(t_lag, t_lag * 0, 'k--')
-plt.plot(t_lag, sta, 'bo-')
-plt.title('Spike-Triggered Average (STA)')
-plt.xlabel('Time before spike (sec)')
-plt.xlim([t_lag.min(), t_lag.max()])
 plt.show()
 
 ########################################################
@@ -171,9 +158,9 @@ plt.show()
 #
 # For a general linear model, an observed spikes can be
 # thought of an underlying parameter
-# :math:`\theta` that control the spike output:
-# :math:`y = \vec{\theta} \cdot \vec{x} + \epsilon` and
-# :math:`y \sim \text{Poiss}(\vec{\theta} \cdot \vec{x})`
+# :math:`\beta_0, \beta` that control the spiking:
+# :math:`y = (\beta_0 + X \beta) \ + \epsilon` and
+# :math:`y \sim \text{Poiss}(\beta_0 + X \beta)`
 #
 # We can add an offset or a "constant" to our design matrix.
 # This can be done by concatenating a column of 1 to
@@ -181,6 +168,7 @@ plt.show()
 
 Xdsgn_offset = np.hstack((np.ones((n_t, 1)), Xdsgn))
 
+# compute whitened spike-triggered average (STA)
 wsta_offset = inv(Xdsgn_offset.T @ Xdsgn_offset)\
     @ Xdsgn_offset.T.dot(spikes_binned)
 
@@ -188,13 +176,13 @@ const, wsta_offset = wsta_offset[0], wsta_offset[1:]
 spikes_pred_lgGLM_offset = const + (Xdsgn @ wsta_offset)
 
 ########################################################
-# **Fitting and predicting with a Poisson GLM**
+# **Fitting and predicting with a Gaussian GLM**
 #
 # We can also assume that their is a non-linear function governing
 # the underlying the firing patterns. Concreately, we can write down as
-# :math:`y = f(\vec{\theta} \cdot \vec{x}) + \epsilon`, and
-# :math:`y \sim \text{Poiss}(\vec{\theta} \cdot \vec{x})`.
-# We call :math:`f^{-1}` a "link function".
+# :math:`y = q(\beta_0 + X \beta) + \epsilon`, and
+# :math:`y \sim \text{Poiss}(\beta_0 + X \beta)`.
+# We call :math:`q^{-1}` a "link function".
 # Here, we can use Pyglmnet's `GLM` to predict the parameters.
 
 # create possion GLM instance
