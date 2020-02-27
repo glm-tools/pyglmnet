@@ -129,6 +129,9 @@ def fetch_RGCs_data(dpath, accept_rgcs_license=False):
     ----------
     dpath: str
         specifies path to which the data files should be downloaded.
+    accept_rgcs_license: bool
+        specify to true to accept the license to use the dataset
+        default: False
 
     Returns
     -------
