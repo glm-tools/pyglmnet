@@ -13,8 +13,8 @@ Poisson: `softplus`
 
 .. math::
 
-    z_i = \beta_0 + \sum_j \beta_j x_{ij} \\
-    \mu_i = \log( 1 + \exp(z_i) )
+    z_i &= \beta_0 + \sum_j \beta_j x_{ij} \\
+    \mu_i &= \log( 1 + \exp(z_i) )
 
 **Log-likelihood function**
 
@@ -26,9 +26,9 @@ Poisson: `softplus`
 
 .. math::
 
-    J = \frac{1}{n}\sum_i \left\{ \log( 1 + \exp( \beta_0 + \sum_j \beta_j x_{ij} ) ) \right\} \\
-    - \frac{1}{n}\sum_i \left\{ y_i \log( \log( 1 + \exp(\beta_0 + \sum_j \beta_j x_{ij} ) ) ) \right\} \\
-    + \lambda (1-\alpha) \frac{1}{2} \sum_j \beta_j^2
+    J &= \frac{1}{n}\sum_i \left\{ \log( 1 + \exp( \beta_0 + \sum_j \beta_j x_{ij} ) ) \right\} \\
+    &- \frac{1}{n}\sum_i \left\{ y_i \log( \log( 1 + \exp(\beta_0 + \sum_j \beta_j x_{ij} ) ) ) \right\} \\
+    &+ \lambda (1-\alpha) \frac{1}{2} \sum_j \beta_j^2
 
 **Gradient**
 
@@ -263,8 +263,8 @@ Gamma
 
 .. math::
 
-    z_i = \beta_0 + \sum_j \beta_j x_{ij} \\
-    \mu_i = \log(1 + \exp(z_i))
+    z_i &= \beta_0 + \sum_j \beta_j x_{ij} \\
+    \mu_i &= \log(1 + \exp(z_i))
 
 **Log-likelihood function**
 
