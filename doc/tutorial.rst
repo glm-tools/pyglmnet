@@ -167,12 +167,10 @@ To calculate the gradients of the cost function with respect to :math:`\beta_0` 
 
 .. math::
 
-     \begin{eqnarray}
-         J(\beta_0, \beta) &= \sum_i \bigg\{ \log(1 + \exp(\beta_0 + \beta^T x_i))\\
-           & - y_i \log(\log(1 + \exp(\beta_0 + \beta^T x_i)))\bigg\}\\
-           & + \lambda(1 - \alpha)\frac{1}{2} \|\beta\|^2_{\mathcal{l_2}}
-           + \lambda\alpha\|\beta\|_{\mathcal{l_1}}
-     \end{eqnarray}
+    J(\beta_0, \beta) &= \sum_i \bigg\{ \log(1 + \exp(\beta_0 + \beta^T x_i))\\
+    &- y_i \log(\log(1 + \exp(\beta_0 + \beta^T x_i)))\bigg\}\\
+    &+ \lambda(1 - \alpha)\frac{1}{2} \|\beta\|^2_{\mathcal{l_2}}
+    + \lambda\alpha\|\beta\|_{\mathcal{l_1}}
 
 
 Since we will apply coordinate descent, let's rewrite this cost in terms of each
@@ -180,11 +178,9 @@ scalar parameter :math:`\beta_j`
 
 .. math::
 
-     \begin{eqnarray}
-         J(\beta_0, \beta) &= \sum_i \bigg\{ \log(1 + \exp(\beta_0 + \sum_j \beta_j x_{ij}))
-         & - y_i \log(\log(1 + \exp(\beta_0 + \sum_j \beta_j x_{ij})))\bigg\}\\
-         & + \lambda(1-\alpha)\frac{1}{2} \sum_j \beta_j^2 + \lambda\alpha\sum_j \mid\beta_j\mid
-     \end{eqnarray}
+    J(\beta_0, \beta) &= \sum_i \bigg\{ \log(1 + \exp(\beta_0 + \sum_j \beta_j x_{ij}))
+    &- y_i \log(\log(1 + \exp(\beta_0 + \sum_j \beta_j x_{ij})))\bigg\}\\
+    &+ \lambda(1-\alpha)\frac{1}{2} \sum_j \beta_j^2 + \lambda\alpha\sum_j \mid\beta_j\mid
 
 Let's take the derivatives of some big expressions using chain rule.
 Define :math:`z_i = \beta_0 + \sum_j \beta_j x_{ij}`.
@@ -193,19 +189,17 @@ For the nonlinearity in the first term :math:`y = q(z) = \log(1+e^{z(\theta)})`,
 
 .. math::
 
-     \begin{eqnarray}
-     \frac{\partial y}{\partial \theta} &= \frac{\partial q}{\partial z}\frac{\partial z}{\partial \theta}\\
-     & = \frac{e^z}{1+e^z}\frac{\partial z}{\partial \theta}\\
-     & = \sigma(z)\frac{\partial z}{\partial \theta}
-     \end{eqnarray}
+    \frac{\partial y}{\partial \theta} &= \frac{\partial q}{\partial z}\frac{\partial z}{\partial \theta}\\
+    &= \frac{e^z}{1+e^z}\frac{\partial z}{\partial \theta}\\
+    &= \sigma(z)\frac{\partial z}{\partial \theta}
 
 For the nonlinearity in the second term :math:`y = \log(q(z)) = \log(\log(1+e^{z(\theta)}))`,
 
 .. math::
 
      \begin{eqnarray}
-     \frac{\partial y}{\partial \theta} & = \frac{1}{q(z)}\frac{\partial q}{\partial z}\frac{\partial z}{\partial \theta}\\
-     & = \frac{\sigma(z)}{q(z)}\frac{\partial z}{\partial \theta}
+     \frac{\partial y}{\partial \theta} &= \frac{1}{q(z)}\frac{\partial q}{\partial z}\frac{\partial z}{\partial \theta}\\
+     &= \frac{\sigma(z)}{q(z)}\frac{\partial z}{\partial \theta}
      \end{eqnarray}
 
 where :math:`\dot q(z)` happens to be be the sigmoid function
@@ -217,13 +211,12 @@ where :math:`\dot q(z)` happens to be be the sigmoid function
 Putting it all together we have:
 
 .. math::
-
-     \frac{\partial J}{\partial \beta_0} = \sum_i \sigma(z_i) - \sum_i y_i\frac{\sigma(z_i)}{q(z_i)}
-
-.. math::
-
-     \frac{\partial J}{\partial \beta_j} = \sum_i \sigma(z_i) x_{ij} - \sum_i y_i \frac{\sigma(z_i)}{q(z_i)}x_{ij}
+      
+    \begin{eqnarray}
+     \frac{\partial J}{\partial \beta_0} &= \sum_i \sigma(z_i) - \sum_i y_i\frac{\sigma(z_i)}{q(z_i)} \\
+     \frac{\partial J}{\partial \beta_j} &= \sum_i \sigma(z_i) x_{ij} - \sum_i y_i \frac{\sigma(z_i)}{q(z_i)}x_{ij}
      + \lambda(1-\alpha)\beta_j + \lambda\alpha \text{sgn}(\beta_j)
+    \end{eqnarray}
 
 Let's define these gradients:
 
@@ -265,8 +258,8 @@ Let's use calculus again to compute these diagonal terms. Recall that:
 .. math::
 
      \begin{eqnarray}
-     \dot q(z) & = \sigma(z)\\
-     \dot\sigma(z) & = \sigma(z)(1-\sigma(z))
+     \dot q(z) &= \sigma(z)\\
+     \dot\sigma(z) &= \sigma(z)(1-\sigma(z))
      \end{eqnarray}
 
 Using these, and applying the product rule
@@ -278,15 +271,11 @@ Using these, and applying the product rule
 Plugging all these in, we get
 
 .. math::
-     \frac{\partial^2 J}{\partial \beta_0^2} = \sum_i \sigma(z_i)(1 - \sigma(z_i)) - \sum_i y_i \bigg\{ \frac{\sigma(z_i) (1 - \sigma(z_i))}{q(z_i)} - \frac{\sigma(z_i)}{q(z_i)^2} \bigg\}
 
-.. math::
-
-     \begin{eqnarray}
-     \frac{\partial^2 J}{\partial \beta_j^2} & = \sum_i \sigma(z_i)(1 - \sigma(z_i)) x_{ij}^2 \\
-     & - \sum_i y_i \bigg\{ \frac{\sigma(z_i) (1 - \sigma(z_i))}{q(z_i)} \\
-     & - \frac{\sigma(z_i)}{q(z_i)^2} \bigg\}x_{ij}^2 + \lambda(1-\alpha)
-     \end{eqnarray}
+    \frac{\partial^2 J}{\partial \beta_0^2} &= \sum_i \sigma(z_i)(1 - \sigma(z_i)) - \sum_i y_i \bigg\{ \frac{\sigma(z_i) (1 - \sigma(z_i))}{q(z_i)} - \frac{\sigma(z_i)}{q(z_i)^2} \bigg\} \\
+    \frac{\partial^2 J}{\partial \beta_j^2} &= \sum_i \sigma(z_i)(1 - \sigma(z_i)) x_{ij}^2 \\
+    &- \sum_i y_i \bigg\{ \frac{\sigma(z_i) (1 - \sigma(z_i))}{q(z_i)} \\
+    &- \frac{\sigma(z_i)}{q(z_i)^2} \bigg\}x_{ij}^2 + \lambda(1-\alpha)
 
 
 .. code-block:: python
@@ -324,10 +313,8 @@ Let's say only the :math:`k^{th}` parameter is updated at time step :math:`t`.
 
 .. math::
 
-     \begin{eqnarray}
-         \beta_k^{t} & = \beta_k^{t-1} - (h_k^{t-1})^{-1} \tilde{g}_k^{t-1} \\
-         \beta_j^{t} & = \beta_j^{t-1}, \forall j \neq k
-     \end{eqnarray}
+    \beta_k^{t} &= \beta_k^{t-1} - (h_k^{t-1})^{-1} \tilde{g}_k^{t-1} \\
+    \beta_j^{t} &= \beta_j^{t-1}, \forall j \neq k
 
 In practice, while implementing the update step, we check to see
 if :math:`h_k^{t-1}` is above a tolerance so that its inverse does not explode.
@@ -369,12 +356,8 @@ one parameter at a time. Let's calculate how to make these updates.
 
 .. math::
 
-    z_i^{t} = z_i^{t-1} - \beta_k^{t-1}x_{ik} + \beta_k^{t}x_{ik}
-
-.. math::
-
-    z_i^{t} = z_i^{t-1} - (h_k^{t-1})^{-1} \tilde{g}_k^{t-1}x_{ik}
-
+    z_i^{t} &= z_i^{t-1} - \beta_k^{t-1}x_{ik} + \beta_k^{t}x_{ik}
+    z_i^{t} &= z_i^{t-1} - (h_k^{t-1})^{-1} \tilde{g}_k^{t-1}x_{ik}
 
 **Gradient update**
 
@@ -388,10 +371,8 @@ If :math:`k > 0`,
 
 .. math::
 
-     \begin{eqnarray}
-         \tilde{g}_{k+1}^t & = \sum_i \sigma(z_i^t) x_{i,k+1} - \sum_i y_i \frac{\sigma(z_i^t)}{q(z_i^t)} x_{i,k+1}
-           & + \lambda(1-\alpha)\beta_{k+1}^t
-     \end{eqnarray}
+    \tilde{g}_{k+1}^t & = \sum_i \sigma(z_i^t) x_{i,k+1} - \sum_i y_i \frac{\sigma(z_i^t)}{q(z_i^t)} x_{i,k+1}
+    & + \lambda(1-\alpha)\beta_{k+1}^t
 
 .. code-block:: python
 
@@ -421,11 +402,9 @@ If :math:`k > 0`,
 
 .. math::
 
-    \begin{eqnarray}
-    h_{k+1}^t & = \sum_i \sigma(z_i^t)(1 - \sigma(z_i^t)) x_{i,k+1}^2 \\
-    & - \sum_i y_i \bigg\{ \frac{\sigma(z_i^t) (1 - \sigma(z_i^t))}{q(z_i^t)}
-    & - \frac{\sigma(z_i^t)}{q(z_i^t)^2} \bigg\}x_{i,k+1}^2 + \lambda(1-\alpha)
-    \end{eqnarray}
+    h_{k+1}^t &= \sum_i \sigma(z_i^t)(1 - \sigma(z_i^t)) x_{i,k+1}^2 \\
+    &- \sum_i y_i \bigg\{ \frac{\sigma(z_i^t) (1 - \sigma(z_i^t))}{q(z_i^t)}
+    &- \frac{\sigma(z_i^t)}{q(z_i^t)^2} \bigg\}x_{i,k+1}^2 + \lambda(1-\alpha)
 
 .. code-block:: python
 
