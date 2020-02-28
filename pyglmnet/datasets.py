@@ -119,7 +119,7 @@ def fetch_community_crime_data():
     return X, y
 
 
-def fetch_RGCs_data(dpath, accept_rgcs_license=False):
+def fetch_rgc_data(dpath, accept_rgcs_license=False):
     """
     Downloads data for spike trains prediction in retinal ganglia cells.
     Please see https://github.com/glm-tools/datasets/RGCs/ for permission

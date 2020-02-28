@@ -38,6 +38,7 @@ References
 """
 
 # Authors: Jonathan Pillow <pillow@princeton.edu>
+#          Titipat Achakulvisut <my.titipat@gmail.com>
 # License: MIT
 
 ########################################################
@@ -48,7 +49,7 @@ import os.path as op
 import json
 
 import numpy as np
-from numpy.linalg import inv
+from numpy.linalg import pinv
 from scipy.linalg import hankel
 
 from pyglmnet import GLM
@@ -63,10 +64,10 @@ from tempfile import TemporaryDirectory
 # ``stim_times`` (time of the stimulation), and
 # ``spike_times`` (recorded time of the spikes)
 
-from pyglmnet.datasets import fetch_RGCs_data
+from pyglmnet.datasets import fetch_rgc_data
 
 with TemporaryDirectory(prefix="tmp_glm-tools") as temp_dir:
-    dpath = fetch_RGCs_data(dpath=temp_dir, accept_rgcs_license=True)
+    dpath = fetch_rgc_data(dpath=temp_dir, accept_rgcs_license=True)
     with open(op.join(dpath, 'data_RGCs.json'), 'r') as f:
         rgcs_dataset = json.loads(f.read())
 
@@ -75,7 +76,7 @@ stim_times = np.array(rgcs_dataset['stim_times'])
 
 n_cells = len(rgcs_dataset['spike_times'])
 dt = stim_times[1] - stim_times[0]  # time between the stimulation
-n_t = len(stim)  # total number of the stimulation
+n_times = len(stim)  # total number of the stimulation
 sfreq = 1. / dt  # frequency of the stimulation
 
 ########################################################
@@ -89,15 +90,15 @@ spike_time = np.array(spike_time)
 n_spikes = len(spike_time)  # number of spikes
 
 # bin the spikes
-t_bins = np.arange(n_t + 1) * dt
+t_bins = np.arange(n_times + 1) * dt
 spikes_binned, _ = np.histogram(spike_time, t_bins)
 
 print('Loaded RGC data: cell {}'.format(cell_idx))
 print('Number of stim frames: {:d} ({:.1f} minutes)'.
-      format(n_t, n_t * dt / 60))
+      format(n_times, n_times * dt / 60))
 print('Time bin size: {:.1f} ms'.format(dt * 1000))
 print('Number of spikes: {} (mean rate = {:.1f} Hz)\n'.
-      format(n_spikes, n_spikes / n_t * 60))
+      format(n_spikes, n_spikes / n_times * 60))
 
 ########################################################
 #
@@ -165,14 +166,13 @@ plt.show()
 # This can be done by concatenating a column of 1 to
 # our previously created design matrix.
 
-Xdsgn_offset = np.hstack((np.ones((n_t, 1)), Xdsgn))
+Xdsgn_offset = np.hstack((np.ones((n_times, 1)), Xdsgn))
 
 # compute whitened spike-triggered average (STA)
-wsta_offset = inv(Xdsgn_offset.T @ Xdsgn_offset)\
-    @ Xdsgn_offset.T.dot(spikes_binned)
+wsta_offset = pinv(Xdsgn_offset) @ spikes_binned
 
-const, wsta_offset = wsta_offset[0], wsta_offset[1:]
-spikes_pred_lgGLM_offset = const + (Xdsgn @ wsta_offset)
+# predict spike counts
+spikes_pred_lgGLM_offset = Xdsgn_offset @ wsta_offset
 
 ########################################################
 # **Fitting and predicting with a Gaussian GLM**
@@ -252,18 +252,10 @@ plt.show()
 # performance of the fitted models
 mse_lgGLM_offset = np.mean((
     spikes_binned - spikes_pred_lgGLM_offset) ** 2)
-mse_poissonGLM = np.mean((
-    spikes_binned - spikes_pred_poissonGLM) ** 2)
-mse_poissonGLM_hist = np.mean((
-    spikes_binned - spikes_pred_poissonGLM_hist) ** 2)
 rss = np.mean((spikes_binned - np.mean(spikes_binned)) ** 2)
 
 print('Training perf (R^2): lin-gauss GLM, w/ offset: {:.2f}'
       .format(1 - mse_lgGLM_offset / rss))
-print('Training perf (R^2): poisson GLM {:.2f}'
-      .format(1 - mse_poissonGLM / rss))
-print('Training perf (R^2): poisson GLM w/ spikes history {:.2f}'
-      .format(1 - mse_poissonGLM_hist / rss))
 print('Training perf (R^2): Pyglmnet possion GLM {:.2f}'
       .format(glm_poisson.score(Xdsgn, spikes_binned)))
 print('Training perf (R^2): Pyglmnet poisson GLM w/ spikes history {:.2f}'
