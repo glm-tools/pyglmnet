@@ -33,6 +33,7 @@ extensions = [
     'numpydoc',
     'sphinx.ext.autosummary',
     'sphinx.ext.doctest',
+    'sphinx.ext.intersphinx',
     'sphinx_gallery.gen_gallery'
 ]
 
@@ -292,7 +293,15 @@ texinfo_documents = [
 # If true, do not generate a @detailmenu in the "Top" node's menu.
 #texinfo_no_detailmenu = False
 
+intersphinx_mapping = {
+    'python': ('https://docs.python.org/3', None),
+    'numpy': ('https://numpy.org/devdocs', None),
+    'scipy': ('https://scipy.github.io/devdocs', None),
+    'matplotlib': ('https://matplotlib.org', None)
+}
+
 sphinx_gallery_conf = {
     'examples_dirs': '../examples',
-    'gallery_dirs': 'auto_examples'
+    'gallery_dirs': 'auto_examples',
+    'reference_url': dict(pyglmnet=None)
 }
