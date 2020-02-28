@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-=================================================================
-GLM for Spike Trains Prediction in Primate Retinal Ganglion Cells
-=================================================================
+================================================================
+GLM for Spike Train Prediction in Primate Retinal Ganglion Cells
+================================================================
 
 * Original tutorial adapted from Johnathan Pillow, Princeton University
 * Dataset provided by E.J. Chichilnisky, Stanford University
@@ -14,7 +14,7 @@ https://github.com/pillowlab/GLMspiketraintutorial.
 
 These data were collected by Valerie Uzzell in the lab of
 E.J. Chichilnisky at the Salk Institute. For full information see
-Uzzell et al. (J Neurophys 04) [1]_, or Pillow et al. (J Neurosci 2005) [2]_.
+Uzzell et al. [1]_, or Pillow et al. [2]_.
 
 In this tutorial, we will demonstrate how to fit linear GLM and
 Poisson GLM to predict the spike counts
@@ -73,15 +73,7 @@ with TemporaryDirectory(prefix="tmp_glm-tools") as temp_dir:
 stim = np.array(rgcs_dataset['stim'])
 stim_times = np.array(rgcs_dataset['stim_times'])
 
-# spike times for all 4 cells (0-1 are OFF cells, 2-3 are ON cells)
-spike_times = [
-    np.array(rgcs_dataset['spike_times']['cell_0']),
-    np.array(rgcs_dataset['spike_times']['cell_1']),
-    np.array(rgcs_dataset['spike_times']['cell_2']),
-    np.array(rgcs_dataset['spike_times']['cell_3']),
-]
-
-n_cells = len(spike_times)  # total number of cells
+n_cells = len(rgcs_dataset['spike_times'])
 dt = stim_times[1] - stim_times[0]  # time between the stimulation
 n_t = len(stim)  # total number of the stimulation
 sfreq = 1. / dt  # frequency of the stimulation
@@ -92,7 +84,8 @@ sfreq = 1. / dt  # frequency of the stimulation
 # In this case, we will pick cell number 2 (ON cell).
 
 cell_idx = 2  # pick cell number 2 (ON cell)
-spike_time = spike_times[cell_idx]  # pick spike time to work with
+spike_time = rgcs_dataset['spike_times']['cell_%d' % cell_idx]
+spike_time = np.array(spike_time)
 n_spikes = len(spike_time)  # number of spikes
 
 # bin the spikes
@@ -106,32 +99,34 @@ print('Time bin size: {:.1f} ms'.format(dt * 1000))
 print('Number of spikes: {} (mean rate = {:.1f} Hz)\n'.
       format(n_spikes, n_spikes / n_t * 60))
 
-# sample indices for visualization
-sample_index = np.arange(120)
-t_sample = dt * sample_index
+########################################################
+#
+# Visualize first 120 samples
+sample_idx = np.arange(120)
+t_sample = dt * sample_idx
+tmax = t_sample.max()
 
-plt.subplot(3, 1, 1)
-plt.step(t_sample, stim[sample_index])
-plt.xlim([t_sample.min(), t_sample.max()])
-plt.title('Raw Stimulus, spikes, and'
-          ' spike counts')
-plt.ylabel('Stimulation Intensity')
+fig, axes = plt.subplots(3, 1, sharex=True)
+axes[0].step(t_sample, stim[sample_idx])
+axes[0].set_xlim([0., tmax])
+axes[0].set_title('Raw Stimulus, spikes, and'
+                  ' spike counts')
+axes[0].set_ylabel('Stimulation Intensity')
 
-plt.subplot(3, 1, 2)
 tspplot = spike_time[(spike_time >= t_sample.min()) &
                      (spike_time < t_sample.max())]
-plt.stem(spike_time[sample_index],
-         [1] * len(spike_time[sample_index]))
-plt.xlim([t_sample.min(), t_sample.max()])
-plt.ylim([0, 2])
-plt.ylabel('Spikes')
-
-plt.subplot(3, 1, 3)
-markerline, _, _ = plt.stem(t_sample, spikes_binned[sample_index])
+markerline, _, _ = axes[1].stem(spike_time[sample_idx],
+                                [1] * len(spike_time[sample_idx]))
 markerline.set_markerfacecolor('none')
-plt.xlim([t_sample.min(), t_sample.max()])
-plt.xlabel('Time (s)')
-plt.ylabel('Binned Spike counts')
+axes[1].set_xlim([0., tmax])
+axes[1].set_ylim([0, 2])
+axes[1].set_ylabel('Spikes')
+
+markerline, _, _ = axes[2].stem(t_sample, spikes_binned[sample_idx])
+markerline.set_markerfacecolor('none')
+axes[2].set_xlim([0., tmax])
+axes[2].set_xlabel('Time (s)')
+axes[2].set_ylabel('Binned Spike counts')
 plt.show()
 
 ########################################################
@@ -145,6 +140,7 @@ n_t_filt = 25  # tweak this to see different results
 stim_padded = np.pad(stim, (n_t_filt - 1, 0))
 Xdsgn = hankel(stim_padded[0: -n_t_filt + 1], stim[-n_t_filt:])
 
+plt.figure()
 plt.imshow(Xdsgn[:50, :],
            cmap='binary',
            aspect='auto',
@@ -185,31 +181,27 @@ spikes_pred_lgGLM_offset = const + (Xdsgn @ wsta_offset)
 # the underlying the firing patterns. Concreately, we can write down as
 # :math:`y = q(\beta_0 + X \beta) + \epsilon`, and
 # :math:`y \sim \text{Poiss}(\beta_0 + X \beta)`.
-# We call :math:`q^{-1}` a "link function".
-# Here, we can use Pyglmnet's `GLM` to predict the parameters.
+# Here we use :math:`exp()` as the inverse link function :math:`q`.
+# We can use the :class:`GLM` class to predict the parameters.
 
 # create possion GLM instance
 glm_poisson = GLM(distr='poisson',
-                  verbose=False, alpha=0.05,
-                  max_iter=1000, learning_rate=0.2,
+                  alpha=0.05,
+                  learning_rate=1.0,
                   score_metric='pseudo_R2',
-                  reg_lambda=1e-7, eta=4.0)
-
-# fitting to a design matrix
+                  reg_lambda=1e-7)
 glm_poisson.fit(Xdsgn, spikes_binned)
-
-# predict spike counts using Poisson GLM
-# alternatively, you can also use
-# np.exp(glm_poisson.beta0_ + X.dot(glm_poisson.beta_))
 spikes_pred_poissonGLM = glm_poisson.predict(Xdsgn)
 
 #############################################################################
 # **Adding spikes history for predicting spike counts**
 #
 # We can even further predict the spikes by concatenating the spikes history.
-# **Note** the spike-history portion of the design
-# matrix had better be shifted so that we aren't allowed to use the spike
-# count on this time bin to predict itself!
+#
+# .. note::
+#    The spike-history portion of the design
+#    matrix had better be shifted so that we aren't allowed to
+#    use the spike count on this time bin to predict itself!
 
 n_t_filt = 25  # same as before, stimulation history
 n_t_hist = 20  # spikes history
@@ -223,11 +215,10 @@ Xdsgn_hist = np.hstack((Xstim, Xspikes))  # design matrix with spikes history
 
 # Now, we are ready to fit Poisson GLM with spikes history.
 # create possion GLM instance
-glm_poisson_hist = GLM(distr='poisson',
-                       verbose=False, alpha=0.05,
-                       max_iter=1000, learning_rate=0.2,
+glm_poisson_hist = GLM(distr='poisson', alpha=0.05,
+                       learning_rate=1.0,
                        score_metric='pseudo_R2',
-                       reg_lambda=1e-7, eta=4.0)
+                       reg_lambda=1e-7)
 
 # fitting to a design matrix with spikes history
 glm_poisson_hist.fit(Xdsgn_hist, spikes_binned)
@@ -242,15 +233,16 @@ spikes_pred_poissonGLM_hist = glm_poisson_hist.predict(Xdsgn_hist)
 # linear Gaussian GLM with offset, Poisson GLM, and
 # Poisson GLM with spikes history for one second.
 
-markerline, _, _ = plt.stem(t_sample, spikes_binned[sample_index])
+plt.figure()
+markerline, _, _ = plt.stem(t_sample, spikes_binned[sample_idx])
 markerline.set_markerfacecolor('none')
-plt.plot(t_sample, spikes_pred_lgGLM_offset[sample_index],
+plt.plot(t_sample, spikes_pred_lgGLM_offset[sample_idx],
          color='gold', linewidth=2, label='lgGLM with offset')
-plt.plot(t_sample, spikes_pred_poissonGLM[sample_index],
+plt.plot(t_sample, spikes_pred_poissonGLM[sample_idx],
          color='green', linewidth=2, label='poissonGLM')
-plt.plot(t_sample, spikes_pred_poissonGLM_hist[sample_index],
+plt.plot(t_sample, spikes_pred_poissonGLM_hist[sample_idx],
          color='red', linewidth=2, label='poissonGLM_hist')
-plt.xlim([t_sample.min(), t_sample.max()])
+plt.xlim([0., tmax])
 plt.title('Spike count prediction')
 plt.xlabel('Time (sec)')
 plt.ylabel('Binned Spike Counts')
