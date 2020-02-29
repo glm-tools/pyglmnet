@@ -197,10 +197,8 @@ For the nonlinearity in the second term :math:`y = \log(q(z)) = \log(\log(1+e^{z
 
 .. math::
 
-     \begin{eqnarray}
-     \frac{\partial y}{\partial \theta} &= \frac{1}{q(z)}\frac{\partial q}{\partial z}\frac{\partial z}{\partial \theta}\\
-     &= \frac{\sigma(z)}{q(z)}\frac{\partial z}{\partial \theta}
-     \end{eqnarray}
+    \frac{\partial y}{\partial \theta} &= \frac{1}{q(z)}\frac{\partial q}{\partial z}\frac{\partial z}{\partial \theta}\\
+    &= \frac{\sigma(z)}{q(z)}\frac{\partial z}{\partial \theta}
 
 where :math:`\dot q(z)` happens to be be the sigmoid function
 
@@ -211,12 +209,10 @@ where :math:`\dot q(z)` happens to be be the sigmoid function
 Putting it all together we have:
 
 .. math::
-      
-    \begin{eqnarray}
-     \frac{\partial J}{\partial \beta_0} &= \sum_i \sigma(z_i) - \sum_i y_i\frac{\sigma(z_i)}{q(z_i)} \\
-     \frac{\partial J}{\partial \beta_j} &= \sum_i \sigma(z_i) x_{ij} - \sum_i y_i \frac{\sigma(z_i)}{q(z_i)}x_{ij}
-     + \lambda(1-\alpha)\beta_j + \lambda\alpha \text{sgn}(\beta_j)
-    \end{eqnarray}
+
+    \frac{\partial J}{\partial \beta_0} &= \sum_i \sigma(z_i) - \sum_i y_i\frac{\sigma(z_i)}{q(z_i)} \\
+    \frac{\partial J}{\partial \beta_j} &= \sum_i \sigma(z_i) x_{ij} - \sum_i y_i \frac{\sigma(z_i)}{q(z_i)}x_{ij}
+    + \lambda(1-\alpha)\beta_j + \lambda\alpha \text{sgn}(\beta_j)
 
 Let's define these gradients:
 
@@ -257,10 +253,8 @@ Let's use calculus again to compute these diagonal terms. Recall that:
 
 .. math::
 
-     \begin{eqnarray}
-     \dot q(z) &= \sigma(z)\\
-     \dot\sigma(z) &= \sigma(z)(1-\sigma(z))
-     \end{eqnarray}
+    \dot q(z) &= \sigma(z)\\
+    \dot\sigma(z) &= \sigma(z)(1-\sigma(z))
 
 Using these, and applying the product rule
 
@@ -274,8 +268,7 @@ Plugging all these in, we get
 
     \frac{\partial^2 J}{\partial \beta_0^2} &= \sum_i \sigma(z_i)(1 - \sigma(z_i)) - \sum_i y_i \bigg\{ \frac{\sigma(z_i) (1 - \sigma(z_i))}{q(z_i)} - \frac{\sigma(z_i)}{q(z_i)^2} \bigg\} \\
     \frac{\partial^2 J}{\partial \beta_j^2} &= \sum_i \sigma(z_i)(1 - \sigma(z_i)) x_{ij}^2 \\
-    &- \sum_i y_i \bigg\{ \frac{\sigma(z_i) (1 - \sigma(z_i))}{q(z_i)} \\
-    &- \frac{\sigma(z_i)}{q(z_i)^2} \bigg\}x_{ij}^2 + \lambda(1-\alpha)
+    &- \sum_i y_i \bigg\{ \frac{\sigma(z_i) (1 - \sigma(z_i))}{q(z_i)} - \frac{\sigma(z_i)}{q(z_i)^2} \bigg\}x_{ij}^2 + \lambda(1-\alpha)
 
 
 .. code-block:: python
@@ -356,8 +349,8 @@ one parameter at a time. Let's calculate how to make these updates.
 
 .. math::
 
-    z_i^{t} &= z_i^{t-1} - \beta_k^{t-1}x_{ik} + \beta_k^{t}x_{ik}
-    z_i^{t} &= z_i^{t-1} - (h_k^{t-1})^{-1} \tilde{g}_k^{t-1}x_{ik}
+    z_i^{t} &= z_i^{t-1} - \beta_k^{t-1}x_{ik} + \beta_k^{t}x_{ik} \\
+    &= z_i^{t-1} - (h_k^{t-1})^{-1} \tilde{g}_k^{t-1}x_{ik}
 
 **Gradient update**
 
