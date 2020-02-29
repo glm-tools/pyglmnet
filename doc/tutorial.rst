@@ -364,8 +364,8 @@ If :math:`k > 0`,
 
 .. math::
 
-    \tilde{g}_{k+1}^t & = \sum_i \sigma(z_i^t) x_{i,k+1} - \sum_i y_i \frac{\sigma(z_i^t)}{q(z_i^t)} x_{i,k+1}
-    & + \lambda(1-\alpha)\beta_{k+1}^t
+    \tilde{g}_{k+1}^t &= \sum_i \sigma(z_i^t) x_{i,k+1} - \sum_i y_i \frac{\sigma(z_i^t)}{q(z_i^t)} x_{i,k+1} \\
+    &+ \lambda(1-\alpha)\beta_{k+1}^t
 
 .. code-block:: python
 
