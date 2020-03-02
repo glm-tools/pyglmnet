@@ -114,7 +114,7 @@ details.
 Citation
 ~~~~~~~~
 
-If you use ``pyglmnet`` package in your publication, please cite use from
+If you use ``pyglmnet`` package in your publication, please cite us from
 our `JOSS publication <https://doi.org/10.21105/joss.01959>`__ using the following BibTex
 
 .. code::
@@ -134,7 +134,7 @@ our `JOSS publication <https://doi.org/10.21105/joss.01959>`__ using the followi
              and Drew Harris and Beibin Li and Olivier Pieters
              and Scott Otterson and Giovanni De Toni and Chris Rodgers
              and Eva Dyer and Matti Hamalainen and Konrad Kording and Pavan Ramkumar},
-   title = {Pyglmnet: Python implementation of elastic-net regularized generalized linear models},
+   title = {{P}yglmnet: {P}ython implementation of elastic-net regularized generalized linear models},
    journal = {Journal of Open Source Software}
    }
 
