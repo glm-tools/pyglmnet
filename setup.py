@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 import setuptools  # noqa; we are using a setuptools namespace
-import os
 from setuptools import find_packages
+import os
 
 
 def get_version():
@@ -15,16 +15,6 @@ def get_version():
     for line in open(file, "r"):
         if "__version__" in line:
             return line.split("=")[1].strip().strip("'").strip('"')
-
-
-def package_tree(pkgroot):
-    """Get the submodule list."""
-    # Function from MNE Python
-    path = op.dirname(__file__)
-    subdirs = [op.relpath(i[0], path).replace(op.sep, '.')
-               for i in os.walk(op.join(path, pkgroot))
-               if '__init__.py' in i[2]]
-    return sorted(subdirs)
 
 
 descr = """Elastic-net regularized generalized linear models."""
