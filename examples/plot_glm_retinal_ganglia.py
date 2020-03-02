@@ -159,7 +159,7 @@ plt.show()
 # :math:`\beta_0, \beta` that control the spiking.
 #
 # You can simply use linear Gaussian GLM with no regularization
-# to predict the parameters
+# to predict the spike counts.
 
 glm_lg = GLM(distr='gaussian',
              reg_lambda=0.0,
