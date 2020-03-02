@@ -151,7 +151,7 @@ def fetch_rgc_data(dpath, accept_rgcs_license=False):
     os.mkdir(dpath)
 
     base_url = (
-        "https://raw.githubusercontent.com/titipata/datasets/rgcs_dataset"
+        "https://raw.githubusercontent.com/glm-tools/datasets/master"
     )
     fnames = ['data_RGCs.json']
 
