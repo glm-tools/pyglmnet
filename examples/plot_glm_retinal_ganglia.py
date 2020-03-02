@@ -165,12 +165,12 @@ glm_lg = GLM(distr='gaussian', reg_lambda=0.0)
 glm_lg.fit(Xdsgn, y)
 
 # predict spike counts
-y_pred_lg = glm_lg.predict(Xdsgn)
+ypred_lg = glm_lg.predict(Xdsgn)
 
 ########################################################
 # **Fitting and predicting with a Poisson GLM**
 #
-# We can also assume that their is a non-linear function governing
+# We can also assume that there is a non-linear function governing
 # the underlying the firing patterns.
 # Here we use :math:`exp()` as the inverse link function :math:`q`.
 # We can use the :class:`GLM` class to predict the parameters.
@@ -184,7 +184,7 @@ glm_poisson = GLM(distr='poisson',
 glm_poisson.fit(Xdsgn, y)
 
 # predict spike counts
-y_pred_poisson = glm_poisson.predict(Xdsgn)
+ypred_poisson = glm_poisson.predict(Xdsgn)
 
 #############################################################################
 # **Adding spikes history for predicting spike counts**
@@ -217,7 +217,7 @@ glm_poisson_hist = GLM(distr='poisson', alpha=0.05,
 glm_poisson_hist.fit(Xdsgn_hist, y)
 
 # predict spike counts
-y_pred_poisson_hist = glm_poisson_hist.predict(Xdsgn_hist)
+ypred_poisson_hist = glm_poisson_hist.predict(Xdsgn_hist)
 
 #############################################################################
 # **Putting all together**
@@ -229,11 +229,11 @@ y_pred_poisson_hist = glm_poisson_hist.predict(Xdsgn_hist)
 plt.figure()
 markerline, _, _ = plt.stem(t_sample, y[sample_idx])
 markerline.set_markerfacecolor('none')
-plt.plot(t_sample, y_pred_lg[sample_idx],
+plt.plot(t_sample, ypred_lg[sample_idx],
          color='gold', linewidth=2, label='lgGLM with offset')
-plt.plot(t_sample, y_pred_poisson[sample_idx],
+plt.plot(t_sample, ypred_poisson[sample_idx],
          color='green', linewidth=2, label='poissonGLM')
-plt.plot(t_sample, y_pred_poisson_hist[sample_idx],
+plt.plot(t_sample, ypred_poisson_hist[sample_idx],
          color='red', linewidth=2, label='poissonGLM_hist')
 plt.xlim([0., tmax])
 plt.title('Spike count prediction')
