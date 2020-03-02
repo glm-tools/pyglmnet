@@ -101,7 +101,8 @@ print('Number of spikes: {} (mean rate = {:.1f} Hz)\n'.
 
 ########################################################
 #
-# Visualize first 120 samples
+# Visualize first 120 samples of the stimulation
+# and the spiking pattern.
 sample_idx = np.arange(120)
 t_sample = dt * sample_idx
 tmax = t_sample.max()
@@ -191,15 +192,11 @@ glm_poisson.fit(Xdsgn, spikes_binned)
 # predict spike counts
 spikes_pred_poissonGLM = glm_poisson.predict(Xdsgn)
 
-#############################################################################
+########################################################
 # **Adding spikes history for predicting spike counts**
 #
-# We can even further predict the spikes by concatenating the spikes history.
-#
-# .. note::
-#    The spike-history portion of the design
-#    matrix had better be shifted so that we aren't allowed to
-#    use the spike count on this time bin to predict itself!
+# We can even predict the spikes by concatenating the spikes history
+# with the stimulation history in the design matrix.
 
 n_t_filt = 25  # same as before, stimulation history
 n_t_hist = 20  # spikes history
@@ -211,8 +208,15 @@ Xstim = hankel(stim_padded[:-n_t_filt + 1], stim[-n_t_filt:])
 Xspikes = hankel(spikes_padded[:-n_t_hist], stim[-n_t_hist:])
 Xdsgn_hist = np.hstack((Xstim, Xspikes))  # design matrix with spikes history
 
+########################################################
+# .. warning::
+#    The spike-history portion of the design
+#    matrix had better be shifted so that we aren't allowed to
+#    use the spike count on this time bin to predict itself!
+#
 # Now, we are ready to fit Poisson GLM with spikes history.
 # create possion GLM instance
+
 glm_poisson_hist = GLM(distr='poisson', alpha=0.05,
                        learning_rate=1.0,
                        score_metric='pseudo_R2',
@@ -224,7 +228,7 @@ glm_poisson_hist.fit(Xdsgn_hist, spikes_binned)
 # predict spike counts
 spikes_pred_poissonGLM_hist = glm_poisson_hist.predict(Xdsgn_hist)
 
-#############################################################################
+########################################################
 # **Putting all together**
 #
 # We are plotting the prediction of spike counts using
