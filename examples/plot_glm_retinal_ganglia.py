@@ -161,9 +161,10 @@ plt.show()
 # :math:`y \sim \text{Poiss}(\beta_0 + X \beta)` where
 # :math:`X` is the stimulation and history of stimulation
 #
-# You can simply use linear Gaussian GLM to fit as follows
+# You can simply use linear Gaussian GLM with no regularization
+# to fit as follows
 
-glm_lgGLM = GLM(distr='gaussian')
+glm_lgGLM = GLM(distr='gaussian', reg_lambda=0.0)
 glm_lgGLM.fit(Xdsgn, spikes_binned)
 
 # predict spike counts
