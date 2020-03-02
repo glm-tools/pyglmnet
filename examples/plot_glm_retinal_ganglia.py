@@ -84,13 +84,13 @@ sfreq = 1. / dt  # frequency of the stimulation
 # In this case, we will pick cell number 2 (ON cell).
 
 cell_idx = 2  # pick cell number 2 (ON cell)
-spike_time = rgcs_dataset['spike_times']['cell_%d' % cell_idx]
-spike_time = np.array(spike_time)
-n_spikes = len(spike_time)  # number of spikes
+spike_times = rgcs_dataset['spike_times']['cell_%d' % cell_idx]
+spike_times = np.array(spike_times)
+n_spikes = len(spike_times)  # number of spikes
 
 # bin the spikes to y which is our predictor
 t_bins = np.arange(n_times + 1) * dt
-y, _ = np.histogram(spike_time, t_bins)
+y, _ = np.histogram(spike_times, t_bins)
 
 print('Loaded RGC data: cell {}'.format(cell_idx))
 print('Number of stim frames: {:d} ({:.1f} minutes)'.
@@ -113,10 +113,10 @@ axes[0].set_title('Raw Stimulus, spikes, and'
                   ' spike counts')
 axes[0].set_ylabel('Stimulation Intensity')
 
-tspplot = spike_time[(spike_time >= t_sample.min()) &
-                     (spike_time < t_sample.max())]
-markerline, _, _ = axes[1].stem(spike_time[sample_idx],
-                                [1] * len(spike_time[sample_idx]))
+tspplot = spike_times[(spike_times >= 0.) &
+                      (spike_times < tmax)]
+markerline, _, _ = axes[1].stem(spike_times[sample_idx],
+                                [1] * len(spike_times[sample_idx]))
 markerline.set_markerfacecolor('none')
 axes[1].set_xlim([0., tmax])
 axes[1].set_ylim([0, 2])
@@ -132,9 +132,9 @@ plt.show()
 ########################################################
 #
 # We can use ``scipy``'s function ``hankel`` to make our design matrix.
-# Design matrix :math:`X` can be created using the stimulation and its history.
-# Later in the tutorial, we will also incorporate spikes history into our
-# design matrix.
+# The design matrix :math:`X` can be created using the stimulation and
+# its history. Later in the tutorial, we will also incorporate spikes
+# history into our design matrix.
 
 n_t_filt = 25  # tweak this to see different results
 stim_padded = np.pad(stim, (n_t_filt - 1, 0))
@@ -154,14 +154,16 @@ plt.show()
 ########################################################
 # **Fitting and predicting with a linear-Gaussian GLM**
 #
-# For a general linear model, an observed spikes can be
+# For a general linear model, the observed spikes can be
 # thought of an underlying parameter
 # :math:`\beta_0, \beta` that control the spiking.
 #
 # You can simply use linear Gaussian GLM with no regularization
 # to predict the parameters
 
-glm_lg = GLM(distr='gaussian', reg_lambda=0.0)
+glm_lg = GLM(distr='gaussian',
+             reg_lambda=0.0,
+             score_metric='pseudo_R2')
 glm_lg.fit(Xdsgn, y)
 
 # predict spike counts
@@ -172,10 +174,9 @@ ypred_lg = glm_lg.predict(Xdsgn)
 #
 # We can also assume that there is a non-linear function governing
 # the underlying the firing patterns.
-# Here we use :math:`exp()` as the inverse link function :math:`q`.
-# We can use the :class:`GLM` class to predict the parameters.
+# In pyglmnet, we use an exponential inverse link function
+# for the Poisson distribution.
 
-# create possion GLM instance
 glm_poisson = GLM(distr='poisson',
                   alpha=0.05,
                   learning_rate=1.0,
@@ -186,15 +187,11 @@ glm_poisson.fit(Xdsgn, y)
 # predict spike counts
 ypred_poisson = glm_poisson.predict(Xdsgn)
 
-#############################################################################
+########################################################
 # **Adding spikes history for predicting spike counts**
 #
-# We can even further predict the spikes by concatenating the spikes history.
-#
-# .. note::
-#    The spike-history portion of the design
-#    matrix had better be shifted so that we aren't allowed to
-#    use the spike count on this time bin to predict itself!
+# We can even further predict the spikes by concatenating the spikes history
+# to the stimulation history in the design matrix.
 
 n_t_filt = 25  # same as before, stimulation history
 n_t_hist = 20  # spikes history
@@ -206,17 +203,22 @@ Xstim = hankel(stim_padded[:-n_t_filt + 1], stim[-n_t_filt:])
 Xspikes = hankel(y_padded[:-n_t_hist], stim[-n_t_hist:])
 Xdsgn_hist = np.hstack((Xstim, Xspikes))  # design matrix with spikes history
 
+########################################################
+#
+# .. warning::
+#    The spike-history portion of the design
+#    matrix had better be shifted so that we aren't allowed to
+#    use the spike count on this time bin to predict itself!
+#
 # Now, we are ready to fit Poisson GLM with spikes history.
-# create possion GLM instance
-glm_poisson_hist = GLM(distr='poisson', alpha=0.05,
+glm_poisson_hist = GLM(distr='poisson',
+                       alpha=0.05,
                        learning_rate=1.0,
                        score_metric='pseudo_R2',
                        reg_lambda=1e-7)
 
-# fitting to a design matrix with spikes history
+# fit and predict with spikes history
 glm_poisson_hist.fit(Xdsgn_hist, y)
-
-# predict spike counts
 ypred_poisson_hist = glm_poisson_hist.predict(Xdsgn_hist)
 
 #############################################################################
@@ -243,9 +245,8 @@ plt.legend()
 plt.show()
 
 # print scores of all the fitted models
-mse = np.sum((y - glm_lg.ynull_) ** 2)
 print('Training perf (R^2): lin-gauss GLM, w/ offset: {:.2f}'
-      .format(1 - glm_lg.score(Xdsgn, y) / mse))
+      .format(1 - glm_lg.score(Xdsgn, y)))
 print('Training perf (R^2): Pyglmnet possion GLM {:.2f}'
       .format(glm_poisson.score(Xdsgn, y)))
 print('Training perf (R^2): Pyglmnet poisson GLM w/ spikes history {:.2f}'
