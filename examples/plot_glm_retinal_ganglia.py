@@ -202,7 +202,7 @@ n_t_hist = 20  # spikes history
 # using both stimulation history and spikes history
 y_padded = np.pad(y, (n_t_hist, 0))
 
-Xstim = hankel(y_padded[:-n_t_filt + 1], stim[-n_t_filt:])
+Xstim = hankel(stim_padded[:-n_t_filt + 1], stim[-n_t_filt:])
 Xspikes = hankel(y_padded[:-n_t_hist], stim[-n_t_hist:])
 Xdsgn_hist = np.hstack((Xstim, Xspikes))  # design matrix with spikes history
 
@@ -243,8 +243,9 @@ plt.legend()
 plt.show()
 
 # print scores of all the fitted models
+mse = np.sum((y - glm_lg.ynull_) ** 2)
 print('Training perf (R^2): lin-gauss GLM, w/ offset: {:.2f}'
-      .format(glm_lg.score(Xdsgn, y)))
+      .format(1 - glm_lg.score(Xdsgn, y) / mse))
 print('Training perf (R^2): Pyglmnet possion GLM {:.2f}'
       .format(glm_poisson.score(Xdsgn, y)))
 print('Training perf (R^2): Pyglmnet poisson GLM w/ spikes history {:.2f}'
