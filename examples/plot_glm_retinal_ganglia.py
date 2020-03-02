@@ -49,7 +49,6 @@ import os.path as op
 import json
 
 import numpy as np
-from numpy.linalg import pinv
 from scipy.linalg import hankel
 
 from pyglmnet import GLM
@@ -162,17 +161,13 @@ plt.show()
 # :math:`y \sim \text{Poiss}(\beta_0 + X \beta)` where
 # :math:`X` is the stimulation and history of stimulation
 #
-# We can add an offset or a "constant" to our design matrix.
-# This can be done by concatenating a column of 1 to
-# our previously created design matrix.
+# You can simply use linear Gaussian GLM to fit as follows
 
-Xdsgn_offset = np.hstack((np.ones((n_times, 1)), Xdsgn))
-
-# compute whitened spike-triggered average (STA)
-wsta_offset = pinv(Xdsgn_offset) @ spikes_binned
+glm_lgGLM = GLM(distr='gaussian')
+glm_lgGLM.fit(Xdsgn, spikes_binned)
 
 # predict spike counts
-spikes_pred_lgGLM_offset = Xdsgn_offset @ wsta_offset
+spikes_pred_lgGLM_offset = glm_lgGLM.predict(Xdsgn)
 
 ########################################################
 # **Fitting and predicting with a Gaussian GLM**
@@ -191,6 +186,8 @@ glm_poisson = GLM(distr='poisson',
                   score_metric='pseudo_R2',
                   reg_lambda=1e-7)
 glm_poisson.fit(Xdsgn, spikes_binned)
+
+# predict spike counts
 spikes_pred_poissonGLM = glm_poisson.predict(Xdsgn)
 
 #############################################################################
