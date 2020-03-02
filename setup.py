@@ -1,5 +1,6 @@
 #! /usr/bin/env python
 import setuptools  # noqa; we are using a setuptools namespace
+from setuptools import find_packages
 import os
 
 
@@ -56,7 +57,7 @@ if __name__ == "__main__":
             "Programming Language :: Python :: 3.7",
         ],
         platforms="any",
-        packages=["pyglmnet"],
+        packages=find_packages(),
         project_urls={
             'Documentation': 'http://glm-tools.github.io/pyglmnet/',
             'Bug Reports': 'https://github.com/glm-tools/pyglmnet/issues',
