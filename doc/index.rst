@@ -68,6 +68,7 @@ Contents
    contributing
    resources
    whats_new
+   citation
 
 Questions / Errors / Bugs
 =========================
