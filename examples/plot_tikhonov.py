@@ -37,7 +37,10 @@ Department of Neurobiology, Northwestern University.
 ########################################################
 # Imports
 
+import os.path as op
+
 import numpy as np
+import pandas as pd
 
 from pyglmnet import GLMCV
 from spykes.ml.strf import STRF
@@ -49,7 +52,10 @@ import matplotlib.pyplot as plt
 
 from pyglmnet.datasets import fetch_tikhonov_data
 
-fixations_df, probes_df, spikes_df = fetch_tikhonov_data()
+dpath = fetch_tikhonov_data()
+fixations_df = pd.read_csv(op.join(dpath, 'fixations.csv'))
+probes_df = pd.read_csv(op.join(dpath, 'probes.csv'))
+spikes_df = pd.read_csv(op.join(dpath, 'spiketimes.csv'))
 spiketimes = np.squeeze(spikes_df.values)
 
 ########################################################

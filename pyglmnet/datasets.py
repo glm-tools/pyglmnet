@@ -88,12 +88,6 @@ def fetch_tikhonov_data(dpath=None):
     dpath : str
         The data path
     """
-    try:
-        import pandas as pd
-    except ImportError:
-        raise ImportError('The pandas module is required for reading the '
-                          'community crime dataset')
-
     dpath = get_data_home(data_home=dpath)
     fnames = ['fixations.csv', 'probes.csv', 'spiketimes.csv']
 
@@ -109,11 +103,7 @@ def fetch_tikhonov_data(dpath=None):
             fname = os.path.join(dpath, fname)
             urlretrieve(url, fname, _reporthook)
 
-    fixations_df = pd.read_csv(op.join(dpath, 'fixations.csv'))
-    probes_df = pd.read_csv(op.join(dpath, 'probes.csv'))
-    spikes_df = pd.read_csv(op.join(dpath, 'spiketimes.csv'))
-
-    return fixations_df, probes_df, spikes_df
+    return dpath
 
 
 def fetch_community_crime_data(dpath=None):
@@ -185,8 +175,8 @@ def fetch_rgc_data(dpath=None, accept_rgcs_license=False):
 
     Returns
     -------
-    dpath : str
-        The data path
+    rgcs_dataset : dict
+        A dictionary from JSON file of retinal ganglia cells dataset
     """
     dpath = get_data_home(data_home=dpath)
     file_name = 'data_RGCs.json'
@@ -344,7 +334,7 @@ def fetch_group_lasso_datasets():
     df.loc[0:positive_vector_matrix.shape[0], "Label"] = 1.0
     df.loc[positive_vector_matrix.shape[0]:, "Label"] = 0.0
 
-    design_matrix = df
-    groups = create_group_indicies_list()
+    Xdsgn = df
+    y = create_group_indicies_list()
 
-    return design_matrix, groups
+    return Xdsgn, y
