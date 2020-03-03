@@ -65,7 +65,7 @@ def get_data_home(data_home=None):
     Parameters
     ----------
     data_home : str | None
-        The path to scikit-learn data dir.
+        The path to pyglmnet data dir.
     """
     if data_home is None:
         data_home = op.join('~', 'glm_data')
