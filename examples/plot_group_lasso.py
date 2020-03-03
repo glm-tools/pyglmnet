@@ -16,7 +16,7 @@ to model parameters in a group-wise fashion based on domain knowledge.
 ########################################################
 
 from pyglmnet import GLMCV
-from pyglmnet.datasets import fetch_group_lasso_datasets
+from pyglmnet.datasets import fetch_group_lasso_data
 import matplotlib.pyplot as plt
 
 ##########################################################
@@ -33,7 +33,7 @@ import matplotlib.pyplot as plt
 ##########################################################
 # Read and preprocess data
 
-df, group_idxs = fetch_group_lasso_datasets()
+df, group_idxs = fetch_group_lasso_data()
 print(df.head())
 
 ##########################################################

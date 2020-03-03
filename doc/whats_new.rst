@@ -18,12 +18,13 @@ BUG
 ~~~
 
     - Graceful handling of small Hessian term in coordinate descent solver that led to exploding update term by `Pavan Ramkumar`_.
-
     - Ensure full compatibility of `GLM` class with `scikit-learn` by `Titipat Achakulvisut`_.
 
 API
 ~~~
 
+    - Add new example for predicting spike counts by `Titipat Achakulvisut`_.
+    - Add API documentation of functions to download example datasets by `Titipat Achakulvisut`_.
 
 .. _1_0_1:
 

@@ -45,6 +45,9 @@ References
 #
 # Import all the relevance libraries.
 
+import os.path as op
+import json
+
 import numpy as np
 from scipy.linalg import hankel
 
@@ -61,7 +64,9 @@ import matplotlib.pyplot as plt
 # ``spike_times`` (recorded time of the spikes)
 
 # use data if locally downloaded, else ask for license agreement
-rgcs_dataset = fetch_rgc_data(accept_rgcs_license=False)
+dpath = fetch_rgc_data(accept_rgcs_license=False)
+with open(op.join(dpath, 'data_RGCs.json'), 'r') as f:
+    rgcs_dataset = json.loads(f.read())
 
 stim = np.array(rgcs_dataset['stim'])
 stim_times = np.array(rgcs_dataset['stim_times'])

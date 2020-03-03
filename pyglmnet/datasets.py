@@ -4,7 +4,6 @@ A set of convenience functions to download datasets for illustrative examples
 import os
 import os.path as op
 import sys
-import json
 import itertools
 import numpy as np
 from scipy.special import comb
@@ -44,13 +43,6 @@ def _reporthook(count, block_size, total_size):
                      % (percent, progress_size / (1024 * 1024)))
 
 
-def _read_json(dpath, file_name):
-    """Function to read JSON file from a given ``dpath``"""
-    with open(op.join(dpath, file_name), 'r') as f:
-        dataset = json.loads(f.read())
-    return dataset
-
-
 def get_data_home(data_home=None):
     """Return the path of the pyglmnet data dir.
     Function from scikit-learn
@@ -82,11 +74,12 @@ def fetch_tikhonov_data(dpath=None):
     ----------
     dpath: str
         specifies path to which the data files should be downloaded.
+        default: None
 
     Returns
     -------
     dpath : str
-        The data path
+        The data path to Tikhonov dataset
     """
     dpath = get_data_home(data_home=dpath)
     fnames = ['fixations.csv', 'probes.csv', 'spiketimes.csv']
@@ -114,7 +107,9 @@ def fetch_community_crime_data(dpath=None):
 
     Parameters
     ----------
-    None
+    dpath: str
+        specifies path to which the data files should be downloaded.
+        default: None
 
     Returns
     -------
@@ -169,14 +164,15 @@ def fetch_rgc_data(dpath=None, accept_rgcs_license=False):
     ----------
     dpath: str
         specifies path to which the data files should be downloaded.
+        default: None
     accept_rgcs_license: bool
         specify to true to accept the license to use the dataset
         default: False
 
     Returns
     -------
-    rgcs_dataset : dict
-        A dictionary from JSON file of retinal ganglia cells dataset
+    dpath : str
+        The data path for retinal ganglia cells dataset
     """
     dpath = get_data_home(data_home=dpath)
     file_name = 'data_RGCs.json'
@@ -201,17 +197,21 @@ def fetch_rgc_data(dpath=None, accept_rgcs_license=False):
             fname = os.path.join(dpath, fname)
             urlretrieve(url, fname, _reporthook)
 
-    rgcs_dataset = _read_json(dpath, file_name)
-
-    return rgcs_dataset
+    return dpath
 
 
-def fetch_group_lasso_datasets():
+def fetch_group_lasso_data(dpath=None):
     """
     Downloads and formats data needed for the group lasso example.
 
-    Returns:
-    --------
+    Parameters
+    ----------   
+    dpath: str
+        specifies path to which the data files should be downloaded.
+        default: None
+
+    Returns
+    -------
     Xdsgn: pandas.DataFrame
         pandas dataframe of a design matrix with formatted data and labels
 
@@ -296,28 +296,32 @@ def fetch_group_lasso_datasets():
 
         return feature_vector
 
-    positive_url = \
+    positive_url = (
         "http://hollywood.mit.edu/burgelab/maxent/ssdata/MEMset/train5_hs"
-    negative_url = \
+    )
+    negative_url = (
         "http://hollywood.mit.edu/burgelab/maxent/ssdata/MEMset/train0_5_hs"
+    )
 
-    with TemporaryDirectory(prefix="tmp_glm-tools") as dpath:
+    dpath = get_data_home(data_home=dpath)
+    fnames = ['pos', 'neg']
+    if not (op.isdir(dpath) and all(op.exists(op.join(dpath, fname))
+                                    for fname in fnames)):
         pos_file = os.path.join(dpath, 'pos')
         neg_file = os.path.join(dpath, 'neg')
-
         urlretrieve(positive_url, pos_file, _reporthook)
         urlretrieve(negative_url, neg_file, _reporthook)
 
-        with open(pos_file) as posfp:
-            positive_sequences = [str(line.strip().upper()) for idx, line in
-                                  enumerate(posfp.readlines())
-                                  if ">" not in line and idx < 2 * 8000]
+    with open(pos_file) as posfp:
+        positive_sequences = [str(line.strip().upper()) for idx, line in
+                                enumerate(posfp.readlines())
+                                if ">" not in line and idx < 2 * 8000]
 
-        with open(neg_file) as negfp:
-            negative_sequences = [str(line.strip().upper()) for idx, line in
-                                  enumerate(negfp.readlines())
-                                  if ">" not in line and
-                                  idx < 2 * len(positive_sequences)]
+    with open(neg_file) as negfp:
+        negative_sequences = [str(line.strip().upper()) for idx, line in
+                                enumerate(negfp.readlines())
+                                if ">" not in line and
+                                idx < 2 * len(positive_sequences)]
 
     assert len(positive_sequences) == len(negative_sequences), \
         "lengths were not the same: p={pos} n={neg}" \
@@ -330,8 +334,8 @@ def fetch_group_lasso_datasets():
 
     df = pd.DataFrame(data=np.vstack((positive_vector_matrix,
                                       negative_vector_matrix)))
-    df.loc[0:positive_vector_matrix.shape[0], "Label"] = 1.0
-    df.loc[positive_vector_matrix.shape[0]:, "Label"] = 0.0
+    df.loc[0:len(positive_vector_matrix), "Label"] = 1.0
+    df.loc[len(positive_vector_matrix):, "Label"] = 0.0
 
     Xdsgn = df
     y = create_group_indicies_list()
