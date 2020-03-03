@@ -65,10 +65,19 @@ from tempfile import TemporaryDirectory
 
 from pyglmnet.datasets import fetch_rgc_data
 
-with TemporaryDirectory(prefix="tmp_glm-tools") as temp_dir:
-    dpath = fetch_rgc_data(dpath=temp_dir, accept_rgcs_license=True)
-    with open(op.join(dpath, 'data_RGCs.json'), 'r') as f:
-        rgcs_dataset = json.loads(f.read())
+def read_json(dpath, file_name):
+    """Function to read JSON file from a given ``dpath``"""
+    with open(op.join(dpath, file_name), 'r') as f:
+        dataset = json.loads(f.read())
+    return dataset
+
+# use data if locally downloaded, else ask for license agreement
+if op.isdir("glm-data"):
+    rgcs_dataset = read_json("glm-data", 'data_RGCs.json')
+else:
+    with TemporaryDirectory(prefix="tmp_glm-tools") as temp_dir:
+        dpath = fetch_rgc_data(dpath=temp_dir, accept_rgcs_license=False)
+        rgcs_dataset = read_json(dpath, 'data_RGCs.json')
 
 stim = np.array(rgcs_dataset['stim'])
 stim_times = np.array(rgcs_dataset['stim_times'])
