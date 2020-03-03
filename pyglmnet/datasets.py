@@ -212,13 +212,12 @@ def fetch_group_lasso_datasets():
 
     Returns:
     --------
-    design_matrix: pandas.DataFrame
-        pandas dataframe with formatted data and labels
+    Xdsgn: pandas.DataFrame
+        pandas dataframe of a design matrix with formatted data and labels
 
-    groups: list
+    y: list
         list of group indicies, the value of the ith position in the list
         is the group number for the ith regression coefficient
-
     """
     try:
         import pandas as pd
