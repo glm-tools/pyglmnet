@@ -5,7 +5,6 @@ import os
 import os.path as op
 import sys
 import json
-import shutil
 import itertools
 import numpy as np
 from scipy.special import comb
@@ -75,7 +74,7 @@ def get_data_home(data_home=None):
     return data_home
 
 
-def fetch_tikhonov_data(dpath):
+def fetch_tikhonov_data(dpath=None):
     """
     Downloads data for Tikhonov example and returns data frames
 
@@ -89,23 +88,35 @@ def fetch_tikhonov_data(dpath):
     dpath : str
         The data path
     """
+    try:
+        import pandas as pd
+    except ImportError:
+        raise ImportError('The pandas module is required for reading the '
+                          'community crime dataset')
 
-    if os.path.exists(dpath):
-        shutil.rmtree(dpath)
-    os.mkdir(dpath)
-
-    base_url = "https://raw.githubusercontent.com/glm-tools/datasets/master"
+    dpath = get_data_home(data_home=dpath)
     fnames = ['fixations.csv', 'probes.csv', 'spiketimes.csv']
 
-    for fname in fnames:
-        url = base_url + "/tikhonov/" + fname
-        fname = os.path.join(dpath, fname)
-        urlretrieve(url, fname, _reporthook)
+    if not (op.isdir(dpath) and all(op.exists(op.join(dpath, fname))
+                                    for fname in fnames)):
+        base_url = (
+            "https://raw.githubusercontent.com/glm-tools/datasets/master"
+        )
+        fnames = ['fixations.csv', 'probes.csv', 'spiketimes.csv']
 
-    return dpath
+        for fname in fnames:
+            url = base_url + "/tikhonov/" + fname
+            fname = os.path.join(dpath, fname)
+            urlretrieve(url, fname, _reporthook)
+
+    fixations_df = pd.read_csv(op.join(dpath, 'fixations.csv'))
+    probes_df = pd.read_csv(op.join(dpath, 'probes.csv'))
+    spikes_df = pd.read_csv(op.join(dpath, 'spiketimes.csv'))
+
+    return fixations_df, probes_df, spikes_df
 
 
-def fetch_community_crime_data():
+def fetch_community_crime_data(dpath=None):
     """
     Downloads data for the community crime example,
     removes missing values, extracts features, and
@@ -128,15 +139,22 @@ def fetch_community_crime_data():
         raise ImportError('The pandas module is required for reading the '
                           'community crime dataset')
 
-    with TemporaryDirectory(prefix="tmp_glm-tools") as dpath:
-        fname = os.path.join(dpath, 'communities.csv')
-        base_url = ("http://archive.ics.uci.edu/ml/machine-learning-databases")
+    dpath = get_data_home(data_home=dpath)
+    file_name = 'communities.csv'
+
+    if not (op.isdir(dpath) and op.exists(op.join(dpath, file_name))):
+        fname = os.path.join(dpath, file_name)
+        base_url = (
+            "http://archive.ics.uci.edu/ml/machine-learning-databases"
+        )
         url = base_url + "/" + "communities/communities.data"
 
         urlretrieve(url, fname, _reporthook)
 
         # Read in the file
         df = pd.read_csv(fname, header=None)
+
+    df = pd.read_csv(op.join(dpath, file_name), header=None)
 
     # Remove missing values
     df.replace('?', np.nan, inplace=True)
@@ -174,9 +192,7 @@ def fetch_rgc_data(dpath=None, accept_rgcs_license=False):
     file_name = 'data_RGCs.json'
 
     # if file already exist, read it from there
-    if op.isdir(dpath) and op.exists(op.join(dpath, file_name)):
-        rgcs_dataset = _read_json(dpath, file_name)
-    else:
+    if not (op.isdir(dpath) and op.exists(op.join(dpath, file_name))):
         # accept licence
         if accept_rgcs_license:
             answer = 'y'
@@ -194,7 +210,8 @@ def fetch_rgc_data(dpath=None, accept_rgcs_license=False):
             url = base_url + "/RGCs/" + fname
             fname = os.path.join(dpath, fname)
             urlretrieve(url, fname, _reporthook)
-        rgcs_dataset = _read_json(dpath, file_name)
+
+    rgcs_dataset = _read_json(dpath, file_name)
 
     return rgcs_dataset
 
