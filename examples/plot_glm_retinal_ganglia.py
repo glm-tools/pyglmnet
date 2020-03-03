@@ -72,7 +72,7 @@ def read_json(dpath, file_name):
     return dataset
 
 # use data if locally downloaded, else ask for license agreement
-if op.isdir("glm-data"):
+if op.isdir("glm-data") and op.exists("glm-data/data_RGCs.json"):
     rgcs_dataset = read_json("glm-data", 'data_RGCs.json')
 else:
     with TemporaryDirectory(prefix="tmp_glm-tools") as temp_dir:
