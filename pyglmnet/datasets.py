@@ -2,7 +2,9 @@
 A set of convenience functions to download datasets for illustrative examples
 """
 import os
+import os.path as op
 import sys
+import json
 import shutil
 import itertools
 import numpy as np
@@ -41,6 +43,36 @@ def _reporthook(count, block_size, total_size):
     percent = min(int(count * block_size * 100 / total_size), 100)
     sys.stdout.write("\r...%d%%, %d MB"
                      % (percent, progress_size / (1024 * 1024)))
+
+
+def _read_json(dpath, file_name):
+    """Function to read JSON file from a given ``dpath``"""
+    with open(op.join(dpath, file_name), 'r') as f:
+        dataset = json.loads(f.read())
+    return dataset
+
+
+def get_data_home(data_home=None):
+    """Return the path of the pyglmnet data dir.
+    Function from scikit-learn
+
+    This folder is used by some large dataset loaders to avoid downloading the
+    data several times.
+
+    By default the data dir is set to a folder named 'glm_data' in the
+    user home folder.
+
+    Parameters
+    ----------
+    data_home : str | None
+        The path to scikit-learn data dir.
+    """
+    if data_home is None:
+        data_home = op.join('~', 'glm_data')
+    data_home = op.expanduser(data_home)
+    if not op.exists(data_home):
+        os.makedirs(data_home)
+    return data_home
 
 
 def fetch_tikhonov_data(dpath):
@@ -119,7 +151,7 @@ def fetch_community_crime_data():
     return X, y
 
 
-def fetch_rgc_data(dpath, accept_rgcs_license=False):
+def fetch_rgc_data(dpath=None, accept_rgcs_license=False):
     """
     Downloads data for spike trains prediction in retinal ganglia cells.
     Please see https://github.com/glm-tools/datasets/RGCs/ for permission
@@ -138,29 +170,33 @@ def fetch_rgc_data(dpath, accept_rgcs_license=False):
     dpath : str
         The data path
     """
-    if accept_rgcs_license:
-        answer = 'y'
+    dpath = get_data_home(data_home=dpath)
+    file_name = 'data_RGCs.json'
+
+    # if file already exist, read it from there
+    if op.isdir(dpath) and op.exists(op.join(dpath, file_name)):
+        rgcs_dataset = _read_json(dpath, file_name)
     else:
-        answer = input('%s\nAgree (y/[n])? ' % _rgcs_license_text)
-    if answer.lower() != 'y':
-        raise RuntimeError('You must agree to the license to use this '
-                           'dataset')
+        # accept licence
+        if accept_rgcs_license:
+            answer = 'y'
+        else:
+            answer = input('%s\nAgree (y/[n])? ' % _rgcs_license_text)
+        if answer.lower() != 'y':
+            raise RuntimeError('You must agree to the license to use this '
+                               'dataset')
 
-    if os.path.exists(dpath):
-        shutil.rmtree(dpath)
-    os.mkdir(dpath)
+        base_url = (
+            "https://raw.githubusercontent.com/glm-tools/datasets/master"
+        )
+        fnames = ['data_RGCs.json']
+        for fname in fnames:
+            url = base_url + "/RGCs/" + fname
+            fname = os.path.join(dpath, fname)
+            urlretrieve(url, fname, _reporthook)
+        rgcs_dataset = _read_json(dpath, file_name)
 
-    base_url = (
-        "https://raw.githubusercontent.com/glm-tools/datasets/master"
-    )
-    fnames = ['data_RGCs.json']
-
-    for fname in fnames:
-        url = base_url + "/RGCs/" + fname
-        fname = os.path.join(dpath, fname)
-        urlretrieve(url, fname, _reporthook)
-
-    return dpath
+    return rgcs_dataset
 
 
 def fetch_group_lasso_datasets():

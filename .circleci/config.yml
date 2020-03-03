@@ -25,7 +25,7 @@ jobs:
                     pip install -e .
                     pip install sphinx_bootstrap_theme numpydoc -q
                     pip install -e git+http://github.com/KordingLab/spykes.git#egg=spykes
-                    python -c "import pyglmnet; pyglmnet.datasets.fetch_rgc_data('examples/glm-data', accept_rgcs_license=True);"
+                    python -c "import pyglmnet; pyglmnet.datasets.fetch_rgc_data(accept_rgcs_license=True);"
                     python --version
                     pip list
             - run:

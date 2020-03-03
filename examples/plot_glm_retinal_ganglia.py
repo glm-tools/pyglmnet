@@ -45,9 +45,6 @@ References
 #
 # Import all the relevance libraries.
 
-import os.path as op
-import json
-
 import numpy as np
 from scipy.linalg import hankel
 
@@ -55,15 +52,6 @@ from pyglmnet import GLM
 from pyglmnet.datasets import fetch_rgc_data
 
 import matplotlib.pyplot as plt
-from tempfile import TemporaryDirectory
-
-
-def read_json(dpath, file_name):
-    """Function to read JSON file from a given ``dpath``"""
-    with open(op.join(dpath, file_name), 'r') as f:
-        dataset = json.loads(f.read())
-    return dataset
-
 
 ########################################################
 #
@@ -73,12 +61,7 @@ def read_json(dpath, file_name):
 # ``spike_times`` (recorded time of the spikes)
 
 # use data if locally downloaded, else ask for license agreement
-if op.isdir("glm-data") and op.exists("glm-data/data_RGCs.json"):
-    rgcs_dataset = read_json("glm-data", 'data_RGCs.json')
-else:
-    with TemporaryDirectory(prefix="tmp_glm-tools") as temp_dir:
-        dpath = fetch_rgc_data(dpath=temp_dir, accept_rgcs_license=False)
-        rgcs_dataset = read_json(dpath, 'data_RGCs.json')
+rgcs_dataset = fetch_rgc_data(accept_rgcs_license=False)
 
 stim = np.array(rgcs_dataset['stim'])
 stim_times = np.array(rgcs_dataset['stim_times'])
