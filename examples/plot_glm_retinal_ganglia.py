@@ -52,9 +52,18 @@ import numpy as np
 from scipy.linalg import hankel
 
 from pyglmnet import GLM
+from pyglmnet.datasets import fetch_rgc_data
 
 import matplotlib.pyplot as plt
 from tempfile import TemporaryDirectory
+
+
+def read_json(dpath, file_name):
+    """Function to read JSON file from a given ``dpath``"""
+    with open(op.join(dpath, file_name), 'r') as f:
+        dataset = json.loads(f.read())
+    return dataset
+
 
 ########################################################
 #
@@ -62,14 +71,6 @@ from tempfile import TemporaryDirectory
 # following keys:  ``stim`` (binary stochastic stimulation),
 # ``stim_times`` (time of the stimulation), and
 # ``spike_times`` (recorded time of the spikes)
-
-from pyglmnet.datasets import fetch_rgc_data
-
-def read_json(dpath, file_name):
-    """Function to read JSON file from a given ``dpath``"""
-    with open(op.join(dpath, file_name), 'r') as f:
-        dataset = json.loads(f.read())
-    return dataset
 
 # use data if locally downloaded, else ask for license agreement
 if op.isdir("glm-data") and op.exists("glm-data/data_RGCs.json"):
