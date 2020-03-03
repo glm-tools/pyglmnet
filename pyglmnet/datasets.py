@@ -8,7 +8,6 @@ import itertools
 import numpy as np
 from scipy.special import comb
 from urllib.request import urlretrieve
-from tempfile import TemporaryDirectory
 
 pbar = None
 _rgcs_license_text = """
@@ -205,7 +204,7 @@ def fetch_group_lasso_data(dpath=None):
     Downloads and formats data needed for the group lasso example.
 
     Parameters
-    ----------   
+    ----------
     dpath: str
         specifies path to which the data files should be downloaded.
         default: None
@@ -314,14 +313,14 @@ def fetch_group_lasso_data(dpath=None):
 
     with open(pos_file) as posfp:
         positive_sequences = [str(line.strip().upper()) for idx, line in
-                                enumerate(posfp.readlines())
-                                if ">" not in line and idx < 2 * 8000]
+                              enumerate(posfp.readlines())
+                              if ">" not in line and idx < 2 * 8000]
 
     with open(neg_file) as negfp:
         negative_sequences = [str(line.strip().upper()) for idx, line in
-                                enumerate(negfp.readlines())
-                                if ">" not in line and
-                                idx < 2 * len(positive_sequences)]
+                              enumerate(negfp.readlines())
+                              if ">" not in line and
+                              idx < 2 * len(positive_sequences)]
 
     assert len(positive_sequences) == len(negative_sequences), \
         "lengths were not the same: p={pos} n={neg}" \
