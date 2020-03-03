@@ -239,7 +239,7 @@ plt.show()
 
 # print scores of all the fitted models
 print('Training perf (R^2): lin-gauss GLM, w/ offset: {:.2f}'
-      .format(1 - glm_lg.score(Xdsgn, y)))
+      .format(glm_lg.score(Xdsgn, y)))
 print('Training perf (R^2): Pyglmnet possion GLM {:.2f}'
       .format(glm_poisson.score(Xdsgn, y)))
 print('Training perf (R^2): Pyglmnet poisson GLM w/ spikes history {:.2f}'
