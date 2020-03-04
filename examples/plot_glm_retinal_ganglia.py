@@ -52,9 +52,9 @@ import numpy as np
 from scipy.linalg import hankel
 
 from pyglmnet import GLM
+from pyglmnet.datasets import fetch_rgc_spike_trains
 
 import matplotlib.pyplot as plt
-from tempfile import TemporaryDirectory
 
 ########################################################
 #
@@ -63,12 +63,9 @@ from tempfile import TemporaryDirectory
 # ``stim_times`` (time of the stimulation), and
 # ``spike_times`` (recorded time of the spikes)
 
-from pyglmnet.datasets import fetch_rgc_data
-
-with TemporaryDirectory(prefix="tmp_glm-tools") as temp_dir:
-    dpath = fetch_rgc_data(dpath=temp_dir, accept_rgcs_license=True)
-    with open(op.join(dpath, 'data_RGCs.json'), 'r') as f:
-        rgcs_dataset = json.loads(f.read())
+dpath = fetch_rgc_spike_trains()
+with open(op.join(dpath, 'data_RGCs.json'), 'r') as f:
+    rgcs_dataset = json.loads(f.read())
 
 stim = np.array(rgcs_dataset['stim'])
 stim_times = np.array(rgcs_dataset['stim_times'])
@@ -246,7 +243,7 @@ plt.show()
 
 # print scores of all the fitted models
 print('Training perf (R^2): lin-gauss GLM, w/ offset: {:.2f}'
-      .format(1 - glm_lg.score(Xdsgn, y)))
+      .format(glm_lg.score(Xdsgn, y)))
 print('Training perf (R^2): Pyglmnet possion GLM {:.2f}'
       .format(glm_poisson.score(Xdsgn, y)))
 print('Training perf (R^2): Pyglmnet poisson GLM w/ spikes history {:.2f}'

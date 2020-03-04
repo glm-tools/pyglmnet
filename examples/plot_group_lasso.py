@@ -16,7 +16,7 @@ to model parameters in a group-wise fashion based on domain knowledge.
 ########################################################
 
 from pyglmnet import GLMCV
-from pyglmnet.datasets import fetch_group_lasso_datasets
+from pyglmnet.datasets import fetch_group_lasso_data
 import matplotlib.pyplot as plt
 
 ##########################################################
@@ -31,18 +31,13 @@ import matplotlib.pyplot as plt
 #
 
 ##########################################################
-# Read and preprocess data
-
-df, group_idxs = fetch_group_lasso_datasets()
-print(df.head())
+# First, we read and preprocess data
+X, y, group = fetch_group_lasso_data()
 
 ##########################################################
 # Set up the training and testing sets
 
 from sklearn.model_selection import train_test_split # noqa
-
-X = df[df.columns.difference(["Label"])].values
-y = df.loc[:, "Label"].values
 
 Xtrain, Xtest, ytrain, ytest = \
     train_test_split(X, y, test_size=0.2, random_state=42)
@@ -52,7 +47,7 @@ Xtrain, Xtest, ytrain, ytest = \
 
 # set up the group lasso GLM model
 gl_glm = GLMCV(distr="binomial", tol=1e-3,
-               group=group_idxs, score_metric="pseudo_R2",
+               group=group, score_metric="pseudo_R2",
                alpha=1.0, learning_rate=3, max_iter=100, cv=3, verbose=True)
 
 

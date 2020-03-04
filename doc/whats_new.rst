@@ -18,12 +18,12 @@ BUG
 ~~~
 
     - Graceful handling of small Hessian term in coordinate descent solver that led to exploding update term by `Pavan Ramkumar`_.
-
     - Ensure full compatibility of `GLM` class with `scikit-learn` by `Titipat Achakulvisut`_.
 
 API
 ~~~
 
+    - Add fetcher for new spike train dataset :func:`pyglmnet.fetch_rgc_spike_trains` by `Titipat Achakulvisut`_.
 
 .. _1_0_1:
 

@@ -38,6 +38,7 @@ Department of Neurobiology, Northwestern University.
 # Imports
 
 import os.path as op
+
 import numpy as np
 import pandas as pd
 
@@ -45,20 +46,16 @@ from pyglmnet import GLMCV
 from spykes.ml.strf import STRF
 
 import matplotlib.pyplot as plt
-from tempfile import TemporaryDirectory
 
 ########################################################
 # Download and fetch data files
 
 from pyglmnet.datasets import fetch_tikhonov_data
 
-with TemporaryDirectory(prefix="tmp_glm-tools") as temp_dir:
-    dpath = fetch_tikhonov_data(dpath=temp_dir)
-    fixations_df = pd.read_csv(op.join(dpath, 'fixations.csv'))
-    probes_df = pd.read_csv(op.join(dpath, 'probes.csv'))
-    probes_df = pd.read_csv(op.join(dpath, 'probes.csv'))
-    spikes_df = pd.read_csv(op.join(dpath, 'spiketimes.csv'))
-
+dpath = fetch_tikhonov_data()
+fixations_df = pd.read_csv(op.join(dpath, 'fixations.csv'))
+probes_df = pd.read_csv(op.join(dpath, 'probes.csv'))
+spikes_df = pd.read_csv(op.join(dpath, 'spiketimes.csv'))
 spiketimes = np.squeeze(spikes_df.values)
 
 ########################################################
