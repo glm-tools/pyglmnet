@@ -23,8 +23,7 @@ BUG
 API
 ~~~
 
-    - Add new example for predicting spike counts by `Titipat Achakulvisut`_.
-    - Add API documentation of functions to download example datasets by `Titipat Achakulvisut`_.
+    - Add fetcher for new spike train dataset :func:`pyglmnet.fetch_rgc_spike_trains` by `Titipat Achakulvisut`_.
 
 .. _1_0_1:
 

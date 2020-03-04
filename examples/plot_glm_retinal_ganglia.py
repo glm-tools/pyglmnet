@@ -52,7 +52,7 @@ import numpy as np
 from scipy.linalg import hankel
 
 from pyglmnet import GLM
-from pyglmnet.datasets import fetch_rgc_data
+from pyglmnet.datasets import fetch_rgc_spike_trains
 
 import matplotlib.pyplot as plt
 
@@ -63,8 +63,7 @@ import matplotlib.pyplot as plt
 # ``stim_times`` (time of the stimulation), and
 # ``spike_times`` (recorded time of the spikes)
 
-# use data if locally downloaded, else ask for license agreement
-dpath = fetch_rgc_data(accept_rgcs_license=False)
+dpath = fetch_rgc_spike_trains()
 with open(op.join(dpath, 'data_RGCs.json'), 'r') as f:
     rgcs_dataset = json.loads(f.read())
 

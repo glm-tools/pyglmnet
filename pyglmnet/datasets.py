@@ -9,7 +9,6 @@ import numpy as np
 from scipy.special import comb
 from urllib.request import urlretrieve
 
-pbar = None
 _rgcs_license_text = """
 License
 -------
@@ -44,7 +43,8 @@ def _reporthook(count, block_size, total_size):
 
 def get_data_home(data_home=None):
     """Return the path of the pyglmnet data dir.
-    Function from scikit-learn
+
+    Function from scikit-learn.
 
     This folder is used by some large dataset loaders to avoid downloading the
     data several times.
@@ -66,8 +66,7 @@ def get_data_home(data_home=None):
 
 
 def fetch_tikhonov_data(dpath=None):
-    """
-    Downloads data for Tikhonov example and returns data frames
+    """Downloads data for Tikhonov example.
 
     Parameters
     ----------
@@ -99,9 +98,9 @@ def fetch_tikhonov_data(dpath=None):
 
 
 def fetch_community_crime_data(dpath=None):
-    """
-    Downloads data for the community crime example,
-    removes missing values, extracts features, and
+    """Downloads community crime data.
+
+    This function removes missing values, extracts features, and
     returns numpy arrays
 
     Parameters
@@ -153,11 +152,8 @@ def fetch_community_crime_data(dpath=None):
     return X, y
 
 
-def fetch_rgc_data(dpath=None, accept_rgcs_license=False):
-    """
-    Downloads data for spike trains prediction in retinal ganglia cells.
-    Please see https://github.com/glm-tools/datasets/RGCs/ for permission
-    to use the dataset
+def fetch_rgc_spike_trains(dpath=None, accept_rgcs_license=False):
+    """Downloads data for spike trains prediction in retinal ganglia cells.
 
     Parameters
     ----------
@@ -172,6 +168,11 @@ def fetch_rgc_data(dpath=None, accept_rgcs_license=False):
     -------
     dpath : str
         The data path for retinal ganglia cells dataset
+
+    Note
+    ----
+    See https://github.com/glm-tools/datasets/RGCs/ for permission
+    to use the dataset.
     """
     dpath = get_data_home(data_home=dpath)
     file_name = 'data_RGCs.json'
@@ -200,8 +201,7 @@ def fetch_rgc_data(dpath=None, accept_rgcs_license=False):
 
 
 def fetch_group_lasso_data(dpath=None):
-    """
-    Downloads and formats data needed for the group lasso example.
+    """Downloads and formats data needed for the group lasso example.
 
     Parameters
     ----------
@@ -211,10 +211,11 @@ def fetch_group_lasso_data(dpath=None):
 
     Returns
     -------
-    Xdsgn: pandas.DataFrame
-        pandas dataframe of a design matrix with formatted data and labels
-
-    y: list
+    X: numpy array, shape (n_samples, n_features)
+        The design matrix.
+    y: numpy array, shape (n_samples,)
+        The labels.
+    group: list
         list of group indicies, the value of the ith position in the list
         is the group number for the ith regression coefficient
     """
@@ -336,7 +337,8 @@ def fetch_group_lasso_data(dpath=None):
     df.loc[0:len(positive_vector_matrix), "Label"] = 1.0
     df.loc[len(positive_vector_matrix):, "Label"] = 0.0
 
-    Xdsgn = df
-    y = create_group_indicies_list()
+    X = df[df.columns.difference(["Label"])].values
+    y = df.loc[:, "Label"].values
+    group = create_group_indicies_list()
 
-    return Xdsgn, y
+    return X, y, group
