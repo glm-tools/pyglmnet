@@ -70,7 +70,7 @@ def fetch_tikhonov_data(dpath=None):
 
     Parameters
     ----------
-    dpath: str
+    dpath: str | None
         specifies path to which the data files should be downloaded.
         default: None
 
@@ -105,7 +105,7 @@ def fetch_community_crime_data(dpath=None):
 
     Parameters
     ----------
-    dpath: str
+    dpath: str | None
         specifies path to which the data files should be downloaded.
         default: None
 
@@ -166,7 +166,7 @@ def fetch_rgc_spike_trains(dpath=None, accept_rgcs_license=False):
 
     Returns
     -------
-    dpath : str
+    dpath : str | None
         The data path for retinal ganglia cells dataset
 
     Note
@@ -205,9 +205,8 @@ def fetch_group_lasso_data(dpath=None):
 
     Parameters
     ----------
-    dpath: str
+    dpath: str | None
         specifies path to which the data files should be downloaded.
-        default: None
 
     Returns
     -------
@@ -311,6 +310,9 @@ def fetch_group_lasso_data(dpath=None):
         neg_file = os.path.join(dpath, 'neg')
         urlretrieve(positive_url, pos_file, _reporthook)
         urlretrieve(negative_url, neg_file, _reporthook)
+    else:
+        pos_file = os.path.join(dpath, 'pos')
+        neg_file = os.path.join(dpath, 'neg')
 
     with open(pos_file) as posfp:
         positive_sequences = [str(line.strip().upper()) for idx, line in
