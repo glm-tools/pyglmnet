@@ -88,3 +88,7 @@ ax = plt.gca()
 ax.spines['top'].set_visible(False)
 ax.spines['right'].set_visible(False)
 plt.show()
+
+########################################################
+# We can also check if the algorithm converged properly
+glmcv.best_estimator_.plot_convergence()

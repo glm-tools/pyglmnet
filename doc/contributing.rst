@@ -161,9 +161,11 @@ The following should be installed in order to build the documentation.
 
 *    `sphinx <https://github.com/sphinx-doc/sphinx/>`_
 *    `sphinx-gallery <https://github.com/sphinx-gallery/sphinx-gallery/>`_
+*    `sphinx_bootstrap_theme <https://github.com/ryan-roemer/sphinx-bootstrap-theme>`_
 *    `pillow <https://github.com/python-pillow/Pillow/>`_
 *    `numpydoc <https://github.com/numpy/numpydoc/>`_
 *    `matplotlib <https://github.com/matplotlib/matplotlib/>`_
+*    `spykes <http://kordinglab.com/spykes/>`_
 
 Shortcut:
 

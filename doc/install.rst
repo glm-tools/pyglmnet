@@ -6,17 +6,15 @@ Check dependencies
 ------------------
 We currently support ``Python 3.5+``.
 
-For the package: ``numpy>=1.11``, ``scipy>=0.17``, ``scikit-learn>=0.18``
+For the package: ``numpy>=1.11`` and ``scipy>=0.17``. For the plotting code,
+optionally install ``matplotlib``.
 
-Additionally, for examples: ``pandas>=0.20``
+Additionally, for examples: ``pandas>=0.20`` and ``scikit-learn>=0.18``.
+Our library is ``scikit-learn`` compatible.
 
 Both `Canopy <https://www.enthought.com/products/canopy/>`__
 and `Anaconda <https://www.continuum.io/downloads>`__
 ship with a recent version of all these packages.
-
-Additionally, for development, tests and coverage: ``pytest``, ``pytest-cov``, ``coverage``, ``flake8``
-
-Additionally, for building documentation: ``sphinx``, ``sphinx-gallery``, ``sphinx_bootstrap_theme``, ``pillow``, ``numpydoc``, ``matplotlib``, ``spykes``
 
 In case you have other distributions of Python, you can install
 the dependencies using ``pip``.
@@ -24,7 +22,6 @@ the dependencies using ``pip``.
 .. code-block:: bash
 
    pip install numpy scipy
-   pip install -U scikit-learn
 
 Get pyglmnet
 ------------
