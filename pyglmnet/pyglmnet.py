@@ -93,7 +93,12 @@ def _lmb(distr, beta0, beta, X, eta, fit_intercept=True):
 def _mu(distr, z, eta, fit_intercept):
     """The non-linearity (inverse link)."""
     if distr in ['softplus', 'gamma', 'neg-binomial']:
-        mu = log1p(np.exp(z))
+        # Numerically stable for larger z. We add a small value to
+        # prevent zeros.
+        # https://cran.r-project.org/web/packages/Rmpfr/vignettes/log1mexp-note.pdf
+        mu = z.copy()
+        mu[z <= 1] = log1p(np.exp(z[z <= 1]))
+        mu[z > 1] = (z[z > 1] + log1p(np.exp(-z[z > 1]))) + 1 * 10e-10
     elif distr == 'poisson':
         mu = z.copy()
         beta0 = (1 - eta) * np.exp(eta) if fit_intercept else 0.
@@ -125,7 +130,7 @@ def _grad_mu(distr, z, eta):
     return grad_mu
 
 
-def _logL(distr, y, y_hat, z=None):
+def _logL(distr, y, y_hat, z=None, theta=1):
     """The log likelihood."""
     if distr in ['softplus', 'poisson']:
         eps = np.spacing(1)
@@ -153,10 +158,9 @@ def _logL(distr, y, y_hat, z=None):
         nu = 1.  # shape parameter, exponential for now
         logL = np.sum(nu * (-y / y_hat - np.log(y_hat)))
     elif distr == 'neg-binomial':
-        theta = y.mean()
         logL = np.sum(loggamma(y + theta) - loggamma(theta) - loggamma(y + 1) +
-                      y * np.log(y) + y * np.log(y_hat) - (theta + y) *
-                      np.log(y_hat + y))
+                      theta * np.log(theta) + y * np.log(y_hat) - (theta + y) *
+                      np.log(y_hat + theta))
     return logL
 
 
@@ -233,7 +237,7 @@ def _L2loss(distr, alpha, Tau, reg_lambda, X, y, eta, group, beta,
 
 
 def _grad_L2loss(distr, alpha, Tau, reg_lambda, X, y, eta, beta,
-                 fit_intercept=True):
+                 fit_intercept=True, theta=1):
     """The gradient."""
     n_samples, n_features = X.shape
     n_samples = np.float(n_samples)
@@ -281,9 +285,11 @@ def _grad_L2loss(distr, alpha, Tau, reg_lambda, X, y, eta, beta,
         grad_beta = -nu * np.dot(grad_logl.T, X).T
 
     elif distr == 'neg-binomial':
-        theta = y.mean()
-        partial_beta_0 = -grad_mu * (y / mu - (theta + y) / (mu + y))
-        grad_beta0 = np.sum(partial_beta_0)
+        partial_beta_0 = grad_mu * ((theta + y) / (mu + theta) - y / mu)
+
+        if fit_intercept:
+            grad_beta0 = np.sum(partial_beta_0)
+
         grad_beta = np.dot(partial_beta_0.T, X)
 
     grad_beta0 *= 1. / n_samples
@@ -300,7 +306,7 @@ def _grad_L2loss(distr, alpha, Tau, reg_lambda, X, y, eta, beta,
     return g
 
 
-def _gradhess_logloss_1d(distr, xk, y, z, eta, fit_intercept=True):
+def _gradhess_logloss_1d(distr, xk, y, z, eta, fit_intercept=True, theta=1):
     """
     Compute gradient (1st derivative)
     and Hessian (2nd derivative)
@@ -364,14 +370,14 @@ def _gradhess_logloss_1d(distr, xk, y, z, eta, fit_intercept=True):
                      (1 - y) * _probit_g6(z, pdfz, cdfz)) * (xk * xk))
 
     elif distr == 'neg-binomial':
-        theta = y.mean()
         mu = _mu(distr, z, eta, fit_intercept)
         grad_mu = _grad_mu(distr, z, eta)
         hess_mu = np.exp(-z) * expit(z)**2
 
-        gradient_beta_j = -grad_mu * (y / mu - (theta + y) / (mu + y))
-        partial_beta_0_1 = hess_mu * (y / mu - (y + theta) / (mu + y))
-        partial_beta_0_2 = grad_mu**2 * ((y + theta) / (mu + y)**2 - y / mu**2)
+        gradient_beta_j = -grad_mu * (y / mu - (y + theta) / (mu + theta))
+        partial_beta_0_1 = hess_mu * (y / mu - (y + theta) / (mu + theta))
+        partial_beta_0_2 = grad_mu**2 * \
+            ((y + theta) / (mu + theta)**2 - y / mu**2)
         partial_beta_0 = -(partial_beta_0_1 + partial_beta_0_2)
         gk = np.dot(gradient_beta_j.T, xk)
         hk = np.dot(partial_beta_0.T, xk**2)
@@ -435,11 +441,9 @@ def simulate_glm(distr, beta0, beta, X, eta=2.0, random_state=None,
         y = np.exp(mu)
     if distr == 'neg-binomial':
         mu = _lmb(distr, beta0, beta, X, eta)
-        trials = X.shape[0]
-        theta = trials / 2  # Number of negative cases
+        theta = 5
         p = theta / (theta + mu)  # Probability of success
-        n = trials - theta  # Number of positive cases
-        y = _random_state.negative_binomial(n, p)
+        y = _random_state.negative_binomial(theta, p)
     return y
 
 
@@ -574,7 +578,7 @@ class GLM(BaseEstimator):
                  learning_rate=2e-1, max_iter=1000,
                  tol=1e-6, eta=2.0, score_metric='deviance',
                  fit_intercept=True,
-                 random_state=0, callback=None, verbose=False):
+                 random_state=0, callback=None, verbose=False, theta=1):
 
         _check_params(distr=distr, max_iter=max_iter,
                       fit_intercept=fit_intercept)
@@ -594,6 +598,7 @@ class GLM(BaseEstimator):
         self.random_state = random_state
         self.callback = callback
         self.verbose = verbose
+        self.theta = theta
         set_log_level(verbose)
 
     def _set_cv(cv, estimator=None, X=None, y=None):
@@ -744,7 +749,7 @@ class GLM(BaseEstimator):
 
                 # Calculate grad and hess of log likelihood term
                 gk, hk = _gradhess_logloss_1d(self.distr, xk, y, z, self.eta,
-                                              fit_intercept)
+                                              fit_intercept, theta=self.theta)
 
                 # Add grad and hess of regularization term
                 if self.Tau is None:
@@ -863,7 +868,7 @@ class GLM(BaseEstimator):
                 grad = _grad_L2loss(self.distr,
                                     alpha, self.Tau,
                                     reg_lambda, X, y, self.eta,
-                                    beta, self.fit_intercept)
+                                    beta, self.fit_intercept, theta=self.theta)
                 # Update
                 beta = beta - self.learning_rate * grad
 
