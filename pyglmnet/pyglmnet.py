@@ -158,7 +158,6 @@ def _logL(distr, y, y_hat, z=None, theta=1):
         nu = 1.  # shape parameter, exponential for now
         logL = np.sum(nu * (-y / y_hat - np.log(y_hat)))
     elif distr == 'neg-binomial':
-        theta = y.mean()
         logL = np.sum(loggamma(y + theta) - loggamma(theta) - loggamma(y + 1) +
                       theta * np.log(theta) + y * np.log(y_hat) - (theta + y) *
                       np.log(y_hat + theta))
@@ -393,9 +392,10 @@ def _gradhess_logloss_1d(distr, xk, y, z, eta, fit_intercept=True, theta=1):
         grad_mu = _grad_mu(distr, z, eta)
         hess_mu = np.exp(-z) * expit(z)**2
 
-        gradient_beta_j = -grad_mu * (y / mu - (theta + y) / (mu + y))
-        partial_beta_0_1 = hess_mu * (y / mu - (y + theta) / (mu + y))
-        partial_beta_0_2 = grad_mu**2 * ((y + theta) / (mu + y)**2 - y / mu**2)
+        gradient_beta_j = -grad_mu * (y / mu - (y + theta) / (mu + theta))
+        partial_beta_0_1 = hess_mu * (y / mu - (y + theta) / (mu + theta))
+        partial_beta_0_2 = grad_mu**2 * \
+            ((y + theta) / (mu + theta)**2 - y / mu**2)
         partial_beta_0 = -(partial_beta_0_1 + partial_beta_0_2)
         gk = np.dot(gradient_beta_j.T, xk)
         hk = np.dot(partial_beta_0.T, xk**2)
@@ -788,8 +788,7 @@ class GLM(BaseEstimator):
 
                 # Calculate grad and hess of log likelihood term
                 gk, hk = _gradhess_logloss_1d(self.distr, xk, y, z, self.eta,
-                                              fit_intercept,
-                                              theta=self.theta)
+                                              self.theta, fit_intercept)
 
                 # Add grad and hess of regularization term
                 if self.Tau is None:
@@ -908,8 +907,7 @@ class GLM(BaseEstimator):
                 grad = _grad_L2loss(self.distr,
                                     alpha, self.Tau,
                                     reg_lambda, X, y, self.eta,
-                                    beta, self.fit_intercept,
-                                    theta=self.theta)
+                                    self.theta, beta, self.fit_intercept)
                 # Update
                 beta = beta - self.learning_rate * grad
 
