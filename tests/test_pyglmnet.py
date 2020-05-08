@@ -209,11 +209,16 @@ def test_glmnet(distr, reg_lambda, fit_intercept, solver):
                       X_train, y_train, eta, group, beta,
                       fit_intercept=fit_intercept))
 
+        if distr == "neg-binomial":
+            theta = y_train.mean()
+        else:
+            theta = 1
+
         glm = GLM(distr, learning_rate=learning_rate,
                   reg_lambda=reg_lambda, tol=1e-5, max_iter=5000,
                   alpha=alpha, solver=solver, score_metric=score_metric,
                   random_state=random_state, callback=callback,
-                  fit_intercept=fit_intercept)
+                  fit_intercept=fit_intercept, theta=theta)
         assert(repr(glm))
 
         glm.fit(X_train, y_train)
