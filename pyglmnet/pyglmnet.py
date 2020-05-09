@@ -502,8 +502,8 @@ class GLM(BaseEstimator):
     ----------
     distr: str
         distribution family can be one of the following
-        'gaussian' | 'binomial' | 'poisson' | 'softplus' | 'probit' | 'gamma'
-        | 'neg-binomial'
+        'gaussian' | 'binomial' | 'poisson' | 'softplus'
+        | 'probit' | 'gamma' | 'neg-binomial'
         default: 'poisson'.
     alpha: float
         the weighting between L1 penalty and L2 penalty term
@@ -771,7 +771,8 @@ class GLM(BaseEstimator):
 
                 # Calculate grad and hess of log likelihood term
                 gk, hk = _gradhess_logloss_1d(self.distr, xk, y, z, self.eta,
-                                              fit_intercept, theta=self.theta)
+                                              fit_intercept,
+                                              theta=self.theta)
 
                 # Add grad and hess of regularization term
                 if self.Tau is None:
@@ -890,7 +891,8 @@ class GLM(BaseEstimator):
                 grad = _grad_L2loss(self.distr,
                                     alpha, self.Tau,
                                     reg_lambda, X, y, self.eta,
-                                    beta, self.fit_intercept, theta=self.theta)
+                                    beta, self.fit_intercept,
+                                    theta=self.theta)
                 # Update
                 beta = beta - self.learning_rate * grad
 
