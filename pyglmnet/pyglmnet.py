@@ -819,6 +819,7 @@ class GLM(BaseEstimator):
             # init active set
             ActiveSet = np.ones_like(beta)
 
+        self._convergence = list()
         # Iterative updates
         for t in range(0, self.max_iter):
             self.n_iter_ += 1
@@ -855,7 +856,9 @@ class GLM(BaseEstimator):
 
             # Convergence by relative parameter change tolerance
             norm_update = np.linalg.norm(beta - beta_old)
-            if t > 1 and (norm_update / np.linalg.norm(beta)) < tol:
+            norm_update /= np.linalg.norm(beta)
+            self._convergence.append(norm_update)
+            if t > 1 and self._convergence[-1] < tol:
                 msg = ('\tParameter update tolerance. ' +
                        'Converged in {0:d} iterations'.format(t))
                 logger.info(msg)
@@ -879,6 +882,37 @@ class GLM(BaseEstimator):
         self.ynull_ = np.mean(y)
         self.is_fitted_ = True
         return self
+
+    def plot_convergence(self, ax=None, show=True):
+        """Plots the convergence.
+
+        Parameters
+        ----------
+        ax : matplotlib.pyplot.axes object
+            If not None, plot in this axis.
+        show : bool
+            If True, call plt.show()
+
+        Returns
+        -------
+        fig : matplotlib.Figure
+            The matplotlib figure handle
+        """
+        import matplotlib.pyplot as plt
+
+        if ax is None:
+            fig, ax = plt.subplots(1, 1)
+
+        ax.semilogy(self._convergence)
+        ax.set_xlim((-20, self.max_iter + 20))
+        ax.axhline(self.tol, linestyle='--', color='r', label='tol')
+        ax.set_ylabel(r'$\Vert\beta_{t} - \beta_{t-1}\Vert/\Vert\beta_t\Vert$')
+        ax.legend()
+
+        if show:
+            plt.show()
+
+        return ax.get_figure()
 
     def predict(self, X):
         """Predict targets.

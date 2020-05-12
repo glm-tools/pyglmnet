@@ -11,6 +11,8 @@ Release notes
 Current
 -------
 
+    - Add method :method:`pyglmnet.GLM.plot_convergence` to inspect convergence by `Mainak Jas`_.
+
 Changelog
 ~~~~~~~~~
 
@@ -19,6 +21,7 @@ BUG
 
     - Graceful handling of small Hessian term in coordinate descent solver that led to exploding update term by `Pavan Ramkumar`_.
     - Ensure full compatibility of `GLM` class with `scikit-learn` by `Titipat Achakulvisut`_.
+
 
 API
 ~~~

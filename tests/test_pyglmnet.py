@@ -1,3 +1,5 @@
+import matplotlib
+
 import subprocess
 import os.path as op
 
@@ -18,6 +20,8 @@ from sklearn.utils.estimator_checks import check_estimator
 
 from pyglmnet import (GLM, GLMCV, _grad_L2loss, _L2loss, simulate_glm,
                       _gradhess_logloss_1d, _loss, datasets, ALLOWED_DISTRS)
+
+matplotlib.use('agg')
 
 
 def test_glm_estimator():
@@ -482,6 +486,7 @@ def test_api_input():
     glm.fit(X, y)
     glm.predict(X)
     glm.score(X, y)
+    glm.plot_convergence()
     glm = GLM(distr='gaussian', solver='test')
 
     with pytest.raises(ValueError, match="solver must be one of"):
