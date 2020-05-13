@@ -12,6 +12,7 @@ Current
 -------
 
     - Add method :method:`pyglmnet.GLM.plot_convergence` to inspect convergence by `Mainak Jas`_.
+    - Add `tqdm` to nicely visualize training time both from notebooks and command line scripts by `Giovanni De Toni`_.
 
 Changelog
 ~~~~~~~~~
