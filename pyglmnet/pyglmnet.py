@@ -7,7 +7,8 @@ import numpy as np
 from scipy.special import expit
 from scipy.stats import norm
 
-from .utils import logger, set_log_level, _check_params
+from .utils import logger, set_log_level, _check_params, \
+    _verbose_iterable, _tqdm_log
 from .base import BaseEstimator, is_classifier, check_version
 
 from .externals.sklearn.utils import check_random_state, check_array, check_X_y
@@ -809,7 +810,7 @@ class GLM(BaseEstimator):
             else:
                 beta = self.beta_
 
-        logger.info('Lambda: %6.4f' % self.reg_lambda)
+        _tqdm_log('Lambda: %6.4f' % self.reg_lambda)
 
         tol = self.tol
         alpha = self.alpha
@@ -820,8 +821,10 @@ class GLM(BaseEstimator):
             ActiveSet = np.ones_like(beta)
 
         self._convergence = list()
+        training_iterations = _verbose_iterable(range(self.max_iter))
+
         # Iterative updates
-        for t in range(0, self.max_iter):
+        for t in training_iterations:
             self.n_iter_ += 1
             beta_old = beta.copy()
             if self.solver == 'batch-gradient':
@@ -861,7 +864,7 @@ class GLM(BaseEstimator):
             if t > 1 and self._convergence[-1] < tol:
                 msg = ('\tParameter update tolerance. ' +
                        'Converged in {0:d} iterations'.format(t))
-                logger.info(msg)
+                _tqdm_log(msg)
                 break
 
             # Compute and save loss if callbacks are requested
@@ -1285,7 +1288,9 @@ class GLMCV(object):
         np.random.shuffle(idxs)
         cv_splits = np.array_split(idxs, self.cv)
 
-        for idx, rl in enumerate(self.reg_lambda):
+        cv_training_iterations = _verbose_iterable(self.reg_lambda)
+
+        for idx, rl in enumerate(cv_training_iterations):
             glm = GLM(distr=self.distr,
                       alpha=self.alpha,
                       Tau=self.Tau,
@@ -1300,7 +1305,7 @@ class GLMCV(object):
                       fit_intercept=self.fit_intercept,
                       random_state=self.random_state,
                       verbose=self.verbose)
-            logger.info('Lambda: %6.4f' % rl)
+            _tqdm_log('Lambda: %6.4f' % rl)
             glm.reg_lambda = rl
 
             scores_fold = list()

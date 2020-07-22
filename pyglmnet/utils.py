@@ -6,9 +6,17 @@ import numpy as np
 from copy import copy
 import logging
 
-
 logger = logging.getLogger('pyglmnet')
 logger.addHandler(logging.StreamHandler())
+
+try:
+    from tqdm.auto import tqdm
+    has_tqdm = True
+except ImportError:
+    logger.warning(
+        "tqdm library not found. Falling back to non-interactive progress "
+        "visualization.")
+    has_tqdm = False
 
 
 def softmax(w):
@@ -130,3 +138,41 @@ def set_log_level(verbose):
             raise ValueError('verbose must be of a valid type')
         verbose = logging_types[verbose]
     logger.setLevel(verbose)
+
+
+def _verbose_iterable(data):
+    """Wrap an iterable object with tqdm.
+
+    If tqdm is not available or if we did not set the appropriate
+    log level, then we fall back to the classical method.
+
+    Parameters
+    ----------
+    data: range, list \n
+        This will be data which will wrapped by tqdm (if available).
+
+    Returns
+    -------
+    wrapped_data: \n
+        Data object wrapped with tqdm.
+    """
+    wrapped_data = data
+    if logger.getEffectiveLevel() == logging.INFO:
+        if has_tqdm:
+            wrapped_data = tqdm(data, leave=False)
+    return wrapped_data
+
+
+def _tqdm_log(msg):
+    """Log a message by using either tqdm or the system logger. This method
+    is needed inside training loops such to provide better visualization.
+
+    Parameters
+    ----------
+    msg: string
+        Message which will be printed
+    """
+    if has_tqdm:
+        tqdm.write(msg)
+    else:
+        logger.info(msg)
