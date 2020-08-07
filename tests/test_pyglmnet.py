@@ -331,7 +331,7 @@ def test_compare_sklearn(solver):
     clf = ElasticNet(alpha=alpha, l1_ratio=l1_ratio, tol=1e-5)
     clf.fit(X, Y)
     glm = GLM(distr='gaussian', alpha=l1_ratio, reg_lambda=alpha,
-              solver=solver, tol=1e-5, max_iter=70)
+              solver=solver, tol=1e-5, max_iter=10000)
     glm.fit(X, Y)
 
     y_sk = clf.predict(X)

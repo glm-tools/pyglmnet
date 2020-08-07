@@ -847,9 +847,11 @@ class GLM(BaseEstimator):
 
             # Apply proximal operator
             if self.fit_intercept:
-                beta[1:] = self._prox(beta[1:], reg_lambda * alpha)
+                beta[1:] = self._prox(beta[1:],
+                                      self.learning_rate * reg_lambda * alpha)
             else:
-                beta = self._prox(beta, reg_lambda * alpha)
+                beta = self._prox(beta,
+                                  self.learning_rate * reg_lambda * alpha)
 
             # Update active set
             if self.solver == 'cdfast':
