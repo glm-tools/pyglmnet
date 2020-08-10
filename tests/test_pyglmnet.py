@@ -321,7 +321,7 @@ def test_compare_sklearn(solver):
         return np.sqrt(np.mean((a - b) ** 2))
 
     X, Y, coef_ = make_regression(
-        n_samples=1000, n_features=1000,
+        n_samples=1000, n_features=500,
         noise=0.1, n_informative=10, coef=True,
         random_state=42)
 
@@ -331,15 +331,15 @@ def test_compare_sklearn(solver):
     clf = ElasticNet(alpha=alpha, l1_ratio=l1_ratio, tol=1e-5)
     clf.fit(X, Y)
     glm = GLM(distr='gaussian', alpha=l1_ratio, reg_lambda=alpha,
-              solver=solver, tol=1e-5, max_iter=10000)
+              solver=solver, tol=1e-6, max_iter=500)
     glm.fit(X, Y)
 
     y_sk = clf.predict(X)
     y_pg = glm.predict(X)
-    assert abs(rmse(Y, y_sk) - rmse(Y, y_pg)) < 1.0
+    assert abs(rmse(Y, y_sk) - rmse(Y, y_pg)) < 0.5
 
     glm = GLM(distr='gaussian', alpha=l1_ratio, reg_lambda=alpha,
-              solver=solver, tol=1e-5, max_iter=5, fit_intercept=False)
+              solver=solver, tol=1e-6, max_iter=5, fit_intercept=False)
     glm.fit(X, Y)
     assert glm.beta0_ == 0.
 
