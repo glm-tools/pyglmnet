@@ -22,6 +22,7 @@ BUG
 
     - Graceful handling of small Hessian term in coordinate descent solver that led to exploding update term by `Pavan Ramkumar`_.
     - Ensure full compatibility of `GLM` class with `scikit-learn` by `Titipat Achakulvisut`_.
+    - Fix incorrect threshold of the proximal operator by `Yu Umegaki`_.
 
 
 API
