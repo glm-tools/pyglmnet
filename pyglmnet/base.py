@@ -1,12 +1,35 @@
+"""Base estimator adapted from scikit-learn."""
+
 import warnings
+import inspect
 from distutils.version import LooseVersion
 
 ##############################################################################
 # adapted from scikit-learn
 
+_DEFAULT_TAGS = {
+    'non_deterministic': False,
+    'requires_positive_X': False,
+    'requires_positive_y': False,
+    'X_types': ['2darray'],
+    'poor_score': False,
+    'no_validation': False,
+    'multioutput': False,
+    "allow_nan": False,
+    'stateless': False,
+    'multilabel': False,
+    '_skip_test': False,
+    '_xfail_checks': False,
+    'multioutput_only': False,
+    'binary_only': False,
+    'requires_fit': True,
+    'requires_y': False,
+}
+
 
 def is_classifier(estimator):
-    """Returns True if the given estimator is (probably) a classifier.
+    """Return True if the given estimator is (probably) a classifier.
+
     Parameters
     ----------
     estimator : object
@@ -21,6 +44,7 @@ def is_classifier(estimator):
 
 def check_version(library, min_version):
     r"""Check minimum library version required.
+
     Parameters
     ----------
     library : str
@@ -48,7 +72,8 @@ def check_version(library, min_version):
 
 
 class BaseEstimator(object):
-    """Base class for all estimators in scikit-learn
+    """Base class for all estimators in scikit-learn.
+
     Notes
     -----
     All estimators should specify all the parameters that can be set
@@ -58,7 +83,7 @@ class BaseEstimator(object):
 
     @classmethod
     def _get_param_names(cls):
-        """Get parameter names for the estimator"""
+        """Get parameter names for the estimator."""
         from inspect import signature
 
         # fetch the constructor or the original constructor before
@@ -87,6 +112,7 @@ class BaseEstimator(object):
 
     def get_params(self, deep=True):
         """Get parameters for this estimator.
+
         Parameters
         ----------
         deep : boolean, optional
@@ -122,6 +148,7 @@ class BaseEstimator(object):
 
     def set_params(self, **params):
         """Set the parameters of this estimator.
+
         The method works on simple estimators as well as on nested objects
         (such as pipelines). The latter have parameters of the form
         ``<component>__<parameter>`` so that it's possible to update each
@@ -156,7 +183,22 @@ class BaseEstimator(object):
                 setattr(self, key, value)
         return self
 
+    def _get_tags(self):
+        collected_tags = {}
+        for base_class in reversed(inspect.getmro(self.__class__)):
+            if hasattr(base_class, '_more_tags'):
+                # need the if because mixins might not have _more_tags
+                # but might do redundant work in estimators
+                # (i.e. calling more tags on BaseEstimator multiple times)
+                more_tags = base_class._more_tags(self)
+                collected_tags.update(more_tags)
+        return collected_tags
+
+    def _more_tags(self):
+        return _DEFAULT_TAGS
+
     def __repr__(self):
+        """repr."""
         from sklearn.base import _pprint
         class_name = self.__class__.__name__
         return '%s(%s)' % (class_name, _pprint(self.get_params(deep=False),
