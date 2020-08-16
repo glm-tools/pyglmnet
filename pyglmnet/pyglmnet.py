@@ -4,7 +4,7 @@ import warnings
 from copy import deepcopy
 
 import numpy as np
-from scipy.special import expit, log1p, loggamma
+from scipy.special import expit, loggamma
 from scipy.stats import norm
 
 from .utils import logger, set_log_level, _check_params, \
@@ -443,32 +443,17 @@ def simulate_glm(distr, beta0, beta, X, eta=2.0, random_state=None,
     _random_state = check_random_state(random_state)
     if distr == 'softplus' or distr == 'poisson':
         y = _random_state.poisson(
-            _lmb(
-                distr,
-                beta0,
-                beta,
-                X,
-                eta,
-                fit_intercept=fit_intercept))
+            _lmb(distr, beta0, beta, X, eta,
+                 fit_intercept=fit_intercept))
     if distr == 'gaussian':
         y = _random_state.normal(
-            _lmb(
-                distr,
-                beta0,
-                beta,
-                X,
-                eta,
-                fit_intercept=fit_intercept))
+            _lmb(distr, beta0, beta, X, eta,
+                 fit_intercept=fit_intercept))
     if distr == 'binomial' or distr == 'probit':
         y = _random_state.binomial(
             1,
-            _lmb(
-                distr,
-                beta0,
-                beta,
-                X,
-                eta,
-                fit_intercept=fit_intercept))
+            _lmb(distr, beta0, beta, X, eta,
+                 fit_intercept=fit_intercept))
     if distr == 'gamma':
         mu = _lmb(distr, beta0, beta, X, eta, fit_intercept=fit_intercept)
         y = np.exp(mu)
