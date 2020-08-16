@@ -448,8 +448,8 @@ class GLM(BaseEstimator):
         'gaussian' | 'binomial' | 'poisson' | 'softplus' | 'probit' | 'gamma'
         default: 'poisson'.
     alpha: float
-        the weighting between L1 penalty and L2 penalty term
-        of the loss function.
+        the weighting between L1 penalty (alpha=1.) and L2 penalty (alpha=0.)
+        term of the loss function.
         default: 0.5
     Tau: array | None
         the (n_features, n_features) Tikhonov matrix.
@@ -1111,8 +1111,8 @@ class GLMCV(object):
         'gaussian' | 'binomial' | 'poisson' | 'softplus' | 'probit' | 'gamma'
         default: 'poisson'.
     alpha: float
-        the weighting between L1 penalty and L2 penalty term
-        of the loss function.
+        the weighting between L1 penalty (alpha=1.) and L2 penalty (alpha=0.)
+        term of the loss function.
         default: 0.5
     Tau: array | None
         the (n_features, n_features) Tikhonov matrix.
