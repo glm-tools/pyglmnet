@@ -7,6 +7,7 @@ from copy import copy
 import logging
 from scipy.special import log1p
 
+from .distributions import BaseDistribution
 
 logger = logging.getLogger('pyglmnet')
 logger.addHandler(logging.StreamHandler())
@@ -113,9 +114,12 @@ def tikhonov_from_prior(prior_cov, n_samples, threshold=0.0001):
 def _check_params(distr, max_iter, fit_intercept):
     from .pyglmnet import ALLOWED_DISTRS
 
-    if distr not in ALLOWED_DISTRS:
-        raise ValueError('distr must be one of %s, Got '
-                         '%s' % (', '.join(ALLOWED_DISTRS), distr))
+    err_msg = ('distr must be one of %s or a subclass of BaseDistribution. '
+               'Got %s' % (', '.join(ALLOWED_DISTRS), distr))
+    if isinstance(distr, str) and distr not in ALLOWED_DISTRS:
+            raise ValueError(err_msg)
+    if not isinstance(distr, str) and not isinstance(distr, BaseDistribution):
+            raise ValueError(err_msg)
 
     if not isinstance(max_iter, int):
         raise ValueError('max_iter must be of type int')

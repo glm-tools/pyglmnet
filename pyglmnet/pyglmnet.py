@@ -14,8 +14,20 @@ from .base import BaseEstimator, is_classifier, check_version
 from .externals.sklearn.utils import check_random_state, check_array, check_X_y
 from .externals.sklearn.utils.validation import check_is_fitted
 
+from .distributions import BaseDistribution, Gaussian
+
 ALLOWED_DISTRS = ['gaussian', 'binomial', 'softplus', 'poisson',
                   'probit', 'gamma', 'neg-binomial']
+
+
+def _get_distr(distr):
+    if isinstance(distr, BaseDistribution):
+        return distr
+
+    elif distr == "gaussian":
+        distr = Gaussian()
+
+    return distr
 
 
 def _probit_g1(z, pdfz, cdfz, thresh=5):
@@ -244,51 +256,59 @@ def _grad_L2loss(distr, alpha, Tau, reg_lambda, X, y, eta, theta, beta,
             Tau = np.eye(beta.shape[0])
     InvCov = np.dot(Tau.T, Tau)
 
-    z = _z(beta[0], beta[1:], X, fit_intercept)
-    mu = _mu(distr, z, eta, fit_intercept)
-    grad_mu = _grad_mu(distr, z, eta)
+    # z = _z(beta[0], beta[1:], X, fit_intercept)
+    # mu = _mu(distr, z, eta, fit_intercept)
+    # grad_mu = _grad_mu(distr, z, eta)
 
-    grad_beta0 = 0.
-    if distr in ['poisson', 'softplus']:
-        if fit_intercept:
-            grad_beta0 = np.sum(grad_mu) - np.sum(y * grad_mu / mu)
-        grad_beta = ((np.dot(grad_mu.T, X) -
-                      np.dot((y * grad_mu / mu).T, X)).T)
+    if fit_intercept:
+        beta0_, beta_ = beta[0], beta[1:]
+    else:
+        beta0_, beta_ = 0., beta
+    grad_beta0, grad_beta = distr.grad_log_likelihood(X, y, beta0_, beta_)
+    grad_beta0 = grad_beta0 if fit_intercept else 0.
 
-    elif distr == 'gaussian':
-        if fit_intercept:
-            grad_beta0 = np.sum((mu - y) * grad_mu)
-        grad_beta = np.dot((mu - y).T, X * grad_mu[:, None]).T
-
-    elif distr == 'binomial':
-        if fit_intercept:
-            grad_beta0 = np.sum(mu - y)
-        grad_beta = np.dot((mu - y).T, X).T
-
-    elif distr == 'probit':
-        grad_logl = (y * _probit_g3(z, grad_mu, mu) -
-                     (1 - y) * _probit_g4(z, grad_mu, mu))
-        if fit_intercept:
-            grad_beta0 = -np.sum(grad_logl)
-        grad_beta = -np.dot(grad_logl.T, X).T
-
-    elif distr == 'gamma':
-        nu = 1.
-        grad_logl = (y / mu ** 2 - 1 / mu) * grad_mu
-        if fit_intercept:
-            grad_beta0 = -nu * np.sum(grad_logl)
-        grad_beta = -nu * np.dot(grad_logl.T, X).T
-
-    elif distr == 'neg-binomial':
-        partial_beta_0 = grad_mu * ((theta + y) / (mu + theta) - y / mu)
-
-        if fit_intercept:
-            grad_beta0 = np.sum(partial_beta_0)
-
-        grad_beta = np.dot(partial_beta_0.T, X)
+    # grad_beta0 = 0.
+    # if distr in ['poisson', 'softplus']:
+    #     if fit_intercept:
+    #         grad_beta0 = np.sum(grad_mu) - np.sum(y * grad_mu / mu)
+    #     grad_beta = ((np.dot(grad_mu.T, X) -
+    #                   np.dot((y * grad_mu / mu).T, X)).T)
+    #
+    # elif distr == 'gaussian':
+    #     if fit_intercept:
+    #         grad_beta0 = np.sum((mu - y) * grad_mu)
+    #     grad_beta = np.dot((mu - y).T, X * grad_mu[:, None]).T
+    #
+    # elif distr == 'binomial':
+    #     if fit_intercept:
+    #         grad_beta0 = np.sum(mu - y)
+    #     grad_beta = np.dot((mu - y).T, X).T
+    #
+    # elif distr == 'probit':
+    #     grad_logl = (y * _probit_g3(z, grad_mu, mu) -
+    #                  (1 - y) * _probit_g4(z, grad_mu, mu))
+    #     if fit_intercept:
+    #         grad_beta0 = -np.sum(grad_logl)
+    #     grad_beta = -np.dot(grad_logl.T, X).T
+    #
+    # elif distr == 'gamma':
+    #     nu = 1.
+    #     grad_logl = (y / mu ** 2 - 1 / mu) * grad_mu
+    #     if fit_intercept:
+    #         grad_beta0 = -nu * np.sum(grad_logl)
+    #     grad_beta = -nu * np.dot(grad_logl.T, X).T
+    #
+    # elif distr == 'neg-binomial':
+    #     partial_beta_0 = grad_mu * ((theta + y) / (mu + theta) - y / mu)
+    #
+    #     if fit_intercept:
+    #         grad_beta0 = np.sum(partial_beta_0)
+    #
+    #     grad_beta = np.dot(partial_beta_0.T, X)
 
     grad_beta0 *= 1. / n_samples
     grad_beta *= 1. / n_samples
+
     if fit_intercept:
         grad_beta += reg_lambda * (1 - alpha) * np.dot(InvCov, beta[1:])
         g = np.zeros((n_features + 1, ))
@@ -299,7 +319,6 @@ def _grad_L2loss(distr, alpha, Tau, reg_lambda, X, y, eta, theta, beta,
         g = grad_beta
 
     return g
-
 
 def _gradhess_logloss_1d(distr, xk, y, z, eta, theta, fit_intercept=True):
     """
@@ -495,8 +514,8 @@ class GLM(BaseEstimator):
 
     Parameters
     ----------
-    distr: str
-        distribution family can be one of the following
+    distr: str or object subclassed from BaseDistribution
+        if str, distribution family can be one of the following
         'gaussian' | 'binomial' | 'poisson' | 'softplus'
         | 'probit' | 'gamma' | 'neg-binomial'
         default: 'poisson'.
@@ -604,8 +623,7 @@ class GLM(BaseEstimator):
 
         _check_params(distr=distr, max_iter=max_iter,
                       fit_intercept=fit_intercept)
-
-        self.distr = distr
+        self.distr = _get_distr(distr)
         self.alpha = alpha
         self.reg_lambda = reg_lambda
         self.Tau = Tau
@@ -770,8 +788,11 @@ class GLM(BaseEstimator):
                     xk = X[:, k]
 
                 # Calculate grad and hess of log likelihood term
-                gk, hk = _gradhess_logloss_1d(self.distr, xk, y, z, self.eta,
-                                              self.theta, fit_intercept)
+                # gk, hk = _gradhess_logloss_1d(self.distr, xk, y, z, self.eta,
+                #                               self.theta, fit_intercept)
+                gk, hk = self.distr.gradhess_log_likelihood_1d(xk, y, z)
+                gk = 1. / n_samples * gk
+                hk = 1. / n_samples * hk
 
                 # Add grad and hess of regularization term
                 if self.Tau is None:
@@ -998,8 +1019,11 @@ class GLM(BaseEstimator):
             raise ValueError('Input data should be of type ndarray (got %s).'
                              % type(X))
 
-        yhat = _lmb(self.distr, self.beta0_, self.beta_, X, self.eta,
-                    fit_intercept=True)
+        # yhat = _lmb(self.distr, self.beta0_, self.beta_, X, self.eta,
+        #             fit_intercept=True)
+
+        z = self.distr._z(self.beta0_, self.beta_, X)
+        yhat = self.distr.mu(z)
 
         if self.distr == 'binomial':
             yhat = (yhat > 0.5).astype(int)
@@ -1028,8 +1052,10 @@ class GLM(BaseEstimator):
             raise ValueError('Input data should be of type ndarray (got %s).'
                              % type(X))
 
-        yhat = _lmb(self.distr, self.beta0_, self.beta_, X, self.eta,
-                    fit_intercept=True)
+        # yhat = _lmb(self.distr, self.beta0_, self.beta_, X, self.eta,
+        #             fit_intercept=True)
+        z = self.distr._z(self.beta0_, self.beta_, X)
+        yhat = self.distr.mu(z)
         yhat = np.asarray(yhat)
         return yhat
 

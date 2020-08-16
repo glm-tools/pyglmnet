@@ -28,7 +28,8 @@ def deviance(y, yhat, distr, theta):
     else:
         LS = 0
 
-    L1 = _logL(distr, y, yhat, theta=theta)
+    # L1 = _logL(distr, y, yhat, theta=theta)
+    L1 = distr.log_likelihood(y, yhat)
     score = -2 * (L1 - LS)
     return score
 
@@ -60,8 +61,10 @@ def pseudo_R2(X, y, yhat, ynull_, distr, theta):
     else:
         LS = 0
 
-    L0 = _logL(distr, y, ynull_, theta=theta)
-    L1 = _logL(distr, y, yhat, theta=theta)
+    # L0 = _logL(distr, y, ynull_, theta=theta)
+    # L1 = _logL(distr, y, yhat, theta=theta)
+    L0 = distr.log_likelihood(y, ynull_)
+    L1 = distr.log_likelihood(y, yhat)
 
     if distr in ['softplus', 'poisson', 'neg-binomial']:
         score = (1 - (LS - L1) / (LS - L0))
