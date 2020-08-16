@@ -4,7 +4,7 @@ import numpy as np
 from .pyglmnet import _logL
 
 
-def deviance(y, yhat, distr):
+def deviance(y, yhat, distr, theta):
     """Deviance metrics.
 
     Parameters
@@ -23,17 +23,17 @@ def deviance(y, yhat, distr):
     score : float
         Deviance of the predicted labels.
     """
-    if distr in ['softplus', 'poisson']:
-        LS = _logL(distr, y, y)
+    if distr in ['softplus', 'poisson', 'neg-binomial']:
+        LS = _logL(distr, y, y, theta=theta)
     else:
         LS = 0
 
-    L1 = _logL(distr, y, yhat)
+    L1 = _logL(distr, y, yhat, theta=theta)
     score = -2 * (L1 - LS)
     return score
 
 
-def pseudo_R2(X, y, yhat, ynull_, distr):
+def pseudo_R2(X, y, yhat, ynull_, distr, theta):
     """Pseudo-R2 metric.
 
     Parameters
@@ -55,15 +55,15 @@ def pseudo_R2(X, y, yhat, ynull_, distr):
     score : float
         Pseudo-R2 score.
     """
-    if distr in ['softplus', 'poisson']:
-        LS = _logL(distr, y, y)
+    if distr in ['softplus', 'poisson', 'neg-binomial']:
+        LS = _logL(distr, y, y, theta=theta)
     else:
         LS = 0
 
-    L0 = _logL(distr, y, ynull_)
-    L1 = _logL(distr, y, yhat)
+    L0 = _logL(distr, y, ynull_, theta=theta)
+    L1 = _logL(distr, y, yhat, theta=theta)
 
-    if distr in ['softplus', 'poisson']:
+    if distr in ['softplus', 'poisson', 'neg-binomial']:
         score = (1 - (LS - L1) / (LS - L0))
     else:
         score = (1 - L1 / L0)
