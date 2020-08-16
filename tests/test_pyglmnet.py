@@ -350,7 +350,6 @@ def test_cdfast(distr):
     n_features = 100
     n_classes = 5
     density = 0.1
-    theta = 1.0
 
     # Batch gradient not available for gamma
     if distr == 'gamma':
@@ -375,7 +374,7 @@ def test_cdfast(distr):
     z = beta_[0] + np.dot(X, beta_[1:])
     k = 1
     xk = X[:, k - 1]
-    gk, hk = _gradhess_logloss_1d(glm.distr, xk, y, z, glm.eta, theta=theta)
+    gk, hk = _gradhess_logloss_1d(glm.distr, xk, y, z, glm.eta, glm.theta)
 
     # test grad and hess
     if distr != 'multinomial':
