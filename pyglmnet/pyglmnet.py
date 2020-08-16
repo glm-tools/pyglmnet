@@ -75,6 +75,22 @@ def _probit_g6(z, pdfz, cdfz, thresh=5):
     return res
 
 
+def _softplus(z):
+    # Numerically stable for larger z. We add a small value to
+    # prevent zeros.
+    # https://cran.r-project.org/web/packages/Rmpfr/vignettes/log1mexp-note.pdf
+    # mu = z.copy()
+    # mu[z <= 1] = log1p(np.exp(z[z <= 1]))
+    # mu[z > 1] = (z[z > 1] + log1p(np.exp(-z[z > 1]))) + 1 * 10e-10
+
+    # see stabilizing softplus: http://sachinashanbhag.blogspot.com/2014/05/numerically-approximation-of-log-1-expy.html #noqa
+    mu = z.copy()
+    mu[z > 35] = z[z > 35]
+    mu[z < -10] = np.exp(z[z < -10])
+    mu[(z >= -10) & (z <= 35)] = log1p(np.exp(z[(z >= -10) & (z <= 35)]))
+    return mu
+
+
 def _z(beta0, beta, X, fit_intercept):
     """Compute z to be passed through non-linearity."""
     if fit_intercept:
@@ -93,12 +109,7 @@ def _lmb(distr, beta0, beta, X, eta, fit_intercept=True):
 def _mu(distr, z, eta, fit_intercept):
     """The non-linearity (inverse link)."""
     if distr in ['softplus', 'gamma', 'neg-binomial']:
-        # Numerically stable for larger z. We add a small value to
-        # prevent zeros.
-        # https://cran.r-project.org/web/packages/Rmpfr/vignettes/log1mexp-note.pdf
-        mu = z.copy()
-        mu[z <= 1] = log1p(np.exp(z[z <= 1]))
-        mu[z > 1] = (z[z > 1] + log1p(np.exp(-z[z > 1]))) + 1 * 10e-10
+        mu = _softplus(z)
     elif distr == 'poisson':
         mu = z.copy()
         beta0 = (1 - eta) * np.exp(eta) if fit_intercept else 0.
@@ -306,7 +317,7 @@ def _grad_L2loss(distr, alpha, Tau, reg_lambda, X, y, eta, theta, beta,
     return g
 
 
-def _gradhess_logloss_1d(distr, xk, y, z, eta, theta=1.0, fit_intercept=True):
+def _gradhess_logloss_1d(distr, xk, y, z, eta, theta, fit_intercept=True):
     """
     Compute gradient (1st derivative)
     and Hessian (2nd derivative)
@@ -386,19 +397,17 @@ def _gradhess_logloss_1d(distr, xk, y, z, eta, theta=1.0, fit_intercept=True):
         raise NotImplementedError('cdfast is not implemented for Gamma '
                                   'distribution')
     elif distr == 'neg-binomial':
-
-        theta = 15.
         mu = _mu(distr, z, eta, fit_intercept)
         grad_mu = _grad_mu(distr, z, eta)
-        hess_mu = np.exp(-z) * expit(z)**2
+        hess_mu = np.exp(-z) * expit(z) ** 2
 
         gradient_beta_j = -grad_mu * (y / mu - (y + theta) / (mu + theta))
         partial_beta_0_1 = hess_mu * (y / mu - (y + theta) / (mu + theta))
-        partial_beta_0_2 = grad_mu**2 * \
-            ((y + theta) / (mu + theta)**2 - y / mu**2)
+        partial_beta_0_2 = grad_mu ** 2 * \
+            ((y + theta) / (mu + theta) ** 2 - y / mu ** 2)
         partial_beta_0 = -(partial_beta_0_1 + partial_beta_0_2)
         gk = np.dot(gradient_beta_j.T, xk)
-        hk = np.dot(partial_beta_0.T, xk**2)
+        hk = np.dot(partial_beta_0.T, xk ** 2)
 
     elif distr == 'gamma':
         raise NotImplementedError('cdfast is not implemented for Gamma '
