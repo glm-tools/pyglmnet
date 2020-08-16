@@ -563,8 +563,9 @@ class GLM(BaseEstimator):
         added to the decision function.
         default: True
     theta: float
-        shape parameter of the negative binomial distribution. It is used
-        only if distr is equal to neg-binomial, otherwise it is ignored.
+        shape parameter of the negative binomial distribution (number of
+        successes before the first failure). It is used only if distr is
+        equal to neg-binomial, otherwise it is ignored.
         default: 1.0
     random_state : int
         seed of the random number generator used to initialize the solution.
@@ -1236,8 +1237,9 @@ class GLMCV(object):
         added to the decision function.
         default: True
     theta: float
-        shape parameter of the negative binomial distribution. It is used
-        only if distr is equal to neg-binomial, otherwise it is ignored.
+        shape parameter of the negative binomial distribution (number of
+        successes before the first failure). It is used only if distr is
+        equal to neg-binomial, otherwise it is ignored.
         default: 1.0
     random_state : int
         seed of the random number generator used to initialize the solution.
