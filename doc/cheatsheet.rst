@@ -295,7 +295,7 @@ where :math:`\mu_i' = \frac{1}{1 + \exp(-z_i)}`.
 
 
 Negative Binomial
--------------------------------
+-----------------
 **Mean Function**
 
 .. math::
