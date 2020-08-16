@@ -76,7 +76,7 @@ def _probit_g6(z, pdfz, cdfz, thresh=5):
 
 
 def _z(beta0, beta, X, fit_intercept):
-    """Compute z to be passed through non-linearity"""
+    """Compute z to be passed through non-linearity."""
     if fit_intercept:
         z = beta0 + np.dot(X, beta)
     else:
@@ -130,7 +130,7 @@ def _grad_mu(distr, z, eta):
     return grad_mu
 
 
-def _logL(distr, y, y_hat, z=None, theta=1):
+def _logL(distr, y, y_hat, z=None, theta=1.0):
     """The log likelihood."""
     if distr in ['softplus', 'poisson']:
         eps = np.spacing(1)
@@ -206,13 +206,13 @@ def _L1penalty(beta, group=None):
     return L1penalty
 
 
-def _loss(distr, alpha, Tau, reg_lambda, X, y, eta, group, beta,
+def _loss(distr, alpha, Tau, reg_lambda, X, y, eta, theta, group, beta,
           fit_intercept=True):
     """Define the objective function for elastic net."""
     n_samples, n_features = X.shape
     z = _z(beta[0], beta[1:], X, fit_intercept)
     y_hat = _mu(distr, z, eta, fit_intercept)
-    L = 1. / n_samples * _logL(distr, y, y_hat, z)
+    L = 1. / n_samples * _logL(distr, y, y_hat, z, theta)
     if fit_intercept:
         P = _penalty(alpha, beta[1:], Tau, group)
     else:
@@ -221,13 +221,13 @@ def _loss(distr, alpha, Tau, reg_lambda, X, y, eta, group, beta,
     return J
 
 
-def _L2loss(distr, alpha, Tau, reg_lambda, X, y, eta, group, beta,
+def _L2loss(distr, alpha, Tau, reg_lambda, X, y, eta, theta, group, beta,
             fit_intercept=True):
     """Define the objective function for elastic net."""
     n_samples, n_features = X.shape
     z = _z(beta[0], beta[1:], X, fit_intercept)
     y_hat = _mu(distr, z, eta, fit_intercept)
-    L = 1. / n_samples * _logL(distr, y, y_hat, z)
+    L = 1. / n_samples * _logL(distr, y, y_hat, z, theta)
     if fit_intercept:
         P = 0.5 * (1 - alpha) * _L2penalty(beta[1:], Tau)
     else:
@@ -236,8 +236,8 @@ def _L2loss(distr, alpha, Tau, reg_lambda, X, y, eta, group, beta,
     return J
 
 
-def _grad_L2loss(distr, alpha, Tau, reg_lambda, X, y, eta, beta,
-                 fit_intercept=True, theta=1):
+def _grad_L2loss(distr, alpha, Tau, reg_lambda, X, y, eta, theta, beta,
+                 fit_intercept=True):
     """The gradient."""
     n_samples, n_features = X.shape
     n_samples = np.float(n_samples)
@@ -306,7 +306,7 @@ def _grad_L2loss(distr, alpha, Tau, reg_lambda, X, y, eta, beta,
     return g
 
 
-def _gradhess_logloss_1d(distr, xk, y, z, eta, fit_intercept=True, theta=1):
+def _gradhess_logloss_1d(distr, xk, y, z, eta, theta=1.0, fit_intercept=True):
     """
     Compute gradient (1st derivative)
     and Hessian (2nd derivative)
@@ -617,7 +617,7 @@ class GLM(BaseEstimator):
                  learning_rate=2e-1, max_iter=1000,
                  tol=1e-6, eta=2.0, score_metric='deviance',
                  fit_intercept=True,
-                 random_state=0, callback=None, verbose=False, theta=1):
+                 random_state=0, theta=1.0, callback=None, verbose=False):
 
         _check_params(distr=distr, max_iter=max_iter,
                       fit_intercept=fit_intercept)
@@ -965,7 +965,7 @@ class GLM(BaseEstimator):
         return self
 
     def plot_convergence(self, ax=None, show=True):
-        """Plots the convergence.
+        """Plot convergence.
 
         Parameters
         ----------
@@ -1142,9 +1142,10 @@ class GLM(BaseEstimator):
 
         # Check whether we have a list of estimators or a single estimator
         if self.score_metric == 'deviance':
-            return metrics.deviance(y, yhat, self.distr)
+            return metrics.deviance(y, yhat, self.distr, self.theta)
         elif self.score_metric == 'pseudo_R2':
-            return metrics.pseudo_R2(X, y, yhat, self.ynull_, self.distr)
+            return metrics.pseudo_R2(X, y, yhat, self.ynull_,
+                                     self.distr, self.theta)
         if self.score_metric == 'accuracy':
             return metrics.accuracy(y, yhat)
 
@@ -1277,7 +1278,7 @@ class GLMCV(object):
                  learning_rate=2e-1, max_iter=1000,
                  tol=1e-6, eta=2.0, score_metric='deviance',
                  fit_intercept=True,
-                 random_state=0, verbose=False):
+                 random_state=0, theta=1.0, verbose=False):
 
         if reg_lambda is None:
             reg_lambda = np.logspace(np.log(0.5), np.log(0.01), 10,
