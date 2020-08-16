@@ -8,7 +8,7 @@ from scipy.special import expit, log1p, loggamma
 from scipy.stats import norm
 
 from .utils import logger, set_log_level, _check_params, \
-    _verbose_iterable, _tqdm_log
+    _verbose_iterable, _tqdm_log, softplus
 from .base import BaseEstimator, is_classifier, check_version
 
 from .externals.sklearn.utils import check_random_state, check_array, check_X_y
@@ -75,24 +75,6 @@ def _probit_g6(z, pdfz, cdfz, thresh=5):
     return res
 
 
-def _softplus(z):
-    # Numerically stable for larger z. We add a small value to
-    # prevent zeros.
-    # https://cran.r-project.org/web/packages/Rmpfr/vignettes/log1mexp-note.pdf
-    # mu = z.copy()
-    # mu[z <= 1] = log1p(np.exp(z[z <= 1]))
-    # mu[z > 1] = (z[z > 1] + log1p(np.exp(-z[z > 1]))) + 1 * 10e-10
-
-    # see stabilizing softplus:
-    # http://sachinashanbhag.blogspot.com/2014/05/numerically-approximation-of-log-1-expy.html
-    # #noqa
-    mu = z.copy()
-    mu[z > 35] = z[z > 35]
-    mu[z < -10] = np.exp(z[z < -10])
-    mu[(z >= -10) & (z <= 35)] = log1p(np.exp(z[(z >= -10) & (z <= 35)]))
-    return mu
-
-
 def _z(beta0, beta, X, fit_intercept):
     """Compute z to be passed through non-linearity."""
     if fit_intercept:
@@ -111,7 +93,7 @@ def _lmb(distr, beta0, beta, X, eta, fit_intercept=True):
 def _mu(distr, z, eta, fit_intercept):
     """The non-linearity (inverse link)."""
     if distr in ['softplus', 'gamma', 'neg-binomial']:
-        mu = _softplus(z)
+        mu = softplus(z)
     elif distr == 'poisson':
         mu = z.copy()
         beta0 = (1 - eta) * np.exp(eta) if fit_intercept else 0.
