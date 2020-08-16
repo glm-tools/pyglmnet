@@ -562,6 +562,10 @@ class GLM(BaseEstimator):
         specifies if a constant (a.k.a. bias or intercept) should be
         added to the decision function.
         default: True
+    theta: float
+        shape parameter of the negative binomial distribution. It is used
+        only if distr is equal to neg-binomial, otherwise it is ignored.
+        default: 1.0
     random_state : int
         seed of the random number generator used to initialize the solution.
         default: 0
@@ -1231,6 +1235,10 @@ class GLMCV(object):
         specifies if a constant (a.k.a. bias or intercept) should be
         added to the decision function.
         default: True
+    theta: float
+        shape parameter of the negative binomial distribution. It is used
+        only if distr is equal to neg-binomial, otherwise it is ignored.
+        default: 1.0
     random_state : int
         seed of the random number generator used to initialize the solution.
         default: 0
