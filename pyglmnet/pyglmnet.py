@@ -83,7 +83,9 @@ def _softplus(z):
     # mu[z <= 1] = log1p(np.exp(z[z <= 1]))
     # mu[z > 1] = (z[z > 1] + log1p(np.exp(-z[z > 1]))) + 1 * 10e-10
 
-    # see stabilizing softplus: http://sachinashanbhag.blogspot.com/2014/05/numerically-approximation-of-log-1-expy.html #noqa
+    # see stabilizing softplus:
+    # http://sachinashanbhag.blogspot.com/2014/05/numerically-approximation-of-log-1-expy.html
+    # #noqa
     mu = z.copy()
     mu[z > 35] = z[z > 35]
     mu[z < -10] = np.exp(z[z < -10])
@@ -1315,6 +1317,7 @@ class GLMCV(object):
         self.ynull_ = None
         self.tol = tol
         self.eta = eta
+        self.theta = theta
         self.score_metric = score_metric
         self.fit_intercept = fit_intercept
         self.random_state = random_state
@@ -1389,6 +1392,7 @@ class GLMCV(object):
                       max_iter=self.max_iter,
                       tol=self.tol,
                       eta=self.eta,
+                      theta=self.theta,
                       score_metric=self.score_metric,
                       fit_intercept=self.fit_intercept,
                       random_state=self.random_state,

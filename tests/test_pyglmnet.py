@@ -192,8 +192,9 @@ def test_glmnet(distr, reg_lambda, fit_intercept, solver):
 
         np.random.seed(random_state)
 
+        theta = 1.0
         X_train = np.random.normal(0.0, 1.0, [n_samples, n_features])
-        y_train = simulate_glm(distr, beta0, beta, X_train,
+        y_train = simulate_glm(distr, beta0, beta, X_train, theta=theta,
                                sample=False)
 
         alpha = 0.
@@ -208,11 +209,6 @@ def test_glmnet(distr, reg_lambda, fit_intercept, solver):
                 _loss(distr, alpha, Tau, reg_lambda,
                       X_train, y_train, eta, theta, group, beta,
                       fit_intercept=fit_intercept))
-
-        if distr == "neg-binomial":
-            theta = y_train.mean()
-        else:
-            theta = 1
 
         glm = GLM(distr, learning_rate=learning_rate,
                   reg_lambda=reg_lambda, tol=1e-5, max_iter=5000,
@@ -354,6 +350,7 @@ def test_cdfast(distr):
     n_features = 100
     n_classes = 5
     density = 0.1
+    theta = 1.0
 
     # Batch gradient not available for gamma
     if distr == 'gamma':
@@ -378,7 +375,7 @@ def test_cdfast(distr):
     z = beta_[0] + np.dot(X, beta_[1:])
     k = 1
     xk = X[:, k - 1]
-    gk, hk = _gradhess_logloss_1d(glm.distr, xk, y, z, glm.eta)
+    gk, hk = _gradhess_logloss_1d(glm.distr, xk, y, z, glm.eta, theta=theta)
 
     # test grad and hess
     if distr != 'multinomial':
