@@ -13,6 +13,7 @@ Current
 
     - Add method :method:`pyglmnet.GLM.plot_convergence` to inspect convergence by `Mainak Jas`_.
     - Add `tqdm` to nicely visualize training time both from notebooks and command line scripts by `Giovanni De Toni`_.
+	- Add Negative Binomial distribution by `Giovanni De Toni`_, `Titipat Achakulvisut`_, `Pavan Ramkumar`_ and `Mainak Jas`_.
 
 Changelog
 ~~~~~~~~~
