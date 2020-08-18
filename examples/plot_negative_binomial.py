@@ -9,9 +9,25 @@ We wrote this example taking inspiration from the R community
 below
 https://stats.idre.ucla.edu/r/dae/negative-binomial-regression/
 
-Here, we would like to predict the days absence of high school
+Here, we would like to predict the number of days absence of high school
 juniors at two schools from there type of program they are enrolled,
 and their math score.
+
+The nature of the empirical data suggests that we need to model
+count data (the number of days absent). In such scenarios, a common model
+we could use is the Poisson regression.
+
+However, if we inspect the dataset more closely, we will notice that
+the dataset is over-dispersed since the conditional mean exceeds the
+conditional variance. We would need to apply another model which is the
+Negative Binomial regression.
+
+The Negative Binomial regression can be seen as a mixture of Poisson
+regression in which the mean of the Poisson distribution can be seen
+as a random variable drawn from a Gamma distribution.
+
+This gives us an extra parameter which can be used to account for the over
+dispersion.
 """
 
 ########################################################
@@ -41,8 +57,11 @@ df = pd.read_stata("https://stats.idre.ucla.edu/stat/stata/dae/nb_data.dta")
 df.hist(column='daysabs', by=['prog'])
 plt.show()
 
-# Print mean and standard deviation for each program enrolled
-df.groupby('prog').agg({'daysabs': ['mean', 'std']})
+# Print mean and standard deviation for each program enrolled.
+# We can see from here that the variance is higher that then mean for all
+# the levels, therefore hinting for over-dispersion.
+prog_mean = df.groupby('prog').agg({'daysabs': ['mean', 'std']})
+print(prog_mean)
 
 ########################################################
 # Feature
@@ -61,8 +80,8 @@ Xtrain, Xtest, ytrain, ytest = train_test_split(Xdsgn, y, test_size=0.2)
 glm_neg_bino = GLM(distr='neg-binomial',
                    alpha=0.0,
                    reg_lambda=0.0,
-                   max_iter=10000,
-                   score_metric='pseudo_R2')
+                   score_metric='pseudo_R2',
+                   verbose=True)
 glm_neg_bino.fit(Xtrain, ytrain)
 
 ########################################################
