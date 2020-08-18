@@ -14,7 +14,7 @@ from .base import BaseEstimator, is_classifier, check_version
 from .externals.sklearn.utils import check_random_state, check_array, check_X_y
 from .externals.sklearn.utils.validation import check_is_fitted
 
-from .distributions import BaseDistribution, Gaussian
+from .distributions import BaseDistribution, Gaussian, Poisson
 
 ALLOWED_DISTRS = ['gaussian', 'binomial', 'softplus', 'poisson',
                   'probit', 'gamma', 'neg-binomial']
@@ -24,8 +24,11 @@ def _get_distr(distr):
     if isinstance(distr, BaseDistribution):
         return distr
 
-    elif distr == "gaussian":
+    elif distr == 'gaussian':
         distr = Gaussian()
+
+    elif distr == 'poisson':
+        distr = Poisson()
 
     return distr
 
@@ -624,6 +627,9 @@ class GLM(BaseEstimator):
         _check_params(distr=distr, max_iter=max_iter,
                       fit_intercept=fit_intercept)
         self.distr = _get_distr(distr)
+        if isinstance(self.distr, Poisson):
+            self.distr.eta = eta
+        print(self.distr.eta)
         self.alpha = alpha
         self.reg_lambda = reg_lambda
         self.Tau = Tau

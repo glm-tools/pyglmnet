@@ -2,6 +2,7 @@
 
 import numpy as np
 from .pyglmnet import _logL
+from .distributions import Poisson
 
 
 def deviance(y, yhat, distr, theta):
@@ -23,8 +24,10 @@ def deviance(y, yhat, distr, theta):
     score : float
         Deviance of the predicted labels.
     """
-    if distr in ['softplus', 'poisson', 'neg-binomial']:
-        LS = _logL(distr, y, y, theta=theta)
+    # if distr in ['softplus', 'poisson', 'neg-binomial']:
+        # LS = _logL(distr, y, y, theta=theta)
+    if isinstance(distr, Poisson):
+        LS = distr.log_likelihood(y, y)
     else:
         LS = 0
 
@@ -56,8 +59,10 @@ def pseudo_R2(X, y, yhat, ynull_, distr, theta):
     score : float
         Pseudo-R2 score.
     """
-    if distr in ['softplus', 'poisson', 'neg-binomial']:
-        LS = _logL(distr, y, y, theta=theta)
+    # if distr in ['softplus', 'poisson', 'neg-binomial']:
+    #     LS = _logL(distr, y, y, theta=theta)
+    if isinstance(distr, Poisson):
+        LS = distr.log_likelihood(y, y)
     else:
         LS = 0
 
@@ -66,7 +71,8 @@ def pseudo_R2(X, y, yhat, ynull_, distr, theta):
     L0 = distr.log_likelihood(y, ynull_)
     L1 = distr.log_likelihood(y, yhat)
 
-    if distr in ['softplus', 'poisson', 'neg-binomial']:
+    # if distr in ['softplus', 'poisson', 'neg-binomial']:
+    if isinstance(distr, Poisson):
         score = (1 - (LS - L1) / (LS - L0))
     else:
         score = (1 - L1 / L0)
