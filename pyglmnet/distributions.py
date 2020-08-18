@@ -56,10 +56,6 @@ class BaseDistribution(ABC):
 class Gaussian(BaseDistribution):
     """Class for Gaussian distribution."""
 
-    def __init__(self):
-        """init."""
-        pass
-
     def mu(self, z):
         """Inverse link function."""
         mu = z
@@ -151,10 +147,6 @@ class Poisson(BaseDistribution):
 class PoissonSoftplus(Poisson):
     """Class for Poisson distribution with softplus inverse link."""
 
-    def __init__(self):
-        """init."""
-        pass
-
     def mu(self, z):
         """Inverse link function."""
         mu = softplus(z)
@@ -223,10 +215,6 @@ class NegBinomialSoftplus(BaseDistribution):
 class Binomial(BaseDistribution):
     """Class for binomial distribution."""
 
-    def __init__(self):
-        """init."""
-        pass
-
     def mu(self, z):
         """Inverse link function."""
         mu = expit(z)
@@ -267,10 +255,6 @@ class Binomial(BaseDistribution):
 
 class Probit(BaseDistribution):
     """Class for probit distribution."""
-
-    def __init__(self):
-        """init."""
-        pass
 
     def _probit_g1(self, z, pdfz, cdfz, thresh=5):
         res = np.zeros_like(z)
@@ -367,10 +351,6 @@ class Probit(BaseDistribution):
 
 class GammaSoftplus(BaseDistribution):
     """Class for Gamma distribution with softplus inverse link."""
-
-    def __init__(self):
-        """init."""
-        pass
 
     def mu(self, z):
         """Inverse link function."""
