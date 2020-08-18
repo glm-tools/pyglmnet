@@ -30,7 +30,6 @@ This gives us an extra parameter which can be used to account for the over
 dispersion.
 """
 
-########################################################
 
 # Author: Titipat Achakulvisut <my.titipat@gmail.com>
 #         Giovanni De Toni <giovanni.det@gmail.com>
