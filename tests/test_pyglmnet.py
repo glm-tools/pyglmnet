@@ -3,14 +3,12 @@ import matplotlib
 import subprocess
 import os.path as op
 
-from functools import partial
 import pytest
 import numpy as np
 from numpy.testing import assert_allclose, assert_array_equal
 from pytest import raises
 
 import scipy.sparse as sps
-from scipy.optimize import approx_fprime
 
 from sklearn.datasets import make_regression
 from sklearn.preprocessing import StandardScaler
@@ -18,7 +16,7 @@ from sklearn.model_selection import GridSearchCV, cross_val_score, KFold
 from sklearn.linear_model import ElasticNet
 from sklearn.utils.estimator_checks import check_estimator
 
-from pyglmnet import (GLM, GLMCV, _grad_L2loss, _L2loss, simulate_glm,
+from pyglmnet import (GLM, GLMCV, simulate_glm,
                       _gradhess_logloss_1d, _loss, datasets, ALLOWED_DISTRS)
 
 matplotlib.use('agg')
@@ -27,35 +25,6 @@ matplotlib.use('agg')
 def test_glm_estimator():
     """Test GLM class using scikit-learn's check_estimator."""
     check_estimator(GLM)
-
-
-@pytest.mark.parametrize("distr", ALLOWED_DISTRS)
-def test_gradients(distr):
-    """Test gradient accuracy."""
-    # data
-    scaler = StandardScaler()
-    n_samples, n_features = 1000, 100
-    X = np.random.normal(0.0, 1.0, [n_samples, n_features])
-    X = scaler.fit_transform(X)
-
-    density = 0.1
-    beta_ = np.zeros(n_features + 1)
-    beta_[0] = np.random.rand()
-    beta_[1:] = sps.rand(n_features, 1, density=density).toarray()[:, 0]
-
-    reg_lambda = 0.1
-
-    glm = GLM(distr=distr, reg_lambda=reg_lambda)
-    y = simulate_glm(glm.distr, beta_[0], beta_[1:], X)
-
-    func = partial(_L2loss, distr, glm.alpha,
-                   glm.Tau, reg_lambda, X, y, glm.eta, glm.theta, glm.group)
-    grad = partial(_grad_L2loss, distr, glm.alpha, glm.Tau,
-                   reg_lambda, X, y,
-                   glm.eta, glm.theta)
-    approx_grad = approx_fprime(beta_, func, 1.5e-8)
-    analytical_grad = grad(beta_)
-    assert_allclose(approx_grad, analytical_grad, rtol=1e-5, atol=1e-3)
 
 
 def test_tikhonov():
