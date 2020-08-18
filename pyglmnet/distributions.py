@@ -2,7 +2,7 @@
 
 from abc import ABC, abstractmethod
 import numpy as np
-from scipy.special import expit, log1p
+from scipy.special import expit, log1p, loggamma
 
 
 def softplus(z):
@@ -190,4 +190,58 @@ class PoissonSoftplus(BaseDistribution):
         grad_s = s * (1 - s)
         grad_s_by_mu = grad_s / mu - s / (mu ** 2)
         hk = np.sum(grad_s * xk ** 2) - np.sum(y * grad_s_by_mu * xk ** 2)
+        return gk, hk
+
+
+class NegBinomialSoftplus(BaseDistribution):
+    """Class for Negative binomial distribution with softplus inverse link."""
+
+    def __init__(self):
+        """init."""
+        self.theta = None
+
+    def mu(self, z):
+        """Inverse link function."""
+        mu = softplus(z)
+        return mu
+
+    def grad_mu(self, z):
+        """Gradient of inverse link."""
+        grad_mu = expit(z)
+        return grad_mu
+
+    def log_likelihood(self, y, y_hat):
+        """Log L2-penalized likelihood."""
+        theta = self.theta
+        log_likelihood = \
+            np.sum(loggamma(y + theta) - loggamma(theta) - loggamma(y + 1) +
+                   theta * np.log(theta) + y * np.log(y_hat) - (theta + y) *
+                   np.log(y_hat + theta))
+        return log_likelihood
+
+    def grad_log_likelihood(self, X, y, beta0, beta):
+        """Gradient of L2-penalized log likelihood."""
+        z = self._z(beta0, beta, X)
+        mu = self.mu(z)
+        grad_mu = self.grad_mu(z)
+        theta = self.theta
+        partial_beta_0 = grad_mu * ((theta + y) / (mu + theta) - y / mu)
+        grad_beta0 = np.sum(partial_beta_0)
+        grad_beta = np.dot(partial_beta_0.T, X)
+        return grad_beta0, grad_beta
+
+    def gradhess_log_likelihood_1d(self, xk, y, beta0, beta):
+        """One-dimensional Gradient and Hessian of log likelihood."""
+        z = self._z(beta0, beta, X)
+        mu = self.mu(z)
+        grad_mu = expit(z)
+        hess_mu = np.exp(-z) * expit(z) ** 2
+
+        gradient_beta_j = -grad_mu * (y / mu - (y + theta) / (mu + theta))
+        partial_beta_0_1 = hess_mu * (y / mu - (y + theta) / (mu + theta))
+        partial_beta_0_2 = grad_mu ** 2 * \
+            ((y + theta) / (mu + theta) ** 2 - y / mu ** 2)
+        partial_beta_0 = -(partial_beta_0_1 + partial_beta_0_2)
+        gk = np.dot(gradient_beta_j.T, xk)
+        hk = np.dot(partial_beta_0.T, xk ** 2)
         return gk, hk

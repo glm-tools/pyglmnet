@@ -2,7 +2,7 @@
 
 import numpy as np
 from .pyglmnet import _logL
-from .distributions import Poisson, PoissonSoftplus
+from .distributions import Poisson, PoissonSoftplus, NegBinomialSoftplus
 
 
 def deviance(y, yhat, distr, theta):
@@ -26,7 +26,7 @@ def deviance(y, yhat, distr, theta):
     """
     # if distr in ['softplus', 'poisson', 'neg-binomial']:
         # LS = _logL(distr, y, y, theta=theta)
-    if isinstance(distr, (Poisson, PoissonSoftplus)):
+    if isinstance(distr, (Poisson, PoissonSoftplus, NegBinomialSoftplus)):
         LS = distr.log_likelihood(y, y)
     else:
         LS = 0
@@ -61,7 +61,7 @@ def pseudo_R2(X, y, yhat, ynull_, distr, theta):
     """
     # if distr in ['softplus', 'poisson', 'neg-binomial']:
     #     LS = _logL(distr, y, y, theta=theta)
-    if isinstance(distr, (Poisson, PoissonSoftplus)):
+    if isinstance(distr, (Poisson, PoissonSoftplus, NegBinomialSoftplus)):
         LS = distr.log_likelihood(y, y)
     else:
         LS = 0
@@ -72,7 +72,7 @@ def pseudo_R2(X, y, yhat, ynull_, distr, theta):
     L1 = distr.log_likelihood(y, yhat)
 
     # if distr in ['softplus', 'poisson', 'neg-binomial']:
-    if isinstance(distr, (Poisson, PoissonSoftplus)):
+    if isinstance(distr, (Poisson, PoissonSoftplus, NegBinomialSoftplus)):
         score = (1 - (LS - L1) / (LS - L0))
     else:
         score = (1 - L1 / L0)

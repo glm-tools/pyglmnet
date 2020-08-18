@@ -15,7 +15,7 @@ from .externals.sklearn.utils import check_random_state, check_array, check_X_y
 from .externals.sklearn.utils.validation import check_is_fitted
 
 from .distributions import BaseDistribution, Gaussian, Poisson, \
-    PoissonSoftplus, softplus
+    PoissonSoftplus, NegBinomialSoftplus, softplus
 
 ALLOWED_DISTRS = ['gaussian', 'binomial', 'softplus', 'poisson',
                   'probit', 'gamma', 'neg-binomial']
@@ -33,6 +33,9 @@ def _get_distr(distr):
 
     elif distr == 'softplus':
         distr = PoissonSoftplus()
+
+    elif distr == 'neg-binomial':
+        distr = NegBinomialSoftplus()
 
     return distr
 
@@ -633,6 +636,8 @@ class GLM(BaseEstimator):
         self.distr = _get_distr(distr)
         if isinstance(self.distr, Poisson):
             self.distr.eta = eta
+        if isinstance(self.distr, NegBinomialSoftplus):
+            self.distr.theta = theta
         self.alpha = alpha
         self.reg_lambda = reg_lambda
         self.Tau = Tau
