@@ -15,7 +15,7 @@ from .externals.sklearn.utils import check_random_state, check_array, check_X_y
 from .externals.sklearn.utils.validation import check_is_fitted
 
 from .distributions import BaseDistribution, Gaussian, Poisson, \
-    PoissonSoftplus, NegBinomialSoftplus, softplus
+    PoissonSoftplus, NegBinomialSoftplus, Binomial, Probit, softplus
 
 ALLOWED_DISTRS = ['gaussian', 'binomial', 'softplus', 'poisson',
                   'probit', 'gamma', 'neg-binomial']
@@ -37,6 +37,11 @@ def _get_distr(distr):
     elif distr == 'neg-binomial':
         distr = NegBinomialSoftplus()
 
+    elif distr == 'binomial':
+        distr = Binomial()
+
+    elif distr == 'probit':
+        distr = Probit()
     return distr
 
 
@@ -1039,7 +1044,7 @@ class GLM(BaseEstimator):
         z = self.distr._z(self.beta0_, self.beta_, X)
         yhat = self.distr.mu(z)
 
-        if self.distr == 'binomial':
+        if isinstance(self.distr, Binomial):
             yhat = (yhat > 0.5).astype(int)
         yhat = np.asarray(yhat)
         return yhat
@@ -1058,7 +1063,8 @@ class GLM(BaseEstimator):
             The predicted targets of shape (n_samples,).
 
         """
-        if self.distr not in ['binomial', 'probit']:
+        # if self.distr not in ['binomial', 'probit']:
+        if not isinstance(self.distr, (Binomial, Probit)):
             raise ValueError('This is only applicable for \
                               the binomial distribution.')
 
@@ -1095,7 +1101,8 @@ class GLM(BaseEstimator):
         X = check_array(X, accept_sparse=False)
         check_is_fitted(self, 'is_fitted_')
 
-        if self.distr in ['binomial', 'probit']:
+        # if self.distr in ['binomial', 'probit']:
+        if isinstance(self.distr, (Binomial, Probit)):
             return self._predict_proba(X)
         else:
             warnings.warn('This is only applicable for \
@@ -1150,14 +1157,16 @@ class GLM(BaseEstimator):
 
         # For f1 as well
         if self.score_metric in ['accuracy']:
-            if self.distr not in ['binomial', 'multinomial']:
+            # if self.distr not in ['binomial', 'multinomial']:
+            if not isinstance(self.distr, (Binomial, Probit)):
                 raise ValueError(self.score_metric +
                                  ' is only defined for binomial ' +
                                  'or multinomial distributions')
 
         y = np.asarray(y).ravel()
 
-        if self.distr in ['binomial', 'probit'] and \
+        # if self.distr in ['binomial', 'probit'] and \
+        if isinstance(self.distr, (Binomial, Probit)) and \
            self.score_metric != 'accuracy':
             yhat = self.predict_proba(X)
         else:

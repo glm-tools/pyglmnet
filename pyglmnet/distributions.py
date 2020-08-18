@@ -3,6 +3,7 @@
 from abc import ABC, abstractmethod
 import numpy as np
 from scipy.special import expit, log1p, loggamma
+from scipy.stats import norm
 
 
 def softplus(z):
@@ -244,4 +245,149 @@ class NegBinomialSoftplus(BaseDistribution):
         partial_beta_0 = -(partial_beta_0_1 + partial_beta_0_2)
         gk = np.dot(gradient_beta_j.T, xk)
         hk = np.dot(partial_beta_0.T, xk ** 2)
+        return gk, hk
+
+
+class Binomial(BaseDistribution):
+    """Class for binomial distribution."""
+
+    def __init__(self):
+        """init."""
+        pass
+
+    def mu(self, z):
+        """Inverse link function."""
+        mu = expit(z)
+        return mu
+
+    def grad_mu(self, z):
+        """Gradient of inverse link."""
+        grad_mu = expit(z) * (1 - expit(z))
+        return grad_mu
+
+    def log_likelihood(self, y, y_hat, z=None):
+        """Log L2-penalized likelihood."""
+        # prevents underflow
+        if z is not None:
+            log_likelihood = np.sum(y * z - np.log(1 + np.exp(z)))
+        # for scoring
+        else:
+            log_likelihood = \
+                np.sum(y * np.log(y_hat) + (1 - y) * np.log(1 - y_hat))
+        return log_likelihood
+
+    def grad_log_likelihood(self, X, y, beta0, beta):
+        """Gradient of L2-penalized log likelihood."""
+        z = self._z(beta0, beta, X)
+        mu = self.mu(z)
+        grad_beta0 = np.sum(mu - y)
+        grad_beta = np.dot((mu - y).T, X).T
+        return grad_beta0, grad_beta
+
+    def gradhess_log_likelihood_1d(self, xk, y, beta0, beta):
+        """One-dimensional Gradient and Hessian of log likelihood."""
+        z = self._z(beta0, beta, X)
+        mu = self.mu(z)
+        gk = np.sum((mu - y) * xk)
+        hk = np.sum(mu * (1.0 - mu) * xk * xk)
+        return gk, hk
+
+
+class Probit(BaseDistribution):
+    """Class for probit distribution."""
+
+    def __init__(self):
+        """init."""
+        pass
+
+    def _probit_g1(self, z, pdfz, cdfz, thresh=5):
+        res = np.zeros_like(z)
+        res[z < -thresh] = np.log(-pdfz[z < -thresh] / z[z < -thresh])
+        res[np.abs(z) <= thresh] = np.log(cdfz[np.abs(z) <= thresh])
+        res[z > thresh] = -pdfz[z > thresh] / z[z > thresh]
+        return res
+
+    def _probit_g2(self, z, pdfz, cdfz, thresh=5):
+        res = np.zeros_like(z)
+        res[z < -thresh] = pdfz[z < -thresh] / z[z < -thresh]
+        res[np.abs(z) <= thresh] = np.log(1 - cdfz[np.abs(z) <= thresh])
+        res[z > thresh] = np.log(pdfz[z > thresh] / z[z > thresh])
+        return res
+
+    def _probit_g3(self, z, pdfz, cdfz, thresh=5):
+        res = np.zeros_like(z)
+        res[z < -thresh] = -z[z < -thresh]
+        res[np.abs(z) <= thresh] = \
+            pdfz[np.abs(z) <= thresh] / cdfz[np.abs(z) <= thresh]
+        res[z > thresh] = pdfz[z > thresh]
+        return res
+
+    def _probit_g4(self, z, pdfz, cdfz, thresh=5):
+        res = np.zeros_like(z)
+        res[z < -thresh] = pdfz[z < -thresh]
+        res[np.abs(z) <= thresh] = \
+            pdfz[np.abs(z) <= thresh] / (1 - cdfz[np.abs(z) <= thresh])
+        res[z > thresh] = z[z > thresh]
+        return res
+
+    def _probit_g5(self, z, pdfz, cdfz, thresh=5):
+        res = np.zeros_like(z)
+        res[z < -thresh] = 0 * z[z < -thresh]
+        res[np.abs(z) <= thresh] = \
+            z[np.abs(z) <= thresh] * pdfz[np.abs(z) <= thresh] / \
+            cdfz[np.abs(z) <= thresh] + (pdfz[np.abs(z) <= thresh] /
+                                         cdfz[np.abs(z) <= thresh]) ** 2
+        res[z > thresh] = z[z > thresh] * pdfz[z > thresh] + pdfz[z > thresh] ** 2
+        return res
+
+    def _probit_g6(self, z, pdfz, cdfz, thresh=5):
+        res = np.zeros_like(z)
+        res[z < -thresh] = \
+            pdfz[z < -thresh] ** 2 - z[z < -thresh] * pdfz[z < -thresh]
+        res[np.abs(z) <= thresh] = \
+            (pdfz[np.abs(z) <= thresh] / (1 - cdfz[np.abs(z) <= thresh])) ** 2 - \
+            z[np.abs(z) <= thresh] * pdfz[np.abs(z) <= thresh] / \
+            (1 - cdfz[np.abs(z) <= thresh])
+        res[z > thresh] = 0 * z[z > thresh]
+        return res
+
+    def mu(self, z):
+        """Inverse link function."""
+        mu = norm.cdf(z)
+        return mu
+
+    def grad_mu(self, z):
+        """Gradient of inverse link."""
+        grad_mu = norm.pdf(z)
+        return grad_mu
+
+    def log_likelihood(self, y, y_hat, z=None):
+        """Log L2-penalized likelihood."""
+        if z is not None:
+            pdfz, cdfz = norm.pdf(z), norm.cdf(z)
+            log_likelihood = \
+                np.sum(y * self._probit_g1(z, pdfz, cdfz) +
+                       (1 - y) * self._probit_g2(z, pdfz, cdfz))
+        else:
+            log_likelihood = \
+                np.sum(y * np.log(y_hat) + (1 - y) * np.log(1 - y_hat))
+        return log_likelihood
+
+    def grad_log_likelihood(self, X, y, beta0, beta):
+        """Gradient of L2-penalized log likelihood."""
+        z = self._z(beta0, beta, X)
+        mu = self.mu(z)
+        grad_beta0 = np.sum(mu - y)
+        grad_beta = np.dot((mu - y).T, X).T
+        return grad_beta0, grad_beta
+
+    def gradhess_log_likelihood_1d(self, xk, y, beta0, beta):
+        """One-dimensional Gradient and Hessian of log likelihood."""
+        z = self._z(beta0, beta, X)
+        pdfz = norm.pdf(z)
+        cdfz = norm.cdf(z)
+        gk = -np.sum((y * self._probit_g3(z, pdfz, cdfz) -
+                      (1 - y) * self._probit_g4(z, pdfz, cdfz)) * xk)
+        hk = np.sum((y * self._probit_g5(z, pdfz, cdfz) +
+                     (1 - y) * self._probit_g6(z, pdfz, cdfz)) * (xk * xk))
         return gk, hk
