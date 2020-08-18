@@ -8,13 +8,14 @@ from scipy.special import expit, loggamma
 from scipy.stats import norm
 
 from .utils import logger, set_log_level, _check_params, \
-    _verbose_iterable, _tqdm_log, softplus
+    _verbose_iterable, _tqdm_log
 from .base import BaseEstimator, is_classifier, check_version
 
 from .externals.sklearn.utils import check_random_state, check_array, check_X_y
 from .externals.sklearn.utils.validation import check_is_fitted
 
-from .distributions import BaseDistribution, Gaussian, Poisson
+from .distributions import BaseDistribution, Gaussian, Poisson, \
+    PoissonSoftplus, softplus
 
 ALLOWED_DISTRS = ['gaussian', 'binomial', 'softplus', 'poisson',
                   'probit', 'gamma', 'neg-binomial']
@@ -29,6 +30,9 @@ def _get_distr(distr):
 
     elif distr == 'poisson':
         distr = Poisson()
+
+    elif distr == 'softplus':
+        distr = PoissonSoftplus()
 
     return distr
 
@@ -629,7 +633,6 @@ class GLM(BaseEstimator):
         self.distr = _get_distr(distr)
         if isinstance(self.distr, Poisson):
             self.distr.eta = eta
-        print(self.distr.eta)
         self.alpha = alpha
         self.reg_lambda = reg_lambda
         self.Tau = Tau

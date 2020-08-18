@@ -5,7 +5,6 @@ A few miscellaneous helper functions for pyglmnet.py
 import numpy as np
 from copy import copy
 import logging
-from scipy.special import log1p
 
 from .distributions import BaseDistribution
 
@@ -20,16 +19,6 @@ except ImportError:
         "tqdm library not found. Falling back to non-interactive progress "
         "visualization.")
     has_tqdm = False
-
-
-def softplus(z):
-    """Numerically stable version of log(1 + exp(z))."""
-    # see stabilizing softplus: http://sachinashanbhag.blogspot.com/2014/05/numerically-approximation-of-log-1-expy.html # noqa
-    mu = z.copy()
-    mu[z > 35] = z[z > 35]
-    mu[z < -10] = np.exp(z[z < -10])
-    mu[(z >= -10) & (z <= 35)] = log1p(np.exp(z[(z >= -10) & (z <= 35)]))
-    return mu
 
 
 def softmax(w):

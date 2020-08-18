@@ -2,6 +2,17 @@
 
 from abc import ABC, abstractmethod
 import numpy as np
+from scipy.special import expit, log1p
+
+
+def softplus(z):
+    """Numerically stable version of log(1 + exp(z))."""
+    # see stabilizing softplus: http://sachinashanbhag.blogspot.com/2014/05/numerically-approximation-of-log-1-expy.html # noqa
+    mu = z.copy()
+    mu[z > 35] = z[z > 35]
+    mu[z < -10] = np.exp(z[z < -10])
+    mu[(z >= -10) & (z <= 35)] = log1p(np.exp(z[(z >= -10) & (z <= 35)]))
+    return mu
 
 
 class BaseDistribution(ABC):
@@ -133,4 +144,50 @@ class Poisson(BaseDistribution):
             np.exp(self.eta) ** 2 * \
             np.sum(y[z > self.eta] / (mu[z > self.eta] ** 2) *
                    (xk[z > self.eta] ** 2))
+        return gk, hk
+
+
+class PoissonSoftplus(BaseDistribution):
+    """Class for Poisson distribution with softplus inverse link."""
+
+    def __init__(self):
+        """init."""
+        pass
+
+    def mu(self, z):
+        """Inverse link function."""
+        mu = softplus(z)
+        return mu
+
+    def grad_mu(self, z):
+        """Gradient of inverse link."""
+        grad_mu = expit(z)
+        return grad_mu
+
+    def log_likelihood(self, y, y_hat):
+        """Log L2-penalized likelihood."""
+        eps = np.spacing(1)
+        log_likelihood = np.sum(y * np.log(y_hat + eps) - y_hat)
+        return log_likelihood
+
+    def grad_log_likelihood(self, X, y, beta0, beta):
+        """Gradient of L2-penalized log likelihood."""
+        z = self._z(beta0, beta, X)
+        mu = self.mu(z)
+        grad_mu = self.grad_mu(z)
+        grad_beta0 = np.sum(grad_mu) - np.sum(y * grad_mu / mu)
+        grad_beta = ((np.dot(grad_mu.T, X) -
+                      np.dot((y * grad_mu / mu).T, X)).T)
+        return grad_beta0, grad_beta
+
+    def gradhess_log_likelihood_1d(self, xk, y, beta0, beta):
+        """One-dimensional Gradient and Hessian of log likelihood."""
+        z = self._z(beta0, beta, X)
+        mu = self.mu(z)
+        s = expit(z)
+        gk = np.sum(s * xk) - np.sum(y * s / mu * xk)
+
+        grad_s = s * (1 - s)
+        grad_s_by_mu = grad_s / mu - s / (mu ** 2)
+        hk = np.sum(grad_s * xk ** 2) - np.sum(y * grad_s_by_mu * xk ** 2)
         return gk, hk
