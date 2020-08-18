@@ -15,7 +15,8 @@ from .externals.sklearn.utils import check_random_state, check_array, check_X_y
 from .externals.sklearn.utils.validation import check_is_fitted
 
 from .distributions import BaseDistribution, Gaussian, Poisson, \
-    PoissonSoftplus, NegBinomialSoftplus, Binomial, Probit, softplus
+    PoissonSoftplus, NegBinomialSoftplus, Binomial, Probit, GammaSoftplus, \
+    softplus
 
 ALLOWED_DISTRS = ['gaussian', 'binomial', 'softplus', 'poisson',
                   'probit', 'gamma', 'neg-binomial']
@@ -42,6 +43,9 @@ def _get_distr(distr):
 
     elif distr == 'probit':
         distr = Probit()
+
+    elif distr == 'gamma':
+        distr = GammaSoftplus()
     return distr
 
 

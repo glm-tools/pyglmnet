@@ -391,3 +391,45 @@ class Probit(BaseDistribution):
         hk = np.sum((y * self._probit_g5(z, pdfz, cdfz) +
                      (1 - y) * self._probit_g6(z, pdfz, cdfz)) * (xk * xk))
         return gk, hk
+
+
+class GammaSoftplus(BaseDistribution):
+    """Class for Gamma distribution with softplus inverse link."""
+
+    def __init__(self):
+        """init."""
+        pass
+
+    def mu(self, z):
+        """Inverse link function."""
+        mu = softplus(z)
+        return mu
+
+    def grad_mu(self, z):
+        """Gradient of inverse link."""
+        grad_mu = expit(z)
+        return grad_mu
+
+    def log_likelihood(self, y, y_hat, z=None):
+        """Log L2-penalized likelihood."""
+        # see
+        # https://www.statistics.ma.tum.de/fileadmin/w00bdb/www/czado/lec8.pdf
+        nu = 1.  # shape parameter, exponential for now
+        log_likelihood = np.sum(nu * (-y / y_hat - np.log(y_hat)))
+        return log_likelihood
+
+    def grad_log_likelihood(self, X, y, beta0, beta):
+        """Gradient of L2-penalized log likelihood."""
+        z = self._z(beta0, beta, X)
+        mu = self.mu(z)
+        grad_mu = self.grad_mu(z)
+        nu = 1.
+        grad_logl = (y / mu ** 2 - 1 / mu) * grad_mu
+        grad_beta0 = -nu * np.sum(grad_logl)
+        grad_beta = -nu * np.dot(grad_logl.T, X).T
+        return grad_beta0, grad_beta
+
+    def gradhess_log_likelihood_1d(self, xk, y, beta0, beta):
+        """One-dimensional Gradient and Hessian of log likelihood."""
+        raise NotImplementedError('cdfast is not implemented for Gamma '
+                                  'distribution')
