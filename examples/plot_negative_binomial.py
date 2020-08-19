@@ -43,8 +43,6 @@ dispersion.
 import pandas as pd
 from pyglmnet import GLM
 
-from sklearn.model_selection import train_test_split
-
 import matplotlib.pyplot as plt
 
 ########################################################
@@ -70,23 +68,14 @@ y = df['daysabs'].values
 program_df = pd.get_dummies(df.prog)
 Xdsgn = pd.concat((df['math'], program_df.drop(3.0, axis=1)), axis=1).values
 
-# Split the dataset into training and test
-Xtrain, Xtest, ytrain, ytest = train_test_split(Xdsgn, y, test_size=0.2)
-
 ########################################################
 # Fit the model using the GLM
 glm_neg_bino = GLM(distr='neg-binomial',
                    alpha=0.0,
                    reg_lambda=0.0,
                    score_metric='pseudo_R2',
-                   verbose=True)
-glm_neg_bino.fit(Xtrain, ytrain)
-
-########################################################
-# Predict
-y_hat = glm_neg_bino.predict(Xtest)
-
-########################################################
-# Return the learned betas and the score
+                   verbose=True,
+                   learning_rate=1e-6,
+                   theta=1.032713156)
+glm_neg_bino.fit(Xdsgn, y)
 print(glm_neg_bino.beta0_, glm_neg_bino.beta_)
-print(glm_neg_bino.score(Xtest, y_hat))
