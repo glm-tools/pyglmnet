@@ -788,7 +788,6 @@ class GLM(BaseEstimator):
             The predicted targets of shape (n_samples,).
 
         """
-        # if self.distr not in ['binomial', 'probit']:
         if not isinstance(self.distr_, (Binomial, Probit)):
             raise ValueError('This is only applicable for \
                               the binomial distribution.')
@@ -824,7 +823,6 @@ class GLM(BaseEstimator):
         X = check_array(X, accept_sparse=False)
         check_is_fitted(self, 'is_fitted_')
 
-        # if self.distr in ['binomial', 'probit']:
         if isinstance(self.distr_, (Binomial, Probit)):
             return self._predict_proba(X)
         else:
@@ -880,7 +878,6 @@ class GLM(BaseEstimator):
 
         # For f1 as well
         if self.score_metric in ['accuracy']:
-            # if self.distr not in ['binomial', 'multinomial']:
             if not isinstance(self.distr_, (Binomial, Probit)):
                 raise ValueError(self.score_metric +
                                  ' is only defined for binomial ' +
@@ -888,7 +885,6 @@ class GLM(BaseEstimator):
 
         y = np.asarray(y).ravel()
 
-        # if self.distr in ['binomial', 'probit'] and \
         if isinstance(self.distr_, (Binomial, Probit)) and \
            self.score_metric != 'accuracy':
             yhat = self.predict_proba(X)
