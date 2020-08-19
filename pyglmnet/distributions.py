@@ -390,10 +390,10 @@ class Probit(BaseDistribution):
         """One-dimensional Gradient and Hessian of log likelihood."""
         pdfz = norm.pdf(z)
         cdfz = norm.cdf(z)
-        gk = -np.sum((y * self._probit_g3(z, pdfz, cdfz) -
-                      (1 - y) * self._probit_g4(z, pdfz, cdfz)) * xk)
-        hk = np.sum((y * self._probit_g5(z, pdfz, cdfz) +
-                     (1 - y) * self._probit_g6(z, pdfz, cdfz)) * (xk * xk))
+        gk = -np.sum((y * _probit_g3(z, pdfz, cdfz) -
+                      (1 - y) * _probit_g4(z, pdfz, cdfz)) * xk)
+        hk = np.sum((y * _probit_g5(z, pdfz, cdfz) +
+                     (1 - y) * _probit_g6(z, pdfz, cdfz)) * (xk * xk))
         return gk, hk
 
     def simulate(self, beta0, beta, X, random_state, sample):
