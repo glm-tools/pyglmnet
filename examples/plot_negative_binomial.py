@@ -28,14 +28,16 @@ as a random variable drawn from a Gamma distribution.
 
 This gives us an extra parameter which can be used to account for the over
 dispersion.
+
+In this example, we will apply both Negative Binomial regression and
+Poisson regression on the dataset.
 """
 
-
+########################################################
 # Author: Titipat Achakulvisut <my.titipat@gmail.com>
 #         Giovanni De Toni <giovanni.det@gmail.com>
 # License: MIT
-
-
+########################################################
 
 ########################################################
 # Import relevance libraries
@@ -49,6 +51,11 @@ import matplotlib.pyplot as plt
 # Read and preprocess data
 df = pd.read_stata("https://stats.idre.ucla.edu/stat/stata/dae/nb_data.dta")
 
+########################################################
+# Change the program type to string (we don't need it)
+df['prog'].replace({1:"General", 2:"Academic", 3:"Vocational"}, inplace=True)
+
+########################################################
 # Histogram of type of program they are enrolled
 df.hist(column='daysabs', by=['prog'])
 plt.show()
@@ -64,18 +71,38 @@ print(prog_mean)
 X = df.drop('daysabs', axis=1)
 y = df['daysabs'].values
 
+########################################################
 # design matrix
 program_df = pd.get_dummies(df.prog)
-Xdsgn = pd.concat((df['math'], program_df.drop(3.0, axis=1)), axis=1).values
+program_df_cleaned = program_df.drop('Vocational', axis=1)[["General", "Academic"]]
+Xdsgn = pd.concat((df['math'], program_df_cleaned), axis=1).values
 
 ########################################################
 # Fit the model using the GLM
-glm_neg_bino = GLM(distr='neg-binomial',
-                   alpha=0.0,
-                   reg_lambda=0.0,
-                   score_metric='pseudo_R2',
-                   verbose=True,
-                   learning_rate=1e-6,
-                   theta=1.032713156)
-glm_neg_bino.fit(Xdsgn, y)
-print(glm_neg_bino.beta0_, glm_neg_bino.beta_)
+glm_nb = GLM(distr='neg-binomial',
+             alpha=0.0,
+             reg_lambda=0.0,
+             score_metric='pseudo_R2',
+             verbose=True,
+             learning_rate=1e-6,
+             theta=1.032713156)
+glm_nb.fit(Xdsgn, y)
+print(glm_nb.beta0_, glm_nb.beta_)
+
+########################################################
+# Fit the model using the Poisson regression instead
+glm_poisson = GLM(distr='poisson',
+             alpha=0.0,
+             reg_lambda=0.0,
+             score_metric='pseudo_R2',
+             verbose=True,
+             learning_rate=1e-6)
+glm_poisson.fit(Xdsgn, y)
+print(glm_poisson.beta0_, glm_poisson.beta_)
+
+
+########################################################
+# Plot convergence information for both negative binomial and poisson
+glm_nb.plot_convergence()
+glm_poisson.plot_convergence()
+plt.show()
