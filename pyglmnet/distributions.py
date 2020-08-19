@@ -5,6 +5,8 @@ import numpy as np
 from scipy.special import expit, log1p, loggamma
 from scipy.stats import norm
 
+from .externals.sklearn.utils import check_random_state
+
 
 def softplus(z):
     """Numerically stable version of log(1 + exp(z))."""
@@ -48,6 +50,11 @@ class BaseDistribution(ABC):
         msg = (f"""Gradients and Hessians of 1-d log likelihood are not specified for {self.__class__} distribution""") # noqa
         raise NotImplementedError(msg)
 
+    def simulate(self, beta0, beta, X, random_state, sample):
+        """Simulate targets y given model beta0, beta, X."""
+        msg = (f"""Simulation of model is not implemented for {self.__class__} distribution""") # noqa
+        raise NotImplementedError(msg)
+
     def _z(self, beta0, beta, X):
         """Compute z to be passed through non-linearity."""
         return beta0 + np.dot(X, beta)
@@ -85,6 +92,15 @@ class Gaussian(BaseDistribution):
         gk = np.sum((z - y) * xk)
         hk = np.sum(xk * xk)
         return gk, hk
+
+    def simulate(self, beta0, beta, X, random_state, sample):
+        """Simulate targets y given model beta0, beta, X."""
+        mu = self.mu(self._z(beta0, beta, X))
+        if not sample:
+            return mu
+        else:
+            _random_state = check_random_state(random_state)
+            return _random_state.normal(mu)
 
 
 class Poisson(BaseDistribution):
@@ -140,6 +156,15 @@ class Poisson(BaseDistribution):
             np.sum(y[z > self.eta] / (mu[z > self.eta] ** 2) *
                    (xk[z > self.eta] ** 2))
         return gk, hk
+
+    def simulate(self, beta0, beta, X, random_state, sample):
+        """Simulate targets y given model beta0, beta, X."""
+        mu = self.mu(self._z(beta0, beta, X))
+        if not sample:
+            return mu
+        else:
+            _random_state = check_random_state(random_state)
+            return _random_state.poisson(mu)
 
 
 class PoissonSoftplus(Poisson):
@@ -219,6 +244,16 @@ class NegBinomialSoftplus(BaseDistribution):
         hk = np.dot(partial_beta_0.T, xk ** 2)
         return gk, hk
 
+    def simulate(self, beta0, beta, X, random_state, sample):
+        """Simulate targets y given model beta0, beta, X."""
+        mu = self.mu(self._z(beta0, beta, X))
+        if not sample:
+            return mu
+        else:
+            _random_state = check_random_state(random_state)
+            p = theta / (theta + mu)  # Probability of success
+            y = _random_state.negative_binomial(theta, p)
+
 
 class Binomial(BaseDistribution):
     """Class for binomial distribution."""
@@ -258,6 +293,15 @@ class Binomial(BaseDistribution):
         gk = np.sum((mu - y) * xk)
         hk = np.sum(mu * (1.0 - mu) * xk * xk)
         return gk, hk
+
+    def simulate(self, beta0, beta, X, random_state, sample):
+        """Simulate targets y given model beta0, beta, X."""
+        mu = self.mu(self._z(beta0, beta, X))
+        if not sample:
+            return mu
+        else:
+            _random_state = check_random_state(random_state)
+            return _random_state.binomial(1, mu)
 
 
 class Probit(BaseDistribution):
@@ -354,6 +398,15 @@ class Probit(BaseDistribution):
                      (1 - y) * self._probit_g6(z, pdfz, cdfz)) * (xk * xk))
         return gk, hk
 
+    def simulate(self, beta0, beta, X, random_state, sample):
+        """Simulate targets y given model beta0, beta, X."""
+        mu = self.mu(self._z(beta0, beta, X))
+        if not sample:
+            return mu
+        else:
+            _random_state = check_random_state(random_state)
+            return _random_state.binomial(1, mu)
+
 
 class GammaSoftplus(BaseDistribution):
     """Class for Gamma distribution with softplus inverse link."""
@@ -391,3 +444,11 @@ class GammaSoftplus(BaseDistribution):
         """One-dimensional Gradient and Hessian of log likelihood."""
         raise NotImplementedError('cdfast is not implemented for Gamma '
                                   'distribution')
+
+    def simulate(self, beta0, beta, X, random_state, sample):
+        """Simulate targets y given model beta0, beta, X."""
+        mu = self.mu(self._z(beta0, beta, X))
+        if not sample:
+            return mu
+        else:
+            return np.exp(mu)

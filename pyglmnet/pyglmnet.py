@@ -184,27 +184,7 @@ def simulate_glm(distr, beta0, beta, X, eta=2.0, random_state=None,
     if not fit_intercept:
         beta0 = 0.
 
-    mu = glm.distr_.mu(glm.distr_._z(beta0, beta, X))
-
-    if not sample:
-        return mu
-
-    _random_state = check_random_state(random_state)
-    if isinstance(distr, (PoissonSoftplus, Poisson)):
-        y = _random_state.poisson(mu)
-
-    if isinstance(distr, Gaussian):
-        y = _random_state.normal(mu)
-
-    if isinstance(distr, (Binomial, Probit)):
-        y = _random_state.binomial(1, mu)
-
-    if isinstance(distr, GammaSoftplus):
-        y = np.exp(mu)
-
-    if isinstance(distr, NegBinomialSoftplus):
-        p = theta / (theta + mu)  # Probability of success
-        y = _random_state.negative_binomial(theta, p)
+    y = glm.distr_.simulate(beta0, beta, X, random_state, sample)
     return y
 
 
