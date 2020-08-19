@@ -119,7 +119,7 @@ def check_consistent_length(*arrays):
     uniques = np.unique(lengths)
     if len(uniques) > 1:
         raise ValueError("Found input variables with inconsistent numbers of"
-                         " samples: %r" % [int(l) for l in lengths])
+                         " samples: %r" % [int(ll) for ll in lengths])
 
 
 def _ensure_sparse_format(spmatrix, accept_sparse, dtype, copy,

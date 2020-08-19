@@ -303,59 +303,65 @@ class Binomial(BaseDistribution):
             return _random_state.binomial(1, mu)
 
 
+def _probit_g1(z, pdfz, cdfz, thresh=5):
+    res = np.zeros_like(z)
+    res[z < -thresh] = np.log(-pdfz[z < -thresh] / z[z < -thresh])
+    res[np.abs(z) <= thresh] = np.log(cdfz[np.abs(z) <= thresh])
+    res[z > thresh] = -pdfz[z > thresh] / z[z > thresh]
+    return res
+
+
+def _probit_g2(z, pdfz, cdfz, thresh=5):
+    res = np.zeros_like(z)
+    res[z < -thresh] = pdfz[z < -thresh] / z[z < -thresh]
+    res[np.abs(z) <= thresh] = np.log(1 - cdfz[np.abs(z) <= thresh])
+    res[z > thresh] = np.log(pdfz[z > thresh] / z[z > thresh])
+    return res
+
+
+def _probit_g3(z, pdfz, cdfz, thresh=5):
+    res = np.zeros_like(z)
+    res[z < -thresh] = -z[z < -thresh]
+    res[np.abs(z) <= thresh] = \
+        pdfz[np.abs(z) <= thresh] / cdfz[np.abs(z) <= thresh]
+    res[z > thresh] = pdfz[z > thresh]
+    return res
+
+
+def _probit_g4(z, pdfz, cdfz, thresh=5):
+    res = np.zeros_like(z)
+    res[z < -thresh] = pdfz[z < -thresh]
+    res[np.abs(z) <= thresh] = \
+        pdfz[np.abs(z) <= thresh] / (1 - cdfz[np.abs(z) <= thresh])
+    res[z > thresh] = z[z > thresh]
+    return res
+
+
+def _probit_g5(z, pdfz, cdfz, thresh=5):
+    res = np.zeros_like(z)
+    res[z < -thresh] = 0 * z[z < -thresh]
+    res[np.abs(z) <= thresh] = \
+        z[np.abs(z) <= thresh] * pdfz[np.abs(z) <= thresh] / \
+        cdfz[np.abs(z) <= thresh] + (pdfz[np.abs(z) <= thresh] /
+                                     cdfz[np.abs(z) <= thresh]) ** 2
+    res[z > thresh] = z[z > thresh] * pdfz[z > thresh] + pdfz[z > thresh] ** 2
+    return res
+
+
+def _probit_g6(z, pdfz, cdfz, thresh=5):
+    res = np.zeros_like(z)
+    res[z < -thresh] = \
+        pdfz[z < -thresh] ** 2 - z[z < -thresh] * pdfz[z < -thresh]
+    res[np.abs(z) <= thresh] = \
+        (pdfz[np.abs(z) <= thresh] / (1 - cdfz[np.abs(z) <= thresh])) ** 2 - \
+        z[np.abs(z) <= thresh] * pdfz[np.abs(z) <= thresh] / \
+        (1 - cdfz[np.abs(z) <= thresh])
+    res[z > thresh] = 0 * z[z > thresh]
+    return res
+
+
 class Probit(BaseDistribution):
     """Class for probit distribution."""
-
-    def _probit_g1(self, z, pdfz, cdfz, thresh=5):
-        res = np.zeros_like(z)
-        res[z < -thresh] = np.log(-pdfz[z < -thresh] / z[z < -thresh])
-        res[np.abs(z) <= thresh] = np.log(cdfz[np.abs(z) <= thresh])
-        res[z > thresh] = -pdfz[z > thresh] / z[z > thresh]
-        return res
-
-    def _probit_g2(self, z, pdfz, cdfz, thresh=5):
-        res = np.zeros_like(z)
-        res[z < -thresh] = pdfz[z < -thresh] / z[z < -thresh]
-        res[np.abs(z) <= thresh] = np.log(1 - cdfz[np.abs(z) <= thresh])
-        res[z > thresh] = np.log(pdfz[z > thresh] / z[z > thresh])
-        return res
-
-    def _probit_g3(self, z, pdfz, cdfz, thresh=5):
-        res = np.zeros_like(z)
-        res[z < -thresh] = -z[z < -thresh]
-        res[np.abs(z) <= thresh] = \
-            pdfz[np.abs(z) <= thresh] / cdfz[np.abs(z) <= thresh]
-        res[z > thresh] = pdfz[z > thresh]
-        return res
-
-    def _probit_g4(self, z, pdfz, cdfz, thresh=5):
-        res = np.zeros_like(z)
-        res[z < -thresh] = pdfz[z < -thresh]
-        res[np.abs(z) <= thresh] = \
-            pdfz[np.abs(z) <= thresh] / (1 - cdfz[np.abs(z) <= thresh])
-        res[z > thresh] = z[z > thresh]
-        return res
-
-    def _probit_g5(self, z, pdfz, cdfz, thresh=5):
-        res = np.zeros_like(z)
-        res[z < -thresh] = 0 * z[z < -thresh]
-        res[np.abs(z) <= thresh] = \
-            z[np.abs(z) <= thresh] * pdfz[np.abs(z) <= thresh] / \
-            cdfz[np.abs(z) <= thresh] + (pdfz[np.abs(z) <= thresh] /
-                                         cdfz[np.abs(z) <= thresh]) ** 2
-        res[z > thresh] = z[z > thresh] * pdfz[z > thresh] + pdfz[z > thresh] ** 2
-        return res
-
-    def _probit_g6(self, z, pdfz, cdfz, thresh=5):
-        res = np.zeros_like(z)
-        res[z < -thresh] = \
-            pdfz[z < -thresh] ** 2 - z[z < -thresh] * pdfz[z < -thresh]
-        res[np.abs(z) <= thresh] = \
-            (pdfz[np.abs(z) <= thresh] / (1 - cdfz[np.abs(z) <= thresh])) ** 2 - \
-            z[np.abs(z) <= thresh] * pdfz[np.abs(z) <= thresh] / \
-            (1 - cdfz[np.abs(z) <= thresh])
-        res[z > thresh] = 0 * z[z > thresh]
-        return res
 
     def mu(self, z):
         """Inverse link function."""
@@ -372,8 +378,8 @@ class Probit(BaseDistribution):
         if z is not None:
             pdfz, cdfz = norm.pdf(z), norm.cdf(z)
             log_likelihood = \
-                np.sum(y * self._probit_g1(z, pdfz, cdfz) +
-                       (1 - y) * self._probit_g2(z, pdfz, cdfz))
+                np.sum(y * _probit_g1(z, pdfz, cdfz) +
+                       (1 - y) * _probit_g2(z, pdfz, cdfz))
         else:
             log_likelihood = \
                 np.sum(y * np.log(y_hat) + (1 - y) * np.log(1 - y_hat))

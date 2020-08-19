@@ -41,8 +41,8 @@ X_train, X_test, y_train, y_test = \
 # the existing Binomial distribution and override mu and grad_mu
 # if we want to use the cloglog link function.
 
-import numpy as np
-from pyglmnet.distributions import Binomial
+import numpy as np  # noqa: E402
+from pyglmnet.distributions import Binomial  # noqa: E402
 
 
 class CustomBinomial(Binomial):
