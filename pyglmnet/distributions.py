@@ -155,6 +155,17 @@ class PoissonSoftplus(Poisson):
         grad_mu = expit(z)
         return grad_mu
 
+    def gradhess_log_likelihood_1d(self, xk, y, z):
+        """One-dimensional Gradient and Hessian of log likelihood."""
+        mu = self.mu(z)
+        s = expit(z)
+        gk = np.sum(s * xk) - np.sum(y * s / mu * xk)
+
+        grad_s = s * (1 - s)
+        grad_s_by_mu = grad_s / mu - s / (mu ** 2)
+        hk = np.sum(grad_s * xk ** 2) - np.sum(y * grad_s_by_mu * xk ** 2)
+        return gk, hk
+
 
 class NegBinomialSoftplus(BaseDistribution):
     """Class for Negative binomial distribution with softplus inverse link."""
