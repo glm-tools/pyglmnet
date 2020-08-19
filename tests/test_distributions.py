@@ -39,8 +39,6 @@ def test_base_distribution():
     msg = 'distr must be one of'
     with pytest.raises(ValueError, match=msg):
         GLM(distr='blah')
-    with pytest.raises(TypeError, match=msg):
-        GLM(distr=['gaussian'])
 
 
 @pytest.mark.parametrize("distr", ALLOWED_DISTRS)
@@ -60,11 +58,12 @@ def test_gradients(distr):
     reg_lambda = 0.1
 
     glm = GLM(distr=distr, reg_lambda=reg_lambda)
+    glm._set_distr()
     y = simulate_glm(glm.distr, beta_[0], beta_[1:], X)
 
     func = partial(_L2loss, distr, glm.alpha,
                    glm.Tau, reg_lambda, X, y, glm.eta, glm.theta, glm.group)
-    grad = partial(_grad_L2loss, glm.distr, glm.alpha, glm.Tau,
+    grad = partial(_grad_L2loss, glm.distr_, glm.alpha, glm.Tau,
                    reg_lambda, X, y,
                    glm.eta, glm.theta)
     approx_grad = approx_fprime(beta_, func, 1.5e-8)

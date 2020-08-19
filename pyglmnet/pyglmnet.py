@@ -22,33 +22,6 @@ ALLOWED_DISTRS = ['gaussian', 'binomial', 'softplus', 'poisson',
                   'probit', 'gamma', 'neg-binomial']
 
 
-def _get_distr(distr):
-    if isinstance(distr, BaseDistribution):
-        return distr
-
-    elif distr == 'gaussian':
-        distr = Gaussian()
-
-    elif distr == 'poisson':
-        distr = Poisson()
-
-    elif distr == 'softplus':
-        distr = PoissonSoftplus()
-
-    elif distr == 'neg-binomial':
-        distr = NegBinomialSoftplus()
-
-    elif distr == 'binomial':
-        distr = Binomial()
-
-    elif distr == 'probit':
-        distr = Probit()
-
-    elif distr == 'gamma':
-        distr = GammaSoftplus()
-    return distr
-
-
 def _probit_g1(z, pdfz, cdfz, thresh=5):
     res = np.zeros_like(z)
     res[z < -thresh] = np.log(-pdfz[z < -thresh] / z[z < -thresh])
@@ -472,12 +445,8 @@ def simulate_glm(distr, beta0, beta, X, eta=2.0, random_state=None,
     if not isinstance(distr, str) and not isinstance(distr, BaseDistribution):
         raise TypeError(err_msg)
 
-    if isinstance(distr, str):
-        distr = _get_distr(distr)
-        if isinstance(distr, Poisson):
-            distr.eta = eta
-        if isinstance(distr, NegBinomialSoftplus):
-            distr.theta = theta
+    glm = GLM(distr=distr)
+    glm._set_distr()
 
     if not isinstance(beta0, float):
         raise ValueError("'beta0' must be float, got %s" % type(beta0))
@@ -488,7 +457,7 @@ def simulate_glm(distr, beta0, beta, X, eta=2.0, random_state=None,
     if not fit_intercept:
         beta0 = 0.
 
-    mu = distr.mu(distr._z(beta0, beta, X))
+    mu = glm.distr_.mu(glm.distr_._z(beta0, beta, X))
 
     if not sample:
         return mu
@@ -652,11 +621,7 @@ class GLM(BaseEstimator):
 
         _check_params(distr=distr, max_iter=max_iter,
                       fit_intercept=fit_intercept)
-        self.distr = _get_distr(distr)
-        if isinstance(self.distr, Poisson):
-            self.distr.eta = eta
-        if isinstance(self.distr, NegBinomialSoftplus):
-            self.distr.theta = theta
+        self.distr = distr
         self.alpha = alpha
         self.reg_lambda = reg_lambda
         self.Tau = Tau
@@ -674,9 +639,27 @@ class GLM(BaseEstimator):
         self.theta = theta
         set_log_level(verbose)
 
+    def _set_distr(self):
+        distr_lookup = {
+            'gaussian': Gaussian(),
+            'poisson': Poisson(),
+            'softplus': PoissonSoftplus(),
+            'neg-binomial': NegBinomialSoftplus(),
+            'binomial': Binomial(),
+            'probit': Probit(),
+            'gamma': GammaSoftplus()
+        }
+        self.distr_ = distr_lookup[self.distr]
+        if isinstance(self.distr_, Poisson):
+            self.distr_.eta = self.eta
+        if isinstance(self.distr_, NegBinomialSoftplus):
+            self.distr_.theta = self.theta
+
     def _set_cv(cv, estimator=None, X=None, y=None):
-        """Set the default CV depending on whether clf
-           is classifier/regressor."""
+        """Set the default CV.
+
+        Depends on whether clf is classifier/regressor.
+        """
         # Detect whether classification or regression
         if estimator in ['classifier', 'regressor']:
             est_is_classifier = estimator == 'classifier'
@@ -823,7 +806,7 @@ class GLM(BaseEstimator):
                 # Calculate grad and hess of log likelihood term
                 # gk, hk = _gradhess_logloss_1d(self.distr, xk, y, z, self.eta,
                 #                               self.theta, fit_intercept)
-                gk, hk = self.distr.gradhess_log_likelihood_1d(xk, y, z)
+                gk, hk = self.distr_.gradhess_log_likelihood_1d(xk, y, z)
                 gk = 1. / n_samples * gk
                 hk = 1. / n_samples * hk
 
@@ -849,7 +832,7 @@ class GLM(BaseEstimator):
 
                 # Update parameters, z
                 beta[k], z = beta[k] - update, z - update * xk
-                
+
         return beta
 
     def fit(self, X, y):
@@ -869,7 +852,7 @@ class GLM(BaseEstimator):
             The fitted model.
         """
         X, y = check_X_y(X, y, accept_sparse=False)
-
+        self._set_distr()
         self.beta0_ = None
         self.beta_ = None
         self.ynull_ = None
@@ -942,7 +925,7 @@ class GLM(BaseEstimator):
             self.n_iter_ += 1
             beta_old = beta.copy()
             if self.solver == 'batch-gradient':
-                grad = _grad_L2loss(self.distr,
+                grad = _grad_L2loss(self.distr_,
                                     alpha, self.Tau,
                                     reg_lambda, X, y, self.eta,
                                     self.theta, beta, self.fit_intercept)
@@ -1056,10 +1039,10 @@ class GLM(BaseEstimator):
         # yhat = _lmb(self.distr, self.beta0_, self.beta_, X, self.eta,
         #             fit_intercept=True)
 
-        z = self.distr._z(self.beta0_, self.beta_, X)
-        yhat = self.distr.mu(z)
+        z = self.distr_._z(self.beta0_, self.beta_, X)
+        yhat = self.distr_.mu(z)
 
-        if isinstance(self.distr, Binomial):
+        if isinstance(self.distr_, Binomial):
             yhat = (yhat > 0.5).astype(int)
         yhat = np.asarray(yhat)
         return yhat
@@ -1079,7 +1062,7 @@ class GLM(BaseEstimator):
 
         """
         # if self.distr not in ['binomial', 'probit']:
-        if not isinstance(self.distr, (Binomial, Probit)):
+        if not isinstance(self.distr_, (Binomial, Probit)):
             raise ValueError('This is only applicable for \
                               the binomial distribution.')
 
@@ -1089,8 +1072,8 @@ class GLM(BaseEstimator):
 
         # yhat = _lmb(self.distr, self.beta0_, self.beta_, X, self.eta,
         #             fit_intercept=True)
-        z = self.distr._z(self.beta0_, self.beta_, X)
-        yhat = self.distr.mu(z)
+        z = self.distr_._z(self.beta0_, self.beta_, X)
+        yhat = self.distr_.mu(z)
         yhat = np.asarray(yhat)
         return yhat
 
@@ -1117,7 +1100,7 @@ class GLM(BaseEstimator):
         check_is_fitted(self, 'is_fitted_')
 
         # if self.distr in ['binomial', 'probit']:
-        if isinstance(self.distr, (Binomial, Probit)):
+        if isinstance(self.distr_, (Binomial, Probit)):
             return self._predict_proba(X)
         else:
             warnings.warn('This is only applicable for \
@@ -1173,7 +1156,7 @@ class GLM(BaseEstimator):
         # For f1 as well
         if self.score_metric in ['accuracy']:
             # if self.distr not in ['binomial', 'multinomial']:
-            if not isinstance(self.distr, (Binomial, Probit)):
+            if not isinstance(self.distr_, (Binomial, Probit)):
                 raise ValueError(self.score_metric +
                                  ' is only defined for binomial ' +
                                  'or multinomial distributions')
@@ -1181,7 +1164,7 @@ class GLM(BaseEstimator):
         y = np.asarray(y).ravel()
 
         # if self.distr in ['binomial', 'probit'] and \
-        if isinstance(self.distr, (Binomial, Probit)) and \
+        if isinstance(self.distr_, (Binomial, Probit)) and \
            self.score_metric != 'accuracy':
             yhat = self.predict_proba(X)
         else:
@@ -1189,10 +1172,10 @@ class GLM(BaseEstimator):
 
         # Check whether we have a list of estimators or a single estimator
         if self.score_metric == 'deviance':
-            return metrics.deviance(y, yhat, self.distr, self.theta)
+            return metrics.deviance(y, yhat, self.distr_, self.theta)
         elif self.score_metric == 'pseudo_R2':
             return metrics.pseudo_R2(X, y, yhat, self.ynull_,
-                                     self.distr, self.theta)
+                                     self.distr_, self.theta)
         if self.score_metric == 'accuracy':
             return metrics.accuracy(y, yhat)
 

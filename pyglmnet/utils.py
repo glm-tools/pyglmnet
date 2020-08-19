@@ -105,10 +105,8 @@ def _check_params(distr, max_iter, fit_intercept):
 
     err_msg = ('distr must be one of %s or a subclass of BaseDistribution. '
                'Got %s' % (', '.join(ALLOWED_DISTRS), distr))
-    if isinstance(distr, str) and distr not in ALLOWED_DISTRS:
+    if distr not in ALLOWED_DISTRS:
         raise ValueError(err_msg)
-    if not isinstance(distr, str) and not isinstance(distr, BaseDistribution):
-        raise TypeError(err_msg)
 
     if not isinstance(max_iter, int):
         raise ValueError('max_iter must be of type int')

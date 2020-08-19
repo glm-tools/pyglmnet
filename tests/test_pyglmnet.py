@@ -325,6 +325,7 @@ def test_cdfast(distr):
         return
 
     glm = GLM(distr, solver='cdfast')
+    glm._set_distr()
 
     np.random.seed(glm.random_state)
 
@@ -343,7 +344,7 @@ def test_cdfast(distr):
     z = beta_[0] + np.dot(X, beta_[1:])
     k = 1
     xk = X[:, k - 1]
-    gk, hk = glm.distr.gradhess_log_likelihood_1d(xk, y, z)
+    gk, hk = glm.distr_.gradhess_log_likelihood_1d(xk, y, z)
     gk = 1. / n_samples * gk
     hk = 1. / n_samples * hk
 
