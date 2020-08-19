@@ -1,12 +1,9 @@
-"""
-A few miscellaneous helper functions for pyglmnet.py
-"""
+"""A few miscellaneous helper functions for pyglmnet."""
 
 import numpy as np
 from copy import copy
 import logging
 
-from .distributions import BaseDistribution
 
 logger = logging.getLogger('pyglmnet')
 logger.addHandler(logging.StreamHandler())

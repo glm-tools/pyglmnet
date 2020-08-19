@@ -172,10 +172,13 @@ def test_glmnet(distr, reg_lambda, fit_intercept, solver):
         group = None
         Tau = None
 
+        glm_ = GLM(distr=distr)
+        glm_._set_distr()
+
         def callback(beta):
             Tau = None
             loss_trace.append(
-                _loss(distr, alpha, Tau, reg_lambda,
+                _loss(glm_.distr_, alpha, Tau, reg_lambda,
                       X_train, y_train, eta, theta, group, beta,
                       fit_intercept=fit_intercept))
 
@@ -194,7 +197,7 @@ def test_glmnet(distr, reg_lambda, fit_intercept, solver):
         # true loss and beta should be recovered when reg_lambda == 0
         if reg_lambda == 0.:
             # verify loss at convergence = loss when beta=beta_
-            l_true = _loss(distr, alpha, Tau, reg_lambda,
+            l_true = _loss(glm_.distr_, alpha, Tau, reg_lambda,
                            X_train, y_train, eta, theta, group,
                            np.concatenate(([beta0], beta)))
             assert_allclose(loss_trace[-1], l_true, rtol=1e-4, atol=1e-5)

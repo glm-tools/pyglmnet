@@ -61,7 +61,7 @@ def test_gradients(distr):
     glm._set_distr()
     y = simulate_glm(glm.distr, beta_[0], beta_[1:], X)
 
-    func = partial(_L2loss, distr, glm.alpha,
+    func = partial(_L2loss, glm.distr_, glm.alpha,
                    glm.Tau, reg_lambda, X, y, glm.eta, glm.theta, glm.group)
     grad = partial(_grad_L2loss, glm.distr_, glm.alpha, glm.Tau,
                    reg_lambda, X, y,

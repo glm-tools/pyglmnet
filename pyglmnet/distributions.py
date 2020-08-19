@@ -34,7 +34,7 @@ class BaseDistribution(ABC):
         pass
 
     @abstractmethod
-    def log_likelihood(self, y, y_hat):
+    def log_likelihood(self, y, y_hat, z=None):
         """Log L2-penalized likelihood."""
         pass
 

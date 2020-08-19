@@ -4,8 +4,6 @@ import warnings
 from copy import deepcopy
 
 import numpy as np
-from scipy.special import expit, loggamma
-from scipy.stats import norm
 
 from .utils import logger, set_log_level, _check_params, \
     _verbose_iterable, _tqdm_log
@@ -15,152 +13,10 @@ from .externals.sklearn.utils import check_random_state, check_array, check_X_y
 from .externals.sklearn.utils.validation import check_is_fitted
 
 from .distributions import BaseDistribution, Gaussian, Poisson, \
-    PoissonSoftplus, NegBinomialSoftplus, Binomial, Probit, GammaSoftplus, \
-    softplus
+    PoissonSoftplus, NegBinomialSoftplus, Binomial, Probit, GammaSoftplus
 
 ALLOWED_DISTRS = ['gaussian', 'binomial', 'softplus', 'poisson',
                   'probit', 'gamma', 'neg-binomial']
-
-
-def _probit_g1(z, pdfz, cdfz, thresh=5):
-    res = np.zeros_like(z)
-    res[z < -thresh] = np.log(-pdfz[z < -thresh] / z[z < -thresh])
-    res[np.abs(z) <= thresh] = np.log(cdfz[np.abs(z) <= thresh])
-    res[z > thresh] = -pdfz[z > thresh] / z[z > thresh]
-    return res
-
-
-def _probit_g2(z, pdfz, cdfz, thresh=5):
-    res = np.zeros_like(z)
-    res[z < -thresh] = pdfz[z < -thresh] / z[z < -thresh]
-    res[np.abs(z) <= thresh] = np.log(1 - cdfz[np.abs(z) <= thresh])
-    res[z > thresh] = np.log(pdfz[z > thresh] / z[z > thresh])
-    return res
-
-
-def _probit_g3(z, pdfz, cdfz, thresh=5):
-    res = np.zeros_like(z)
-    res[z < -thresh] = -z[z < -thresh]
-    res[np.abs(z) <= thresh] = \
-        pdfz[np.abs(z) <= thresh] / cdfz[np.abs(z) <= thresh]
-    res[z > thresh] = pdfz[z > thresh]
-    return res
-
-
-def _probit_g4(z, pdfz, cdfz, thresh=5):
-    res = np.zeros_like(z)
-    res[z < -thresh] = pdfz[z < -thresh]
-    res[np.abs(z) <= thresh] = \
-        pdfz[np.abs(z) <= thresh] / (1 - cdfz[np.abs(z) <= thresh])
-    res[z > thresh] = z[z > thresh]
-    return res
-
-
-def _probit_g5(z, pdfz, cdfz, thresh=5):
-    res = np.zeros_like(z)
-    res[z < -thresh] = 0 * z[z < -thresh]
-    res[np.abs(z) <= thresh] = \
-        z[np.abs(z) <= thresh] * pdfz[np.abs(z) <= thresh] / \
-        cdfz[np.abs(z) <= thresh] + (pdfz[np.abs(z) <= thresh] /
-                                     cdfz[np.abs(z) <= thresh]) ** 2
-    res[z > thresh] = z[z > thresh] * pdfz[z > thresh] + pdfz[z > thresh] ** 2
-    return res
-
-
-def _probit_g6(z, pdfz, cdfz, thresh=5):
-    res = np.zeros_like(z)
-    res[z < -thresh] = \
-        pdfz[z < -thresh] ** 2 - z[z < -thresh] * pdfz[z < -thresh]
-    res[np.abs(z) <= thresh] = \
-        (pdfz[np.abs(z) <= thresh] / (1 - cdfz[np.abs(z) <= thresh])) ** 2 - \
-        z[np.abs(z) <= thresh] * pdfz[np.abs(z) <= thresh] / \
-        (1 - cdfz[np.abs(z) <= thresh])
-    res[z > thresh] = 0 * z[z > thresh]
-    return res
-
-
-def _z(beta0, beta, X, fit_intercept):
-    """Compute z to be passed through non-linearity."""
-    if fit_intercept:
-        z = beta0 + np.dot(X, beta)
-    else:
-        z = np.dot(X, np.r_[beta0, beta])
-    return z
-
-
-def _lmb(distr, beta0, beta, X, eta, fit_intercept=True):
-    """Conditional intensity function."""
-    z = _z(beta0, beta, X, fit_intercept)
-    return _mu(distr, z, eta, fit_intercept)
-
-
-def _mu(distr, z, eta, fit_intercept):
-    """The non-linearity (inverse link)."""
-    if distr in ['softplus', 'gamma', 'neg-binomial']:
-        mu = softplus(z)
-    elif distr == 'poisson':
-        mu = z.copy()
-        beta0 = (1 - eta) * np.exp(eta) if fit_intercept else 0.
-        mu[z > eta] = z[z > eta] * np.exp(eta) + beta0
-        mu[z <= eta] = np.exp(z[z <= eta])
-    elif distr == 'gaussian':
-        mu = z
-    elif distr == 'binomial':
-        mu = expit(z)
-    elif distr == 'probit':
-        mu = norm.cdf(z)
-    return mu
-
-
-def _grad_mu(distr, z, eta):
-    """Derivative of the non-linearity."""
-    if distr in ['softplus', 'gamma', 'neg-binomial']:
-        grad_mu = expit(z)
-    elif distr == 'poisson':
-        grad_mu = z.copy()
-        grad_mu[z > eta] = np.ones_like(z)[z > eta] * np.exp(eta)
-        grad_mu[z <= eta] = np.exp(z[z <= eta])
-    elif distr == 'gaussian':
-        grad_mu = np.ones_like(z)
-    elif distr == 'binomial':
-        grad_mu = expit(z) * (1 - expit(z))
-    elif distr in 'probit':
-        grad_mu = norm.pdf(z)
-    return grad_mu
-
-
-def _logL(distr, y, y_hat, z=None, theta=1.0):
-    """The log likelihood."""
-    if distr in ['softplus', 'poisson']:
-        eps = np.spacing(1)
-        logL = np.sum(y * np.log(y_hat + eps) - y_hat)
-    elif distr == 'gaussian':
-        logL = -0.5 * np.sum((y - y_hat)**2)
-    elif distr == 'binomial':
-
-        # prevents underflow
-        if z is not None:
-            logL = np.sum(y * z - np.log(1 + np.exp(z)))
-        # for scoring
-        else:
-            logL = np.sum(y * np.log(y_hat) + (1 - y) * np.log(1 - y_hat))
-    elif distr == 'probit':
-        if z is not None:
-            pdfz, cdfz = norm.pdf(z), norm.cdf(z)
-            logL = np.sum(y * _probit_g1(z, pdfz, cdfz) +
-                          (1 - y) * _probit_g2(z, pdfz, cdfz))
-        else:
-            logL = np.sum(y * np.log(y_hat) + (1 - y) * np.log(1 - y_hat))
-    elif distr == 'gamma':
-        # see
-        # https://www.statistics.ma.tum.de/fileadmin/w00bdb/www/czado/lec8.pdf
-        nu = 1.  # shape parameter, exponential for now
-        logL = np.sum(nu * (-y / y_hat - np.log(y_hat)))
-    elif distr == 'neg-binomial':
-        logL = np.sum(loggamma(y + theta) - loggamma(theta) - loggamma(y + 1) +
-                      theta * np.log(theta) + y * np.log(y_hat) - (theta + y) *
-                      np.log(y_hat + theta))
-    return logL
 
 
 def _penalty(alpha, beta, Tau, group):
@@ -209,9 +65,15 @@ def _loss(distr, alpha, Tau, reg_lambda, X, y, eta, theta, group, beta,
           fit_intercept=True):
     """Define the objective function for elastic net."""
     n_samples, n_features = X.shape
-    z = _z(beta[0], beta[1:], X, fit_intercept)
-    y_hat = _mu(distr, z, eta, fit_intercept)
-    L = 1. / n_samples * _logL(distr, y, y_hat, z, theta)
+    if fit_intercept:
+        z = distr._z(beta[0], beta[1:], X)
+    else:
+        z = distr._z(0., beta, X)
+    y_hat = distr.mu(z)
+    if isinstance(distr, (Binomial, Probit)):
+        L = 1. / n_samples * distr.log_likelihood(y, y_hat, z)
+    else:
+        L = 1. / n_samples * distr.log_likelihood(y, y_hat)
     if fit_intercept:
         P = _penalty(alpha, beta[1:], Tau, group)
     else:
@@ -224,9 +86,15 @@ def _L2loss(distr, alpha, Tau, reg_lambda, X, y, eta, theta, group, beta,
             fit_intercept=True):
     """Define the objective function for elastic net."""
     n_samples, n_features = X.shape
-    z = _z(beta[0], beta[1:], X, fit_intercept)
-    y_hat = _mu(distr, z, eta, fit_intercept)
-    L = 1. / n_samples * _logL(distr, y, y_hat, z, theta)
+    if fit_intercept:
+        z = distr._z(beta[0], beta[1:], X)
+    else:
+        z = distr._z(0., beta, X)
+    y_hat = distr.mu(z)
+    if isinstance(distr, (Binomial, Probit)):
+        L = 1. / n_samples * distr.log_likelihood(y, y_hat, z)
+    else:
+        L = 1. / n_samples * distr.log_likelihood(y, y_hat)
     if fit_intercept:
         P = 0.5 * (1 - alpha) * _L2penalty(beta[1:], Tau)
     else:
@@ -248,55 +116,12 @@ def _grad_L2loss(distr, alpha, Tau, reg_lambda, X, y, eta, theta, beta,
             Tau = np.eye(beta.shape[0])
     InvCov = np.dot(Tau.T, Tau)
 
-    # z = _z(beta[0], beta[1:], X, fit_intercept)
-    # mu = _mu(distr, z, eta, fit_intercept)
-    # grad_mu = _grad_mu(distr, z, eta)
-
     if fit_intercept:
         beta0_, beta_ = beta[0], beta[1:]
     else:
         beta0_, beta_ = 0., beta
     grad_beta0, grad_beta = distr.grad_log_likelihood(X, y, beta0_, beta_)
     grad_beta0 = grad_beta0 if fit_intercept else 0.
-
-    # grad_beta0 = 0.
-    # if distr in ['poisson', 'softplus']:
-    #     if fit_intercept:
-    #         grad_beta0 = np.sum(grad_mu) - np.sum(y * grad_mu / mu)
-    #     grad_beta = ((np.dot(grad_mu.T, X) -
-    #                   np.dot((y * grad_mu / mu).T, X)).T)
-    #
-    # elif distr == 'gaussian':
-    #     if fit_intercept:
-    #         grad_beta0 = np.sum((mu - y) * grad_mu)
-    #     grad_beta = np.dot((mu - y).T, X * grad_mu[:, None]).T
-    #
-    # elif distr == 'binomial':
-    #     if fit_intercept:
-    #         grad_beta0 = np.sum(mu - y)
-    #     grad_beta = np.dot((mu - y).T, X).T
-    #
-    # elif distr == 'probit':
-    #     grad_logl = (y * _probit_g3(z, grad_mu, mu) -
-    #                  (1 - y) * _probit_g4(z, grad_mu, mu))
-    #     if fit_intercept:
-    #         grad_beta0 = -np.sum(grad_logl)
-    #     grad_beta = -np.dot(grad_logl.T, X).T
-    #
-    # elif distr == 'gamma':
-    #     nu = 1.
-    #     grad_logl = (y / mu ** 2 - 1 / mu) * grad_mu
-    #     if fit_intercept:
-    #         grad_beta0 = -nu * np.sum(grad_logl)
-    #     grad_beta = -nu * np.dot(grad_logl.T, X).T
-    #
-    # elif distr == 'neg-binomial':
-    #     partial_beta_0 = grad_mu * ((theta + y) / (mu + theta) - y / mu)
-    #
-    #     if fit_intercept:
-    #         grad_beta0 = np.sum(partial_beta_0)
-    #
-    #     grad_beta = np.dot(partial_beta_0.T, X)
 
     grad_beta0 *= 1. / n_samples
     grad_beta *= 1. / n_samples
@@ -311,104 +136,6 @@ def _grad_L2loss(distr, alpha, Tau, reg_lambda, X, y, eta, theta, beta,
         g = grad_beta
 
     return g
-
-def _gradhess_logloss_1d(distr, xk, y, z, eta, theta, fit_intercept=True):
-    """
-    Compute gradient (1st derivative)
-    and Hessian (2nd derivative)
-    of log likelihood for a single coordinate.
-
-    Parameters
-    ----------
-    xk: float
-        (n_samples,)
-    y: float
-        (n_samples,)
-    z: float
-        (n_samples,)
-
-    Returns
-    -------
-    gk: gradient, float:
-        (n_features + 1,)
-    hk: float:
-        (n_features + 1,)
-    """
-    n_samples = xk.shape[0]
-
-    if distr == 'softplus':
-        mu = _mu(distr, z, eta, fit_intercept)
-        s = expit(z)
-        gk = np.sum(s * xk) - np.sum(y * s / mu * xk)
-
-        grad_s = s * (1 - s)
-        grad_s_by_mu = grad_s / mu - s / (mu ** 2)
-        hk = np.sum(grad_s * xk ** 2) - np.sum(y * grad_s_by_mu * xk ** 2)
-
-    elif distr == 'poisson':
-        mu = _mu(distr, z, eta, fit_intercept)
-        s = expit(z)
-        gk = np.sum((mu[z <= eta] - y[z <= eta]) *
-                    xk[z <= eta]) + \
-            np.exp(eta) * \
-            np.sum((1 - y[z > eta] / mu[z > eta]) *
-                   xk[z > eta])
-        hk = np.sum(mu[z <= eta] * xk[z <= eta] ** 2) + \
-            np.exp(eta) ** 2 * \
-            np.sum(y[z > eta] / (mu[z > eta] ** 2) *
-                   (xk[z > eta] ** 2))
-
-    elif distr == 'gaussian':
-        gk = np.sum((z - y) * xk)
-        hk = np.sum(xk * xk)
-
-    elif distr == 'binomial':
-        mu = _mu(distr, z, eta, fit_intercept)
-        gk = np.sum((mu - y) * xk)
-        hk = np.sum(mu * (1.0 - mu) * xk * xk)
-
-    elif distr == 'probit':
-        pdfz = norm.pdf(z)
-        cdfz = norm.cdf(z)
-        gk = -np.sum((y * _probit_g3(z, pdfz, cdfz) -
-                      (1 - y) * _probit_g4(z, pdfz, cdfz)) * xk)
-        hk = np.sum((y * _probit_g5(z, pdfz, cdfz) +
-                     (1 - y) * _probit_g6(z, pdfz, cdfz)) * (xk * xk))
-
-    elif distr == 'neg-binomial':
-        mu = _mu(distr, z, eta, fit_intercept)
-        grad_mu = _grad_mu(distr, z, eta)
-        hess_mu = np.exp(-z) * expit(z)**2
-
-        gradient_beta_j = -grad_mu * (y / mu - (y + theta) / (mu + theta))
-        partial_beta_0_1 = hess_mu * (y / mu - (y + theta) / (mu + theta))
-        partial_beta_0_2 = grad_mu**2 * \
-            ((y + theta) / (mu + theta)**2 - y / mu**2)
-        partial_beta_0 = -(partial_beta_0_1 + partial_beta_0_2)
-        gk = np.dot(gradient_beta_j.T, xk)
-        hk = np.dot(partial_beta_0.T, xk**2)
-
-    elif distr == 'gamma':
-        raise NotImplementedError('cdfast is not implemented for Gamma '
-                                  'distribution')
-    elif distr == 'neg-binomial':
-        mu = _mu(distr, z, eta, fit_intercept)
-        grad_mu = _grad_mu(distr, z, eta)
-        hess_mu = np.exp(-z) * expit(z) ** 2
-
-        gradient_beta_j = -grad_mu * (y / mu - (y + theta) / (mu + theta))
-        partial_beta_0_1 = hess_mu * (y / mu - (y + theta) / (mu + theta))
-        partial_beta_0_2 = grad_mu ** 2 * \
-            ((y + theta) / (mu + theta) ** 2 - y / mu ** 2)
-        partial_beta_0 = -(partial_beta_0_1 + partial_beta_0_2)
-        gk = np.dot(gradient_beta_j.T, xk)
-        hk = np.dot(partial_beta_0.T, xk ** 2)
-
-    elif distr == 'gamma':
-        raise NotImplementedError('cdfast is not implemented for Gamma '
-                                  'distribution')
-
-    return 1. / n_samples * gk, 1. / n_samples * hk
 
 
 def simulate_glm(distr, beta0, beta, X, eta=2.0, random_state=None,
@@ -791,7 +518,10 @@ class GLM(BaseEstimator):
         """
         n_samples, n_features = X.shape
         reg_scale = rl * (1 - self.alpha)
-        z = _z(beta[0], beta[1:], X, fit_intercept)
+        if fit_intercept:
+            z = self.distr_._z(beta[0], beta[1:], X)
+        else:
+            z = self.distr_._z(0., beta, X)
         for k in range(0, n_features + int(fit_intercept)):
             # Only update parameters in active set
             if ActiveSet[k] != 0:
@@ -1036,9 +766,6 @@ class GLM(BaseEstimator):
             raise ValueError('Input data should be of type ndarray (got %s).'
                              % type(X))
 
-        # yhat = _lmb(self.distr, self.beta0_, self.beta_, X, self.eta,
-        #             fit_intercept=True)
-
         z = self.distr_._z(self.beta0_, self.beta_, X)
         yhat = self.distr_.mu(z)
 
@@ -1070,8 +797,6 @@ class GLM(BaseEstimator):
             raise ValueError('Input data should be of type ndarray (got %s).'
                              % type(X))
 
-        # yhat = _lmb(self.distr, self.beta0_, self.beta_, X, self.eta,
-        #             fit_intercept=True)
         z = self.distr_._z(self.beta0_, self.beta_, X)
         yhat = self.distr_.mu(z)
         yhat = np.asarray(yhat)
