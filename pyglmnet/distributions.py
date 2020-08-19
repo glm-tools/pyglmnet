@@ -60,6 +60,19 @@ class BaseDistribution(ABC):
         return beta0 + np.dot(X, beta)
 
 
+class SoftplusLink:
+
+    def mu(self, z):
+        """Inverse link function."""
+        mu = softplus(z)
+        return mu
+
+    def grad_mu(self, z):
+        """Gradient of inverse link."""
+        grad_mu = expit(z)
+        return grad_mu
+
+
 class Gaussian(BaseDistribution):
     """Class for Gaussian distribution."""
 
@@ -166,18 +179,8 @@ class Poisson(BaseDistribution):
             return _random_state.poisson(mu)
 
 
-class PoissonSoftplus(Poisson):
+class PoissonSoftplus(Poisson, SoftplusLink):
     """Class for Poisson distribution with softplus inverse link."""
-
-    def mu(self, z):
-        """Inverse link function."""
-        mu = softplus(z)
-        return mu
-
-    def grad_mu(self, z):
-        """Gradient of inverse link."""
-        grad_mu = expit(z)
-        return grad_mu
 
     def gradhess_log_likelihood_1d(self, xk, y, z):
         """One-dimensional Gradient and Hessian of log likelihood."""
@@ -191,22 +194,12 @@ class PoissonSoftplus(Poisson):
         return gk, hk
 
 
-class NegBinomialSoftplus(BaseDistribution):
+class NegBinomialSoftplus(BaseDistribution, SoftplusLink):
     """Class for Negative binomial distribution with softplus inverse link."""
 
     def __init__(self):
         """init."""
         self.theta = None
-
-    def mu(self, z):
-        """Inverse link function."""
-        mu = softplus(z)
-        return mu
-
-    def grad_mu(self, z):
-        """Gradient of inverse link."""
-        grad_mu = expit(z)
-        return grad_mu
 
     def log_likelihood(self, y, y_hat):
         """Log L2-penalized likelihood."""
@@ -413,18 +406,8 @@ class Probit(BaseDistribution):
             return _random_state.binomial(1, mu)
 
 
-class GammaSoftplus(BaseDistribution):
+class GammaSoftplus(BaseDistribution, SoftplusLink):
     """Class for Gamma distribution with softplus inverse link."""
-
-    def mu(self, z):
-        """Inverse link function."""
-        mu = softplus(z)
-        return mu
-
-    def grad_mu(self, z):
-        """Gradient of inverse link."""
-        grad_mu = expit(z)
-        return grad_mu
 
     def log_likelihood(self, y, y_hat, z=None):
         """Log L2-penalized likelihood."""

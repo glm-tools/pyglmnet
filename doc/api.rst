@@ -6,14 +6,32 @@ API Documentation
 
 .. currentmodule:: pyglmnet
 
-Classes
-=======
+GLM Classes
+===========
 
-.. autoclass:: GLM
-   :members:
+.. currentmodule:: pyglmnet
 
-.. autoclass:: GLMCV
-  :members:
+.. autosummary::
+   :toctree: generated/
+
+   GLM
+   GLMCV
+
+Distribution Classes
+====================
+
+.. currentmodule:: pyglmnet.distributions
+
+.. autosummary::
+   :toctree: generated/
+
+   BaseDistribution
+   Poisson
+   PoissonSoftplus
+   NegBinomialSoftplus
+   Binomial
+   Probit
+   GammaSoftplus
 
 
 Datasets
