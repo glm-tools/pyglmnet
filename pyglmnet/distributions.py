@@ -179,7 +179,7 @@ class Poisson(BaseDistribution):
             return _random_state.poisson(mu)
 
 
-class PoissonSoftplus(Poisson, SoftplusLink):
+class PoissonSoftplus(SoftplusLink, Poisson):
     """Class for Poisson distribution with softplus inverse link."""
 
     def gradhess_log_likelihood_1d(self, xk, y, z):
@@ -194,7 +194,7 @@ class PoissonSoftplus(Poisson, SoftplusLink):
         return gk, hk
 
 
-class NegBinomialSoftplus(BaseDistribution, SoftplusLink):
+class NegBinomialSoftplus(SoftplusLink, BaseDistribution):
     """Class for Negative binomial distribution with softplus inverse link."""
 
     def __init__(self):
@@ -406,7 +406,7 @@ class Probit(BaseDistribution):
             return _random_state.binomial(1, mu)
 
 
-class GammaSoftplus(BaseDistribution, SoftplusLink):
+class GammaSoftplus(SoftplusLink, BaseDistribution):
     """Class for Gamma distribution with softplus inverse link."""
 
     def log_likelihood(self, y, y_hat, z=None):
