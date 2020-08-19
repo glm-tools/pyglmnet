@@ -465,9 +465,19 @@ def simulate_glm(distr, beta0, beta, X, eta=2.0, random_state=None,
     y: array
         simulated target data of shape (n_samples,)
     """
-    if distr not in ALLOWED_DISTRS:
-        raise ValueError("'distr' must be in %s, got %s"
-                         % (repr(ALLOWED_DISTRS), distr))
+    err_msg = ('distr must be one of %s or a subclass of BaseDistribution. '
+               'Got %s' % (', '.join(ALLOWED_DISTRS), distr))
+    if isinstance(distr, str) and distr not in ALLOWED_DISTRS:
+        raise ValueError(err_msg)
+    if not isinstance(distr, str) and not isinstance(distr, BaseDistribution):
+        raise TypeError(err_msg)
+
+    if isinstance(distr, str):
+        distr = _get_distr(distr)
+        if isinstance(distr, Poisson):
+            distr.eta = eta
+        if isinstance(distr, NegBinomialSoftplus):
+            distr.theta = theta
 
     if not isinstance(beta0, float):
         raise ValueError("'beta0' must be float, got %s" % type(beta0))
@@ -475,28 +485,28 @@ def simulate_glm(distr, beta0, beta, X, eta=2.0, random_state=None,
     if beta.ndim != 1:
         raise ValueError("'beta' must be 1D, got %dD" % beta.ndim)
 
+    if not fit_intercept:
+        beta0 = 0.
+
+    mu = distr.mu(distr._z(beta0, beta, X))
+
     if not sample:
-        return _lmb(distr, beta0, beta, X, eta, fit_intercept=fit_intercept)
+        return mu
 
     _random_state = check_random_state(random_state)
-    if distr == 'softplus' or distr == 'poisson':
-        y = _random_state.poisson(
-            _lmb(distr, beta0, beta, X, eta,
-                 fit_intercept=fit_intercept))
-    if distr == 'gaussian':
-        y = _random_state.normal(
-            _lmb(distr, beta0, beta, X, eta,
-                 fit_intercept=fit_intercept))
-    if distr == 'binomial' or distr == 'probit':
-        y = _random_state.binomial(
-            1,
-            _lmb(distr, beta0, beta, X, eta,
-                 fit_intercept=fit_intercept))
-    if distr == 'gamma':
-        mu = _lmb(distr, beta0, beta, X, eta, fit_intercept=fit_intercept)
+    if isinstance(distr, (PoissonSoftplus, Poisson)):
+        y = _random_state.poisson(mu)
+
+    if isinstance(distr, Gaussian):
+        y = _random_state.normal(mu)
+
+    if isinstance(distr, (Binomial, Probit)):
+        y = _random_state.binomial(1, mu)
+
+    if isinstance(distr, GammaSoftplus):
         y = np.exp(mu)
-    if distr == 'neg-binomial':
-        mu = _lmb(distr, beta0, beta, X, eta, fit_intercept=fit_intercept)
+
+    if isinstance(distr, NegBinomialSoftplus):
         p = theta / (theta + mu)  # Probability of success
         y = _random_state.negative_binomial(theta, p)
     return y
@@ -838,7 +848,8 @@ class GLM(BaseEstimator):
                 update = 1. / hk * gk if hk > 1. else self.learning_rate * gk
 
                 # Update parameters, z
-                beta[k], z = beta[k] - update, z - update * xk
+                # beta[k], z = beta[k] - update, z - update * xk
+                beta[k] = beta[k] - update
         return beta
 
     def fit(self, X, y):

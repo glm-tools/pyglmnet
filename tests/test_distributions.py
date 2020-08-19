@@ -42,6 +42,7 @@ def test_base_distribution():
     with pytest.raises(TypeError, match=msg):
         GLM(distr=['gaussian'])
 
+
 @pytest.mark.parametrize("distr", ALLOWED_DISTRS)
 def test_gradients(distr):
     """Test gradient accuracy."""
@@ -63,7 +64,7 @@ def test_gradients(distr):
 
     func = partial(_L2loss, distr, glm.alpha,
                    glm.Tau, reg_lambda, X, y, glm.eta, glm.theta, glm.group)
-    grad = partial(_grad_L2loss, distr, glm.alpha, glm.Tau,
+    grad = partial(_grad_L2loss, glm.distr, glm.alpha, glm.Tau,
                    reg_lambda, X, y,
                    glm.eta, glm.theta)
     approx_grad = approx_fprime(beta_, func, 1.5e-8)

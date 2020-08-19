@@ -17,7 +17,7 @@ from sklearn.linear_model import ElasticNet
 from sklearn.utils.estimator_checks import check_estimator
 
 from pyglmnet import (GLM, GLMCV, simulate_glm,
-                      _gradhess_logloss_1d, _loss, datasets, ALLOWED_DISTRS)
+                      _loss, datasets, ALLOWED_DISTRS)
 
 matplotlib.use('agg')
 
@@ -343,7 +343,9 @@ def test_cdfast(distr):
     z = beta_[0] + np.dot(X, beta_[1:])
     k = 1
     xk = X[:, k - 1]
-    gk, hk = _gradhess_logloss_1d(glm.distr, xk, y, z, glm.eta, glm.theta)
+    gk, hk = glm.distr.gradhess_log_likelihood_1d(xk, y, z)
+    gk = 1. / n_samples * gk
+    hk = 1. / n_samples * hk
 
     # test grad and hess
     if distr != 'multinomial':
@@ -407,7 +409,6 @@ def test_random_state_consistency():
 @pytest.mark.parametrize("distr", ALLOWED_DISTRS)
 def test_simulate_glm(distr):
     """Test that every generative model can be simulated from."""
-
     random_state = 1
     state = np.random.RandomState(random_state)
     n_samples, n_features = 10, 3
@@ -427,13 +428,12 @@ def test_simulate_glm(distr):
 
     # If the distribution name is garbage it will fail
     distr = 'multivariate_gaussian_poisson'
-    with pytest.raises(ValueError, match="'distr' must be in"):
+    with pytest.raises(ValueError):
         simulate_glm(distr, 1.0, 1.0, np.array([[1.0]]))
 
 
 def test_api_input():
     """Test that the input value of y can be of different types."""
-
     random_state = 1
     state = np.random.RandomState(random_state)
     n_samples, n_features = 100, 5
