@@ -145,7 +145,6 @@ class Poisson(BaseDistribution):
     def gradhess_log_likelihood_1d(self, xk, y, z):
         """One-dimensional Gradient and Hessian of log likelihood."""
         mu = self.mu(z)
-        s = expit(z)
         gk = np.sum((mu[z <= self.eta] - y[z <= self.eta]) *
                     xk[z <= self.eta]) + \
             np.exp(self.eta) * \
@@ -251,8 +250,8 @@ class NegBinomialSoftplus(BaseDistribution):
             return mu
         else:
             _random_state = check_random_state(random_state)
-            p = theta / (theta + mu)  # Probability of success
-            y = _random_state.negative_binomial(theta, p)
+            p = self.theta / (self.theta + mu)  # Probability of success
+            return _random_state.negative_binomial(self.theta, p)
 
 
 class Binomial(BaseDistribution):

@@ -33,7 +33,7 @@ X_train, X_test, y_train, y_test = \
 #   - mu: inverse link function
 #   - grad_mu: gradient of the inverse link function
 #   - log_likelihood: the log likelihood function
-#   - grad_log_likelihood: the gradient of the log 
+#   - grad_log_likelihood: the gradient of the log
 #     likelihood.
 # All distributions in pyglmnet inherit from BaseDistribution
 #
