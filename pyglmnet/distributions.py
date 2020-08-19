@@ -80,9 +80,8 @@ class Gaussian(BaseDistribution):
         grad_beta = np.dot((mu - y).T, X * grad_mu[:, None]).T
         return grad_beta0, grad_beta
 
-    def gradhess_log_likelihood_1d(self, xk, y, beta0, beta):
+    def gradhess_log_likelihood_1d(self, xk, y, z):
         """One-dimensional Gradient and Hessian of log likelihood."""
-        z = self._z(beta0, beta, X)
         gk = np.sum((z - y) * xk)
         hk = np.sum(xk * xk)
         return gk, hk
@@ -127,9 +126,8 @@ class Poisson(BaseDistribution):
                       np.dot((y * grad_mu / mu).T, X)).T)
         return grad_beta0, grad_beta
 
-    def gradhess_log_likelihood_1d(self, xk, y, beta0, beta):
+    def gradhess_log_likelihood_1d(self, xk, y, z):
         """One-dimensional Gradient and Hessian of log likelihood."""
-        z = self._z(beta0, beta, X)
         mu = self.mu(z)
         s = expit(z)
         gk = np.sum((mu[z <= self.eta] - y[z <= self.eta]) *
@@ -195,13 +193,12 @@ class NegBinomialSoftplus(BaseDistribution):
         grad_beta = np.dot(partial_beta_0.T, X)
         return grad_beta0, grad_beta
 
-    def gradhess_log_likelihood_1d(self, xk, y, beta0, beta):
+    def gradhess_log_likelihood_1d(self, xk, y, z):
         """One-dimensional Gradient and Hessian of log likelihood."""
-        z = self._z(beta0, beta, X)
         mu = self.mu(z)
         grad_mu = expit(z)
         hess_mu = np.exp(-z) * expit(z) ** 2
-
+        theta = self.theta
         gradient_beta_j = -grad_mu * (y / mu - (y + theta) / (mu + theta))
         partial_beta_0_1 = hess_mu * (y / mu - (y + theta) / (mu + theta))
         partial_beta_0_2 = grad_mu ** 2 * \
@@ -244,9 +241,8 @@ class Binomial(BaseDistribution):
         grad_beta = np.dot((mu - y).T, X).T
         return grad_beta0, grad_beta
 
-    def gradhess_log_likelihood_1d(self, xk, y, beta0, beta):
+    def gradhess_log_likelihood_1d(self, xk, y, z):
         """One-dimensional Gradient and Hessian of log likelihood."""
-        z = self._z(beta0, beta, X)
         mu = self.mu(z)
         gk = np.sum((mu - y) * xk)
         hk = np.sum(mu * (1.0 - mu) * xk * xk)
@@ -337,9 +333,8 @@ class Probit(BaseDistribution):
         grad_beta = np.dot((mu - y).T, X).T
         return grad_beta0, grad_beta
 
-    def gradhess_log_likelihood_1d(self, xk, y, beta0, beta):
+    def gradhess_log_likelihood_1d(self, xk, y, z):
         """One-dimensional Gradient and Hessian of log likelihood."""
-        z = self._z(beta0, beta, X)
         pdfz = norm.pdf(z)
         cdfz = norm.cdf(z)
         gk = -np.sum((y * self._probit_g3(z, pdfz, cdfz) -
@@ -381,7 +376,7 @@ class GammaSoftplus(BaseDistribution):
         grad_beta = -nu * np.dot(grad_logl.T, X).T
         return grad_beta0, grad_beta
 
-    def gradhess_log_likelihood_1d(self, xk, y, beta0, beta):
+    def gradhess_log_likelihood_1d(self, xk, y, z):
         """One-dimensional Gradient and Hessian of log likelihood."""
         raise NotImplementedError('cdfast is not implemented for Gamma '
                                   'distribution')
