@@ -848,8 +848,8 @@ class GLM(BaseEstimator):
                 update = 1. / hk * gk if hk > 1. else self.learning_rate * gk
 
                 # Update parameters, z
-                # beta[k], z = beta[k] - update, z - update * xk
-                beta[k] = beta[k] - update
+                beta[k], z = beta[k] - update, z - update * xk
+                
         return beta
 
     def fit(self, X, y):
