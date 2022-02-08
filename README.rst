@@ -183,4 +183,3 @@ MIT License Copyright (c) 2016-2019 Pavan Ramkumar
 .. |JOSS| image:: https://joss.theoj.org/papers/10.21105/joss.01959/status.svg
    :target: https://doi.org/10.21105/joss.01959
 .. _[Documentation (stable version)]: http://glm-tools.github.io/pyglmnet
-.. _[Documentation (development version)]: https://circleci.com/api/v1.1/project/github/glm-tools/pyglmnet/latest/artifacts/0/html/index.html?branch=master
