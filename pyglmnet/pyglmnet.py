@@ -235,7 +235,7 @@ def _grad_L2loss(distr, alpha, Tau, reg_lambda, X, y, eta, theta, beta,
                  fit_intercept=True):
     """The gradient."""
     n_samples, n_features = X.shape
-    n_samples = np.float(n_samples)
+    n_samples = float(n_samples)
 
     if Tau is None:
         if fit_intercept:
