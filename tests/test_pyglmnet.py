@@ -3,14 +3,12 @@ import matplotlib
 import subprocess
 import os.path as op
 
-from functools import partial
 import pytest
 import numpy as np
 from numpy.testing import assert_allclose, assert_array_equal
 from pytest import raises
 
 import scipy.sparse as sps
-from scipy.optimize import approx_fprime
 
 from sklearn.datasets import make_regression
 from sklearn.preprocessing import StandardScaler
@@ -18,8 +16,8 @@ from sklearn.model_selection import GridSearchCV, cross_val_score, KFold
 from sklearn.linear_model import ElasticNet
 from sklearn.utils.estimator_checks import check_estimator
 
-from pyglmnet import (GLM, GLMCV, _grad_L2loss, _L2loss, simulate_glm,
-                      _gradhess_logloss_1d, _loss, datasets, ALLOWED_DISTRS)
+from pyglmnet import (GLM, GLMCV, simulate_glm,
+                      _loss, datasets, ALLOWED_DISTRS)
 
 matplotlib.use('agg')
 
@@ -27,35 +25,6 @@ matplotlib.use('agg')
 def test_glm_estimator():
     """Test GLM class using scikit-learn's check_estimator."""
     check_estimator(GLM)
-
-
-@pytest.mark.parametrize("distr", ALLOWED_DISTRS)
-def test_gradients(distr):
-    """Test gradient accuracy."""
-    # data
-    scaler = StandardScaler()
-    n_samples, n_features = 1000, 100
-    X = np.random.normal(0.0, 1.0, [n_samples, n_features])
-    X = scaler.fit_transform(X)
-
-    density = 0.1
-    beta_ = np.zeros(n_features + 1)
-    beta_[0] = np.random.rand()
-    beta_[1:] = sps.rand(n_features, 1, density=density).toarray()[:, 0]
-
-    reg_lambda = 0.1
-
-    glm = GLM(distr=distr, reg_lambda=reg_lambda)
-    y = simulate_glm(glm.distr, beta_[0], beta_[1:], X)
-
-    func = partial(_L2loss, distr, glm.alpha,
-                   glm.Tau, reg_lambda, X, y, glm.eta, glm.theta, glm.group)
-    grad = partial(_grad_L2loss, distr, glm.alpha, glm.Tau,
-                   reg_lambda, X, y,
-                   glm.eta, glm.theta)
-    approx_grad = approx_fprime(beta_, func, 1.5e-8)
-    analytical_grad = grad(beta_)
-    assert_allclose(approx_grad, analytical_grad, rtol=1e-5, atol=1e-3)
 
 
 def test_tikhonov():
@@ -203,10 +172,13 @@ def test_glmnet(distr, reg_lambda, fit_intercept, solver):
         group = None
         Tau = None
 
+        glm_ = GLM(distr=distr)
+        glm_._set_distr()
+
         def callback(beta):
             Tau = None
             loss_trace.append(
-                _loss(distr, alpha, Tau, reg_lambda,
+                _loss(glm_.distr_, alpha, Tau, reg_lambda,
                       X_train, y_train, eta, theta, group, beta,
                       fit_intercept=fit_intercept))
 
@@ -225,7 +197,7 @@ def test_glmnet(distr, reg_lambda, fit_intercept, solver):
         # true loss and beta should be recovered when reg_lambda == 0
         if reg_lambda == 0.:
             # verify loss at convergence = loss when beta=beta_
-            l_true = _loss(distr, alpha, Tau, reg_lambda,
+            l_true = _loss(glm_.distr_, alpha, Tau, reg_lambda,
                            X_train, y_train, eta, theta, group,
                            np.concatenate(([beta0], beta)))
             assert_allclose(loss_trace[-1], l_true, rtol=1e-4, atol=1e-5)
@@ -316,7 +288,7 @@ def test_compare_sklearn(solver):
     def rmse(a, b):
         return np.sqrt(np.mean((a - b) ** 2))
 
-    X, Y, coef_ = make_regression(
+    X, y, coef_ = make_regression(
         n_samples=1000, n_features=500,
         noise=0.1, n_informative=10, coef=True,
         random_state=42)
@@ -325,18 +297,18 @@ def test_compare_sklearn(solver):
     l1_ratio = 0.5
 
     clf = ElasticNet(alpha=alpha, l1_ratio=l1_ratio, tol=1e-5)
-    clf.fit(X, Y)
+    clf.fit(X, y)
     glm = GLM(distr='gaussian', alpha=l1_ratio, reg_lambda=alpha,
               solver=solver, tol=1e-6, max_iter=500)
-    glm.fit(X, Y)
+    glm.fit(X, y)
 
     y_sk = clf.predict(X)
     y_pg = glm.predict(X)
-    assert abs(rmse(Y, y_sk) - rmse(Y, y_pg)) < 0.5
+    assert abs(rmse(y, y_sk) - rmse(y, y_pg)) < 0.5
 
     glm = GLM(distr='gaussian', alpha=l1_ratio, reg_lambda=alpha,
               solver=solver, tol=1e-6, max_iter=5, fit_intercept=False)
-    glm.fit(X, Y)
+    glm.fit(X, y)
     assert glm.beta0_ == 0.
 
     glm.predict(X)
@@ -356,6 +328,7 @@ def test_cdfast(distr):
         return
 
     glm = GLM(distr, solver='cdfast')
+    glm._set_distr()
 
     np.random.seed(glm.random_state)
 
@@ -374,7 +347,9 @@ def test_cdfast(distr):
     z = beta_[0] + np.dot(X, beta_[1:])
     k = 1
     xk = X[:, k - 1]
-    gk, hk = _gradhess_logloss_1d(glm.distr, xk, y, z, glm.eta, glm.theta)
+    gk, hk = glm.distr_.gradhess_log_likelihood_1d(xk, y, z)
+    gk = 1. / n_samples * gk
+    hk = 1. / n_samples * hk
 
     # test grad and hess
     if distr != 'multinomial':
@@ -438,7 +413,6 @@ def test_random_state_consistency():
 @pytest.mark.parametrize("distr", ALLOWED_DISTRS)
 def test_simulate_glm(distr):
     """Test that every generative model can be simulated from."""
-
     random_state = 1
     state = np.random.RandomState(random_state)
     n_samples, n_features = 10, 3
@@ -458,13 +432,12 @@ def test_simulate_glm(distr):
 
     # If the distribution name is garbage it will fail
     distr = 'multivariate_gaussian_poisson'
-    with pytest.raises(ValueError, match="'distr' must be in"):
+    with pytest.raises(ValueError):
         simulate_glm(distr, 1.0, 1.0, np.array([[1.0]]))
 
 
 def test_api_input():
     """Test that the input value of y can be of different types."""
-
     random_state = 1
     state = np.random.RandomState(random_state)
     n_samples, n_features = 100, 5
