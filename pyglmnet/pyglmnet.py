@@ -4,7 +4,7 @@ import warnings
 from copy import deepcopy
 
 import numpy as np
-from scipy.special import expit, loggamma
+from scipy.special import expit, loggamma, xlogy, xlog1py
 from scipy.stats import norm
 
 from .utils import logger, set_log_level, _check_params, \
@@ -136,17 +136,19 @@ def _logL(distr, y, y_hat, z=None, theta=1.0):
 
         # prevents underflow
         if z is not None:
-            logL = np.sum(y * z - np.log(1 + np.exp(z)))
+            logL = np.sum(y * z - np.logaddexp(0, z))
         # for scoring
         else:
-            logL = np.sum(y * np.log(y_hat) + (1 - y) * np.log(1 - y_hat))
+            y_hat = np.asarray(y_hat, dtype=float)
+            logL = np.sum(xlogy(y, y_hat) + xlog1py(1 - y, -y_hat))
     elif distr == 'probit':
         if z is not None:
             pdfz, cdfz = norm.pdf(z), norm.cdf(z)
             logL = np.sum(y * _probit_g1(z, pdfz, cdfz) +
                           (1 - y) * _probit_g2(z, pdfz, cdfz))
         else:
-            logL = np.sum(y * np.log(y_hat) + (1 - y) * np.log(1 - y_hat))
+            y_hat = np.asarray(y_hat, dtype=float)
+            logL = np.sum(xlogy(y, y_hat) + xlog1py(1 - y, -y_hat))
     elif distr == 'gamma':
         # see
         # https://www.statistics.ma.tum.de/fileadmin/w00bdb/www/czado/lec8.pdf
