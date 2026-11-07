@@ -2,6 +2,7 @@
 
 import numpy as np
 from pyglmnet import GLM, simulate_glm
+from pyglmnet.metrics import deviance
 
 
 def test_deviance():
@@ -58,3 +59,19 @@ def test_accuracy():
     score = glm_sim.score(X, y)
 
     assert(isinstance(score, float))
+
+
+def test_bernoulli_loglik_endpoints():
+    """Bernoulli log likelihood is finite at probabilities 0 and 1."""
+    from pyglmnet.pyglmnet import _logL
+    y = np.array([0., 1., 0., 1.])
+    for distr in ['binomial', 'probit']:
+        # perfect predictions at the endpoints: log likelihood is 0
+        assert _logL(distr, y, y.copy()) == 0.
+        assert deviance(y, y.copy(), distr, theta=1.0) == 0.
+        # integer probabilities are not wrapped by the negation
+        assert _logL(distr, np.array([0.]),
+                     np.array([1], dtype=np.uint8)) == -np.inf
+    # large logits must not overflow
+    z = np.array([-1000., 1000., -1000., 1000.])
+    assert _logL('binomial', y, None, z=z) == 0.
