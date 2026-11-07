@@ -511,3 +511,19 @@ def test_intro_example():
                 break
             code_lines.append(line.strip())
     subprocess.run(['python', '-c', '\n'.join(code_lines)], check=True)
+
+
+def test_simulate_gamma_samples():
+    """simulate_glm(sample=True) draws shape-1 gamma samples with mean mu."""
+    X = np.zeros((20000, 1))
+    beta0, beta = 0.5, np.array([0.])
+    mu = simulate_glm('gamma', beta0, beta, X, sample=False)
+    assert np.allclose(mu, mu[0])
+    y = simulate_glm('gamma', beta0, beta, X, random_state=1, sample=True)
+    # shape-1 gamma: mean mu, variance mu ** 2
+    assert np.isclose(np.mean(y), mu[0], rtol=0.03)
+    assert np.isclose(np.var(y), mu[0] ** 2, rtol=0.1)
+    assert_array_equal(
+        y, simulate_glm('gamma', beta0, beta, X, random_state=1, sample=True))
+    assert not np.array_equal(
+        y, simulate_glm('gamma', beta0, beta, X, random_state=2, sample=True))

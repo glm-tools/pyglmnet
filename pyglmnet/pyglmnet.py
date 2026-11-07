@@ -456,7 +456,7 @@ def simulate_glm(distr, beta0, beta, X, eta=2.0, random_state=None,
                  fit_intercept=fit_intercept))
     if distr == 'gamma':
         mu = _lmb(distr, beta0, beta, X, eta, fit_intercept=fit_intercept)
-        y = np.exp(mu)
+        y = _random_state.gamma(shape=1.0, scale=mu)
     if distr == 'neg-binomial':
         mu = _lmb(distr, beta0, beta, X, eta, fit_intercept=fit_intercept)
         p = theta / (theta + mu)  # Probability of success
