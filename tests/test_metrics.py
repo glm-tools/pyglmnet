@@ -2,7 +2,7 @@
 
 import numpy as np
 from pyglmnet import GLM, simulate_glm
-from pyglmnet.metrics import deviance
+from pyglmnet.metrics import deviance, pseudo_R2
 
 
 def test_deviance():
@@ -75,3 +75,25 @@ def test_bernoulli_loglik_endpoints():
     # large logits must not overflow
     z = np.array([-1000., 1000., -1000., 1000.])
     assert _logL('binomial', y, None, z=z) == 0.
+
+
+def test_gamma_deviance_saturated():
+    """Gamma deviance is 0 for perfect predictions and matches the formula."""
+    y = np.array([0.1, 0.2, 0.4])
+    assert np.isclose(deviance(y, y.copy(), 'gamma', theta=1.0), 0.)
+    mu = np.array([0.15, 0.25, 0.3])
+    expected = 2 * np.sum((y - mu) / mu - np.log(y / mu))
+    assert np.isclose(deviance(y, mu, 'gamma', theta=1.0), expected)
+    # unchanged when y and mu are rescaled together
+    assert np.isclose(deviance(10 * y, 10 * mu, 'gamma', theta=1.0), expected)
+    # pseudo-R2 is 1 - D / D_null: 1 for a perfect fit, 0 for the null model
+    X = np.zeros((3, 1))
+    ynull = np.mean(y)
+    d_null = deviance(y, np.full(3, ynull), 'gamma', theta=1.0)
+    assert np.isclose(pseudo_R2(X, y, y.copy(), ynull, 'gamma', 1.0), 1.)
+    assert np.isclose(pseudo_R2(X, y, np.full(3, ynull), ynull, 'gamma', 1.0),
+                      0.)
+    r2 = pseudo_R2(X, y, mu, ynull, 'gamma', 1.0)
+    assert np.isclose(r2, 1 - expected / d_null)
+    assert np.isclose(pseudo_R2(X, 10 * y, 10 * mu, 10 * ynull, 'gamma', 1.0),
+                      r2)
